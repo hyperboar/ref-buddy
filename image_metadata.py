@@ -35,8 +35,8 @@ class ImageMetadata:
                 facing INTEGER DEFAULT 0,
                 last_viewed TIMESTAMP DEFAULT 0,
                 difficulty INTEGER DEFAULT 10,
-                study_type INTEGER DEFAULT 0,
-                fav INTEGER DEFAULT 0
+                fav INTEGER DEFAULT 0,
+                study_type INTEGER DEFAULT 0
             )
         """
 
@@ -102,7 +102,7 @@ class ImageMetadata:
     def from_full_row(row) -> 'ImageMetadata':
         return ImageMetadata(idx=row[0], path=row[1], count=row[2],
                              time_spent=row[3], facing=row[4], last_viewed=row[5],
-                             diff=row[6], study_type=row[7], is_fav=row[8])
+                             diff=row[6], is_fav=row[7], study_type=row[8])
 
     def get_by_id(conn, id: int):
         return ImageMetadata.read(conn, id)
