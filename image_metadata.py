@@ -13,13 +13,15 @@ IMAGES_PATH = os.getenv('IMAGES_PATH')
 class ImageMetadata:
     TABLE_NAME = "image_metadata"
 
-    def __init__(self, path, count=0, time_spent=0, facing=0, last_viewed=0, idx=-1, diff='unknown'):
-        self._path = path
-        self._count = count
-        self._time_spent = time_spent
-        self._facing = facing
-        self._last_viewed = last_viewed
-        self._difficulty = diff
+    def __init__(self, path, count=0, time_spent=0, facing=0, last_viewed=0, idx=-1, diff=0, study_type=0, is_fav=False):
+        self.path = path
+        self.count = count
+        self.time_spent = time_spent
+        self.facing = facing
+        self.last_viewed = last_viewed
+        self.difficulty = diff
+        self.study_type = study_type
+        self.is_fav = is_fav
         self._id = idx
 
     @staticmethod
@@ -32,7 +34,9 @@ class ImageMetadata:
                 time_spent INTEGER DEFAULT 0,
                 facing INTEGER DEFAULT 0,
                 last_viewed TIMESTAMP DEFAULT 0,
-                difficulty INTEGER DEFAULT 10
+                difficulty INTEGER DEFAULT 10,
+                study_type INTEGER DEFAULT 0,
+                fav INTEGER DEFAULT 0
             )
         """
 
@@ -47,34 +51,6 @@ class ImageMetadata:
 
     def to_tuple(self):
         return (self.path, self.count, self.time_spent, self.facing)
-
-    # region Getters
-
-    @property
-    def path(self):
-        return self._path
-
-    @property
-    def count(self):
-        return self._count
-
-    @property
-    def time_spent(self):
-        return self._time_spent
-
-    @property
-    def facing(self):
-        return self._facing
-
-    @property
-    def id(self):
-        return self._facing
-
-    @property
-    def difficulty(self):
-        return self._difficulty
-
-    # endregion Getters
 
     # region CRUD
 
@@ -124,7 +100,9 @@ class ImageMetadata:
 
     @staticmethod
     def from_full_row(row) -> 'ImageMetadata':
-        return ImageMetadata(idx=row[0], path=row[1], count=row[2], time_spent=row[3], facing=row[4], last_viewed=row[5], diff=row[6])
+        return ImageMetadata(idx=row[0], path=row[1], count=row[2],
+                             time_spent=row[3], facing=row[4], last_viewed=row[5],
+                             diff=row[6], study_type=row[7], is_fav=row[8])
 
     def get_by_id(conn, id: int):
         return ImageMetadata.read(conn, id)
@@ -149,13 +127,42 @@ class ImageMetadata:
         return ImageMetadata.from_full_row(row)
 
     @staticmethod
-    def str_to_facing(facing: str) -> 'int':
+    def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = 1) -> 'ImageMetadata':
+        c = conn.cursor()
+        q_same_folder = ''
+        if same_folder > 0:
+            img = ImageMetadata.get_by_id(conn, prev_image_id)
+            folder = os.path.dirname(img.path)
+            q_same_folder = f'AND path LIKE "{folder}%"'
+        q = f'SELECT * FROM {ImageMetadata.TABLE_NAME} ' \
+            f'WHERE study_type={study_type} {q_same_folder} ORDER BY RANDOM() LIMIT 1'
+        c.execute(q)
+        print(q)
+        row = c.fetchone()
+        if row is None:
+            return None
+        return ImageMetadata.from_full_row(row)
+
+    @staticmethod
+    def str_to_facing(facing: str) -> int:
         match facing:
             case "front":
                 return 0
             case "side":
                 return 1
             case "back":
+                return 2
+            case _:
+                return 0
+
+    @staticmethod
+    def str_to_study_type(study_type: str) -> int:
+        match study_type:
+            case "academic":
+                return 0
+            case "pron":
+                return 1
+            case "any":
                 return 2
             case _:
                 return 0
