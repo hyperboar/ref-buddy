@@ -74,19 +74,23 @@ def study_image(image_id):
 @app.route('/study-random')
 def study_random():
     args = request.args
-    source_type = args.get('source-type')
-    same_folder = args.get('same-folder')
-    prev_image_id = args.get('prev-image-id')
-    difficulty = args.get('difficulty')
+    study_type = args.get('source-type')
+    same_folder = int(args.get('same-folder') == "true")
+    prev_image_id = int(args.get('image-id'))
+    difficulty = int(args.get('difficulty'))
     facing = args.get('facing')
-    timer = args.get('timer')
+    timer = int(args.get('time-planned'))
+
+    f_num = ImageMetadata.str_to_facing(facing)
+    st_num = ImageMetadata.str_to_study_type(study_type)
 
     db = sqlite3.connect(DB_FILE)
-    f_num = ImageMetadata.str_to_facing(facing)
-    metadata = ImageMetadata.get_random_by_facing(db, f_num)
+    metadata = ImageMetadata.get_random_by_study_type(db, st_num, same_folder, prev_image_id)
     if metadata is None:
         return f'Error: No images found with facing "{facing}"'
+
     return render_template_string(metadata.to_html(timer))
+
 
 if __name__ == '__main__':
     app.run(port=7071)
