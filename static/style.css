@@ -31,7 +31,7 @@ body {
     height: 100%;
     object-fit: cover;
     filter: blur(8px);
-    transform: scale(1.2);
+    transform: translate(0%, 5%) scale(1.2);
     z-index: -1;
 }
 
