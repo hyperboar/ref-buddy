@@ -13,6 +13,7 @@ load_dotenv()
 # Get the values of DB_PATH and DB_NAME from the environment
 DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
 IMAGES_PATH = os.getenv('IMAGES_PATH')
+SERVER_PORT = os.getenv('SERVER_PORT')
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -93,4 +94,4 @@ def study_random():
 
 
 if __name__ == '__main__':
-    app.run(port=7071)
+    app.run(port=SERVER_PORT)
