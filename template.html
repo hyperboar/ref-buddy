@@ -2,88 +2,13 @@
 <html>
 <head>
 	<title>Image ($image_id)</title>
-	<style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .modal {
-            display: flex;
-            flex-wrap: wrap;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            overflow: hidden;
-            text-align: center;
-            align-items: center;
-            justify-content: center;
-            /*justify-content: space-between;*/
-            flex-direction: column; /* add column flex direction */
-        }
-
-        .modal-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: blur(8px);
-            transform: scale(1.2);
-            z-index: -1;
-        }
-
-        .modal-img {
-            flex-basis: 80%;
-            margin: 20px;
-            display: block;
-            object-fit: contain;
-            max-width: calc(100% - 40px); /* 20px margin on left and right */
-            max-height: calc(100% - 40px); /* 20px margin on top and bottom */
-            /*border: calc(100% * min(100vw, 100vh)) solid transparent; !* fallback border width *!*/
-        }
-
-        .modal-controls {
-            display: flex;
-            min-width: 300px;
-            flex-direction: column; /* add column flex direction */
-            align-items: center;
-            /*flex-wrap: wrap;*/
-            align-self: flex-start;
-            /*justify-content: space-between;*/
-        }
-        .modal-controls .row {
-            display: flex;
-            flex-direction: row; /* change to row */
-            align-items: center;
-            justify-content: center; /* add justify-content */
-        }
-
-        .modal-controls select,
-        .modal-controls button {
-            margin: 3px;
-        }
-
-        .modal-controls .space
-        {
-            margin-left: 10px;
-        }
-
-        @media only screen and (max-width: 768px) {
-            .modal img {
-                max-height: 80%;
-                flex-basis: 100%;
-            }
-        }
-	</style>
+    <link rel="stylesheet" href="/static/style.css">
+    <script type="text/javascript" src="/static/img_params.js"></script>
+    <script type="text/javascript" src="/static/main.js"></script>
 </head>
 <body>
+    <div style="display: none" id="image-id" >$image_id</div>
+    <div style="display: none">$path</div>
 	<div class="modal">
         <img class="modal-bg" src="/image/$image_id" alt="$image_id:$path">
         <img class="modal-img" src="/image/$image_id" alt="$image_id:$path">
@@ -111,9 +36,9 @@
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="true">
             </div>
-            <div class="row">
+            <div class="row timer">
                 <span>Timer&nbsp;&nbsp;</span>
-                <span id="time-current">10</span>&nbsp;/&nbsp;<span id="time-planned">10</span>
+                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned">10</span>
                 <span class="space"/>
                 <button id="timer-start" started="">Start</button>
             </div>
@@ -132,6 +57,8 @@
             </div>
         </div>
 	</div>
+
+
 
     <script>
         function countup() {
@@ -154,77 +81,47 @@
     </script>
 
     <script>
-        function InitializeNextPrev()
+    function incrementCount(imageId) {
+        fetch(`/increment_count/$${imageId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        }
+    </script>
+
+    <script>
+        window.onload = function()
         {
+            console.log("Page Loaded!")
+
+            let imgParams = new ImgParams('image-id', 'facing', 'source-type', 'same-folder', 'difficulty', 'time-planned')
+            imgParams.setParamsFromGET()
+
+
             const nextButton = document.getElementById("next");
             nextButton.addEventListener("click", function ()
             {
-                const facing = document.getElementById('facing').value;
-                const sourceType = document.getElementById('source-type').value;
-                const sameFolder = document.getElementById("same-folder").value;
-                const difficulty = document.getElementById("difficulty").value;
-                const timer = document.getElementById("time-planned").textContent;
-                const prevImageId = "$image_id";
+                const curParams = imgParams.getParamsAsGET();
                 const curUrl = window.location.href.split('/');
                 const domain = `$${curUrl[0]}//$${curUrl[2]}`;
-                const url = `$${domain}/study-random?source-type=$${sourceType}&same-folder=$${sameFolder}&prev-image-id=$${prevImageId}&difficulty=$${difficulty}&facing=$${facing}&timer=$${timer}`;
+                const url = `$${domain}/study-random?$${curParams}`;
+
                 const prevParams = document.getElementById("prev").getAttribute("prev-params");
                 history.replaceState(null, null, `/study-image/$image_id?$${prevParams}`);
                 window.location.href = url;
             });
 
-            const facing = document.getElementById('facing').value;
-            const sourceType = document.getElementById('source-type').value;
-            const sameFolder = document.getElementById("same-folder").value;
-            const difficulty = document.getElementById("difficulty").value;
-            const timer = document.getElementById("time-planned").textContent;
-            const prevImageId = "$image_id";
-            const params = `source-type=$${sourceType}&same-folder=$${sameFolder}&prev-image-id=$${prevImageId}&difficulty=$${difficulty}&facing=$${facing}&timer=$${timer}`;
             const prevButton = document.getElementById("prev");
-            prevButton.setAttribute("prev-params", params)
-            prevButton.addEventListener("click", function ()
-            {
+            prevButton.setAttribute("prev-params", imgParams.getParamsAsGET())
+            prevButton.addEventListener("click", function () {
                 window.history.back()
             });
-        }
-        InitializeNextPrev()
-    </script>
-    <script>
-        function InitializeUrlParams()
-        {
-            // get the current URL
-            const urlParams = new URLSearchParams(window.location.search);
-
-            // get the values of the parameters from the URL
-            const facing = urlParams.get('facing');
-            const sameFolder = urlParams.get('same-folder');
-            const difficulty = urlParams.get('difficulty');
-            const sourceType = urlParams.get('source-type');
-            const timer = urlParams.get('timer');
-
-            // set the values of the HTML elements to the parameter values
-            document.getElementById('facing').value = facing;
-            document.getElementById('same-folder').checked = sameFolder === 'true';
-            document.getElementById('difficulty').value = difficulty;
-            document.getElementById('source-type').value = sourceType;
-            document.getElementById("time-planned").textContent = timer;
-            document.getElementById("time-current").textContent = "0";
-        }
-        InitializeUrlParams()
-    </script>
-
-    <script>
-        function incrementCount(imageId) {
-            fetch(`/increment_count/$${imageId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
         }
     </script>
 </body>
