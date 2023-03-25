@@ -104,6 +104,19 @@ def set_image_fav():
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string('yep')
 
+@app.route('/set-image-last-viewed')
+def set_image_last_viewed():
+    args = request.args
+    image_id = int(args.get('image-id'))
+    now = datetime.now()
+
+    db = sqlite3.connect(DB_FILE)
+    r = ImageMetadata.set_image_last_viewed(db, image_id, now)
+
+    if not r:
+        abort(404, 'Something went wrong, last viewed not updated, probably...')
+    return render_template_string('yep')
+
 
 if __name__ == '__main__':
     app.run(port=SERVER_PORT)

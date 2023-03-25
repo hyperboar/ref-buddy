@@ -23,20 +23,16 @@ class ImgParams {
         const sourceType = `${this.sourceTypeId}=` + document.getElementById(this.sourceTypeId).value
         const sameFolder = `${this.sameFolderId}=` + document.getElementById(this.sameFolderId).checked
         const difficulty = `${this.difficultyId}=` + document.getElementById(this.difficultyId).value
-        const timer      = `${this.timePlannedId}=` + document.getElementById(this.timePlannedId).textContent
+        const timer      = `${this.timePlannedId}=` + document.getElementById(this.timePlannedId).getAttribute('value')
         const imageId    = `${this.imageId}=` + document.getElementById(this.imageId).textContent
 
         return `${facing}&${sourceType}&${sameFolder}&${difficulty}&${timer}&${imageId}`
     }
 
-    setParamsFromGET() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        document.getElementById(this.facingId).value            = urlParams.get(this.facingId)
-        document.getElementById(this.sourceTypeId).value        = urlParams.get(this.sourceTypeId)
-        document.getElementById(this.sameFolderId).checked      = urlParams.get(this.sameFolderId) === "true"
-        document.getElementById(this.difficultyId).value        = urlParams.get(this.difficultyId)
-        document.getElementById(this.timePlannedId).textContent = urlParams.get(this.timePlannedId)
+    getImgIdAsGET()
+    {
+        const imageId    = `${this.imageId}=` + document.getElementById(this.imageId).textContent
+        return `${imageId}`
     }
 
     getParamsFav(fav)
@@ -46,4 +42,16 @@ class ImgParams {
 
         return `${imageId}&${isFav}`
     }
+
+    setParamsFromGET() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        document.getElementById(this.facingId).value            = urlParams.get(this.facingId)
+        document.getElementById(this.sourceTypeId).value        = urlParams.get(this.sourceTypeId)
+        document.getElementById(this.sameFolderId).checked      = urlParams.get(this.sameFolderId) === "true"
+        document.getElementById(this.difficultyId).value        = urlParams.get(this.difficultyId)
+        document.getElementById(this.timePlannedId).setAttribute('value', urlParams.get(this.timePlannedId))
+    }
+
+
 }

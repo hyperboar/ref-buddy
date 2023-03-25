@@ -144,12 +144,18 @@ class ImageMetadata:
         return ImageMetadata.from_full_row(row)
 
     @staticmethod
-    def set_image_fav(conn, image_id, is_fav):
+    def set_image_fav(conn, image_id: int, is_fav: int):
         c = conn.cursor()
         c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET fav = ? WHERE id = ? ', (is_fav, image_id))
         conn.commit()
         return c.rowcount > 0
-        pass
+
+    @staticmethod
+    def set_image_last_viewed(conn, image_id: int, time: 'datetime'):
+        c = conn.cursor()
+        c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET last_viewed = ? WHERE id = ?', (time, image_id))
+        conn.commit()
+        return c.rowcount > 0
 
     @staticmethod
     def str_to_facing(facing: str) -> int:
@@ -177,6 +183,10 @@ class ImageMetadata:
 
     # endregion Convenience
 
+    @classmethod
+    def set_image_last_viewed(self, conn, time):
+        return ImageMetadata.set_image_last_viewed(conn, self._id, time)
+
     def to_html(self, timer=0) -> 'str':
         print("self.is_fav " + str(self.is_fav))
         with open('template.html', 'r') as f:
@@ -190,6 +200,3 @@ class ImageMetadata:
             timer=timer,
             is_fav=self.is_fav
         )
-
-
-
