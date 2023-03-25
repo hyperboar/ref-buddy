@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Modal Image</title>
+	<style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .modal {
+            display: flex;
+            flex-wrap: wrap;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            overflow: hidden;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            /*justify-content: space-between;*/
+            flex-direction: column; /* add column flex direction */
+        }
+
+        .modal-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(8px);
+            transform: scale(1.2);
+            z-index: -1;
+        }
+
+        .modal-img {
+            flex-basis: 80%;
+            margin: 20px;
+            display: block;
+            object-fit: contain;
+            max-width: calc(100% - 40px); /* 20px margin on left and right */
+            max-height: calc(100% - 40px); /* 20px margin on top and bottom */
+            /*border: calc(100% * min(100vw, 100vh)) solid transparent; !* fallback border width *!*/
+        }
+
+        .modal-controls {
+            display: flex;
+            min-width: 300px;
+            flex-direction: column; /* add column flex direction */
+            align-items: center;
+            /*flex-wrap: wrap;*/
+            align-self: flex-start;
+            /*justify-content: space-between;*/
+        }
+        .modal-controls .row {
+            display: flex;
+            flex-direction: row; /* change to row */
+            align-items: center;
+            justify-content: center; /* add justify-content */
+        }
+
+        .modal-controls select,
+        .modal-controls button {
+            margin: 3px;
+        }
+
+        .modal-controls .space
+        {
+            margin-left: 10px;
+        }
+
+        @media only screen and (max-width: 768px) {
+            .modal img {
+                max-height: 80%;
+                flex-basis: 100%;
+            }
+        }
+	</style>
+</head>
+<body>
+	<img src="file://E:\Drawing_refs\studio\Casual Poses-Part1\IMG (183).jpg" alt="modal image">
+
+    <div class="modal">
+        <img class="modal-bg" src="file://E:\Drawing_refs\studio\Casual Poses-Part1\IMG (183).jpg" alt="modal bg">
+        <img class="modal-img" src="file://E:\Drawing_refs\studio\Casual Poses-Part1\IMG (183).jpg" alt="modal image">
+        <div class="modal-controls">
+            <div class="row">
+                <span>View: </span>
+                <select>
+                    <option value="front">Front</option>
+                    <option value="side">Side</option>
+                    <option value="back">Back</option>
+                </select>
+                <span class="space"/>
+                <span>View: </span>
+                <select>
+                    <option value="front">Front</option>
+                    <option value="side">Side</option>
+                    <option value="back">Back</option>
+                </select>
+            </div>
+            <div class="row">
+                <span>Timer </span>
+                <span class="time-current">10</span> / <span class="time-planned">10</span>
+                <span class="space"/>
+                <button class="timer-start">Start</button>
+                <button class="timer-start" value="Reset">Stop</button>
+            </div>
+            <div class="row">
+                <button class="prev">Prev</button>
+                <button class="next">Next</button>
+            </div>
+        </div>
+	</div>
+
+</body>
+</html>
