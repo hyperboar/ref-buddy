@@ -13,6 +13,12 @@
         <img class="modal-bg" src="/image/$image_id" alt="$image_id:$path">
         <img class="modal-img" src="/image/$image_id" alt="$image_id:$path">
         <div class="modal-controls">
+            <div class="row timer">
+                <span class="timer-icon"></span>&nbsp;&nbsp;
+                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned">10</span>
+                <span class="space"/>
+                <button id="timer-start" started="">Start</button>
+            </div>
             <div class="row">
                 <span>View: </span>
                 <select id="facing">
@@ -28,6 +34,7 @@
                 </select>
             </div>
             <div class="row">
+                <button class="fav" id="is-fav" value="$is_fav"></button>
                 <span>Diff: </span>
                 <select id="difficulty">
                     <option value="0">Beginner</option>
@@ -35,12 +42,6 @@
                 </select>
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="true">
-            </div>
-            <div class="row timer">
-                <span>Timer&nbsp;&nbsp;</span>
-                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned">10</span>
-                <span class="space"/>
-                <button id="timer-start" started="">Start</button>
             </div>
 <!--            <div id="caption">-->
 <!--                <ul>-->
@@ -100,10 +101,11 @@
         {
             console.log("Page Loaded!")
 
-            let imgParams = new ImgParams('image-id', 'facing', 'source-type', 'same-folder', 'difficulty', 'time-planned')
+            let imgParams = new ImgParams('image-id', 'facing', 'source-type', 'same-folder', 'difficulty', 'time-planned', 'is-fav')
             imgParams.setParamsFromGET()
 
 
+            // next
             const nextButton = document.getElementById("next");
             nextButton.addEventListener("click", function ()
             {
@@ -117,10 +119,37 @@
                 window.location.href = url;
             });
 
+            // prev
             const prevButton = document.getElementById("prev");
             prevButton.setAttribute("prev-params", imgParams.getParamsAsGET())
-            prevButton.addEventListener("click", function () {
+            prevButton.addEventListener("click", function ()
+            {
                 window.history.back()
+            });
+
+            //fab is-fav
+            const favButton = document.getElementById("is-fav");
+            if (favButton.value === "1") { favButton.classList.add("on") }
+            favButton.addEventListener("click", function ()
+            {
+                console.log(favButton.value)
+                let val = (parseInt(favButton.value) + 1) % 2;
+
+                favButton.classList.add('loading-fav')
+                fetch(`/set-image-fav?$${imgParams.getParamsFav(val)}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+
+                        if (val === 0) {favButton.classList.remove("on")}
+                        else favButton.classList.add("on")
+
+                        favButton.value = val;
+                        favButton.classList.remove('loading-fav')
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                        favButton.classList.remove('loading-fav')
+                    });
             });
         }
     </script>

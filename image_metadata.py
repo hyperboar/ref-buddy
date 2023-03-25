@@ -13,7 +13,7 @@ IMAGES_PATH = os.getenv('IMAGES_PATH')
 class ImageMetadata:
     TABLE_NAME = "image_metadata"
 
-    def __init__(self, path, count=0, time_spent=0, facing=0, last_viewed=0, idx=-1, diff=0, study_type=0, is_fav=False):
+    def __init__(self, path, count=0, time_spent=0, facing=0, last_viewed=0, idx=-1, diff=0, study_type=0, is_fav=0):
         self.path = path
         self.count = count
         self.time_spent = time_spent
@@ -144,6 +144,14 @@ class ImageMetadata:
         return ImageMetadata.from_full_row(row)
 
     @staticmethod
+    def set_image_fav(conn, image_id, is_fav):
+        c = conn.cursor()
+        c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET fav = ? WHERE id = ? ', (is_fav, image_id))
+        conn.commit()
+        return c.rowcount > 0
+        pass
+
+    @staticmethod
     def str_to_facing(facing: str) -> int:
         match facing:
             case "front":
@@ -170,6 +178,7 @@ class ImageMetadata:
     # endregion Convenience
 
     def to_html(self, timer=0) -> 'str':
+        print("self.is_fav " + str(self.is_fav))
         with open('template.html', 'r') as f:
             template = Template(f.read())
         return template.substitute(
@@ -178,5 +187,9 @@ class ImageMetadata:
             count=self.count,
             time_spent=self.time_spent,
             facing=self.facing,
-            timer=timer
+            timer=timer,
+            is_fav=self.is_fav
         )
+
+
+

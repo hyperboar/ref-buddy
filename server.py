@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import Flask, render_template_string, request, send_file
+from flask import Flask, render_template_string, request, send_file, abort
 from image_metadata import ImageMetadata
 import os
 from datetime import datetime
@@ -69,7 +69,7 @@ def study_image(image_id):
     db = sqlite3.connect(DB_FILE)
     metadata =  ImageMetadata.get_by_id(db, image_id)
     if metadata is None:
-        return f'Error: No images found with id "{image_id}"'
+        abort(404, f'Error: No images found with id "{image_id}"')
     return render_template_string(metadata.to_html(60))
 
 @app.route('/study-random')
@@ -91,6 +91,18 @@ def study_random():
         return f'Error: No images found with facing "{facing}"'
 
     return render_template_string(metadata.to_html(timer))
+
+@app.route('/set-image-fav')
+def set_image_fav():
+    args = request.args
+    is_fav = int(args.get('is-fav'))
+    image_id = int(args.get('image-id'))
+
+    db = sqlite3.connect(DB_FILE)
+    r = ImageMetadata.set_image_fav(db, image_id, is_fav)
+    if not r:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return render_template_string('yep')
 
 
 if __name__ == '__main__':
