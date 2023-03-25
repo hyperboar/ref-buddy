@@ -4,7 +4,7 @@
 	<title>Image ($image_id)</title>
     <link rel="stylesheet" href="/static/style.css">
     <script type="text/javascript" src="/static/img_params.js"></script>
-    <script type="text/javascript" src="/static/main.js"></script>
+    <script type="text/javascript" src="/static/study_timer.js"></script>
 </head>
 <body>
     <div style="display: none" id="image-id" >$image_id</div>
@@ -15,7 +15,7 @@
         <div class="modal-controls">
             <div class="row timer">
                 <span class="timer-icon"></span>&nbsp;&nbsp;
-                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned">10</span>
+                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned">0</span>
                 <span class="space"/>
                 <button id="timer-start" started="">Start</button>
             </div>
@@ -58,28 +58,6 @@
             </div>
         </div>
 	</div>
-
-
-
-    <script>
-        function countup() {
-            var timer = 0
-            setInterval(function()
-            {
-                timer++;
-                document.getElementById("time-current").textContent = timer;
-            }, 1000);
-        }
-
-        const startTimerButton = document.getElementById("timer-start");
-        startTimerButton.addEventListener("click", function ()
-        {
-            countup()
-            startTimerButton.setAttribute("started", "true")
-            startTimerButton.textContent = "Alga Only";
-            startTimerButton.setAttribute("disabled", "true")
-        });
-    </script>
 
     <script>
     function incrementCount(imageId) {
@@ -150,6 +128,17 @@
                         console.error('There was a problem with the fetch operation:', error);
                         favButton.classList.remove('loading-fav')
                     });
+            });
+
+            // study timer
+            const timer = new StudyTimer($timer, 'time-current', "time-planned")
+
+            const timerButton = document.getElementById("timer-start");
+            timerButton.addEventListener("click", function ()
+            {
+                timer.start()
+                timerButton.textContent = "Alga Only";
+                timerButton.setAttribute("disabled", "true")
             });
         }
     </script>
