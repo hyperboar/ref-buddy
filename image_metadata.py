@@ -27,6 +27,8 @@ class ImageMetadata:
     @staticmethod
     def get_table_schema() -> str:
         return f"""
+            PRAGMA foreign_keys = ON;
+            
             CREATE TABLE IF NOT EXISTS {ImageMetadata.TABLE_NAME} (
                 id INTEGER PRIMARY KEY,
                 path TEXT NOT NULL,
@@ -36,8 +38,33 @@ class ImageMetadata:
                 last_viewed TIMESTAMP DEFAULT 0,
                 difficulty INTEGER DEFAULT 10,
                 fav INTEGER DEFAULT 0,
-                study_type INTEGER DEFAULT 0
+                study_type INTEGER DEFAULT 0,
+                lost INTEGER DEFAULT 0,
+                FOREIGN KEY (facing) REFERENCES facings (id),
+                FOREIGN KEY (study_type) REFERENCES poses (id)
             )
+            
+            CREATE TABLE IF NOT EXISTS poses (
+                id INTEGER PRIMARY KEY,
+                pose TEXT NOT NULL UNIQUE
+            );
+            
+            INSERT INTO poses (pose) VALUES ('stand');
+            INSERT INTO poses (pose) VALUES ('sit');
+            INSERT INTO poses (pose) VALUES ('lay');
+            INSERT INTO poses (pose) VALUES ('stand_bent');
+            
+            CREATE TABLE facings (
+                id INTEGER PRIMARY KEY,
+                facing TEXT NOT NULL UNIQUE
+            );
+            
+            INSERT INTO facings (facing) VALUES ('front');
+            INSERT INTO facings (facing) VALUES ('back');
+            INSERT INTO facings (facing) VALUES ('side');
+            INSERT INTO facings (facing) VALUES ('3/4');
+            INSERT INTO facings (facing) VALUES ('top');
+            INSERT INTO facings (facing) VALUES ('bottom');
         """
 
     def save(self, conn):
