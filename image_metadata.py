@@ -128,8 +128,8 @@ class ImageMetadata:
     @staticmethod
     def from_full_row(row) -> 'ImageMetadata':
         return ImageMetadata(idx=row[0], path=row[1], count=row[2],
-                             time_spent=row[3], facing=row[4], last_viewed=row[5],
-                             diff=row[6], is_fav=row[7], study_type=row[8])
+                             time_spent=row[3], last_viewed=row[4], diff=row[5],
+                             is_fav=row[6], study_type=row[7], facing=row[8])
 
     def get_by_id(conn, id: int):
         return ImageMetadata.read(conn, id)
@@ -185,6 +185,19 @@ class ImageMetadata:
         return c.rowcount > 0
 
     @staticmethod
+    def get_id_by_path(conn, path: str) -> int:
+        c = conn.cursor()
+        q = f"""
+        select id from image_metadata where path LIKE '{path}%' order by id limit 1
+        """
+        c.execute(q)
+        row = c.fetchone()
+        if row is None:
+            return 0
+
+        return row[0]
+
+    @staticmethod
     def str_to_facing(facing: str) -> int:
         match facing:
             case "front":
@@ -223,7 +236,9 @@ class ImageMetadata:
             path=self.path,
             count=self.count,
             time_spent=self.time_spent,
+            study_type=self.study_type,
             facing=self.facing,
             timer=timer,
+            difficulty=self.difficulty,
             is_fav=self.is_fav
         )

@@ -15,29 +15,39 @@
         <div class="modal-controls">
             <div class="row timer">
                 <span class="timer-icon"></span>&nbsp;&nbsp;
-                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned">0</span>
+                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
                 <span class="space"/>
                 <button id="timer-start" started="">Start</button>
             </div>
             <div class="row">
                 <span>View: </span>
-                <select id="facing">
+                <select id="facing" value="$facing">
                     <option value="front">Front</option>
                     <option value="side">Side</option>
                     <option value="back">Back</option>
                 </select>
                 <span class="space"/>
                 <span>Source: </span>
-                <select id="source-type">
-                    <option value="academic">Academic</option>
-                    <option value="pron">Pron</option>
+                <select id="source-type" value="$study_type">
+                    <option value="0">Academic</option>
+                    <option value="1">Pron</option>
                 </select>
             </div>
             <div class="row">
                 <button class="fav" id="is-fav" value="$is_fav"></button>
                 <span>Diff: </span>
-                <select id="difficulty">
+                <select id="difficulty" value="$difficulty">
                     <option value="0">Beginner</option>
+                    <option style="display: none" value="0">Beginner</option>
+                    <option style="display: none" value="1">Beginner</option>
+                    <option style="display: none" value="2">Beginner</option>
+                    <option style="display: none" value="3">Beginner</option>
+                    <option style="display: none" value="4">Beginner</option>
+                    <option style="display: none" value="5">Beginner</option>
+                    <option style="display: none" value="6">Beginner</option>
+                    <option style="display: none" value="7">Beginner</option>
+                    <option style="display: none" value="8">Beginner</option>
+                    <option style="display: none" value="9">Beginner</option>
                     <option value="10">Pro</option>
                 </select>
                 <label for="same-folder">Same folder:</label>
@@ -75,11 +85,19 @@
     </script>
 
     <script>
+        let list = document.getElementById("source-type")
+        list.options[parseInt(list.getAttribute('value'))].setAttribute('selected', 'selected')
+
+        list = document.getElementById("difficulty")
+        list.options[parseInt(list.getAttribute('value'))].setAttribute('selected', 'selected')
+
+
         window.onload = function()
         {
             console.log("Page Loaded!")
 
             let imgParams = new ImgParams('image-id', 'facing', 'source-type', 'same-folder', 'difficulty', 'time-planned', 'is-fav')
+
             imgParams.setParamsFromGET()
 
 
@@ -107,10 +125,11 @@
 
             //fab is-fav
             const favButton = document.getElementById("is-fav");
-            if (favButton.value === "1") { favButton.classList.add("on") }
+            if (favButton.value === "1") {
+                console.log(favButton.value)
+                favButton.classList.add("on") }
             favButton.addEventListener("click", function ()
             {
-                console.log(favButton.value)
                 let val = (parseInt(favButton.value) + 1) % 2;
 
                 favButton.classList.add('loading-fav')
@@ -120,8 +139,9 @@
 
                         if (val === 0) {favButton.classList.remove("on")}
                         else favButton.classList.add("on")
-
+                        
                         favButton.value = val;
+                        console.log(favButton.value)
                         favButton.classList.remove('loading-fav')
                     })
                     .catch(error => {
