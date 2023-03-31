@@ -1,2 +1,4 @@
 .idea/
 venv/
+dist/
+database_backup*.db
