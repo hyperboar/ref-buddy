@@ -16,22 +16,26 @@ load_dotenv()
 # Get the values of DB_PATH and DB_NAME from the environment
 DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
 IMAGES_PATH = os.getenv('IMAGES_PATH')
+SERVER_PORT = os.getenv('SERVER_PORT')
 
 
 class MainWindow(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.master.title("Image Metadata")
+        self.master.title("Drawing Gallery Tool")
         self.master.geometry("300x200")
         self.pack()
+
+        self.gallery_url = f"http://localhost:{SERVER_PORT}"
+
+        self.create_widgets()
 
         # Check if the database file exists
         if not os.path.isfile(DB_FILE):
             messagebox.showerror("Error", "Database file not found. Please run the import first.")
-            self.quit()
-
-        self.create_widgets()
+            self.server_button["state"] = "disabled"
+            # self.quit()
 
     def create_widgets(self):
         self.import_button = tk.Button(self)
@@ -44,8 +48,14 @@ class MainWindow(tk.Frame):
         self.server_button["command"] = self.launch_server
         self.server_button.pack(side="top")
 
-        self.quit_button = tk.Button(self, text="QUIT", fg="red", command=self.master.destroy)
-        self.quit_button.pack(side="bottom")
+        self.link = tk.Label(root, text="Go to gallery")
+        self.link["state"] = "disabled"
+        self.link.pack(pady=20)
+        self.link.bind("<Button-1>", self.go_to_gallery)
+        self.link.config(fg="blue", cursor="hand2", font=("Arial", 12, "underline"))
+
+        # quit_button = tk.Button(self, text="QUIT", fg="red", command=self.master.destroy)
+        # quit_button.pack(side="bottom")
 
     def import_images(self):
         # Ask user to select a folder
@@ -57,10 +67,15 @@ class MainWindow(tk.Frame):
 
     def launch_server(self):
         subprocess.Popen(["python", "server.py"], cwd=os.getcwd())
+        self.link["state"] = "normal"
+        self.server_button["state"] = "disabled"
 
-    def open_web_page(self):
-        webbrowser.open(ImageMetadata.get_random_image().to_html())
+    def go_to_gallery(self, test):
+        print(test)
+        webbrowser.open(self.gallery_url)
 
-root = tk.Tk()
-app = MainWindow(master=root)
-app.mainloop()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = MainWindow(master=root)
+    app.mainloop()
