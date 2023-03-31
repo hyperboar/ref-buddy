@@ -1,7 +1,8 @@
 import sqlite3
 
-from flask import Flask, render_template_string, request, send_file, abort
+from flask import Flask, render_template_string, request, send_file, abort, send_from_directory, render_template
 from image_metadata import ImageMetadata
+from image_metadata_overview import ImageMetadataOverview
 import os
 from datetime import datetime
 
@@ -14,8 +15,20 @@ load_dotenv()
 DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
 IMAGES_PATH = os.getenv('IMAGES_PATH')
 SERVER_PORT = os.getenv('SERVER_PORT')
+THUMB_PATH  = os.getenv('THUMB_PATH')
 
 app = Flask(__name__, static_url_path='/static')
+app.config['THUMB_STATIC'] = THUMB_PATH
+
+@app.route('/')
+def index():
+    db = sqlite3.connect(DB_FILE)
+    paths, images = ImageMetadataOverview.get_overview(db)
+    return render_template('tpl_index.html', path_range=range(len(paths)), paths=paths, images=images)
+
+@app.route('/thumb/<path:path>')
+def send_static_thumb(path):
+    return send_from_directory(app.config['THUMB_STATIC'], path)
 
 @app.route('/image/<path:path>')
 def show_image(path):
@@ -75,7 +88,7 @@ def study_image(image_id):
 @app.route('/study-random')
 def study_random():
     args = request.args
-    study_type = args.get('source-type')
+    study_type = int(args.get('source-type'))
     same_folder = int(args.get('same-folder') == "true")
     prev_image_id = int(args.get('image-id'))
     difficulty = int(args.get('difficulty'))
@@ -83,10 +96,9 @@ def study_random():
     timer = int(args.get('time-planned'))
 
     f_num = ImageMetadata.str_to_facing(facing)
-    st_num = ImageMetadata.str_to_study_type(study_type)
 
     db = sqlite3.connect(DB_FILE)
-    metadata = ImageMetadata.get_random_by_study_type(db, st_num, same_folder, prev_image_id)
+    metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id)
     if metadata is None:
         return f'Error: No images found with facing "{facing}"'
 

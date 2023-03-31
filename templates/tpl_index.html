@@ -1,0 +1,37 @@
+<html>
+<head>
+  <title>Image Directories</title>
+  <style>
+    .directory {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .directory img {
+      width: 200px;
+      max-height: 80px;
+      object-fit: contain;
+    }
+    .directory h4 {
+      margin: 0;
+    }
+    .directory p {
+      margin: 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Image Directories</h1>
+  {% for i in path_range %}
+    <div class="directory">
+      <img src="/thumb/{{ paths[i].image_id }}.jpg" alt="thumbnail">
+      <div>
+        <h4>{{ paths[i].path }} <a href="/study-image/{{ paths[i].image_id }}?time-planned=120">open id:{{ paths[i].image_id }}</a></h4>
+        <p>{{ paths[i].count }} images</p>
+      </div>
+    </div>
+  {% endfor %}
+</body>
+</html>
