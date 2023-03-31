@@ -2,3 +2,4 @@
 venv/
 dist/
 database_backup*.db
+__pycache__
