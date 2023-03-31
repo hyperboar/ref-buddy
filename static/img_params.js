@@ -46,12 +46,17 @@ class ImgParams {
     setParamsFromGET() {
         const urlParams = new URLSearchParams(window.location.search);
 
-        document.getElementById(this.facingId).value            = urlParams.get(this.facingId)
-        document.getElementById(this.sourceTypeId).value        = urlParams.get(this.sourceTypeId)
-        document.getElementById(this.sameFolderId).checked      = urlParams.get(this.sameFolderId) === "true"
-        document.getElementById(this.difficultyId).value        = urlParams.get(this.difficultyId)
-        document.getElementById(this.timePlannedId).setAttribute('value', urlParams.get(this.timePlannedId))
+        // document.getElementById(this.facingId).value            = urlParams.get(this.facingId)
+        // document.getElementById(this.sourceTypeId).value        = urlParams.get(this.sourceTypeId)
+        if (urlParams.get(this.sameFolderId) !== null)
+        {
+            document.getElementById(this.sameFolderId).checked = urlParams.get(this.sameFolderId) === "true"
+        }
+        // document.getElementById(this.difficultyId).value        = urlParams.get(this.difficultyId)
+
+        if (urlParams.get(this.timePlannedId) !== null)
+        {
+            document.getElementById(this.timePlannedId).setAttribute('value', urlParams.get(this.timePlannedId))
+        }
     }
-
-
 }
