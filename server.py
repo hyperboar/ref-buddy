@@ -67,8 +67,6 @@ def study_random():
     facing = args.get('facing')
     timer = int(args.get('time-planned'))
 
-    f_num = ImageMetadata.str_to_facing(facing)
-
     db = sqlite3.connect(Env.DB_FILE)
     metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id)
     if metadata is None:
