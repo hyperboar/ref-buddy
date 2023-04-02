@@ -118,15 +118,36 @@ class ImageMetadata:
     # region CRUD
 
     @staticmethod
-    def create(conn, path: str)-> 'ImageMetadata':
-        """--"""
-        cursor = conn.cursor()
-        cursor.execute(f"""
-            INSERT INTO {ImageMetadata.TABLE_NAME} (path)
-            VALUES (?)
-        """, (path,))
+    def create(conn, path: str, study_types=None)-> 'ImageMetadata':
+        """++"""
+        c = conn.cursor()
+
+        dir = os.path.dirname(path)
+        file = os.path.basename(path)
+
+        stype_list = [s for s in study_types if dir.startswith(s[1])]
+        if stype_list is None or len(stype_list) == 0:
+            print(f"Path '{path}' should be in study_type named folder (These: {','.join([s[1] for s in study_types])})")
+            return -1
+
+        stype = stype_list[0]
+        new_path = dir[len(stype[1]) + 1:]
+
+        c.execute(f"select * from paths where path = ?", (new_path,))
+        rows = c.fetchone()
+        if rows is None:
+            c.execute(f"insert into paths (path) values (?)", (new_path,))
+            path_id = c.lastrowid
+        else:
+            path_id = rows[0]
+
+        # print(f"inserting {(path_id, stype[0], file)} for path '{new_path}'")
+        c.execute(f"""
+            INSERT INTO {ImageMetadata.TABLE_NAME} (path, study_type, filename)
+            VALUES (?, ?, ?)
+        """, (path_id, stype[0], file))
         conn.commit()
-        return ImageMetadata.read(conn, cursor.lastrowid)
+        return c.lastrowid
 
     @staticmethod
     def read(conn, idx: int) -> 'ImageMetadata':
@@ -304,6 +325,12 @@ class ImageMetadata:
             case _:
                 return 0
 
+    @staticmethod
+    def get_study_types(conn):
+        c = conn.cursor()
+        c.execute("select * from study_types")
+        return c.fetchall()
+
     # endregion Convenience
 
     def to_html(self, timer=0) -> 'str':
@@ -327,7 +354,7 @@ class ImageMetadata:
 
 
 if __name__ == "__main__":
-    import Env
+    from Env import Env
     db = sqlite3.connect(Env.DB_FILE)
     ImageMetadata.static_initialize(db)
 

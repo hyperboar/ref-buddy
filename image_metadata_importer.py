@@ -1,7 +1,6 @@
 import sqlite3
 import os
 from image_metadata import ImageMetadata
-from datetime import datetime
 import sys
 
 
@@ -13,28 +12,37 @@ class ImageMetadataImporter:
         self.conn.close()
 
     def import_metadata(self, folder_path):
+        formats = ('.png', '.jpg', '.jpeg', '.webp')
+        ImageMetadata.static_initialize(self.conn)
+        sts = ImageMetadata.get_study_types(self.conn)
 
-        for dirpath, dirnames, filenames in os.walk(folder_path):
+        for dir_path, dir_names, filenames in os.walk(folder_path):
+            count = 0
+            max_count = len(filenames)
+            print(f"Importing '{dir_path}'...")
             for file_name in filenames:
-                if file_name.endswith(('.png', '.jpg', '.jpeg')):
-                    file_path = os.path.join(dirpath, file_name)
+                if file_name.endswith(formats):
+                    file_path = os.path.join(dir_path, file_name)
                     file_path = os.path.relpath(file_path, folder_path)
-                    print("File path:", file_path)
                     try:
                         existing_metadata = ImageMetadata.get_by_path(self.conn, file_path)
                         if not existing_metadata:
-                            ImageMetadata.create(self.conn, file_path)
+                            count += 1
+                            print(f"\r({count}/{max_count}) New '{file_path}'", end='')
+                            ImageMetadata.create(self.conn, file_path, sts)
                         else:
-
-                            print("File already recorded: ", file_path)
+                            count += 1
+                            print(f"\r({count}/{max_count}) File exists '{file_path}'", end='')
                     except Exception as e:
                         print(f"Error processing  {file_path}: {sys.exc_info()[0]}")
                         raise
+            print(f"")
+
 
 if __name__ == '__main__':
-    folder_path = sys.argv[1]
-    if not os.path.isabs(folder_path):
+    path = sys.argv[1]
+    if not os.path.isabs(path):
         print("Error: Please provide a valid absolute path to the folder.")
         sys.exit(1)
 
-    ImageMetadataImporter.import_images(folder_path)
+    ImageMetadataImporter.import_images(path)
