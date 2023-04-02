@@ -1,40 +1,53 @@
 <html>
 <head>
-  <title>Image Directories</title>
-  <style>
-    body {
-      background-color: #7a7676;
-    }
+    <title>Gallery overview</title>
+    <style>
+        body {
+            background-color: #7a7676;
+        }
 
-    .directory {
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .directory img {
-      width: 200px;
-      max-height: 80px;
-      object-fit: contain;
-    }
-    .directory h4 {
-      margin: 0;
-    }
-    .directory p {
-      margin: 0;
-      font-size: 14px;
-    }
-  </style>
+        .directory {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .directory img {
+            width: 200px;
+            max-height: 80px;
+            object-fit: contain;
+        }
+
+        .directory h4 {
+            margin: 0;
+            font-style: normal;
+            font-weight: normal;
+        }
+
+        .directory p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .directory a:visited, .directory a {
+            color: #2d2c2c;
+        }
+        .directory a:hover {
+            color: #422b56;
+        }
+    </style>
 </head>
 <body>
-  <h1>Image Directories</h1>
-  {% for img in images %}
+<h1>Image Directories</h1>
+{% for img in images %}
     <div class="directory">
-      <img src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
-      <div>
-        <h4>{{ img.path }} <a href="/study-image/{{ img.image_id }}?time-planned=120">open id:{{ img.image_id }}</a></h4>
-      </div>
+        <img src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
+        <div>
+            <h4>[{{ img.study_type }}] <b>{{ img.path }}</b> <a href="/study-image/{{ img.image_id }}?time-planned=120">open
+                id:{{ img.image_id }}</a></h4>
+        </div>
     </div>
-  {% endfor %}
+{% endfor %}
 </body>
 </html>
