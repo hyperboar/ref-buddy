@@ -11,7 +11,11 @@
     <div style="display: none">$path</div>
 	<div class="modal">
         <img class="modal-bg" src="/image/$image_id" alt="$image_id:$path">
-        <img class="modal-img" src="/image/$image_id" alt="$image_id:$path">
+        <div class="modal-img-container">
+            <img class="modal-img" src="/image/$image_id" alt="$image_id:$path">
+            <button class="modal-button-prev"><</button>
+            <button class="modal-button-next">></button>
+        </div>
         <div class="modal-controls">
             <div class="row timer">
                 <span class="timer-icon"></span>&nbsp;&nbsp;
