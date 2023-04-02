@@ -7,6 +7,7 @@ from tkinter import messagebox
 
 from image_metadata_importer import ImageMetadataImporter
 from image_metadata import ImageMetadata
+from maintenance import generate_thumbs
 from Env import Env
 
 
@@ -21,6 +22,7 @@ class MainWindow(tk.Frame):
         self.gallery_url = f"http://localhost:{Env.SERVER_PORT}"
 
         self.create_widgets()
+        self.create_menus()
 
         # Check if the database file exists
         if not os.path.isfile(Env.DB_FILE):
@@ -39,7 +41,7 @@ class MainWindow(tk.Frame):
         self.server_button["command"] = self.launch_server
         self.server_button.pack(side="top")
 
-        self.link = tk.Label(root, text="Go to gallery")
+        self.link = tk.Label(self, text="Go to gallery")
         self.link["state"] = "disabled"
         self.link.pack(pady=20)
         self.link.bind("<Button-1>", self.go_to_gallery)
@@ -47,6 +49,24 @@ class MainWindow(tk.Frame):
 
         # quit_button = tk.Button(self, text="QUIT", fg="red", command=self.master.destroy)
         # quit_button.pack(side="bottom")
+
+    def create_menus(self):
+        self.menu_bar = tk.Menu(self.master)
+
+        # create file menu
+        file_menu = tk.Menu(self.menu_bar, tearoff=0)
+        file_menu.add_command(label="Import images", command=self.import_images)
+        file_menu.add_command(label="Exit", command=root.quit)
+
+        self.menu_bar.add_cascade(label="File", menu=file_menu)
+
+        # create maintenance menu
+        maintenance_menu = tk.Menu(self.menu_bar, tearoff=0)
+        maintenance_menu.add_command(label="Generate thumbs", command=generate_thumbs)
+
+        self.menu_bar.add_cascade(label="Maintenance", menu=maintenance_menu)
+
+        self.master.config(menu=self.menu_bar)
 
     def import_images(self):
         # Ask user to select a folder
