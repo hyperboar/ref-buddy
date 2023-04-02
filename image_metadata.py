@@ -3,16 +3,6 @@ import sqlite3
 import random
 from string import Template
 
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-IMAGES_PATH = os.getenv('IMAGES_PATH')
-
-def full_image_path(st, path, file):
-    import os
-    return os.path.join(st, path, file)
 
 class ImageMetadata:
     TABLE_NAME = "image_metadata"
@@ -337,12 +327,10 @@ class ImageMetadata:
 
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
-    DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
-
-    db = sqlite3.connect(DB_FILE)
+    import Env
+    db = sqlite3.connect(Env.DB_FILE)
     ImageMetadata.static_initialize(db)
+
     print(ImageMetadata.read(db, 666))
     print(ImageMetadata.get_by_path(db, 'pron\[Graphis] 2018-06-13 Gals – Asuna Kawai 河合あすな Natural beauty melons!\gra_asuna-k056.jpg'))
     print(ImageMetadata.get_id_by_path(db, 'pron\[Graphis] 2018-06-13 Gals – Asuna Kawai 河合あすな Natural beauty melons!\gra_asuna-k056.jpg'))

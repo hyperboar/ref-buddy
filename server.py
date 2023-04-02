@@ -5,36 +5,27 @@ from image_metadata import ImageMetadata
 from image_metadata_overview import ImageMetadataOverview
 import os
 from datetime import datetime
+import Env
 
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Get the values of DB_PATH and DB_NAME from the environment
-DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
-IMAGES_PATH = os.getenv('IMAGES_PATH')
-SERVER_PORT = os.getenv('SERVER_PORT')
-THUMB_PATH  = os.getenv('THUMB_PATH')
 
 app = Flask(__name__, static_url_path='/static')
-app.config['THUMB_STATIC'] = THUMB_PATH
+app.config['THUMB_STATIC'] = Env.THUMB_PATH
 
 @app.route('/')
 def index():
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     images = ImageMetadataOverview.get_overview(db)
     return render_template('tpl_index.html', images=images)
 
 @app.route('/favs')
 def favs():
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     images = ImageMetadata.get_favs(db)
     return render_template('tpl_favs.html', images=images)
 
 @app.route('/last')
 def last():
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     images = ImageMetadata.get_last(db)
     return render_template('tpl_last.html', images=images)
 
@@ -44,7 +35,7 @@ def send_static_thumb(path):
 
 @app.route('/image/<path:path>')
 def show_image(path):
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     metadata = ImageMetadata.get_by_path(db, path)
     if metadata is None:
         return f'Error: Image not found: {path}'
@@ -84,14 +75,14 @@ def show_image(path):
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
     print(f"getting id {image_id}")
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     metadata = ImageMetadata.get_by_id(db, image_id)
     ext = os.path.splitext(metadata.path)[1]
-    return send_file(os.path.join(IMAGES_PATH, metadata.path), mimetype=f'image/{ext}')
+    return send_file(os.path.join(Env.IMAGES_PATH, metadata.path), mimetype=f'image/{ext}')
 
 @app.route('/study-image/<int:image_id>')
 def study_image(image_id):
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     metadata = ImageMetadata.get_by_id(db, image_id)
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
@@ -109,7 +100,7 @@ def study_random():
 
     f_num = ImageMetadata.str_to_facing(facing)
 
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id)
     if metadata is None:
         return f'Error: No images found with facing "{facing}"'
@@ -122,7 +113,7 @@ def set_image_fav():
     is_fav = int(args.get('is-fav'))
     image_id = int(args.get('image-id'))
 
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     r = ImageMetadata.set_image_fav(db, image_id, is_fav)
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
@@ -134,7 +125,7 @@ def set_image_last_viewed():
     image_id = int(args.get('image-id'))
     now = datetime.now()
 
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     r = ImageMetadata.set_image_last_viewed(db, image_id, now)
 
     if not r:
@@ -143,7 +134,7 @@ def set_image_last_viewed():
 
 
 if __name__ == '__main__':
-    db = sqlite3.connect(DB_FILE)
+    db = sqlite3.connect(Env.DB_FILE)
     ImageMetadata.static_initialize(db)
 
-    app.run(port=SERVER_PORT)
+    app.run(port=Env.SERVER_PORT)

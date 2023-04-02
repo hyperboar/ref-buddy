@@ -47,11 +47,8 @@ class OverviewPath:
 if __name__ == "__main__":
     import os
     import sqlite3
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
-    db = sqlite3.connect(DB_FILE)
+    import Env
+    db = sqlite3.connect(Env.DB_FILE)
     res = ImageMetadataOverview.get_overview(db)
 
     for o in res:

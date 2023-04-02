@@ -3,25 +3,16 @@ import sys
 import sqlite3
 from PIL import Image
 from image_metadata import ImageMetadata
-from dotenv import load_dotenv
 import time
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Get the values of DB_PATH and DB_NAME from the environment
-DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
-IMAGES_PATH = os.getenv('IMAGES_PATH')
-THUMB_PATH = os.getenv('THUMB_PATH')
-THUMB_MAX_SIZE = int(os.getenv('THUMB_MAX_SIZE'))
+import Env
 
 
 def get_db_info():
-    if not os.path.isfile(DB_FILE):
-        print(f"Database file '{DB_FILE}' does not exist.")
+    if not os.path.isfile(Env.DB_FILE):
+        print(f"Database file '{Env.DB_FILE}' does not exist.")
         return
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(Env.DB_FILE)
     cursor = conn.cursor()
 
     table = ImageMetadata.TABLE_NAME
@@ -41,17 +32,17 @@ def get_db_info():
 
     cursor.execute(f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}")
     num_images = cursor.fetchone()[0]
-    print(f"Database file '{DB_FILE}' exists and contains {num_images} images.")
+    print(f"Database file '{Env.DB_FILE}' exists and contains {num_images} images.")
 
     cursor.close()
     conn.close()
 
 
 def create_new_db():
-    if not os.path.isfile(DB_FILE):
-        print(f"Database file '{DB_FILE}' do not exist. Creating one.")
+    if not os.path.isfile(Env.DB_FILE):
+        print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(Env.DB_FILE)
     cursor = conn.cursor()
 
     table = ImageMetadata.TABLE_NAME
@@ -65,17 +56,17 @@ def create_new_db():
         cursor.execute('DROP TABLE image_metadata')
 
     cursor.execute(ImageMetadata.get_table_schema())
-    print(f"New database created at path '{DB_FILE}'.")
+    print(f"New database created at path '{Env.DB_FILE}'.")
 
     cursor.close()
     conn.close()
 
 
 def create_new_db():
-    if not os.path.isfile(DB_FILE):
-        print(f"Database file '{DB_FILE}' do not exist. Creating one.")
+    if not os.path.isfile(Env.DB_FILE):
+        print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(Env.DB_FILE)
     cursor = conn.cursor()
 
     table = ImageMetadata.TABLE_NAME
@@ -89,7 +80,7 @@ def create_new_db():
         cursor.execute('DROP TABLE image_metadata')
 
     cursor.execute(ImageMetadata.get_table_schema())
-    print(f"New database created at path '{DB_FILE}'.")
+    print(f"New database created at path '{Env.DB_FILE}'.")
 
     cursor.close()
     conn.close()
@@ -97,7 +88,7 @@ def create_new_db():
 
 def generate_thumbs():
     # Connect to SQLite database
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(Env.DB_FILE)
     c = conn.cursor()
 
     # Select all image paths from image_metadata table
@@ -105,8 +96,8 @@ def generate_thumbs():
     results = c.fetchall()
 
     # Create thumbnail folder if it doesn't exist
-    if not os.path.exists(THUMB_PATH):
-        os.makedirs(THUMB_PATH)
+    if not os.path.exists(Env.THUMB_PATH):
+        os.makedirs(Env.THUMB_PATH)
 
     i = 0
     i_step = 42
@@ -121,7 +112,7 @@ def generate_thumbs():
             time.sleep(1)
 
         # Generate thumbnail filename by using id from database
-        thumb_filename = os.path.join(THUMB_PATH, f"{image_id}.jpg")
+        thumb_filename = os.path.join(Env.THUMB_PATH, f"{image_id}.jpg")
 
         # Skip image if thumbnail already exists
         if os.path.exists(thumb_filename):
@@ -129,11 +120,11 @@ def generate_thumbs():
 
         new_count += 1
 
-        path = os.path.join(IMAGES_PATH, path)
+        path = os.path.join(Env.IMAGES_PATH, path)
 
         # Load image and generate thumbnail
         image = Image.open(path)
-        image.thumbnail((THUMB_MAX_SIZE, THUMB_MAX_SIZE))
+        image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
 
         # Save thumbnail as JPEG file
         image.convert('RGB').save(thumb_filename, 'JPEG')
@@ -146,7 +137,7 @@ def generate_thumbs():
     conn.close()
 
 def extract_paths():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(Env.DB_FILE)
     c = conn.cursor()
 
     c.execute(f"select * from study_type")

@@ -7,16 +7,7 @@ from tkinter import messagebox
 
 from image_metadata_importer import ImageMetadataImporter
 from image_metadata import ImageMetadata
-
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Get the values of DB_PATH and DB_NAME from the environment
-DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
-IMAGES_PATH = os.getenv('IMAGES_PATH')
-SERVER_PORT = os.getenv('SERVER_PORT')
+import Env
 
 
 class MainWindow(tk.Frame):
@@ -27,12 +18,12 @@ class MainWindow(tk.Frame):
         self.master.geometry("300x200")
         self.pack()
 
-        self.gallery_url = f"http://localhost:{SERVER_PORT}"
+        self.gallery_url = f"http://localhost:{Env.SERVER_PORT}"
 
         self.create_widgets()
 
         # Check if the database file exists
-        if not os.path.isfile(DB_FILE):
+        if not os.path.isfile(Env.DB_FILE):
             messagebox.showerror("Error", "Database file not found. Please run the import first.")
             self.server_button["state"] = "disabled"
             # self.quit()
@@ -61,7 +52,7 @@ class MainWindow(tk.Frame):
         # Ask user to select a folder
         folder_path = filedialog.askdirectory()
         if folder_path:
-            importer = ImageMetadataImporter(DB_FILE)
+            importer = ImageMetadataImporter(Env.DB_FILE)
             importer.import_metadata(folder_path)
             messagebox.showinfo("Success", "Images imported successfully.")
 
