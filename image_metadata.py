@@ -75,9 +75,10 @@ class ImageMetadata:
                 type TEXT NOT NULL UNIQUE
             );
             
-            INSERT INTO study_type (type) VALUES ('academic');
-            INSERT INTO study_type (type) VALUES ('pron');
-            INSERT INTO study_type (type) VALUES ('artist');
+            INSERT INTO study_types (type) VALUES ('academic');
+            INSERT INTO study_types (type) VALUES ('pron');
+            INSERT INTO study_types (type) VALUES ('artists');
+            INSERT INTO study_types (type) VALUES ('the_bits');
             
             CREATE TABLE IF NOT EXISTS poses (
                 id INTEGER PRIMARY KEY,
