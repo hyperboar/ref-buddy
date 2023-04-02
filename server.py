@@ -41,37 +41,6 @@ def show_image(path):
         return f'Error: Image not found: {path}'
     return render_template_string(metadata.to_html())
 
-# @app.route('/random_image/<facing>/<timer>')
-# def show_random_image(facing, timer):
-#     db = sqlite3.connect(DB_FILE)
-#     metadata = ImageMetadata.get_random_by_facing(db, facing)
-#     if metadata is None:
-#         return f'Error: No images found with facing "{facing}"'
-#     return render_template_string(metadata.to_html(timer))
-
-# @app.route('/random_image/<facing>')
-# def show_random_image_deault_time(facing):
-#     db = sqlite3.connect(DB_FILE)
-#     f_num = ImageMetadata.str_to_facing(facing)
-#     metadata = ImageMetadata.get_random_by_facing(db, f_num)
-#     if metadata is None:
-#         return f'Error: No images found with facing "{f_num}"'
-#     return render_template_string(metadata.to_html(60))
-
-# @app.route('/update_image/<int:image_id>', methods=['POST'])
-# def update_image(image_id):
-#     db = sqlite3.connect(DB_FILE)
-#     metadata = ImageMetadata.get_by_id(db, image_id)
-#     if metadata is None:
-#         return f'Error: Image not found with ID "{image_id}"'
-#
-#     metadata.usage_count += 1
-#     metadata.time_watching += 10  # Increase by 10 seconds for demo purposes
-#     metadata.last_viewed = datetime.now()
-#     metadata.save()
-#
-#     return f'Updated image: {metadata.path}'
-
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
     print(f"getting id {image_id}")

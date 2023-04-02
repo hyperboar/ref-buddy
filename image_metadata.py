@@ -102,24 +102,10 @@ class ImageMetadata:
             INSERT INTO facings (facing) VALUES ('bottom');
         """
 
-
-    # def save(self, conn):
-    #     c = conn.cursor()
-    #     c.execute(
-    #         f"INSERT INTO {ImageMetadata.TABLE_NAME} (path, usage_count, time_spent_watching, facing, last_viewed) "
-    #         f"VALUES (?, ?, ?, ?, ?)",
-    #         (self.path, self.usage_count, self.time_spent_watching, self.facing, self.last_viewed)
-    #     )
-    #     conn.commit()
-
-    # def to_tuple(self):
-    #     return (self.path, self.count, self.time_spent, self.facing)
-
     # region CRUD
 
     @staticmethod
     def create(conn, path: str, study_types=None)-> 'ImageMetadata':
-        """++"""
         c = conn.cursor()
 
         dir = os.path.dirname(path)
@@ -151,7 +137,6 @@ class ImageMetadata:
 
     @staticmethod
     def read(conn, idx: int) -> 'ImageMetadata':
-        """++"""
         cursor = conn.cursor()
 
         cursor.execute(f"{ImageMetadata.BASE_Q} where im.id = ?", (idx,))
@@ -161,34 +146,12 @@ class ImageMetadata:
             return None
         return ImageMetadata.from_full_row(row)
 
-    # @staticmethod
-    # def update(conn, idx: int, image_metadata: 'ImageMetadata') -> 'int':
-    #     cursor = conn.cursor()
-    #     cursor.execute(f"""
-    #         UPDATE {ImageMetadata.TABLE_NAME}
-    #         SET path = ?, count = ?, time_spent = ?, facing = ?
-    #         WHERE id = ?
-    #     """, (*image_metadata.to_tuple(), idx))
-    #     conn.commit()
-    #     return cursor.rowcount
-
-    # @staticmethod
-    # def delete(conn, id) -> 'int':
-    #     cursor = conn.cursor()
-    #     cursor.execute(f"""
-    #         DELETE FROM {ImageMetadata.TABLE_NAME}
-    #         WHERE id = ?
-    #     """, (id,))
-    #     conn.commit()
-    #     return cursor.rowcount
-
     # endregion CRUD
 
     # region Convenience
 
     @staticmethod
     def from_full_row(row) -> 'ImageMetadata':
-        """++"""
         f = ImageMetadata.get_fields()
         return ImageMetadata(
             idx=row[f['id']],
@@ -207,7 +170,6 @@ class ImageMetadata:
 
     @staticmethod
     def get_favs(conn, count: int = 10000, start: int = 0):
-        """++"""
         c = conn.cursor()
         c.execute(f'{ImageMetadata.BASE_Q} WHERE im.fav = ? ORDER BY im.last_viewed DESC LIMIT ? OFFSET ?', (1, count, start))
         rows = c.fetchall()
@@ -217,7 +179,6 @@ class ImageMetadata:
 
     @staticmethod
     def get_last(conn, count: int = 60, start: int = 0):
-        """++"""
         c = conn.cursor()
         c.execute(f'{ImageMetadata.BASE_Q} ORDER BY im.last_viewed DESC LIMIT ? OFFSET ?', (count, start))
         rows = c.fetchall()
@@ -226,12 +187,10 @@ class ImageMetadata:
         return [ImageMetadata.from_full_row(row) for row in rows]
 
     def get_by_id(conn, id: int):
-        """++"""
         return ImageMetadata.read(conn, id)
 
     @staticmethod
     def get_by_path(conn, path) -> 'ImageMetadata':
-        """++"""
         c = conn.cursor()
         c.execute(f"select id, filename from {ImageMetadata.TABLE_NAME} where filename = ?", (os.path.basename(path),))
 
@@ -250,19 +209,8 @@ class ImageMetadata:
 
         return target[0]
 
-    # @staticmethod
-    # def get_random_by_facing(conn, facing: int) -> 'ImageMetadata':
-    #     c = conn.cursor()
-    #     c.execute(f'SELECT * FROM {ImageMetadata.TABLE_NAME} WHERE facing = ? ORDER BY RANDOM() LIMIT 1', (facing,))
-    #     row = c.fetchone()
-    #     # print(str(row))
-    #     if row is None:
-    #         return None
-    #     return ImageMetadata.from_full_row(row)
-
     @staticmethod
     def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = 1) -> 'ImageMetadata':
-        """++"""
         c = conn.cursor()
         q_same_folder = ''
         if same_folder > 0:
@@ -279,7 +227,6 @@ class ImageMetadata:
 
     @staticmethod
     def set_image_fav(conn, image_id: int, is_fav: int):
-        """++"""
         c = conn.cursor()
         c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET fav = ? WHERE id = ? ', (is_fav, image_id))
         conn.commit()
@@ -287,7 +234,6 @@ class ImageMetadata:
 
     @staticmethod
     def set_image_last_viewed(conn, image_id: int, time: 'datetime'):
-        """++"""
         c = conn.cursor()
         c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET last_viewed = ? WHERE id = ?', (time, image_id))
         conn.commit()
@@ -295,35 +241,10 @@ class ImageMetadata:
 
     @staticmethod
     def get_id_by_path(conn, path: str) -> int:
-        """++"""
         img = ImageMetadata.get_by_path(conn, path)
         if img is None:
             return -1
         return img.image_id
-
-    @staticmethod
-    def str_to_facing(facing: str) -> int:
-        match facing:
-            case "front":
-                return 0
-            case "side":
-                return 1
-            case "back":
-                return 2
-            case _:
-                return 0
-
-    @staticmethod
-    def str_to_study_type(study_type: str) -> int:
-        match study_type:
-            case "academic":
-                return 0
-            case "pron":
-                return 1
-            case "any":
-                return 2
-            case _:
-                return 0
 
     @staticmethod
     def get_study_types(conn):
@@ -376,4 +297,3 @@ if __name__ == "__main__":
     print('last')
     for img in ImageMetadata.get_last(db, count=2, start=0):
         print(img)
-
