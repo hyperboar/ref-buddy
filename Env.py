@@ -11,3 +11,4 @@ class Env:
     IMAGES_PATH = os.getenv('IMAGES_PATH')
     SERVER_PORT = os.getenv('SERVER_PORT')
     THUMB_PATH = os.getenv('THUMB_PATH')
+    THUMB_MAX_SIZE = int(os.getenv('THUMB_MAX_SIZE'))

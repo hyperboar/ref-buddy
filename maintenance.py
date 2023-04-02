@@ -89,11 +89,14 @@ def create_new_db():
 def generate_thumbs():
     # Connect to SQLite database
     conn = sqlite3.connect(Env.DB_FILE)
-    c = conn.cursor()
+
+    ImageMetadata.static_initialize(conn)
 
     # Select all image paths from image_metadata table
-    c.execute(f"SELECT id, path FROM {ImageMetadata.TABLE_NAME}")
-    results = c.fetchall()
+    # c.execute(f"SELECT id, path FROM {ImageMetadata.TABLE_NAME}")
+    c = conn.cursor()
+    c.execute(ImageMetadata.BASE_Q)
+    images = [ImageMetadata.from_full_row(row) for row in  c.fetchall()]
 
     # Create thumbnail folder if it doesn't exist
     if not os.path.exists(Env.THUMB_PATH):
@@ -101,18 +104,18 @@ def generate_thumbs():
 
     i = 0
     i_step = 42
-    max_i = len(results)
+    max_i = len(images)
     new_count = 0
     # Generate thumbnail for each image
-    for image_id, path in results:
+    for img in images:
 
         i += 1
         if (i % i_step) == 0:
             print(f"\rProgress: {int(i / max_i * 100.)}% ({new_count} new)", end='')
-            time.sleep(1)
+            # time.sleep(1)
 
         # Generate thumbnail filename by using id from database
-        thumb_filename = os.path.join(Env.THUMB_PATH, f"{image_id}.jpg")
+        thumb_filename = os.path.join(Env.THUMB_PATH, f"{img.image_id}.jpg")
 
         # Skip image if thumbnail already exists
         if os.path.exists(thumb_filename):
@@ -120,7 +123,7 @@ def generate_thumbs():
 
         new_count += 1
 
-        path = os.path.join(Env.IMAGES_PATH, path)
+        path = os.path.join(Env.IMAGES_PATH, img.path)
 
         # Load image and generate thumbnail
         image = Image.open(path)
