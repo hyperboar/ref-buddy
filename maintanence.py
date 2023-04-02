@@ -4,7 +4,7 @@ import sqlite3
 from PIL import Image
 from image_metadata import ImageMetadata
 import time
-import Env
+from Env import Env
 
 
 def get_db_info():

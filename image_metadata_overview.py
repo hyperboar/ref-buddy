@@ -47,7 +47,7 @@ class OverviewPath:
 if __name__ == "__main__":
     import os
     import sqlite3
-    import Env
+    from Env import Env
     db = sqlite3.connect(Env.DB_FILE)
     res = ImageMetadataOverview.get_overview(db)
 

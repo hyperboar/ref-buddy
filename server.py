@@ -5,7 +5,7 @@ from image_metadata import ImageMetadata
 from image_metadata_overview import ImageMetadataOverview
 import os
 from datetime import datetime
-import Env
+from Env import Env
 
 
 app = Flask(__name__, static_url_path='/static')

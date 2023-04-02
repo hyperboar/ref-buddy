@@ -7,7 +7,7 @@ from tkinter import messagebox
 
 from image_metadata_importer import ImageMetadataImporter
 from image_metadata import ImageMetadata
-import Env
+from Env import Env
 
 
 class MainWindow(tk.Frame):
