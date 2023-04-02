@@ -23,8 +23,20 @@ app.config['THUMB_STATIC'] = THUMB_PATH
 @app.route('/')
 def index():
     db = sqlite3.connect(DB_FILE)
-    paths, images = ImageMetadataOverview.get_overview(db)
-    return render_template('tpl_index.html', path_range=range(len(paths)), paths=paths, images=images)
+    images = ImageMetadataOverview.get_overview(db)
+    return render_template('tpl_index.html', images=images)
+
+@app.route('/favs')
+def favs():
+    db = sqlite3.connect(DB_FILE)
+    images = ImageMetadata.get_favs(db)
+    return render_template('tpl_favs.html', images=images)
+
+@app.route('/last')
+def last():
+    db = sqlite3.connect(DB_FILE)
+    images = ImageMetadata.get_last(db)
+    return render_template('tpl_last.html', images=images)
 
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):
@@ -38,36 +50,36 @@ def show_image(path):
         return f'Error: Image not found: {path}'
     return render_template_string(metadata.to_html())
 
-@app.route('/random_image/<facing>/<timer>')
-def show_random_image(facing, timer):
-    db = sqlite3.connect(DB_FILE)
-    metadata = ImageMetadata.get_random_by_facing(db, facing)
-    if metadata is None:
-        return f'Error: No images found with facing "{facing}"'
-    return render_template_string(metadata.to_html(timer))
+# @app.route('/random_image/<facing>/<timer>')
+# def show_random_image(facing, timer):
+#     db = sqlite3.connect(DB_FILE)
+#     metadata = ImageMetadata.get_random_by_facing(db, facing)
+#     if metadata is None:
+#         return f'Error: No images found with facing "{facing}"'
+#     return render_template_string(metadata.to_html(timer))
 
-@app.route('/random_image/<facing>')
-def show_random_image_deault_time(facing):
-    db = sqlite3.connect(DB_FILE)
-    f_num = ImageMetadata.str_to_facing(facing)
-    metadata = ImageMetadata.get_random_by_facing(db, f_num)
-    if metadata is None:
-        return f'Error: No images found with facing "{f_num}"'
-    return render_template_string(metadata.to_html(60))
+# @app.route('/random_image/<facing>')
+# def show_random_image_deault_time(facing):
+#     db = sqlite3.connect(DB_FILE)
+#     f_num = ImageMetadata.str_to_facing(facing)
+#     metadata = ImageMetadata.get_random_by_facing(db, f_num)
+#     if metadata is None:
+#         return f'Error: No images found with facing "{f_num}"'
+#     return render_template_string(metadata.to_html(60))
 
-@app.route('/update_image/<int:image_id>', methods=['POST'])
-def update_image(image_id):
-    db = sqlite3.connect(DB_FILE)
-    metadata = ImageMetadata.get_by_id(db, image_id)
-    if metadata is None:
-        return f'Error: Image not found with ID "{image_id}"'
-
-    metadata.usage_count += 1
-    metadata.time_watching += 10  # Increase by 10 seconds for demo purposes
-    metadata.last_viewed = datetime.now()
-    metadata.save()
-
-    return f'Updated image: {metadata.path}'
+# @app.route('/update_image/<int:image_id>', methods=['POST'])
+# def update_image(image_id):
+#     db = sqlite3.connect(DB_FILE)
+#     metadata = ImageMetadata.get_by_id(db, image_id)
+#     if metadata is None:
+#         return f'Error: Image not found with ID "{image_id}"'
+#
+#     metadata.usage_count += 1
+#     metadata.time_watching += 10  # Increase by 10 seconds for demo purposes
+#     metadata.last_viewed = datetime.now()
+#     metadata.save()
+#
+#     return f'Updated image: {metadata.path}'
 
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
@@ -80,7 +92,7 @@ def serve_image(image_id):
 @app.route('/study-image/<int:image_id>')
 def study_image(image_id):
     db = sqlite3.connect(DB_FILE)
-    metadata =  ImageMetadata.get_by_id(db, image_id)
+    metadata = ImageMetadata.get_by_id(db, image_id)
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
     return render_template_string(metadata.to_html(60))
@@ -131,4 +143,7 @@ def set_image_last_viewed():
 
 
 if __name__ == '__main__':
+    db = sqlite3.connect(DB_FILE)
+    ImageMetadata.static_initialize(db)
+
     app.run(port=SERVER_PORT)

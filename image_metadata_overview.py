@@ -2,9 +2,9 @@ from image_metadata import ImageMetadata
 import sqlite3
 
 
-def drop_filename(path):
-    import os
-    return os.path.dirname(path)
+# def drop_filename(path):
+#     import os
+#     return os.path.dirname(path)
 
 
 class ImageMetadataOverview:
@@ -12,19 +12,26 @@ class ImageMetadataOverview:
     def get_overview(conn):
         c = conn.cursor()
 
-        conn.create_function("drop_filename", 1, drop_filename)
-        qPaths = f"""
-        SELECT drop_filename(path) AS set_path, COUNT(*) AS image_count
-        FROM image_metadata
-        GROUP BY set_path
-        ORDER BY set_path
-        """
-        c.execute(qPaths)
-        rows = c.fetchall()
-        paths = [OverviewPath(path=row[0], count=row[1], image_id=ImageMetadata.get_id_by_path(conn, row[0])) for row in rows]
-        images = [ImageMetadata.get_by_id(conn, p.image_id) for p in paths]
+        # conn.create_function("drop_filename", 1, drop_filename)
 
-        return paths, images
+        c.execute(f"select id, path, study_type from {ImageMetadata.TABLE_NAME} group by path order by study_type ")
+
+        rows = c.fetchall()
+        images = [ImageMetadata.get_by_id(conn, row[0]) for row in rows]
+        return images
+
+        # qPaths = f"""
+        # SELECT drop_filename(path) AS set_path, COUNT(*) AS image_count
+        # FROM image_metadata
+        # GROUP BY set_path
+        # ORDER BY set_path
+        # """
+        # c.execute(qPaths)
+        # rows = c.fetchall()
+        # paths = [OverviewPath(path=row[0], count=row[1], image_id=ImageMetadata.get_id_by_path(conn, row[0])) for row in rows]
+        # images = [ImageMetadata.get_by_id(conn, p.image_id) for p in paths]
+        #
+        # return paths, images
 
 
 class OverviewPath:

@@ -2,6 +2,10 @@
 <head>
   <title>Image Directories</title>
   <style>
+    body {
+      background-color: #7a7676;
+    }
+
     .directory {
       margin-bottom: 20px;
       display: flex;
@@ -24,12 +28,11 @@
 </head>
 <body>
   <h1>Image Directories</h1>
-  {% for i in path_range %}
+  {% for img in images %}
     <div class="directory">
-      <img src="/thumb/{{ paths[i].image_id }}.jpg" alt="thumbnail">
+      <img src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
       <div>
-        <h4>{{ paths[i].path }} <a href="/study-image/{{ paths[i].image_id }}?time-planned=120">open id:{{ paths[i].image_id }}</a></h4>
-        <p>{{ paths[i].count }} images</p>
+        <h4>{{ img.path }} <a href="/study-image/{{ img.image_id }}?time-planned=120">open id:{{ img.image_id }}</a></h4>
       </div>
     </div>
   {% endfor %}
