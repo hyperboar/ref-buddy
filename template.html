@@ -12,7 +12,7 @@
 	<div class="modal">
         <img class="modal-bg" src="/image/$image_id" alt="$image_id:$path">
         <div class="modal-img-container">
-            <img class="modal-img" src="/image/$image_id" alt="$image_id:$path">
+            <img class="modal-img" src="/image/$image_id" alt="$image_id:$path" tabindex="0">
             <button class="modal-button-prev"><</button>
             <button class="modal-button-next">></button>
         </div>
@@ -91,16 +91,16 @@
     </script>
 
     <script>
-        let list = document.getElementById("source-type")
+        let list = document.getElementById('source-type')
         list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
 
-        list = document.getElementById("difficulty")
+        list = document.getElementById('difficulty')
         list.options[parseInt(list.getAttribute('value'))].setAttribute('selected', 'selected')
 
 
         window.onload = function()
         {
-            console.log("Page Loaded!")
+            console.log('Page Loaded!')
 
             let imgParams = new ImgParams('image-id', 'facing', 'source-type', 'same-folder', 'difficulty', 'time-planned', 'is-fav')
 
@@ -115,33 +115,33 @@
                 const domain = `$${curUrl[0]}//$${curUrl[2]}`;
                 const url = `$${domain}/study-random?$${curParams}`;
 
-                const prevParams = document.getElementById("prev").getAttribute("prev-params");
+                const prevParams = document.getElementById('prev').getAttribute('prev-params');
                 history.replaceState(null, null, `/study-image/$image_id?$${prevParams}`);
                 window.location.href = url;
             }
-            const nextButton = document.getElementById("next");
-            const nextButtonSmall = document.querySelector(".modal-button-next")
-            nextButton.addEventListener("click", onClickNext);
-            nextButtonSmall.addEventListener("click", onClickNext);
+            const nextButton = document.getElementById('next');
+            const nextButtonSmall = document.querySelector('.modal-button-next')
+            nextButton.addEventListener('click', onClickNext);
+            nextButtonSmall.addEventListener('click', onClickNext);
 
             // prev
             const onClickPrev = function ()
             {
                 window.history.back()
             }
-            const prevButton = document.getElementById("prev");
-            const prevButtonSmall = document.querySelector(".modal-button-prev");
-            prevButton.setAttribute("prev-params", imgParams.getParamsAsGET())
-            prevButtonSmall.setAttribute("prev-params", imgParams.getParamsAsGET())
-            prevButton.addEventListener("click", onClickPrev);
-            prevButtonSmall.addEventListener("click", onClickPrev);
+            const prevButton = document.getElementById('prev');
+            const prevButtonSmall = document.querySelector('.modal-button-prev');
+            prevButton.setAttribute('prev-params', imgParams.getParamsAsGET())
+            prevButtonSmall.setAttribute('prev-params', imgParams.getParamsAsGET())
+            prevButton.addEventListener('click', onClickPrev);
+            prevButtonSmall.addEventListener('click', onClickPrev);
 
             //fab is-fav
-            const favButton = document.getElementById("is-fav");
-            if (favButton.value === "1") {
+            const favButton = document.getElementById('is-fav');
+            if (favButton.value === '1') {
                 console.log(favButton.value)
-                favButton.classList.add("on") }
-            favButton.addEventListener("click", function ()
+                favButton.classList.add('on') }
+            favButton.addEventListener('click', function ()
             {
                 let val = (parseInt(favButton.value) + 1) % 2;
 
@@ -150,8 +150,8 @@
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
 
-                        if (val === 0) {favButton.classList.remove("on")}
-                        else favButton.classList.add("on")
+                        if (val === 0) {favButton.classList.remove('on')}
+                        else favButton.classList.add('on')
                         
                         favButton.value = val;
                         console.log(favButton.value)
@@ -164,23 +164,38 @@
             });
 
             // study timer
-            const timer = new StudyTimer($timer, 'time-current', "time-planned")
+            const timer = new StudyTimer($timer, 'time-current', 'time-planned')
 
-            const timerButton = document.getElementById("timer-start");
-            timerButton.addEventListener("click", function ()
-            {
+            const onTimerStart = function () {
                 timer.start()
-                timerButton.textContent = "Alga Only";
-                timerButton.setAttribute("disabled", "true")
+                timerButton.textContent = 'Alga Only';
+                timerButton.setAttribute('disabled', 'true')
 
                 fetch(`/set-image-last-viewed?$${imgParams.getImgIdAsGET()}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
-                        console.log("Last Viewed time updated!")
+                        console.log('Last Viewed time updated!')
                     })
                     .catch(error => {
                         console.error('There was a problem with the fetch operation:', error);
                     });
+            }
+            const timerButton = document.getElementById('timer-start');
+            timerButton.addEventListener('click', onTimerStart);
+
+            const toggleSameFolder = function()
+            {
+                const sf = document.getElementById('same-folder');
+                sf.checked = !sf.checked;
+            }
+
+            document.addEventListener('keydown', function(e)
+            {
+                if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
+                if (e.keyCode === 37) { onClickPrev(); e.preventDefault(); } // <-
+                if (e.keyCode === 39) { onClickNext(); e.preventDefault(); } // ->
+                if (e.keyCode === 13) { onTimerStart(); e.preventDefault(); } // enter
+                if (e.keyCode === 32) { toggleSameFolder(); e.preventDefault(); } // space
             });
         }
     </script>
