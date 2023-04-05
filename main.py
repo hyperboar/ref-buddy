@@ -5,6 +5,8 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 
+from export_frames_window import ExportFramesWindow
+
 from image_metadata_importer import ImageMetadataImporter
 from image_metadata import ImageMetadata
 from maintenance import generate_thumbs
@@ -56,6 +58,7 @@ class MainWindow(tk.Frame):
         # create file menu
         file_menu = tk.Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="Import images", command=self.import_images)
+        file_menu.add_command(label="Export frames from file", command=self.open_ffmpeg_window)
         file_menu.add_command(label="Exit", command=root.quit)
 
         self.menu_bar.add_cascade(label="File", menu=file_menu)
@@ -75,6 +78,9 @@ class MainWindow(tk.Frame):
             importer = ImageMetadataImporter(Env.DB_FILE)
             importer.import_metadata(folder_path)
             messagebox.showinfo("Success", "Images imported successfully.")
+
+    def open_ffmpeg_window(self):
+        self.ffmpeg = ExportFramesWindow(self.master)
 
     def launch_server(self):
         subprocess.Popen(["python", "server.py"], cwd=os.getcwd())
