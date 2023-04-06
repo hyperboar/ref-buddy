@@ -11,9 +11,9 @@
 </div>
 {% for img in images %}
     <div class="directory">
-        <img src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
+        <img class="thumb" src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
         <div>
-            <h4>[{{ img.study_type }}] <b>{{ img.path }}</b> <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120">open
+            <h4>[{{ img.study_type }}] <b>{{ img.path }}</b> <a href="/folder/{{ img.path_id }}"><img class="dir-link" src="/static/link.png"></a> <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120">open
                 id:{{ img.image_id }}</a></h4>
         </div>
     </div>

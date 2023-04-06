@@ -3,9 +3,22 @@ body
     background-color: #7a7676;
 }
 
+.header
+{
+    display: flex;
+    flex-direction: row;
+    height: 80px;
+    align-items: center;
+}
+
+.header h1, a, p
+{
+    margin-left: 10px;
+}
+
 /* Flex container */
 .gallery {
-    width: 50%;
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;

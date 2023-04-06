@@ -28,10 +28,18 @@ body {
     gap: 10px;
 }
 
-.directory img {
+.directory .thumb {
     width: 200px;
     max-height: 80px;
     object-fit: contain;
+}
+
+.directory .dir-link
+{
+    width: 15px;
+    height: 15px;
+    background-size: cover;
+    background-image: url("/static/link.png");
 }
 
 .directory h4 {
