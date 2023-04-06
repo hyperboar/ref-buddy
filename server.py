@@ -63,7 +63,15 @@ def study_image(image_id):
     metadata = ImageMetadata.get_by_id(db, image_id)
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
-    return render_template_string(metadata.to_html(60))
+
+    args = request.args
+    match args.get('time-planned'):
+        case None:
+            timer = 60
+        case s:
+            timer = int(s)
+
+    return render_template('tpl_image.html', image=metadata, timer=timer)
 
 @app.route('/study-random')
 def study_random():
@@ -73,14 +81,19 @@ def study_random():
     prev_image_id = int(args.get('image-id'))
     difficulty = int(args.get('difficulty'))
     facing = args.get('facing')
-    timer = int(args.get('time-planned'))
+
+    match args.get('time-planned'):
+        case None:
+            timer = 120
+        case s:
+            timer = int(s)
 
     db = sqlite3.connect(Env.DB_FILE)
     metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id)
     if metadata is None:
         return f'Error: No images found with facing "{facing}"'
 
-    return render_template_string(metadata.to_html(timer))
+    return render_template('tpl_image.html', image=metadata, timer=timer)
 
 @app.route('/set-image-fav')
 def set_image_fav():

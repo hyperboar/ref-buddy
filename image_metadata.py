@@ -229,7 +229,6 @@ class ImageMetadata:
 
         return images[0].study_type, row[0], images
 
-
     @staticmethod
     def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = 1) -> 'ImageMetadata':
         c = conn.cursor()
@@ -244,7 +243,6 @@ class ImageMetadata:
         if row is None:
             return None
         return ImageMetadata.from_full_row(row)
-
 
     @staticmethod
     def set_image_fav(conn, image_id: int, is_fav: int):
@@ -274,23 +272,6 @@ class ImageMetadata:
         return c.fetchall()
 
     # endregion Convenience
-
-    def to_html(self, timer=0) -> 'str':
-        print("self.is_fav " + str(self.is_fav))
-        with open('template.html', 'r') as f:
-            template = Template(f.read())
-        return template.substitute(
-            image_id=self.image_id,
-            path=self.path,
-            path_id=self.path_id,
-            count=self.count,
-            time_spent=self.time_spent,
-            study_type=self.study_type_id,
-            facing=self.facing,
-            timer=timer,
-            difficulty=self.difficulty,
-            is_fav=self.is_fav
-        )
 
     def __str__(self):
         return f"{self.image_id}({self.last_viewed}): {self.path} fav({self.is_fav})"

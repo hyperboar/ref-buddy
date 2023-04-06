@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Image ($image_id)</title>
+	<title>Image ({{ image.image_id }})</title>
     <link rel="stylesheet" href="/static/style.css">
     <script type="text/javascript" src="/static/img_params.js"></script>
     <script type="text/javascript" src="/static/study_timer.js"></script>
 </head>
 <body>
-    <div style="display: none" id="image-id" >$image_id</div>
-    <div style="display: none">$path</div>
+    <div style="display: none" id="image-id" >{{ image.image_id }}</div>
+    <div style="display: none">{{ image.path }}</div>
 	<div class="modal">
-        <img class="modal-bg" src="/image/$image_id" alt="$image_id:$path">
+        <img class="modal-bg" src="/image/{{ image.image_id }}" alt="{{ image.image_id }}:{{ image.path }}">
         <div class="modal-img-container">
-            <img class="modal-img" src="/image/$image_id" alt="$image_id:$path" tabindex="0">
+            <img class="modal-img" src="/image/{{ image.image_id }}" alt="{{ image.image_id }}:{{ image.path }}" tabindex="0">
             <button class="modal-button-prev"><</button>
             <button class="modal-button-next">></button>
         </div>
@@ -25,14 +25,14 @@
             </div>
             <div class="row">
                 <span>View: </span>
-                <select id="facing" value="$facing">
+                <select id="facing" value="{{ image.facing }}">
                     <option value="front">Front</option>
                     <option value="side">Side</option>
                     <option value="back">Back</option>
                 </select>
                 <span class="space"/>
                 <span>Source: </span>
-                <select id="source-type" value="$study_type">
+                <select id="source-type" value="{{ image.study_type_id }}">
                     <option value="1">Academic</option>
                     <option value="2">Pron</option>
                     <option value="3">Artist</option>
@@ -40,9 +40,9 @@
                 </select>
             </div>
             <div class="row">
-                <button class="fav" id="is-fav" value="$is_fav"></button>
+                <button class="fav" id="is-fav" value="{{ image.is_fav }}"></button>
                 <span>Diff: </span>
-                <select id="difficulty" value="$difficulty">
+                <select id="difficulty" value="{{ image.difficulty }}">
                     <option value="0">Beginner</option>
                     <option style="display: none" value="0">Beginner</option>
                     <option style="display: none" value="1">Beginner</option>
@@ -58,7 +58,7 @@
                 </select>
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="true">
-                <a href="/folder/${path_id}"><img class="dir-link" src="/static/link.png"></a>
+                <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
             </div>
 <!--            <div id="caption">-->
 <!--                <ul>-->
@@ -78,7 +78,7 @@
 
     <script>
     function incrementCount(imageId) {
-        fetch(`/increment_count/$${imageId}`)
+        fetch(`/increment_count/${imageId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -113,11 +113,11 @@
             {
                 const curParams = imgParams.getParamsAsGET();
                 const curUrl = window.location.href.split('/');
-                const domain = `$${curUrl[0]}//$${curUrl[2]}`;
-                const url = `$${domain}/study-random?$${curParams}`;
+                const domain = `${curUrl[0]}//${curUrl[2]}`;
+                const url = `${domain}/study-random?${curParams}`;
 
                 const prevParams = document.getElementById('prev').getAttribute('prev-params');
-                history.replaceState(null, null, `/study-image/$image_id?$${prevParams}`);
+                history.replaceState(null, null, `/study-image/$image_id?${prevParams}`);
                 window.location.href = url;
             }
             const nextButton = document.getElementById('next');
@@ -147,7 +147,7 @@
                 let val = (parseInt(favButton.value) + 1) % 2;
 
                 favButton.classList.add('loading-fav')
-                fetch(`/set-image-fav?$${imgParams.getParamsFav(val)}`)
+                fetch(`/set-image-fav?${imgParams.getParamsFav(val)}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
 
@@ -165,14 +165,14 @@
             });
 
             // study timer
-            const timer = new StudyTimer($timer, 'time-current', 'time-planned')
+            const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')
 
             const onTimerStart = function () {
                 timer.start()
                 timerButton.textContent = 'Alga Only';
                 timerButton.setAttribute('disabled', 'true')
 
-                fetch(`/set-image-last-viewed?$${imgParams.getImgIdAsGET()}`)
+                fetch(`/set-image-last-viewed?${imgParams.getImgIdAsGET()}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
                         console.log('Last Viewed time updated!')
