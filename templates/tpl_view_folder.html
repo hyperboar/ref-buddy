@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Favorites</title>
+    <link rel="stylesheet" href="/static/styles_gallery.css">
+</head>
+<body>
+<div class="header">
+<h1>Folder </h1>
+    <p>[{{ overview.study_type }}]</p><p>{{ overview.path }}</p>
+</div>
+<div class="gallery">
+    {% for image in images %}
+    <div class="thumbnail">
+        <a href="/study-image/{{ image.image_id }}">
+            <img src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
+        </a>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>

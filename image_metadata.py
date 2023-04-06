@@ -211,6 +211,26 @@ class ImageMetadata:
         return target[0]
 
     @staticmethod
+    def get_all_by_path_id(conn, path_id: int) -> '[ImageMetadata]':
+        c = conn.cursor()
+
+        c.execute(f"select path from paths where id = ?", (path_id,))
+        row = c.fetchone()
+        if row is None:
+            return "", f"No path with id {path_id}", []
+
+        c.execute(f"{ImageMetadata.BASE_Q} WHERE im.path = ?", (path_id,))
+
+        rows = c.fetchall()
+        if len(rows) == 0:
+            return "", f"No images at path with id {path_id}", []
+
+        images = [ImageMetadata.from_full_row(row) for row in rows]
+
+        return images[0].study_type, row[0], images
+
+
+    @staticmethod
     def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = 1) -> 'ImageMetadata':
         c = conn.cursor()
         q_same_folder = ''

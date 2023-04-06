@@ -2,7 +2,7 @@ import sqlite3
 
 from flask import Flask, render_template_string, request, send_file, abort, send_from_directory, render_template
 from image_metadata import ImageMetadata
-from image_metadata_overview import ImageMetadataOverview
+from image_metadata_overview import ImageMetadataOverview, OverviewPath
 import os
 from datetime import datetime
 from Env import Env
@@ -18,16 +18,24 @@ def index():
     return render_template('tpl_index.html', images=images)
 
 @app.route('/favs')
-def favs():
+def view_favs():
     db = sqlite3.connect(Env.DB_FILE)
     images = ImageMetadata.get_favs(db)
     return render_template('tpl_favs.html', images=images)
 
 @app.route('/last')
-def last():
+def view_last():
     db = sqlite3.connect(Env.DB_FILE)
     images = ImageMetadata.get_last(db)
     return render_template('tpl_last.html', images=images)
+
+@app.route('/folder/<int:path_id>')
+def view_folder(path_id):
+    db = sqlite3.connect(Env.DB_FILE)
+    study_type, path, images = ImageMetadata.get_all_by_path_id(db, path_id)
+    overview = OverviewPath.from_image_metadata(images[0])
+
+    return render_template('tpl_view_folder.html', images=images, overview=overview)
 
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):
