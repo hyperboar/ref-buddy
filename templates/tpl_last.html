@@ -2,39 +2,10 @@
 <html>
 <head>
     <title>Last Viewed</title>
-    <style>
-        body
-        {
-            background-color: #7a7676;
-        }
-
-        /* Flex container */
-        .gallery {
-            width: 50%;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Flex item */
-        .gallery .thumbnail {
-            max-width: 100%;
-            height: auto;
-            object-fit: cover;
-        }
-
-        /* CSS grid for responsive layout */
-        @media (min-width: 768px) {
-            .gallery {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles_gallery.css">
 </head>
 <body>
+<h2>Latest study</h2>
 <div class="gallery">
     {% for image in images %}
     <div class="thumbnail">

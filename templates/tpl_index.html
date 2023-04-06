@@ -1,45 +1,14 @@
 <html>
 <head>
     <title>Gallery overview</title>
-    <style>
-        body {
-            background-color: #7a7676;
-        }
-
-        .directory {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .directory img {
-            width: 200px;
-            max-height: 80px;
-            object-fit: contain;
-        }
-
-        .directory h4 {
-            margin: 0;
-            font-style: normal;
-            font-weight: normal;
-        }
-
-        .directory p {
-            margin: 0;
-            font-size: 14px;
-        }
-
-        .directory a:visited, .directory a {
-            color: #2d2c2c;
-        }
-        .directory a:hover {
-            color: #422b56;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles_overview.css">
 </head>
 <body>
-<h1>Image Directories</h1>
+<div class="header">
+<h1>Overview</h1>
+    <a href="/favs">Favourites</a>
+    <a href="/last">Last study</a>
+</div>
 {% for img in images %}
     <div class="directory">
         <img src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">

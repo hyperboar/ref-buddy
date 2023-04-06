@@ -1,0 +1,54 @@
+body {
+    background-color: #7a7676;
+}
+
+.header
+{
+    display: flex;
+    flex-direction: row;
+    height: 80px;
+    align-items: center;
+}
+
+.header h1, a
+{
+    margin-left: 10px;
+}
+
+.header h1
+{
+    margin-right: 20px;
+}
+
+
+.directory {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.directory img {
+    width: 200px;
+    max-height: 80px;
+    object-fit: contain;
+}
+
+.directory h4 {
+    margin: 0;
+    font-style: normal;
+    font-weight: normal;
+}
+
+.directory p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.directory a:visited, .directory a {
+    color: #2d2c2c;
+}
+
+.directory a:hover {
+    color: #422b56;
+}
