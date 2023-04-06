@@ -282,6 +282,7 @@ class ImageMetadata:
         return template.substitute(
             image_id=self.image_id,
             path=self.path,
+            path_id=self.path_id,
             count=self.count,
             time_spent=self.time_spent,
             study_type=self.study_type_id,

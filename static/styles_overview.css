@@ -38,8 +38,6 @@ body {
 {
     width: 15px;
     height: 15px;
-    background-size: cover;
-    background-image: url("/static/link.png");
 }
 
 .directory h4 {

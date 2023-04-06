@@ -80,7 +80,11 @@ body {
     left: -43%;
 }
 
-
+.dir-link
+{
+    width: 15px;
+    height: 15px;
+}
 
 
 .modal-controls {
