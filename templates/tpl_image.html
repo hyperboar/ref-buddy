@@ -33,10 +33,9 @@
                 <span class="space"/>
                 <span>Source: </span>
                 <select id="source-type" value="{{ image.study_type_id }}">
-                    <option value="1">Academic</option>
-                    <option value="2">Pron</option>
-                    <option value="3">Artist</option>
-                    <option value="4">The Bits</option>
+                    {% for st in study_types %}
+                    <option value="{{ st[0] }}">{{ st[1] }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="row">
