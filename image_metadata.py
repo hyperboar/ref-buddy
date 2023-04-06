@@ -79,6 +79,7 @@ class ImageMetadata:
             INSERT INTO study_types (type) VALUES ('pron');
             INSERT INTO study_types (type) VALUES ('artists');
             INSERT INTO study_types (type) VALUES ('the_bits');
+            insert into study_types (type) values ('video')
             
             CREATE TABLE IF NOT EXISTS poses (
                 id INTEGER PRIMARY KEY,
