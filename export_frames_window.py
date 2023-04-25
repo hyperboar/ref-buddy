@@ -46,7 +46,7 @@ class ExportFramesWindow(tk.Toplevel):
 
     def browse_file(self):
         filename = filedialog.askopenfilename(initialdir="", title="Select a File",
-                                              filetypes=[("Sequences", "*.gif *.webp *.mp4"), ("All files", "*.*")])
+                                              filetypes=[("Sequences", "*.gif *.webp *.webm *.mp4 *.avi *.mov"), ("All files", "*.*")])
         self.file_entry.delete(0, tk.END)
         self.file_entry.insert(0, filename)
         self.focus_force()
@@ -71,10 +71,7 @@ class ExportFramesWindow(tk.Toplevel):
             case ".webp":
                 self.split_webp(input_file, os.path.join(new_dir, filename))
                 pass
-            case ".gif":
-                self.split_ffmpeg(input_file, os.path.join(new_dir, filename))
-                pass
-            case ".mp4":
+            case ".webm" | ".gif" | ".mp4" | ".avi" | ".mov":
                 self.split_ffmpeg(input_file, os.path.join(new_dir, filename))
                 pass
 
