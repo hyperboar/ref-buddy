@@ -4,13 +4,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 import subprocess
 from Env import Env
-
-# we might need to install ImageMagic first https://imagemagick.org/script/download.php
-IMAGEMAGIC_URL = "https://imagemagick.org/script/download.php"
-try:
-    from wand.image import Image
-except ImportError:
-    Image = None
+from PIL import Image
 
 
 class ExportFramesWindow(tk.Toplevel):
@@ -27,7 +21,7 @@ class ExportFramesWindow(tk.Toplevel):
         self.file_entry = tk.Entry(self, width=50)
         self.file_button = tk.Button(self, text="Browse", command=self.browse_file)
 
-        self.fps_label = tk.Label(self, text="FPS (ffmpeg target/Webp to skip):")
+        self.fps_label = tk.Label(self, text="FPS (ffmpeg target/Webp every Nth):")
         self.fps_entry = tk.Entry(self, width=10, validate="key")
         self.fps_entry.config(validatecommand=(self.fps_entry.register(self.validate_int), "%P"))
         self.fps_entry.insert(0, Env.DEFAULT_FPS_SPLIT)
@@ -68,26 +62,21 @@ class ExportFramesWindow(tk.Toplevel):
         os.mkdir(new_dir)
 
         match ext:
-            case ".webp":
-                self.split_webp(input_file, os.path.join(new_dir, filename))
+            case ".webp" | ".gif":
+                self.split_images(input_file, os.path.join(new_dir, filename))
                 pass
-            case ".webm" | ".gif" | ".mp4" | ".avi" | ".mov":
+            case ".webm" | ".mp4" | ".avi" | ".mov":
                 self.split_ffmpeg(input_file, os.path.join(new_dir, filename))
                 pass
 
-    def split_webp(self, input_file, output_file):
-
-        if Image is None:
-            messagebox.showerror("ImageMagic is not installed.", f"To export .webp files you need to install ImageMagic libs first. Use this link {IMAGEMAGIC_URL}")
-            return
-
-        with Image(filename=input_file) as img:
-            skip = int(self.fps_entry.get())
-            for i, frame in enumerate(img.sequence):
-                with Image(frame) as f:
-                    if (i % skip) != 0:
-                        continue
-                    f.save(filename=f'{os.path.join(output_file)}_{i}.png')
+    def split_images(self, input_file, output_file):
+        with Image.open(input_file) as im:
+            skip = int(self.fps_entry.get()) - 1
+            for i in range(im.n_frames):
+                if skip > 0 and (i % skip) != 0:
+                    continue
+                im.seek(i)
+                im.save(f'{os.path.join(output_file)}_{i:04}.png')
 
     def split_ffmpeg(self, input_file, filename):
 
