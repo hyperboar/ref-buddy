@@ -201,8 +201,8 @@
 
 
             // magnification
-            const modalImage = document.querySelector('.modal-img');
-            const magnification = document.querySelector('.magnification');
+            const modalImage = document.querySelector('.modal-img')
+            const magnification = document.querySelector('.magnification')
             let mhalf = {x:0, y:0}
             let msize = {x:0, y:0}
             let msizeScaled = {x:0, y:0}
@@ -216,25 +216,21 @@
             modalImage.addEventListener('wheel', function handleScroll(event)
             {
                 // Prevent the default scrolling behavior
-                event.preventDefault();
+                event.preventDefault()
 
                 // Determine the direction of the scroll
-                const delta = Math.sign(event.deltaY); // -1 for scrolling up, 1 for scrolling down
+                const delta = Math.sign(event.deltaY) // -1 for scrolling up, 1 for scrolling down
 
                 // Scrolling up
-                if (delta === -1)
-                {
-                    scaleStep--
-                }
+                if (delta === -1) { scaleStep-- }
                 // Scrolling down
-                else if (delta === 1)
-                {
-                    scaleStep++
-                }
+                else if (delta === 1) { scaleStep++ }
+
+                scaleStep = Math.max(scaleStep, 1)
 
                 scale = 1 + scaleAdd * scaleStep
 
-                isZoomed = true;
+                isZoomed = true
 
                 mpos.x = modalImage.getBoundingClientRect().left
                 mpos.y = modalImage.getBoundingClientRect().top
@@ -245,16 +241,19 @@
                 mhalf.x = msize.x * 0.5
                 mhalf.y = msize.y * 0.5
 
-                magnification.style.display = 'block';
-                magnification.style.width  = `${msize.x}px`;
-                magnification.style.height = `${msize.y}px`;
+                modalImage.classList.add('modal-img-darken')
+                magnification.style.display = 'block'
+                magnification.style.width  = `${msize.x}px`
+                magnification.style.height = `${msize.y}px`
 
-                magnification.style.backgroundImage = `url('${modalImage.src}')`;
-                magnification.style.backgroundSize = `${100 * scale}% auto`;
+                magnification.style.backgroundImage = `url('${modalImage.src}')`
+                magnification.style.backgroundSize = `${100 * scale}% auto`
 
                 // Set the magnification container position
-                magnification.style.left = `${mpos.x}px`;
-                magnification.style.top = `${mpos.y}px`;
+                magnification.style.left = `${mpos.x}px`
+                magnification.style.top = `${mpos.y}px`
+
+                updateMagnifiedOffset(event.clientX, event.clientY)
             });
 
             modalImage.addEventListener('mouseup', function ()
@@ -262,9 +261,10 @@
                 if (!isZoomed) { return; }
 
                 isZoomed = false;
-                magnification.style.display = 'none';
+                modalImage.classList.remove('modal-img-darken')
+                magnification.style.display = 'none'
 
-                scaleStep = 0
+                scaleStep = 1
                 scale = 1 + scaleAdd * scaleStep
             });
 
@@ -272,23 +272,26 @@
             {
                 if (!isZoomed) { return }
 
-                // Calculate the position within the image
-                let x = event.clientX - mpos.x;
-                let y = event.clientY - mpos.y;
-                // Calculate the position of the magnification container
-                x = Math.min(Math.max(x, 0), msize.x) - mhalf.x;
-                y = Math.min(Math.max(y, 0), msize.y) - mhalf.y;
-                x /= msize.x; y /= msize.y
+                updateMagnifiedOffset(event.clientX, event.clientY)
+            });
 
-                const dx = x ; const dy = y
+            function updateMagnifiedOffset(cx, cy)
+            {
+                // Calculate the position within the image
+                let x = cx - mpos.x
+                let y = cy - mpos.y
+                // clamp 0 to msize
+                x = Math.min(Math.max(x, 0), msize.x) - mhalf.x
+                y = Math.min(Math.max(y, 0), msize.y) - mhalf.y
+                x /= msize.x; y /= msize.y
 
                 x *= msizeScaled.x; y *= msizeScaled.y
 
                 x -= (msizeScaled.x - msize.x) * 0.5
                 y -= (msizeScaled.y - msize.y) * 0.5
 
-                magnification.style.backgroundPosition = `${x}px ${y}px`;
-            });
+                magnification.style.backgroundPosition = `${x}px ${y}px`
+            }
         }
     </script>
 </body>
