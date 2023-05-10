@@ -8,7 +8,6 @@ from tkinter import messagebox
 from export_frames_window import ExportFramesWindow
 
 from image_metadata_importer import ImageMetadataImporter
-from image_metadata import ImageMetadata
 from maintenance import generate_thumbs
 from Env import Env
 
@@ -33,19 +32,14 @@ class MainWindow(tk.Frame):
             # self.quit()
 
     def create_widgets(self):
-        self.import_button = tk.Button(self)
-        self.import_button["text"] = "Import Images"
-        self.import_button["command"] = self.import_images
-        self.import_button.pack(side="top")
-
         self.server_button = tk.Button(self)
         self.server_button["text"] = "Launch Server"
         self.server_button["command"] = self.launch_server
-        self.server_button.pack(side="top")
+        self.server_button.pack(side="top", pady=20)
 
         self.link = tk.Label(self, text="Go to gallery")
         self.link["state"] = "disabled"
-        self.link.pack(pady=20)
+        self.link.pack(pady=10)
         self.link.bind("<Button-1>", self.go_to_gallery)
         self.link.config(fg="blue", cursor="hand2", font=("Arial", 12, "underline"))
 
