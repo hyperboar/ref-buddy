@@ -58,19 +58,24 @@ body {
     /*border: calc(100% * min(100vw, 100vh)) solid transparent; !* fallback border width *!*/
 }
 
-.modal-img-darken {
+.modal-img-darken
+{
     filter: brightness(50%); /* Adjust the percentage value for desired darkness */
-  }
+}
 
-.magnification {
+.magnification
+{
     pointer-events: none;
     position: absolute;
-    left: 0px;
-    top: 0px;
-    /*width: 300px; !* Adjust the size of the magnification container as needed *!*/
-    /*height: 300px;*/
+    left: 0;
+    top: 0;
     background-repeat: no-repeat;
     display: none;
+}
+
+.modal-img, .magnification
+{
+    cursor: url("/static/cursor-zoom.png") , auto;
 }
 
 .modal-button-prev, .modal-button-next
