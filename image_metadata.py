@@ -1,7 +1,5 @@
 import os
 import sqlite3
-import random
-from string import Template
 
 
 class ImageMetadata:
@@ -10,7 +8,7 @@ class ImageMetadata:
     BASE_Q = f"SELECT im.*, st.type AS study_type, pr.path AS path_full FROM image_metadata AS im JOIN study_types AS st ON im.study_type = st.id JOIN paths AS pr ON im.path = pr.id"
 
     def __init__(self, path, filename=None, count=0, time_spent=0, facing=0, last_viewed=0, idx=-1, diff=0, study_type=None, is_fav=0,
-                 path_id=0, study_type_id=0):
+                 path_id=0, study_type_id=0, image_hash='', imported_at=0):
         self.image_id = idx
         self.path = os.path.join(study_type, path, filename)
         self.path_id = path_id
@@ -23,6 +21,9 @@ class ImageMetadata:
         self.difficulty = diff
         self.facing = facing
         self.time_spent = time_spent
+
+        self.image_hash = image_hash
+        self.imported_at = imported_at
 
     @staticmethod
     def static_initialize(conn):
@@ -60,6 +61,8 @@ class ImageMetadata:
                 difficulty INTEGER DEFAULT 10,
                 fav INTEGER DEFAULT 0,
                 lost INTEGER DEFAULT 0,
+                imported_at DATETIME,
+                hash TEXT,
                 FOREIGN KEY (path) REFERENCES paths (id),
                 FOREIGN KEY (study_type) REFERENCES study_type (id),
                 FOREIGN KEY (facing) REFERENCES facings (id)
@@ -168,7 +171,9 @@ class ImageMetadata:
             count=row[f['count']],
             time_spent=row[f['time_spent']],
             diff=row[f['difficulty']],
-            facing=row[f['facing']])
+            facing=row[f['facing']],
+            image_hash=row[f['hash']],
+            imported_at=row[f['imported_at']])
 
     @staticmethod
     def get_favs(conn, count: int = 10000, start: int = 0):
@@ -271,6 +276,13 @@ class ImageMetadata:
         c = conn.cursor()
         c.execute("select * from study_types")
         return c.fetchall()
+
+    def mark_as_lost(self, conn, auto_commit=True):
+        c = conn.cursor()
+        c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET lost = 1 WHERE id = {self.image_id}')
+
+        if auto_commit:
+            conn.commit()
 
     # endregion Convenience
 

@@ -1,3 +1,4 @@
+import hashlib
 import os
 import sys
 import sqlite3
@@ -138,6 +139,55 @@ def generate_thumbs():
     print(f"\rProgress: {int(i / max_i * 100.)}%", end='')
     # Close database connection
     conn.close()
+
+
+def rehash_images():
+    conn = sqlite3.connect(Env.DB_FILE)
+
+    ImageMetadata.static_initialize(conn)
+
+    c = conn.cursor()
+    # rows count
+    c.execute(f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}")
+
+    rows_max = c.fetchone()[0]
+    rows_step = 500
+    rows_start = 0
+
+    while rows_start < rows_max:
+        c.execute(f"{ImageMetadata.BASE_Q} LIMIT {rows_step} OFFSET {rows_start}")
+        images = [ImageMetadata.from_full_row(row) for row in c.fetchall()]
+
+        for image in images:
+            print(f"\r{int(rows_start/rows_max * 100)}%... Hashing {image.image_id} {image.path}", end="")
+
+            image_path = os.path.join(Env.IMAGES_PATH, image.path)
+
+            if not os.path.exists(image_path):
+                image.mark_as_lost(conn, auto_commit=False)
+                continue
+
+            with open(image_path, 'rb') as file:
+                image_data = file.read()
+            image_hash = hashlib.sha1(image_data).hexdigest()
+
+            c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET hash = "{image_hash}" WHERE id = {image.image_id}')
+
+
+        rows_start += rows_step
+
+    conn.commit()
+    conn.close()
+
+    print("\r100% Rehashing complete", end="")
+
+    # display duplicates
+    # SELECT pa.path, A.filename, A.lost, pb.path, B.filename
+    # FROM image_metadata AS A
+    # JOIN image_metadata AS B ON A.hash = B.hash
+    # JOIN paths as pa ON A.path = pa.id
+    # JOIN paths as pb ON B.path = pb.id
+    # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
 if __name__ == "__main__":

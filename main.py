@@ -8,7 +8,7 @@ from tkinter import messagebox
 from export_frames_window import ExportFramesWindow
 
 from image_metadata_importer import ImageMetadataImporter
-from maintenance import generate_thumbs
+from maintenance import generate_thumbs, rehash_images
 from Env import Env
 
 
@@ -52,16 +52,18 @@ class MainWindow(tk.Frame):
         # create file menu
         file_menu = tk.Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="Import images", command=self.import_images)
-        file_menu.add_command(label="Export frames from file", command=self.open_ffmpeg_window)
         file_menu.add_command(label="Exit", command=root.quit)
 
         self.menu_bar.add_cascade(label="File", menu=file_menu)
 
         # create maintenance menu
-        maintenance_menu = tk.Menu(self.menu_bar, tearoff=0)
-        maintenance_menu.add_command(label="Generate thumbs", command=generate_thumbs)
+        tools_menu = tk.Menu(self.menu_bar, tearoff=0)
+        tools_menu.add_command(label="Export frames from file", command=self.open_ffmpeg_window)
+        tools_menu.add_separator()
+        tools_menu.add_command(label="Generate thumbs", command=generate_thumbs)
+        tools_menu.add_command(label="Rehash all images", command=rehash_images)
 
-        self.menu_bar.add_cascade(label="Maintenance", menu=maintenance_menu)
+        self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
 
         self.master.config(menu=self.menu_bar)
 
