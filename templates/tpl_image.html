@@ -117,7 +117,7 @@
                 const url = `${domain}/study-random?${curParams}`;
 
                 const prevParams = document.getElementById('prev').getAttribute('prev-params');
-                history.replaceState(null, null, `/study-image/$image_id?${prevParams}`);
+                history.replaceState(null, null, `/study-image/{{ image.image_id }}?${prevParams}`);
                 window.location.href = url;
             }
             const nextButton = document.getElementById('next');
@@ -222,9 +222,9 @@
                 const delta = Math.sign(event.deltaY) // -1 for scrolling up, 1 for scrolling down
 
                 // Scrolling up
-                if (delta === -1) { scaleStep-- }
+                if (delta === 1) { scaleStep-- }
                 // Scrolling down
-                else if (delta === 1) { scaleStep++ }
+                else if (delta === -1) { scaleStep++ }
 
                 scaleStep = Math.max(scaleStep, 1)
 
