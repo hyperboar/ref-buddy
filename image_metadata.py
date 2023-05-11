@@ -110,7 +110,7 @@ class ImageMetadata:
     # region CRUD
 
     @staticmethod
-    def create(conn, path: str, study_types=None)-> 'ImageMetadata':
+    def create(conn, path: str, study_types=None) -> 'ImageMetadata':
         c = conn.cursor()
 
         dir = os.path.dirname(path)
@@ -134,8 +134,8 @@ class ImageMetadata:
 
         # print(f"inserting {(path_id, stype[0], file)} for path '{new_path}'")
         c.execute(f"""
-            INSERT INTO {ImageMetadata.TABLE_NAME} (path, study_type, filename)
-            VALUES (?, ?, ?)
+            INSERT INTO {ImageMetadata.TABLE_NAME} (path, study_type, filename, imported_at)
+            VALUES (?, ?, ?, DATETIME('now'))
         """, (path_id, stype[0], file))
         conn.commit()
         return c.lastrowid

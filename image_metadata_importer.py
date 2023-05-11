@@ -16,10 +16,13 @@ class ImageMetadataImporter:
         ImageMetadata.static_initialize(self.conn)
         sts = ImageMetadata.get_study_types(self.conn)
 
+        new_count = 0
+
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
             max_count = len(filenames)
-            print(f"Importing '{dir_path}'...")
+            msg_dir = f"Importing '{dir_path}'..."
+            print(f"\r{msg_dir}. {len(filenames)} files in this folder", end='')
             for file_name in filenames:
                 if file_name.endswith(formats):
                     file_path = os.path.join(dir_path, file_name)
@@ -28,15 +31,18 @@ class ImageMetadataImporter:
                         existing_metadata = ImageMetadata.get_by_path(self.conn, file_path)
                         if not existing_metadata:
                             count += 1
-                            print(f"\r({count}/{max_count}) New '{file_path}'", end='')
+                            new_count += 1
+                            print(f"\r{msg_dir} ({count}/{max_count}) New '{file_name}'", end='')
                             ImageMetadata.create(self.conn, file_path, sts)
                         else:
                             count += 1
-                            print(f"\r({count}/{max_count}) File exists '{file_path}'", end='')
+                            print(f"\r{msg_dir} ({count}/{max_count}) File exists '{file_name}'", end='')
                     except Exception as e:
                         print(f"Error processing  {file_path}: {sys.exc_info()[0]}")
                         raise
             print(f"")
+
+        print(f"\nImport completed! Found {new_count} new files.")
 
 
 if __name__ == '__main__':
