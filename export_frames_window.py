@@ -63,11 +63,14 @@ class ExportFramesWindow(tk.Toplevel):
 
         match ext:
             case ".webp" | ".gif":
+                print("Splitting image...")
                 self.split_images(input_file, os.path.join(new_dir, filename))
                 pass
             case ".webm" | ".mp4" | ".avi" | ".mov":
+                print("Splitting by ffmpeg...")
                 self.split_ffmpeg(input_file, os.path.join(new_dir, filename))
                 pass
+        print("Split completed.")
 
     def split_images(self, input_file, output_file):
         with Image.open(input_file) as im:
