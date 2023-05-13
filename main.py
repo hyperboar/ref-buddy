@@ -10,6 +10,7 @@ from export_frames_window import ExportFramesWindow
 from image_metadata_importer import ImageMetadataImporter
 from maintenance import generate_thumbs, rehash_images
 from Env import Env
+from rehash_dialog import RehashDialog
 
 
 class MainWindow(tk.Frame):
@@ -61,7 +62,7 @@ class MainWindow(tk.Frame):
         tools_menu.add_command(label="Export frames from file", command=self.open_ffmpeg_window)
         tools_menu.add_separator()
         tools_menu.add_command(label="Generate thumbs", command=generate_thumbs)
-        tools_menu.add_command(label="Rehash all images", command=rehash_images)
+        tools_menu.add_command(label="Rehash all images", command=self.rehash_options)
 
         self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
 
@@ -86,6 +87,20 @@ class MainWindow(tk.Frame):
     def go_to_gallery(self, test):
         print(test)
         webbrowser.open(self.gallery_url)
+
+    def rehash_options(self):
+        dialog = RehashDialog(root)
+        self.master.wait_window(dialog)
+        result = dialog.result
+        dialog.destroy()
+
+        match result:
+            case "all":
+                print("Rehashing ALL images...")
+                rehash_images(rehash_all=True)
+            case "new":
+                print("Hashing new images...")
+                rehash_images(rehash_all=False)
 
 
 if __name__ == "__main__":

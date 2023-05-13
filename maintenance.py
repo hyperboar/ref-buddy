@@ -141,26 +141,31 @@ def generate_thumbs():
     conn.close()
 
 
-def rehash_images():
+def rehash_images(rehash_all):
     conn = sqlite3.connect(Env.DB_FILE)
 
     ImageMetadata.static_initialize(conn)
 
     c = conn.cursor()
     # rows count
-    c.execute(f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}")
+    q = f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}"
+    if not rehash_all:
+        q += " WHERE hash IS NULL"
+    c.execute(q)
 
     rows_max = c.fetchone()[0]
     rows_step = 500
     rows_start = 0
 
     while rows_start < rows_max:
-        c.execute(f"{ImageMetadata.BASE_Q} LIMIT {rows_step} OFFSET {rows_start}")
+        q = f"{ImageMetadata.BASE_Q}"
+        if not rehash_all:
+            q += " WHERE hash IS NULL"
+        c.execute(q + f" LIMIT {rows_step} OFFSET {rows_start}")
         images = [ImageMetadata.from_full_row(row) for row in c.fetchall()]
 
         for image in images:
             print(f"\r{int(rows_start/rows_max * 100)}%... Hashing {image.image_id} {image.path}", end="")
-
             image_path = os.path.join(Env.IMAGES_PATH, image.path)
 
             if not os.path.exists(image_path):
@@ -172,7 +177,6 @@ def rehash_images():
             image_hash = hashlib.sha1(image_data).hexdigest()
 
             c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET hash = "{image_hash}" WHERE id = {image.image_id}')
-
 
         rows_start += rows_step
 
