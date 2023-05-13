@@ -9,14 +9,18 @@
     <a href="/favs">Favourites</a>
     <a href="/last">Last study</a>
 </div>
+<div class="tiles-container">
 {% for img in images %}
-    <div class="directory">
-        <img class="thumb" src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
-        <div>
-            <h4>[{{ img.study_type }}] <b>{{ img.path }}</b> <a href="/folder/{{ img.path_id }}"><img class="dir-link" src="/static/link.png"></a> <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120">open
-                id:{{ img.image_id }}</a></h4>
+    <div class="tile">
+        <img class="bg-thumb" src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
+        <div class="overlay">
+            <h2>[{{ img.study_type }}]</h2>
+            <p>{{ img.path }}</p>
+            <a href="/folder/{{ img.path_id }}">Folder <img class="dir-link" src="/static/link.png"></a>
+            <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120">First id:{{ img.image_id }}</a>
         </div>
     </div>
 {% endfor %}
+</div>
 </body>
 </html>
