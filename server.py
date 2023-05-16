@@ -20,14 +20,14 @@ def index():
 @app.route('/favs')
 def view_favs():
     db = sqlite3.connect(Env.DB_FILE)
-    images = ImageMetadata.get_favs(db)
-    return render_template('tpl_favs.html', images=images)
+    images = ImageMetadata.get_favs(db, 300)
+    return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None)
 
 @app.route('/last')
 def view_last():
     db = sqlite3.connect(Env.DB_FILE)
-    images = ImageMetadata.get_last(db)
-    return render_template('tpl_last.html', images=images)
+    images = ImageMetadata.get_last(db, 1000)
+    return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None)
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
@@ -35,7 +35,7 @@ def view_folder(path_id):
     study_type, path, images = ImageMetadata.get_all_by_path_id(db, path_id)
     overview = OverviewPath.from_image_metadata(images[0])
 
-    return render_template('tpl_view_folder.html', images=images, overview=overview)
+    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview)
 
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):
