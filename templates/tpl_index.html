@@ -2,6 +2,7 @@
 <head>
     <title>Gallery overview</title>
     <link rel="stylesheet" href="/static/styles_overview.css">
+    <script type="text/javascript" src="/static/image_lazy_load.js"></script>
 </head>
 <body>
 <div class="header">
@@ -12,7 +13,7 @@
 <div class="tiles-container">
 {% for img in images %}
     <div class="tile">
-        <div class="bg-thumb" style="background-image: url('/thumb/{{ img.image_id }}.jpg')"></div>
+        <div class="bg-thumb" data-src="/thumb/{{ img.image_id }}.jpg"></div>
         <div class="overlay">
             <a class="a-hidden" href="/folder/{{ img.path_id }}" target="_blank"><h2>[{{ img.study_type }}]</h2></a>
             <a class="a-hidden" href="/folder/{{ img.path_id }}" target="_blank"><p>{{ img.path }}</p></a>
@@ -22,5 +23,11 @@
     </div>
 {% endfor %}
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function()
+    {
+        new ImageLazyLoad('.bg-thumb', true, '300px')
+    }, false)
+</script>
 </body>
 </html>

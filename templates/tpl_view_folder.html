@@ -3,6 +3,8 @@
 <head>
     <title>Favorites</title>
     <link rel="stylesheet" href="/static/styles_gallery.css">
+    <script type="text/javascript" src="/static/image_lazy_load.js"></script>
+    <script type="text/javascript" src="/static/mut_attr_observer.js"></script>
 </head>
 <body>
 <div class="header">
@@ -13,10 +15,26 @@
     {% for image in images %}
     <div class="thumbnail">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
-            <img src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
+            <img class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
         </a>
     </div>
     {% endfor %}
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function()
+    {
+        // reveal on load
+        const thumbs = document.querySelectorAll('.thumb')
+        thumbs.forEach((elem, idx) =>
+        {
+            new MutationAttributeObserver(elem, 'src', (target) =>
+            {
+                target.classList.remove('thumb-hidden')
+            })
+        })
+
+        new ImageLazyLoad('.thumb', false, '300px')
+    }, false)
+</script>
 </body>
 </html>

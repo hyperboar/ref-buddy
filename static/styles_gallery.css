@@ -28,15 +28,25 @@ body
 
 /* Flex item */
 .gallery .thumbnail {
+    min-height: 200px;
+    min-width: 133px;
     max-width: 100%;
     height: auto;
     object-fit: cover;
+}
+
+.gallery .thumb {
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+}
+.gallery .thumb-hidden {
+    opacity: 0.1 !important;
 }
 
 /* CSS grid for responsive layout */
 @media (min-width: 768px) {
     .gallery {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     }
 }
