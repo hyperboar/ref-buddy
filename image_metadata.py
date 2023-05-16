@@ -144,7 +144,7 @@ class ImageMetadata:
     def read(conn, idx: int) -> 'ImageMetadata':
         cursor = conn.cursor()
 
-        cursor.execute(f"{ImageMetadata.BASE_Q} where im.id = ?", (idx,))
+        cursor.execute(f"{ImageMetadata.BASE_Q} where im.id = {idx}")
 
         row = cursor.fetchone()
         if row is None:
@@ -199,14 +199,14 @@ class ImageMetadata:
     @staticmethod
     def get_by_path(conn, path) -> 'ImageMetadata':
         c = conn.cursor()
-        c.execute(f"select id, filename from {ImageMetadata.TABLE_NAME} where filename = ?", (os.path.basename(path),))
+        c.execute(f"select id, filename from {ImageMetadata.TABLE_NAME} where filename = '{os.path.basename(path)}'")
 
         rows = c.fetchall()
         if len(rows) == 0:
             return None
 
         images = [ImageMetadata.read(conn, row[0]) for row in rows]
-        target = [img for img in images if path == img.path]
+        target = [image for image in images if path == image.path]
 
         if len(target) == 0:
             return None
