@@ -12,12 +12,12 @@
 <div class="tiles-container">
 {% for img in images %}
     <div class="tile">
-        <img class="bg-thumb" src="/thumb/{{ img.image_id }}.jpg" alt="thumbnail">
+        <div class="bg-thumb" style="background-image: url('/thumb/{{ img.image_id }}.jpg')"></div>
         <div class="overlay">
-            <h2>[{{ img.study_type }}]</h2>
-            <p>{{ img.path }}</p>
-            <a href="/folder/{{ img.path_id }}">Folder <img class="dir-link" src="/static/link.png"></a>
-            <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120">First id:{{ img.image_id }}</a>
+            <a class="a-hidden" href="/folder/{{ img.path_id }}" target="_blank"><h2>[{{ img.study_type }}]</h2></a>
+            <a class="a-hidden" href="/folder/{{ img.path_id }}" target="_blank"><p>{{ img.path }}</p></a>
+            <a href="/folder/{{ img.path_id }}" target="_blank">Folder <img class="dir-link" src="/static/link.png"></a>
+            <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120" target="_blank">First id:{{ img.image_id }}</a>
         </div>
     </div>
 {% endfor %}

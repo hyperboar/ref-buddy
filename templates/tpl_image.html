@@ -210,6 +210,7 @@
             let scale = 1
             let scaleStep = 0
             const scaleAdd = 0.3
+            const maxScale = 25
 
             let isZoomed = false;
 
@@ -226,7 +227,7 @@
                 // Scrolling down
                 else if (delta === -1) { scaleStep++ }
 
-                scaleStep = Math.max(scaleStep, 1)
+                scaleStep = Math.min(Math.max(scaleStep, 1), maxScale)
 
                 scale = 1 + scaleAdd * scaleStep
 
