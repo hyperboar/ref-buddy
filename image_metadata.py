@@ -66,7 +66,9 @@ class ImageMetadata:
                 FOREIGN KEY (path) REFERENCES paths (id),
                 FOREIGN KEY (study_type) REFERENCES study_type (id),
                 FOREIGN KEY (facing) REFERENCES facings (id)
-            )
+            );
+            
+            CREATE INDEX fn_index ON image_metadata (filename);
             
             CREATE TABLE IF NOT EXISTS paths (
                 id INTEGER PRIMARY KEY,
@@ -82,7 +84,7 @@ class ImageMetadata:
             INSERT INTO study_types (type) VALUES ('pron');
             INSERT INTO study_types (type) VALUES ('artists');
             INSERT INTO study_types (type) VALUES ('the_bits');
-            insert into study_types (type) values ('video')
+            insert into study_types (type) values ('video');
             
             CREATE TABLE IF NOT EXISTS poses (
                 id INTEGER PRIMARY KEY,
