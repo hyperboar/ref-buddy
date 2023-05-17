@@ -193,10 +193,10 @@
             document.addEventListener('keydown', function(e)
             {
                 if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
-                if (e.keyCode === 37) { onClickPrev(); e.preventDefault(); } // <-
-                if (e.keyCode === 39) { onClickNext(); e.preventDefault(); } // ->
-                if (e.keyCode === 13) { onTimerStart(); e.preventDefault(); } // enter
-                if (e.keyCode === 32) { toggleSameFolder(); e.preventDefault(); } // space
+                if (e.code === 'ArrowLeft')  { onClickPrev(); e.preventDefault(); } // <-
+                if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
+                if (e.code === 'Enter')      { onTimerStart(); e.preventDefault(); } // enter
+                if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
             });
 
 
