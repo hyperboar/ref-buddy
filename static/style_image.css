@@ -33,6 +33,12 @@ body {
     filter: blur(8px);
     transform: translate(0%, 5%) scale(1.2);
     z-index: -1;
+    transition: filter 0.3s ease;
+}
+
+.modal-bg-gray
+{
+    filter: grayscale(100%) blur(8px);
 }
 
 .modal-img-container
@@ -56,11 +62,17 @@ body {
     /*max-width: calc(100% - 40px); !* 20px margin on left and right *!*/
     /*max-height: calc(100% - 40px); !* 20px margin on top and bottom *!*/
     /*border: calc(100% * min(100vw, 100vh)) solid transparent; !* fallback border width *!*/
+    transition: filter 0.2s ease;
 }
 
 .modal-img-darken
 {
     filter: brightness(50%); /* Adjust the percentage value for desired darkness */
+}
+
+.modal-img-gray
+{
+    filter: grayscale(100%);
 }
 
 .magnification

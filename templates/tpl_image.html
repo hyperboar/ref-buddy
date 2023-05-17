@@ -23,6 +23,7 @@
                 <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
                 <span class="space"/>
                 <button id="timer-start" started="">Start</button>
+                <button id="toggle-grayscale" value="">Gray</button>
             </div>
             <div class="row">
                 <span>View: </span>
@@ -190,6 +191,23 @@
                 sf.checked = !sf.checked;
             }
 
+            // toggle grayscale
+            const toggleGrayscale = function()
+            {
+                const toggle = (img, className) =>
+                {
+                    if (img.classList.contains(className)) {img.classList.remove(className)}
+                    else img.classList.add(className)
+                }
+
+                toggle(document.querySelector('.modal-bg'), 'modal-bg-gray')
+                toggle(document.querySelector('.modal-img'), 'modal-img-gray')
+                toggle(document.querySelector('.magnification'), 'modal-img-gray')
+            }
+
+            const gsButton = document.getElementById('toggle-grayscale');
+            gsButton.addEventListener('click', toggleGrayscale);
+
             document.addEventListener('keydown', function(e)
             {
                 if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
@@ -197,6 +215,7 @@
                 if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
                 if (e.code === 'Enter')      { onTimerStart(); e.preventDefault(); } // enter
                 if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
+                if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
             });
 
 
