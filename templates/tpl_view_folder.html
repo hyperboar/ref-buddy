@@ -11,6 +11,7 @@
 <h1>{{ title }} </h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
 </div>
+<div>{{ panel|default('') }}</div>
 <div class="gallery">
     {% for image in images %}
     <div class="thumbnail">

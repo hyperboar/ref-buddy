@@ -107,6 +107,41 @@ class ImageMetadata:
             INSERT INTO facings (facing) VALUES ('3/4');
             INSERT INTO facings (facing) VALUES ('top');
             INSERT INTO facings (facing) VALUES ('bottom');
+            
+            CREATE TABLE IF NOT EXISTS tags (
+                id INTEGER PRIMARY KEY,
+                tag TEXT UNIQUE
+            );
+            
+            CREATE TABLE  IF NOT EXISTS image_tags (
+                image_id INTEGER,
+                tag_id INTEGER,
+                FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+                FOREIGN KEY (tag_id) REFERENCES tags(id),
+                PRIMARY KEY (image_id, tag_id)
+            );
+            
+            INSERT INTO tags (tag) VALUES ('futanari');
+            
+            INSERT INTO tags (tag) VALUES ('academic');
+            INSERT INTO tags (tag) VALUES ('pron');
+            INSERT INTO tags (tag) VALUES ('artists');
+            INSERT INTO tags (tag) VALUES ('the_bits');
+            Insert into tags (tag) values ('video');
+            
+            INSERT INTO tags (tag) VALUES ('face');
+            
+            INSERT INTO tags (tag) VALUES ('pose_stand');
+            INSERT INTO tags (tag) VALUES ('pose_sit');
+            INSERT INTO tags (tag) VALUES ('pose_lay');
+            INSERT INTO tags (tag) VALUES ('pose_stand_bent');
+            
+            INSERT INTO tags (tag) VALUES ('view_body_front');
+            INSERT INTO tags (tag) VALUES ('view_body_back');
+            INSERT INTO tags (tag) VALUES ('view_body_side');
+            INSERT INTO tags (tag) VALUES ('view_body_3-4');
+            INSERT INTO tags (tag) VALUES ('view_body_top');
+            INSERT INTO tags (tag) VALUES ('view_body_bottom');
         """
 
     # region CRUD
@@ -238,6 +273,34 @@ class ImageMetadata:
         return images[0].study_type, row[0], images
 
     @staticmethod
+    def get_all_by_tags(conn, tags: [int], limit=100, offset=0) -> '[ImageMetadata]':
+        c = conn.cursor()
+
+        tag_str = ','.join([str(num) for num in tags])
+        # image ids
+        c.execute(f"""
+                SELECT image_id, COUNT(DISTINCT tag_id) AS tag_count
+                FROM image_tags
+                WHERE tag_id IN ({tag_str})
+                GROUP BY image_id
+            """)
+        rows = c.fetchall()
+        if len(rows) == 0:
+            return f"No images found for tags ({tag_str}) in tags", []
+
+        image_ids = [str(row[0]) for row in rows if row[1] == len(tags)]
+
+        c.execute(f"{ImageMetadata.BASE_Q} WHERE im.id IN ({','.join(image_ids)}) ORDER BY im.imported_at  LIMIT {limit} OFFSET {offset}")
+
+        rows = c.fetchall()
+        if len(rows) == 0:
+            return f"No images found for tags ({tag_str}) in images", []
+
+        images = [ImageMetadata.from_full_row(row) for row in rows]
+
+        return "", images
+
+    @staticmethod
     def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = 1) -> 'ImageMetadata':
         c = conn.cursor()
         q_same_folder = ''
@@ -279,12 +342,37 @@ class ImageMetadata:
         c.execute("select * from study_types")
         return c.fetchall()
 
+    @staticmethod
+    def get_all_tags(conn):
+        c = conn.cursor()
+        c.execute(f'SELECT * FROM tags')
+
+        rows = c.fetchall()
+        return rows #[row[1] row[1] for row in ]
+
+    @staticmethod
+    def get_tag_names(conn, tags: [int]):
+        tag_rows = {str(tag[0]): tag[1] for tag in ImageMetadata.get_all_tags(conn)}
+
+        tags_str = []
+        for i in range(len(tags)):
+            tags_str.append(tag_rows[str(tags[i])])
+
+        return tags_str
+
     def mark_as_lost(self, conn, auto_commit=True):
         c = conn.cursor()
         c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET lost = 1 WHERE id = {self.image_id}')
 
         if auto_commit:
             conn.commit()
+
+    def get_tags(self, conn):
+        c = conn.cursor()
+        c.execute(f'SELECT t.id, t.tag FROM image_tags it JOIN tags t ON it.tag_id = t.id WHERE it.image_id = {self.image_id} ORDER BY t.tag')
+
+        rows = c.fetchall()
+        return rows #[row[1] row[1] for row in ]
 
     # endregion Convenience
 

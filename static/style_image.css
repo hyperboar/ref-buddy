@@ -197,3 +197,21 @@ span #time-current {
 .loading-fav {
   animation: rotateFav 2s linear infinite;
 }
+
+.popup {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: none;
+}
+
+.popup-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#copyButton {
+  margin-left: 10px;
+}

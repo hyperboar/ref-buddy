@@ -1,6 +1,8 @@
 import sqlite3
 
 from flask import Flask, render_template_string, request, send_file, abort, send_from_directory, render_template
+from markupsafe import Markup
+
 from image_metadata import ImageMetadata
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 import os
@@ -37,6 +39,29 @@ def view_folder(path_id):
 
     return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview)
 
+@app.route('/tagged')
+def view_tags():
+    args = request.args
+    tags = [int(tag_str) for tag_str in args.get('tags').split(',')]
+
+    page_str = args.get('page')
+    if page_str is None:
+        page = 0
+    else:
+        page = max(int(page_str) - 1, 0)
+
+    limit = 100
+    offset = limit * page
+    db = sqlite3.connect(Env.DB_FILE)
+    response, images = ImageMetadata.get_all_by_tags(db, tags, limit, offset)
+
+    overview = {}
+    overview["study_type"] = ', '.join(ImageMetadata.get_tag_names(db, tags))
+    overview["path"] = ""
+
+    panel = Markup(render_template('tpl_tags_panel.html', tags=ImageMetadata.get_all_tags(db)))
+    return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=panel)
+
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):
     return send_from_directory(app.config['THUMB_STATIC'], path)
@@ -72,7 +97,7 @@ def study_image(image_id):
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
 
-    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types)
+    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=metadata.get_tags(db))
 
 @app.route('/study-random')
 def study_random():
@@ -95,7 +120,7 @@ def study_random():
     if metadata is None:
         return f'Error: No images found with facing "{facing}"'
 
-    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types)
+    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=metadata.get_tags(db))
 
 @app.route('/set-image-fav')
 def set_image_fav():
