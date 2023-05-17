@@ -191,23 +191,51 @@
                 sf.checked = !sf.checked;
             }
 
+            const toggleCssClass = function(elem, className)
+            {
+                if (elem.classList.contains(className)) { elem.classList.remove(className) }
+                else { elem.classList.add(className) }
+            }
+
             // toggle grayscale
             const toggleGrayscale = function()
             {
-                const toggle = (img, className) =>
-                {
-                    if (img.classList.contains(className)) {img.classList.remove(className)}
-                    else img.classList.add(className)
-                }
-
-                toggle(document.querySelector('.modal-bg'), 'modal-bg-gray')
-                toggle(document.querySelector('.modal-img'), 'modal-img-gray')
-                toggle(document.querySelector('.magnification'), 'modal-img-gray')
+                toggleCssClass(document.querySelector('.modal-bg'), 'modal-bg-gray')
+                toggleCssClass(document.querySelector('.modal-img'), 'modal-img-gray')
+                toggleCssClass(document.querySelector('.magnification'), 'modal-img-gray')
             }
 
             const gsButton = document.getElementById('toggle-grayscale');
             gsButton.addEventListener('click', toggleGrayscale);
 
+            // toggle cursor
+            const toggleCursor = function(keycode)
+            {
+                let img  = document.querySelector('.modal-img')
+                // let zoom = document.querySelector('.magnification')
+                const stops = ['cursor-stop-m2', 'cursor-stop-m1', 'cursor-stop-0', 'cursor-stop-p1', 'cursor-stop-p2']
+                const disableAllBut = function(elem, oneName, allNames)
+                {
+                    allNames.forEach((n) => { if (n === oneName) { return; } elem.classList.remove(n) })
+                }
+
+                // numpad "5" is 50% brightness or "0 exposure stops" or 18% gray
+                let idx = parseInt(keycode.replace('Numpad', '').replace('Digit', ''))
+                // hit 0, bring default cursor back
+                if (idx === 0)
+                {
+                    disableAllBut(img, '', stops)
+                    return
+                }
+                idx -= 3 // we start from 3 and go up.
+                if (idx < 0 || stops.length <= idx) { return }
+
+                toggleCssClass(img, stops[idx])
+                disableAllBut(img, stops[idx], stops)
+            }
+
+
+            // hotkeys
             document.addEventListener('keydown', function(e)
             {
                 if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
@@ -216,6 +244,8 @@
                 if (e.code === 'Enter')      { onTimerStart(); e.preventDefault(); } // enter
                 if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
                 if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
+                if (e.code.includes('Numpad') || e.code.includes('Digit'))
+                                             { toggleCursor(e.code); e.preventDefault(); } // numbers
             });
 
 
