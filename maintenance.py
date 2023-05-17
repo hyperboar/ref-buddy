@@ -157,7 +157,7 @@ def rehash_images(rehash_all):
     rows_step = 500
     rows_start = 0
 
-    while rows_start < rows_max:
+    while rows_start <= rows_max:
         q = f"{ImageMetadata.BASE_Q}"
         if not rehash_all:
             q += " WHERE hash IS NULL"
