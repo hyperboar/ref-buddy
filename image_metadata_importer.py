@@ -20,6 +20,9 @@ class ImageMetadataImporter:
 
         new_count = 0
 
+        self.print_begin(f'Starting image import from folder "{folder_path}"')
+        self.print_begin(f'Image formats to be imported: {formats}')
+
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
             max_count = len(filenames)
@@ -53,6 +56,9 @@ class ImageMetadataImporter:
 
         print(f"\nImport completed! Found {new_count} new files.")
 
+    @staticmethod
+    def print_begin(msg):
+        print(msg)
 
     @staticmethod
     def print_total(msg_dir, total: int):

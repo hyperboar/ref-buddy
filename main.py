@@ -69,12 +69,18 @@ class MainWindow(tk.Frame):
         self.master.config(menu=self.menu_bar)
 
     def import_images(self):
-        # Ask user to select a folder
-        folder_path = filedialog.askdirectory()
-        if folder_path:
+        if not os.path.exists(Env.IMAGES_PATH):
+            messagebox.showinfo("Nope", f'Folder at path "{Env.IMAGES_PATH}" does not exist.')
+            return
+
+        try:
             importer = ImageMetadataImporter(Env.DB_FILE)
-            importer.import_metadata(folder_path)
-            messagebox.showinfo("Success", "Images imported successfully.")
+            importer.import_metadata(Env.IMAGES_PATH)
+        except Exception as e:
+            messagebox.showinfo("Nope", "Something went wrong. Check logs for details.")
+            raise
+
+        messagebox.showinfo("Success", "Images imported successfully.")
 
     def open_ffmpeg_window(self):
         self.ffmpeg = ExportFramesWindow(self.master)
