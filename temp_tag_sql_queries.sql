@@ -8,7 +8,7 @@ WHERE study_type = 1;
 INSERT OR IGNORE INTO image_tags (image_id, tag_id)
 SELECT id, 3
 FROM image_metadata
-WHERE study_type in (2, 3);
+WHERE study_type in (2, 4);
 -- the_bits
 INSERT OR IGNORE INTO image_tags (image_id, tag_id)
 SELECT id, 5

@@ -194,6 +194,56 @@ def rehash_images(rehash_all):
     # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
+def assign_folder_tags():
+    """Go over all imag_metadata rows and add tags academic, pron, the_bits, artists and frames(video)"""
+    conn = sqlite3.connect(Env.DB_FILE)
+    ImageMetadata.static_initialize(conn)
+
+    c = conn.cursor()
+    c.execute(f"""
+        -- academic
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 2
+        FROM image_metadata
+        WHERE study_type = 1;
+    """)
+    c.execute(f"""
+        -- pron and the-bits
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 3
+        FROM image_metadata
+        WHERE study_type in (2, 4);
+    """)
+    c.execute(f"""
+        -- the_bits
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 5
+        FROM image_metadata
+        WHERE study_type = 4;
+    """)
+    c.execute(f"""
+        -- artists
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 4
+        FROM image_metadata
+        WHERE study_type = 3;
+    """)
+    c.execute(f"""
+        -- frames
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 6
+        FROM image_metadata
+        WHERE study_type = 5;
+    """)
+
+    conn.commit()
+    conn.close()
+
+
+def cleanup_lost_images():
+    pass
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--new-db":
         create_new_db()

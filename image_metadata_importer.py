@@ -3,6 +3,8 @@ import os
 from image_metadata import ImageMetadata
 import sys
 
+from maintenance import assign_folder_tags
+
 
 class ImageMetadataImporter:
     def __init__(self, db_path):
@@ -43,7 +45,14 @@ class ImageMetadataImporter:
                     raise
             print(f"")
 
+        if new_count > 0:
+            print("")
+            print(f"\rAssigning essential tags to new images...", end="")
+            assign_folder_tags()
+            print(f"\rAssigning essential tags to new images... Done!", end="")
+
         print(f"\nImport completed! Found {new_count} new files.")
+
 
     @staticmethod
     def print_total(msg_dir, total: int):
