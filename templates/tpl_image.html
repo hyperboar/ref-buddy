@@ -256,7 +256,7 @@
                 if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
                 if (e.code === 'ArrowLeft')  { onClickPrev(); e.preventDefault(); } // <-
                 if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
-                if (e.code === 'Enter')      { onTimerStart(); e.preventDefault(); } // enter
+                if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
                 if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
                 if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
                 if (e.code.includes('Numpad') || e.code.includes('Digit'))
