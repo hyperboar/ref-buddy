@@ -301,12 +301,12 @@ class ImageMetadata:
         return "", images
 
     @staticmethod
-    def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = 1) -> 'ImageMetadata':
+    def get_random_by_study_type(conn, study_type: int, same_folder: int = 0, prev_image_id: int = -1) -> 'ImageMetadata':
         c = conn.cursor()
         q_same_folder = ''
-        if same_folder > 0:
+        if same_folder > 0 and prev_image_id > 0:
             img = ImageMetadata.get_by_id(conn, prev_image_id)
-            q_same_folder = f'AND im.path={img.path_id}'
+            q_same_folder = f'AND im.path={img.path_id}' if img is not None and img.study_type_id == study_type else ''
         q = f'{ImageMetadata.BASE_Q} ' \
             f'WHERE im.study_type={study_type} {q_same_folder} ORDER BY RANDOM() LIMIT 1'
         c.execute(q)

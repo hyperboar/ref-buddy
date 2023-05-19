@@ -27,14 +27,9 @@
             </div>
             <div class="row">
                 <span>View: </span>
-                <select id="facing" value="{{ image.facing }}">
-                    <option value="front">Front</option>
-                    <option value="side">Side</option>
-                    <option value="back">Back</option>
-                </select>
                 <span class="space"/>
                 <span>Source: </span>
-                <select id="source-type" value="{{ image.study_type_id }}">
+                <select id="study-type" value="{{ image.study_type_id }}">
                     {% for st in study_types %}
                     <option value="{{ st[0] }}">{{ st[1] }}</option>
                     {% endfor %}
@@ -43,34 +38,10 @@
             </div>
             <div class="row">
                 <button class="fav" id="is-fav" value="{{ image.is_fav }}"></button>
-                <span>Diff: </span>
-                <select id="difficulty" value="{{ image.difficulty }}">
-                    <option value="0">Beginner</option>
-                    <option style="display: none" value="0">Beginner</option>
-                    <option style="display: none" value="1">Beginner</option>
-                    <option style="display: none" value="2">Beginner</option>
-                    <option style="display: none" value="3">Beginner</option>
-                    <option style="display: none" value="4">Beginner</option>
-                    <option style="display: none" value="5">Beginner</option>
-                    <option style="display: none" value="6">Beginner</option>
-                    <option style="display: none" value="7">Beginner</option>
-                    <option style="display: none" value="8">Beginner</option>
-                    <option style="display: none" value="9">Beginner</option>
-                    <option value="10">Pro</option>
-                </select>
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="true">
                 <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
             </div>
-<!--            <div id="caption">-->
-<!--                <ul>-->
-<!--                    <li><p id="timer">$timer</p></li>-->
-<!--                    <li>Count: $count</li>-->
-<!--                    <li>Time spent: $time_spent seconds</li>-->
-<!--                    <li>Facing: $facing</li>-->
-<!--                    <button onclick="incrementCount($image_id)">Increment count</button>-->
-<!--                </ul>-->
-<!--            </div>-->
             <div class="row">
                 <button id="prev">Prev</button>
                 <button id="next">Next</button>
@@ -108,18 +79,14 @@
     </script>
 
     <script>
-        let list = document.getElementById('source-type')
+        let list = document.getElementById('study-type')
         list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
-
-        list = document.getElementById('difficulty')
-        list.options[parseInt(list.getAttribute('value'))].setAttribute('selected', 'selected')
-
 
         window.onload = function()
         {
             console.log('Page Loaded!')
 
-            let imgParams = new ImgParams('image-id', 'facing', 'source-type', 'same-folder', 'difficulty', 'time-planned', 'is-fav')
+            let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav')
 
             imgParams.setParamsFromGET()
 

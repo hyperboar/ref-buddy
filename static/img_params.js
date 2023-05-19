@@ -1,32 +1,27 @@
 
 class ImgParams {
     imageId
-    facingId
-    sourceTypeId
+    studyTypeId
     sameFolderId
-    difficultyId
     timePlannedId
 
-    constructor(imageId, facing, sourceType, sameFolder, difficulty, timePlanned, isFav) {
+    constructor(imageId, sourceType, sameFolder, timePlanned, isFav) {
         // html ids AND GET param names
         this.imageId = imageId
-        this.facingId = facing
-        this.sourceTypeId = sourceType
+        this.studyTypeId = sourceType
         this.sameFolderId = sameFolder
-        this.difficultyId = difficulty
         this.timePlannedId = timePlanned
         this.isFavId = isFav
     }
 
-    getParamsAsGET() {
-        const facing     = `${this.facingId}=` + document.getElementById(this.facingId).value
-        const sourceType = `${this.sourceTypeId}=` + document.getElementById(this.sourceTypeId).value
+    getParamsAsGET()
+    {
+        const sourceType = `${this.studyTypeId}=` + document.getElementById(this.studyTypeId).value
         const sameFolder = `${this.sameFolderId}=` + document.getElementById(this.sameFolderId).checked
-        const difficulty = `${this.difficultyId}=` + document.getElementById(this.difficultyId).value
         const timer      = `${this.timePlannedId}=` + document.getElementById(this.timePlannedId).getAttribute('value')
         const imageId    = `${this.imageId}=` + document.getElementById(this.imageId).textContent
 
-        return `${facing}&${sourceType}&${sameFolder}&${difficulty}&${timer}&${imageId}`
+        return `${sourceType}&${sameFolder}&${timer}&${imageId}`
     }
 
     getImgIdAsGET()
@@ -43,16 +38,13 @@ class ImgParams {
         return `${imageId}&${isFav}`
     }
 
-    setParamsFromGET() {
+    setParamsFromGET()
+    {
         const urlParams = new URLSearchParams(window.location.search);
-
-        // document.getElementById(this.facingId).value            = urlParams.get(this.facingId)
-        // document.getElementById(this.sourceTypeId).value        = urlParams.get(this.sourceTypeId)
         if (urlParams.get(this.sameFolderId) !== null)
         {
             document.getElementById(this.sameFolderId).checked = urlParams.get(this.sameFolderId) === "true"
         }
-        // document.getElementById(this.difficultyId).value        = urlParams.get(this.difficultyId)
 
         if (urlParams.get(this.timePlannedId) !== null)
         {
