@@ -325,7 +325,11 @@ class ImageMetadata:
     @staticmethod
     def set_image_last_viewed(conn, image_id: int, time: 'datetime'):
         c = conn.cursor()
-        c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET last_viewed = ? WHERE id = ?', (time, image_id))
+
+        c.execute(f'SELECT count FROM {ImageMetadata.TABLE_NAME} WHERE id = ?', (image_id,))
+        count = c.fetchone()[0] + 1
+
+        c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET last_viewed = ?, count = ? WHERE id = ?', (time, count, image_id))
         conn.commit()
         return c.rowcount > 0
 
