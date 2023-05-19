@@ -26,3 +26,17 @@ FROM image_metadata
 WHERE study_type = 5;
 
 
+-- hash duplicates
+select im.id, p.path, im.filename
+from image_metadata as im
+    join paths p on im.path = p.id
+where im.id in
+      (
+      select im1.id
+      from image_metadata as im1
+          join image_metadata as im2
+      where im1.id <> im2.id AND
+            im2.lost = 0 AND im1.lost = 0 AND
+            im1.hash = im2.hash
+      )
+order by im.hash, p.path;

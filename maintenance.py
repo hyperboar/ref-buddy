@@ -240,6 +240,41 @@ def assign_folder_tags():
     conn.close()
 
 
+def mark_all_lost():
+    conn = sqlite3.connect(Env.DB_FILE)
+
+    ImageMetadata.static_initialize(conn)
+
+    c = conn.cursor()
+    # rows count
+    q = f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}"
+    c.execute(q)
+
+    rows_max = c.fetchone()[0]
+    rows_step = 500
+    rows_start = 0
+
+    while rows_start <= rows_max:
+        q = f"{ImageMetadata.BASE_Q}"
+        c.execute(q + f" LIMIT {rows_step} OFFSET {rows_start}")
+        images = [ImageMetadata.from_full_row(row) for row in c.fetchall()]
+
+        for image in images:
+            image_path = os.path.join(Env.IMAGES_PATH, image.path)
+
+            if os.path.exists(image_path):
+                continue
+
+            print(f"Lost {image.image_id} {image.path}")
+            image.mark_as_lost(conn, auto_commit=False)
+
+        rows_start += rows_step
+
+    conn.commit()
+    conn.close()
+    pass
+
+
 def cleanup_lost_images():
     pass
 

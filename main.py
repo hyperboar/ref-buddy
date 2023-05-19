@@ -8,7 +8,7 @@ from tkinter import messagebox
 from export_frames_window import ExportFramesWindow
 
 from image_metadata_importer import ImageMetadataImporter
-from maintenance import generate_thumbs, rehash_images
+from maintenance import generate_thumbs, rehash_images, mark_all_lost
 from Env import Env
 from rehash_dialog import RehashDialog
 
@@ -63,6 +63,7 @@ class MainWindow(tk.Frame):
         tools_menu.add_separator()
         tools_menu.add_command(label="Generate thumbs", command=generate_thumbs)
         tools_menu.add_command(label="Rehash all images", command=self.rehash_options)
+        tools_menu.add_command(label="Find lost images", command=mark_all_lost)
 
         self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
 
