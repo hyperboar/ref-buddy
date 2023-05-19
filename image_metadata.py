@@ -55,17 +55,17 @@ class ImageMetadata:
             CREATE TABLE IF NOT EXISTS {ImageMetadata.TABLE_NAME} (
                 id INTEGER PRIMARY KEY,
                 filename TEXT NOT NULL,
-                count INTEGER DEFAULT 0,
-                facing INTEGER DEFAULT 0,
-                last_viewed TIMESTAMP DEFAULT 0,
-                difficulty INTEGER DEFAULT 10,
+                path INTEGER NOT NULL,
+                study_type INTEGER NOT NULL,
                 fav INTEGER DEFAULT 0,
+                count INTEGER DEFAULT 0,
+                rating INTEGER DEFAULT 0,
                 lost INTEGER DEFAULT 0,
-                imported_at DATETIME,
+                last_viewed TIMESTAMP DEFAULT 0,
+                imported_at DATETIME NOT NULL,
                 hash TEXT,
                 FOREIGN KEY (path) REFERENCES paths (id),
-                FOREIGN KEY (study_type) REFERENCES study_type (id),
-                FOREIGN KEY (facing) REFERENCES facings (id)
+                FOREIGN KEY (study_type) REFERENCES study_types (id),
             );
             
             CREATE INDEX fn_index ON image_metadata (filename);
@@ -84,29 +84,8 @@ class ImageMetadata:
             INSERT INTO study_types (type) VALUES ('pron');
             INSERT INTO study_types (type) VALUES ('artists');
             INSERT INTO study_types (type) VALUES ('the_bits');
-            insert into study_types (type) values ('video');
-            
-            CREATE TABLE IF NOT EXISTS poses (
-                id INTEGER PRIMARY KEY,
-                pose TEXT NOT NULL UNIQUE
-            );
-            
-            INSERT INTO poses (pose) VALUES ('stand');
-            INSERT INTO poses (pose) VALUES ('sit');
-            INSERT INTO poses (pose) VALUES ('lay');
-            INSERT INTO poses (pose) VALUES ('stand_bent');
-            
-            CREATE TABLE facings (
-                id INTEGER PRIMARY KEY,
-                facing TEXT NOT NULL UNIQUE
-            );
-            
-            INSERT INTO facings (facing) VALUES ('front');
-            INSERT INTO facings (facing) VALUES ('back');
-            INSERT INTO facings (facing) VALUES ('side');
-            INSERT INTO facings (facing) VALUES ('3/4');
-            INSERT INTO facings (facing) VALUES ('top');
-            INSERT INTO facings (facing) VALUES ('bottom');
+            INSERT INTO study_types (type) VALUES ('video');
+        
             
             CREATE TABLE IF NOT EXISTS tags (
                 id INTEGER PRIMARY KEY,
@@ -206,9 +185,6 @@ class ImageMetadata:
             is_fav=row[f['fav']],
 
             count=row[f['count']],
-            time_spent=row[f['time_spent']],
-            diff=row[f['difficulty']],
-            facing=row[f['facing']],
             image_hash=row[f['hash']],
             imported_at=row[f['imported_at']])
 
