@@ -11,3 +11,5 @@ main.spec
 main.exe
 figure_drawing_trainer.spec
 figure_drawing_trainer.exe
+web_server.spec
+web_server.exe

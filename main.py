@@ -86,6 +86,19 @@ class MainWindow(tk.Frame):
         self.ffmpeg = ExportFramesWindow(self.master)
 
     def launch_server(self):
+        # is_run = False
+        # if os.path.exists('./web_server.exe'):
+        #     print("web server")
+        #     subprocess.Popen(["web_server.exe"], cwd=os.getcwd())
+        #     is_run = True
+        # elif os.path.exists('./server.py'):
+        #     print("py server")
+        #     subprocess.Popen(["python", "server.py"], cwd=os.getcwd())
+        #     is_run = True
+        #
+        # if not is_run:
+        #     return
+
         subprocess.Popen(["python", "server.py"], cwd=os.getcwd())
         self.link["state"] = "normal"
         self.server_button["state"] = "disabled"
