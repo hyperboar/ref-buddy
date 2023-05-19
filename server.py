@@ -127,6 +127,18 @@ def set_image_fav():
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string('yep')
 
+@app.route('/add-image-rating')
+def add_image_rating():
+    args = request.args
+    rating = int(args.get('rating', default='0'))
+    image_id = int(args.get('image-id'))
+
+    db = sqlite3.connect(Env.DB_FILE)
+    r = ImageMetadata.add_image_rating(db, image_id, rating)
+    if not r:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return render_template_string(str(r))
+
 @app.route('/set-image-last-viewed')
 def set_image_last_viewed():
     args = request.args

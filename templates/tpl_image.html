@@ -23,21 +23,27 @@
                 <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
                 <span class="space"/>
                 <button id="timer-start" started="">Start</button>
-                <button id="toggle-grayscale" value="">Gray</button>
             </div>
             <div class="row">
-                <span>View: </span>
-                <span class="space"/>
-                <span>Source: </span>
+                <span>Study: </span>
                 <select id="study-type" value="{{ image.study_type_id }}">
                     {% for st in study_types %}
                     <option value="{{ st[0] }}">{{ st[1] }}</option>
                     {% endfor %}
                 </select>
+                <span class="space"/>
+                <button id="toggle-grayscale" value="">Gray</button>
+                <span class="space"/>
                 <button id="info-button">info</button>
             </div>
             <div class="row">
                 <button class="fav" id="is-fav" value="{{ image.is_fav }}"></button>
+                <span class="space"/>
+                <label for="rate-up">Rating: {{ image.rating }}</label>
+                <button class="rate-up" id="rate-up" value="0"></button>
+                <button class="rate-dn" id="rate-dn" value="0"></button>
+            </div>
+            <div class="row">
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="true">
                 <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
@@ -62,22 +68,6 @@
             </div>
         </div>
 	</div>
-
-    <script>
-    function incrementCount(imageId) {
-        fetch(`/increment_count/${imageId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-        }
-    </script>
-
     <script>
         let list = document.getElementById('study-type')
         list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
@@ -146,6 +136,42 @@
                         favButton.classList.remove('loading-fav')
                     });
             });
+
+            // rate up/down
+            const rateupButton = document.getElementById('rate-up');
+            const ratednButton = document.getElementById('rate-dn');
+
+            const rateCall = (imageId, rating) =>
+            {
+                rateupButton.setAttribute('disabled', 'true')
+                ratednButton.setAttribute('disabled', 'true')
+
+                if (rating > 0)
+                {
+                    rateupButton.classList.add('loading-fav')
+                }
+                else
+                {
+                    ratednButton.classList.add('loading-fav')
+                }
+
+                fetch(`/add-image-rating?image-id=${imageId}&rating=${rating}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+
+                        rateupButton.classList.remove('loading-fav')
+                        ratednButton.classList.remove('loading-fav')
+
+                        console.log(response.body)
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                        favButton.classList.remove('loading-fav')
+                    });
+            }
+
+            rateupButton.addEventListener('click', function () { rateCall({{ image.image_id }}, 1) });
+            ratednButton.addEventListener('click', function () { rateCall({{ image.image_id }}, -1) });
 
             // study timer
             const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')

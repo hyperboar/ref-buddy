@@ -198,6 +198,17 @@ span #time-current {
   animation: rotateFav 2s linear infinite;
 }
 
+.rate-up, .rate-dn
+{
+    width: 25px;
+    height: 25px;
+    background-size: cover;
+    border: none;
+    padding: 2px;
+}
+.rate-up {background-image: url("/static/arrow_up.png");}
+.rate-dn {background-image: url("/static/arrow_down.png");}
+
 .popup {
   position: absolute;
   background-color: #ffffff;

@@ -7,7 +7,7 @@ class ImageMetadata:
     FIELDS = None
     BASE_Q = f"SELECT im.*, st.type AS study_type, pr.path AS path_full FROM image_metadata AS im JOIN study_types AS st ON im.study_type = st.id JOIN paths AS pr ON im.path = pr.id"
 
-    def __init__(self, path, filename=None, count=0, time_spent=0, facing=0, last_viewed=0, idx=-1, diff=0, study_type=None, is_fav=0,
+    def __init__(self, path, filename=None, count=0, last_viewed=0, idx=-1, rating=0, study_type=None, is_fav=0,
                  path_id=0, study_type_id=0, image_hash='', imported_at=0):
         self.image_id = idx
         self.path = os.path.join(study_type, path, filename)
@@ -16,11 +16,8 @@ class ImageMetadata:
         self.study_type_id = study_type_id
         self.last_viewed = last_viewed
         self.is_fav = is_fav
-
+        self.rating = rating
         self.count = count
-        self.difficulty = diff
-        self.facing = facing
-        self.time_spent = time_spent
 
         self.image_hash = image_hash
         self.imported_at = imported_at
@@ -183,7 +180,7 @@ class ImageMetadata:
             filename=row[f['filename']],
             last_viewed=row[f['last_viewed']],
             is_fav=row[f['fav']],
-
+            rating=row[f['rating']],
             count=row[f['count']],
             image_hash=row[f['hash']],
             imported_at=row[f['imported_at']])
@@ -297,6 +294,17 @@ class ImageMetadata:
         c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET fav = ? WHERE id = ? ', (is_fav, image_id))
         conn.commit()
         return c.rowcount > 0
+
+    @staticmethod
+    def add_image_rating(conn, image_id: int, rating_add: int) -> int:
+        if rating_add == 0:
+            return
+        c = conn.cursor()
+        c.execute(f'SELECT rating FROM {ImageMetadata.TABLE_NAME} WHERE id = ?', (image_id,))
+        rating = c.fetchone()[0] + rating_add
+        c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET rating = ? WHERE id = ? ', (rating, image_id))
+        conn.commit()
+        return rating if c.rowcount > 0 else 0
 
     @staticmethod
     def set_image_last_viewed(conn, image_id: int, time: 'datetime'):
