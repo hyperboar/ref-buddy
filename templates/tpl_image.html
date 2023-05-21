@@ -4,6 +4,7 @@
 	<title>Image ({{ image.image_id }})</title>
     <link rel="stylesheet" href="/static/style_image.css">
     <script type="text/javascript" src="/static/img_params.js"></script>
+    <script type="text/javascript" src="/static/rating.js"></script>
     <script type="text/javascript" src="/static/study_timer.js"></script>
 </head>
 <body>
@@ -39,7 +40,7 @@
             <div class="row">
                 <button class="fav" id="is-fav" value="{{ image.is_fav }}"></button>
                 <span class="space"/>
-                <label for="rate-up">Rating: {{ image.rating }}</label>
+                <label for="rate-up">Rating: <span id="image-rating">{{ image.rating }}</span></label>
                 <button class="rate-up" id="rate-up" value="0"></button>
                 <button class="rate-dn" id="rate-dn" value="0"></button>
             </div>
@@ -137,41 +138,7 @@
                     });
             });
 
-            // rate up/down
-            const rateupButton = document.getElementById('rate-up');
-            const ratednButton = document.getElementById('rate-dn');
-
-            const rateCall = (imageId, rating) =>
-            {
-                rateupButton.setAttribute('disabled', 'true')
-                ratednButton.setAttribute('disabled', 'true')
-
-                if (rating > 0)
-                {
-                    rateupButton.classList.add('loading-fav')
-                }
-                else
-                {
-                    ratednButton.classList.add('loading-fav')
-                }
-
-                fetch(`/add-image-rating?image-id=${imageId}&rating=${rating}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-
-                        rateupButton.classList.remove('loading-fav')
-                        ratednButton.classList.remove('loading-fav')
-
-                        console.log(response.body)
-                    })
-                    .catch(error => {
-                        console.error('There was a problem with the fetch operation:', error);
-                        favButton.classList.remove('loading-fav')
-                    });
-            }
-
-            rateupButton.addEventListener('click', function () { rateCall({{ image.image_id }}, 1) });
-            ratednButton.addEventListener('click', function () { rateCall({{ image.image_id }}, -1) });
+            const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn')
 
             // study timer
             const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')
