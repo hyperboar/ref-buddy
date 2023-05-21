@@ -8,10 +8,12 @@ from image_metadata_overview import ImageMetadataOverview, OverviewPath
 import os
 from datetime import datetime
 from Env import Env
-
+from server_ext_rating import routes_rating
 
 app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
+
+app.register_blueprint(routes_rating)
 
 @app.route('/')
 def index():
@@ -126,18 +128,6 @@ def set_image_fav():
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string('yep')
-
-@app.route('/add-image-rating')
-def add_image_rating():
-    args = request.args
-    rating = int(args.get('rating', default='0'))
-    image_id = int(args.get('image-id'))
-
-    db = sqlite3.connect(Env.DB_FILE)
-    r = ImageMetadata.add_image_rating(db, image_id, rating)
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return render_template_string(str(r))
 
 @app.route('/set-image-last-viewed')
 def set_image_last_viewed():
