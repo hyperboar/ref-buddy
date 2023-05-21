@@ -43,6 +43,9 @@
                 <label for="rate-up">Rating: <span id="image-rating">{{ image.rating }}</span></label>
                 <button class="rate-up" id="rate-up" value="0"></button>
                 <button class="rate-dn" id="rate-dn" value="0"></button>
+                <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
+                <button class="rate-up" id="rate-up-f" value="0"></button>
+                <button class="rate-dn" id="rate-dn-f" value="0"></button>
             </div>
             <div class="row">
                 <label for="same-folder">Same folder:</label>
@@ -139,6 +142,7 @@
             });
 
             const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn')
+            const rateFolder = new RateFolder({{ image.image_id }}, 'rate-fld', 'rate-up-f', 'rate-dn-f')
 
             // study timer
             const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')

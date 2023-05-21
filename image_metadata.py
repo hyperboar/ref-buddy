@@ -203,6 +203,7 @@ class ImageMetadata:
             return None
         return [ImageMetadata.from_full_row(row) for row in rows]
 
+    @staticmethod
     def get_by_id(conn, id: int):
         return ImageMetadata.read(conn, id)
 
@@ -296,15 +297,19 @@ class ImageMetadata:
         return c.rowcount > 0
 
     @staticmethod
-    def add_image_rating(conn, image_id: int, rating_add: int) -> int:
+    def add_image_rating(conn, image_id: int, rating_add: int, auto_commit=True) -> int:
         if rating_add == 0:
-            return
+            return 1
         c = conn.cursor()
         c.execute(f'SELECT rating FROM {ImageMetadata.TABLE_NAME} WHERE id = ?', (image_id,))
         rating = c.fetchone()[0] + rating_add
         c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET rating = ? WHERE id = ? ', (rating, image_id))
-        conn.commit()
-        return rating if c.rowcount > 0 else 0
+        if auto_commit:
+            conn.commit()
+            return rating if c.rowcount > 0 else 0
+        else:
+            return 0
+
 
     @staticmethod
     def set_image_last_viewed(conn, image_id: int, time: 'datetime'):
