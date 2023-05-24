@@ -214,6 +214,18 @@
                 disableAllBut(img, stops[idx], stops)
             }
 
+            // toggle image flip
+            let isFlipped = false
+            const toggleFlip = function(event)
+            {
+                isFlipped = !isFlipped
+
+                toggleCssClass(document.querySelector('.modal-img'), 'image-flip')
+                toggleCssClass(document.querySelector('.magnification'), 'image-flip')
+
+                updateMagnifiedOffset(event.clientX, event.clientY)
+            }
+
 
             // hotkeys
             document.addEventListener('keydown', function(e)
@@ -224,6 +236,7 @@
                 if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
                 if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
                 if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
+                if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
                 if (e.code.includes('Numpad') || e.code.includes('Digit'))
                                              { toggleCursor(e.code); e.preventDefault(); } // numbers
             });
@@ -313,7 +326,7 @@
                 // clamp 0 to msize
                 x = Math.min(Math.max(x, 0), msize.x) - mhalf.x
                 y = Math.min(Math.max(y, 0), msize.y) - mhalf.y
-                x /= msize.x; y /= msize.y
+                x /= msize.x * (isFlipped ? -1 : 1); y /= msize.y
 
                 x *= -msizeScaled.x; y *= -msizeScaled.y
 

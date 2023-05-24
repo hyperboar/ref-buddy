@@ -124,6 +124,11 @@ body {
     height: 15px;
 }
 
+.image-flip
+{
+    transform: scaleX(-1);
+}
+
 
 .modal-controls {
     display: flex;
