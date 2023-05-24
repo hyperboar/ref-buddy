@@ -50,6 +50,7 @@
             <div class="row">
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="true">
+                <input type="hidden" id="min-rating" value="0">
                 <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
             </div>
             <div class="row">
@@ -80,7 +81,7 @@
         {
             console.log('Page Loaded!')
 
-            let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav')
+            let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating')
 
             imgParams.setParamsFromGET()
 

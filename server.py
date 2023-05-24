@@ -108,10 +108,11 @@ def study_random():
     same_folder = int(args.get('same-folder', default='false') == "true")
     prev_image_id = int(args.get('image-id', default='-1'))
     timer = int(args.get('time-planned', default='120'))
+    rating = int(args.get('min-rating', default='0'))
 
     db = sqlite3.connect(Env.DB_FILE)
     study_types = ImageMetadata.get_study_types(db)
-    metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id)
+    metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id, min_rating=rating)
     if metadata is None:
         return f'Error: No images found"'
 

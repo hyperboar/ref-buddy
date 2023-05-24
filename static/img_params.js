@@ -4,14 +4,16 @@ class ImgParams {
     studyTypeId
     sameFolderId
     timePlannedId
+    minRatingId
 
-    constructor(imageId, sourceType, sameFolder, timePlanned, isFav) {
+    constructor(imageId, sourceType, sameFolder, timePlanned, isFav, minRating) {
         // html ids AND GET param names
         this.imageId = imageId
         this.studyTypeId = sourceType
         this.sameFolderId = sameFolder
         this.timePlannedId = timePlanned
         this.isFavId = isFav
+        this.minRatingId = minRating
     }
 
     getParamsAsGET()
@@ -20,8 +22,9 @@ class ImgParams {
         const sameFolder = `${this.sameFolderId}=` + document.getElementById(this.sameFolderId).checked
         const timer      = `${this.timePlannedId}=` + document.getElementById(this.timePlannedId).getAttribute('value')
         const imageId    = `${this.imageId}=` + document.getElementById(this.imageId).textContent
+        const rating     = `${this.minRatingId}=` + document.getElementById(this.minRatingId).value
 
-        return `${sourceType}&${sameFolder}&${timer}&${imageId}`
+        return `${sourceType}&${sameFolder}&${timer}&${imageId}&${rating}`
     }
 
     getImgIdAsGET()
@@ -49,6 +52,11 @@ class ImgParams {
         if (urlParams.get(this.timePlannedId) !== null)
         {
             document.getElementById(this.timePlannedId).setAttribute('value', urlParams.get(this.timePlannedId))
+        }
+
+        if (urlParams.get(this.minRatingId) !== null)
+        {
+            document.getElementById(this.minRatingId).setAttribute('value', urlParams.get(this.minRatingId))
         }
     }
 }
