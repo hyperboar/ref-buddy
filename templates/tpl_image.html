@@ -188,16 +188,18 @@
             const gsButton = document.getElementById('toggle-grayscale');
             gsButton.addEventListener('click', toggleGrayscale);
 
+            const disableAllBut = function(elem, oneName, allNames)
+            {
+                allNames.forEach((n) => { if (n === oneName) { return; } elem.classList.remove(n) })
+            }
+
             // toggle cursor
             const toggleCursor = function(keycode)
             {
                 let img  = document.querySelector('.modal-img')
                 // let zoom = document.querySelector('.magnification')
                 const stops = ['cursor-stop-m2', 'cursor-stop-m1', 'cursor-stop-0', 'cursor-stop-p1', 'cursor-stop-p2']
-                const disableAllBut = function(elem, oneName, allNames)
-                {
-                    allNames.forEach((n) => { if (n === oneName) { return; } elem.classList.remove(n) })
-                }
+
 
                 // numpad "5" is 50% brightness or "0 exposure stops" or 18% gray
                 let idx = parseInt(keycode.replace('Numpad', '').replace('Digit', ''))
@@ -226,6 +228,54 @@
                 updateMagnifiedOffset(event.clientX, event.clientY)
             }
 
+            // set image contrast
+            let isContrast = false
+            const toggleContrast = function(keycode)
+            {
+                isContrast = !isContrast
+
+                const img = document.querySelector('.modal-img')
+                const zoom = document.querySelector('.magnification')
+                const bg = document.querySelector('.modal-bg')
+
+                const contrastGray = [
+                    'modal-img-gray',
+                    'modal-img-gray-contrast-150',
+                    'modal-img-gray-contrast-200',
+                    'modal-img-gray-contrast-300',
+                    'modal-img-gray-contrast-1000']
+                const contrastGrayBg = [
+                    'modal-bg-gray']
+
+                disableAllBut(img, '', contrastGray)
+                disableAllBut(zoom, '', contrastGray)
+                disableAllBut(bg, '', contrastGrayBg)
+                switch (keycode) {
+
+                    case 'KeyQ':
+                        break
+                    case 'KeyW':
+                        toggleCssClass(img, contrastGray[1])
+                        toggleCssClass(zoom, contrastGray[1])
+                        toggleCssClass(bg, contrastGrayBg[0])
+                        break
+                    case 'KeyE':
+                        toggleCssClass(img, contrastGray[2])
+                        toggleCssClass(zoom, contrastGray[2])
+                        toggleCssClass(bg, contrastGrayBg[0])
+                        break
+                    case 'KeyR':
+                        toggleCssClass(img, contrastGray[3])
+                        toggleCssClass(zoom, contrastGray[3])
+                        toggleCssClass(bg, contrastGrayBg[0])
+                        break
+                    case 'KeyT':
+                        toggleCssClass(img, contrastGray[4])
+                        toggleCssClass(zoom, contrastGray[4])
+                        toggleCssClass(bg, contrastGrayBg[0])
+                        break
+                }
+            }
 
             // hotkeys
             document.addEventListener('keydown', function(e)
@@ -236,6 +286,8 @@
                 if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
                 if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
                 if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
+                if (['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT'].includes(e.code))
+                                             { toggleContrast(e.code); e.preventDefault(); } // g
                 if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
                 if (e.code.includes('Numpad') || e.code.includes('Digit'))
                                              { toggleCursor(e.code); e.preventDefault(); } // numbers

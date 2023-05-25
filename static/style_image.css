@@ -70,10 +70,12 @@ body {
     filter: brightness(50%); /* Adjust the percentage value for desired darkness */
 }
 
-.modal-img-gray
-{
-    filter: grayscale(100%);
-}
+.modal-img-gray { filter: grayscale(100%); }
+
+.modal-img-gray-contrast-150  { filter: grayscale(100%) contrast(1.5); }
+.modal-img-gray-contrast-200  { filter: grayscale(100%) contrast(2); }
+.modal-img-gray-contrast-300  { filter: grayscale(100%) contrast(3); }
+.modal-img-gray-contrast-1000 { filter: grayscale(100%) contrast(10); }
 
 .magnification
 {
@@ -83,6 +85,7 @@ body {
     top: 0;
     background-repeat: no-repeat;
     display: none;
+    transition: filter 0.2s ease;
 }
 
 .modal-img, .magnification
