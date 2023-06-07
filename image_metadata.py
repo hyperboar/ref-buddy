@@ -58,7 +58,7 @@ class ImageMetadata:
                 count INTEGER DEFAULT 0,
                 rating INTEGER DEFAULT 0,
                 lost INTEGER DEFAULT 0,
-                last_viewed TIMESTAMP DEFAULT 0,
+                last_viewed TIMESTAMP DEFAULT '1999-01-01 00:00:00',
                 imported_at DATETIME NOT NULL,
                 hash TEXT,
                 FOREIGN KEY (path) REFERENCES paths (id),
