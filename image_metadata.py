@@ -59,7 +59,7 @@ class ImageMetadata:
                 rating INTEGER DEFAULT 0,
                 lost INTEGER DEFAULT 0,
                 last_viewed TIMESTAMP DEFAULT '1999-01-01 00:00:00',
-                imported_at DATETIME NOT NULL,
+                imported_at DATETIME DEFAULT (datetime('now')),
                 hash TEXT,
                 FOREIGN KEY (path) REFERENCES paths (id),
                 FOREIGN KEY (study_type) REFERENCES study_types (id),
