@@ -41,20 +41,22 @@ def view_folder(path_id):
 @app.route('/tagged')
 def view_tags():
     args = request.args
-    tags = [int(tag_str) for tag_str in args.get('tags').split(',')]
+    tags_all = args.get('tags').split(',')
+    tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
+    tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
 
-    page_str = args.get('page')
-    if page_str is None:
-        page = 0
-    else:
-        page = max(int(page_str) - 1, 0)
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+
+    page_str = args.get('page', default='1')
+    page = max(int(page_str) - 1, 0)
 
     limit = 100
     offset = limit * page
-    response, images = ImageMetadataCtrl.get_all_by_tags(tags, limit, offset)
+    response, images = ImageMetadataCtrl.get_all_by_tags(tags_pos, tags_neg, limit, offset)
 
     overview = {}
-    overview["study_type"] = ', '.join(ImageMetadataCtrl.get_tag_names(tags))
+    overview["study_type"] = ', '.join(tags_all)
     overview["path"] = ""
 
     panel = Markup(render_template('tpl_tags_panel.html', tags=ImageMetadataCtrl.get_all_tags()))

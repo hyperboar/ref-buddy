@@ -92,6 +92,9 @@ class Tag(Base):
     id = Column(Integer, primary_key=True)
     tag = Column(Text, unique=True)
 
+    def __str__(self):
+        return f"({self.id}:{self.tag})"
+
 class ImageTag(Base):
     __tablename__ = 'image_tags'
 

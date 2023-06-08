@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path
+from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag
 from sqlalchemy import func
 
 class ImageMetadataController:
@@ -97,34 +97,23 @@ class ImageMetadataController:
         return rows[0].study_type, rows[0], rows
 
     @staticmethod
-    def get_all_by_tags(conn, tags: [int], limit=100, offset=0) -> '[ImageMetadata]':
-        # c = conn.cursor()
-        #
-        # tag_str = ','.join([str(num) for num in tags])
-        # # image ids
-        # c.execute(f"""
-        #         SELECT image_id, COUNT(DISTINCT tag_id) AS tag_count
-        #         FROM image_tags
-        #         WHERE tag_id IN ({tag_str})
-        #         GROUP BY image_id
-        #     """)
-        # rows = c.fetchall()
-        # if len(rows) == 0:
-        #     return f"No images found for tags ({tag_str}) in tags", []
-        #
-        # image_ids = [str(row[0]) for row in rows if row[1] == len(tags)]
-        #
-        # c.execute(
-        #     f"{ImageMetadata.BASE_Q} WHERE im.id IN ({','.join(image_ids)}) ORDER BY im.imported_at  LIMIT {limit} OFFSET {offset}")
-        #
-        # rows = c.fetchall()
-        # if len(rows) == 0:
-        #     return f"No images found for tags ({tag_str}) in images", []
-        #
-        # images = [ImageMetadata.from_full_row(row) for row in rows]
-        #
-        # return "", images
-        pass
+    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit=100, offset=0) -> '[ImageMetadata]':
+        s = Session()
+
+        l = len(tags_pos)
+        q = s.query(ImageTag).filter(ImageTag.tag_id.in_(tags_pos)).filter(~ImageTag.tag_id.in_(tags_neg)).group_by(ImageTag.image_id).having(func.count(ImageTag.image_id) == l)
+        image_ids = [imt.image_id for imt in q.all()]
+
+        q = s.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).order_by(ImageMetadata.imported_at.desc())
+        result = q.limit(limit).offset(offset).all()
+
+        return "", result
+
+    @staticmethod
+    def get_tags_by_names(tags: [str]) -> [int]:
+        s = Session()
+        rows = s.query(Tag).filter(Tag.tag.in_(tags)).all()
+        return [row.id for row in rows]
 
     @staticmethod
     def get_random_by_study_type(study_type: int, same_folder: int = 0, prev_image_id: int = -1,
@@ -184,31 +173,30 @@ class ImageMetadataController:
     @staticmethod
     def get_tag_names(tags: [int]):
         s = Session()
-        found = s.query(Tag).filter(
-            tags.contains(Tag.id.in_(tags)) # ??
-        ).all()
+        found = s.query(Tag).filter(Tag.id.in_(tags)).all()
         return [t.tag for t in found]
 
     # endregion Convenience
 
 
 if __name__ == "__main__":
-    print(ImageMetadataController.get_by_id(666))
-    print(ImageMetadataController.get_by_path('pron\[Graphis] 2018-06-13 Gals – Asuna Kawai 河合あすな Natural beauty melons!\gra_asuna-k056.jpg'))
-    print(ImageMetadataController.get_id_by_path('pron\[Graphis] 2018-06-13 Gals – Asuna Kawai 河合あすな Natural beauty melons!\gra_asuna-k056.jpg'))
-    print(ImageMetadataController.get_by_id(1666))
-    print(ImageMetadataController.get_by_id(2666))
-
-    print('random')
-    print(ImageMetadataController.get_random_by_study_type(1))
-    print(ImageMetadataController.get_random_by_study_type(1))
-    print(ImageMetadataController.get_random_by_study_type(2, 1, 666))
-
-    print('favs')
-    for img in ImageMetadataController.get_favs(count=2, start=3):
-        print(img)
-
-    print('last')
-    for img in ImageMetadataController.get_last(count=2, start=0):
-        print(img)
+    print(ImageMetadataController.get_all_by_tags(None, [1, 24]))
+    # print(ImageMetadataController.get_by_id(666))
+    # print(ImageMetadataController.get_by_path('pron\[Graphis] 2018-06-13 Gals – Asuna Kawai 河合あすな Natural beauty melons!\gra_asuna-k056.jpg'))
+    # print(ImageMetadataController.get_id_by_path('pron\[Graphis] 2018-06-13 Gals – Asuna Kawai 河合あすな Natural beauty melons!\gra_asuna-k056.jpg'))
+    # print(ImageMetadataController.get_by_id(1666))
+    # print(ImageMetadataController.get_by_id(2666))
+    #
+    # print('random')
+    # print(ImageMetadataController.get_random_by_study_type(1))
+    # print(ImageMetadataController.get_random_by_study_type(1))
+    # print(ImageMetadataController.get_random_by_study_type(2, 1, 666))
+    #
+    # print('favs')
+    # for img in ImageMetadataController.get_favs(count=2, start=3):
+    #     print(img)
+    #
+    # print('last')
+    # for img in ImageMetadataController.get_last(count=2, start=0):
+    #     print(img)
     pass

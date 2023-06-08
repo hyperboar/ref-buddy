@@ -1,6 +1,6 @@
 <div>
     {% for tag in tags %}
-        <a href="#" onclick="toggle_tag('{{ tag[0] }}')">{{ tag[1] }}</a>&nbsp;
+        <a href="#" onclick="toggle_tag('{{ tag.tag }}')">{{ tag.tag }}</a>&nbsp;
     {% endfor %}
 <script>
     function toggle_tag(tagId)
