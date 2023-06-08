@@ -1,24 +1,11 @@
-from image_metadata import ImageMetadata
-import sqlite3
+from models.models_lump import Session, ImageMetadata
 import os
-
-
-# def drop_filename(path):
-#     import os
-#     return os.path.dirname(path)
-
 
 class ImageMetadataOverview:
     @staticmethod
-    def get_overview(conn):
-        c = conn.cursor()
-
-        # conn.create_function("drop_filename", 1, drop_filename)
-
-        c.execute(f"select id, path, study_type from {ImageMetadata.TABLE_NAME} group by path order by study_type ")
-
-        rows = c.fetchall()
-        images = [ImageMetadata.get_by_id(conn, row[0]) for row in rows]
+    def get_overview():
+        s = Session()
+        images = s.query(ImageMetadata).group_by(ImageMetadata.path_id).order_by(ImageMetadata.study_type_id).all()
         return [OverviewPath.from_image_metadata(img) for img in images]
 
 

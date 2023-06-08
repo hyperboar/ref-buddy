@@ -1,9 +1,5 @@
-import sqlite3
-
 from flask import Blueprint, request, abort, render_template_string
-
-from Env import Env
-from image_metadata import ImageMetadata
+from image_metadata_controller import ImageMetadataController
 
 
 routes_rating = Blueprint('routes_rating', __name__)
@@ -15,8 +11,7 @@ def add_image_rating():
     rating = int(args.get('rating', default='0'))
     image_id = int(args.get('image-id'))
 
-    db = sqlite3.connect(Env.DB_FILE)
-    r = ImageMetadata.add_image_rating(db, image_id, rating)
+    r = ImageMetadataController.add_image_rating(image_id, rating)
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string(str(r))
@@ -28,18 +23,16 @@ def add_folder_rating():
     rating = int(args.get('rating', default='0'))
     image_id = int(args.get('image-id'))
 
-    db = sqlite3.connect(Env.DB_FILE)
-
-    img = ImageMetadata.get_by_id(db, image_id)
-    imgs = ImageMetadata.get_all_by_path_id(db, img.path_id)[2]
+    img = ImageMetadataController.get_by_id(image_id)
+    imgs = ImageMetadataController.get_all_by_path_id(img.path_id)[2]
     res = 0
     for i in imgs:
-        res += ImageMetadata.add_image_rating(db, i.image_id, rating, auto_commit=False)
+        res += ImageMetadataController.add_image_rating(i.image_id, rating)
 
     if res > 0:
         abort(404, 'Something went wrong, fav not set, probably...')
-        db.rollback()
+        # db.rollback()
         return
 
-    db.commit()
+    # db.commit()
     return 'ok'

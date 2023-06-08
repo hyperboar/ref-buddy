@@ -1,27 +1,25 @@
-import sqlite3
 import os
-from image_metadata import ImageMetadata
 import sys
 
+from image_metadata_controller import ImageMetadataController as Ctrl
 from maintenance import assign_folder_tags
+from models.models_lump import Session
 
 
 class ImageMetadataImporter:
     def __init__(self, db_path):
-        self.conn = sqlite3.connect(db_path)
-
-    def __del__(self):
-        self.conn.close()
+        pass
 
     def import_metadata(self, folder_path):
         formats = ('.png', '.jpg', '.jpeg', '.webp')
-        ImageMetadata.static_initialize(self.conn)
-        sts = ImageMetadata.get_study_types(self.conn)
+        sts = Ctrl.get_study_types()
 
         new_count = 0
 
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
+
+        session = Session()
 
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
@@ -34,17 +32,17 @@ class ImageMetadataImporter:
                 file_path = os.path.join(dir_path, file_name)
                 file_path = os.path.relpath(file_path, folder_path)
                 try:
-                    existing_metadata = ImageMetadata.get_by_path(self.conn, file_path)
+                    existing_metadata = Ctrl.get_by_path(file_path, session=session)
                     if not existing_metadata:
                         count += 1
                         new_count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, True)
-                        ImageMetadata.create(self.conn, file_path, sts)
+                        Ctrl.create(file_path, sts, session=session)
                     else:
                         count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, False)
                 except Exception as e:
-                    print(f"Error processing  {file_path}: {sys.exc_info()[0]}")
+                    print(f"\nError processing  {file_path}: {sys.exc_info()[0]}")
                     raise
             print(f"")
 

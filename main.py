@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import webbrowser
 import tkinter as tk
 from tkinter import filedialog
@@ -100,7 +101,8 @@ class MainWindow(tk.Frame):
         # if not is_run:
         #     return
 
-        subprocess.Popen(["python", "server.py"], cwd=os.getcwd())
+        subprocess.Popen([os.path.join(sys.prefix, 'Scripts', 'python'), 'server.py'], cwd=os.getcwd())
+
         self.link["state"] = "normal"
         self.server_button["state"] = "disabled"
 
@@ -116,10 +118,10 @@ class MainWindow(tk.Frame):
 
         match result:
             case "all":
-                print("Rehashing ALL images...")
+                print("\nRehashing ALL images...")
                 rehash_images(rehash_all=True)
             case "new":
-                print("Hashing new images...")
+                print("\nHashing new images...")
                 rehash_images(rehash_all=False)
 
 

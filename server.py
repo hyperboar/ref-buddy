@@ -3,11 +3,12 @@ import sqlite3
 from flask import Flask, render_template_string, request, send_file, abort, send_from_directory, render_template
 from markupsafe import Markup
 
-from image_metadata import ImageMetadata
+from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 import os
 from datetime import datetime
 from Env import Env
+from models.models_lump import Session
 from server_ext_rating import routes_rating
 
 app = Flask(__name__, static_url_path='/static')
@@ -17,26 +18,22 @@ app.register_blueprint(routes_rating)
 
 @app.route('/')
 def index():
-    db = sqlite3.connect(Env.DB_FILE)
-    images = ImageMetadataOverview.get_overview(db)
+    images = ImageMetadataOverview.get_overview()
     return render_template('tpl_index.html', images=images)
 
 @app.route('/favs')
 def view_favs():
-    db = sqlite3.connect(Env.DB_FILE)
-    images = ImageMetadata.get_favs(db, 300)
+    images = ImageMetadataCtrl.get_favs(300)
     return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None)
 
 @app.route('/last')
 def view_last():
-    db = sqlite3.connect(Env.DB_FILE)
-    images = ImageMetadata.get_last(db, 1000)
+    images = ImageMetadataCtrl.get_last(1000)
     return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None)
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
-    db = sqlite3.connect(Env.DB_FILE)
-    study_type, path, images = ImageMetadata.get_all_by_path_id(db, path_id)
+    study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id)
     overview = OverviewPath.from_image_metadata(images[0])
 
     return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview)
@@ -54,33 +51,22 @@ def view_tags():
 
     limit = 100
     offset = limit * page
-    db = sqlite3.connect(Env.DB_FILE)
-    response, images = ImageMetadata.get_all_by_tags(db, tags, limit, offset)
+    response, images = ImageMetadataCtrl.get_all_by_tags(tags, limit, offset)
 
     overview = {}
-    overview["study_type"] = ', '.join(ImageMetadata.get_tag_names(db, tags))
+    overview["study_type"] = ', '.join(ImageMetadataCtrl.get_tag_names(tags))
     overview["path"] = ""
 
-    panel = Markup(render_template('tpl_tags_panel.html', tags=ImageMetadata.get_all_tags(db)))
+    panel = Markup(render_template('tpl_tags_panel.html', tags=ImageMetadataCtrl.get_all_tags()))
     return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=panel)
 
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):
     return send_from_directory(app.config['THUMB_STATIC'], path)
 
-@app.route('/image/<path:path>')
-def show_image(path):
-    db = sqlite3.connect(Env.DB_FILE)
-    metadata = ImageMetadata.get_by_path(db, path)
-    if metadata is None:
-        return f'Error: Image not found: {path}'
-    return render_template_string(metadata.to_html())
-
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
-    print(f"getting id {image_id}")
-    db = sqlite3.connect(Env.DB_FILE)
-    metadata = ImageMetadata.get_by_id(db, image_id)
+    metadata = ImageMetadataCtrl.get_by_id(image_id)
     ext = os.path.splitext(metadata.path)[1]
     return send_file(os.path.join(Env.IMAGES_PATH, metadata.path), mimetype=f'image/{ext}')
 
@@ -93,13 +79,14 @@ def study_image(image_id):
         case s:
             timer = int(s)
 
-    db = sqlite3.connect(Env.DB_FILE)
-    metadata = ImageMetadata.get_by_id(db, image_id)
-    study_types = ImageMetadata.get_study_types(db)
+    s = Session()
+    s.begin()
+    metadata = ImageMetadataCtrl.get_by_id(image_id)
+    study_types = ImageMetadataCtrl.get_study_types()
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
 
-    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=metadata.get_tags(db))
+    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
 
 @app.route('/study-random')
 def study_random():
@@ -110,13 +97,14 @@ def study_random():
     timer = int(args.get('time-planned', default='120'))
     rating = int(args.get('min-rating', default='0'))
 
-    db = sqlite3.connect(Env.DB_FILE)
-    study_types = ImageMetadata.get_study_types(db)
-    metadata = ImageMetadata.get_random_by_study_type(db, study_type, same_folder, prev_image_id, min_rating=rating)
+    s = Session()
+    s.begin()
+    study_types = ImageMetadataCtrl.get_study_types()
+    metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating)
     if metadata is None:
         return f'Error: No images found"'
 
-    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=metadata.get_tags(db))
+    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
 
 @app.route('/set-image-fav')
 def set_image_fav():
@@ -124,8 +112,7 @@ def set_image_fav():
     is_fav = int(args.get('is-fav'))
     image_id = int(args.get('image-id'))
 
-    db = sqlite3.connect(Env.DB_FILE)
-    r = ImageMetadata.set_image_fav(db, image_id, is_fav)
+    r = ImageMetadataCtrl.set_image_fav(image_id, is_fav)
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string('yep')
@@ -136,8 +123,7 @@ def set_image_last_viewed():
     image_id = int(args.get('image-id'))
     now = datetime.now()
 
-    db = sqlite3.connect(Env.DB_FILE)
-    r = ImageMetadata.set_image_last_viewed(db, image_id, now)
+    r = ImageMetadataCtrl.set_image_last_viewed(image_id, now)
 
     if not r:
         abort(404, 'Something went wrong, last viewed not updated, probably...')
@@ -145,7 +131,7 @@ def set_image_last_viewed():
 
 
 if __name__ == '__main__':
-    db = sqlite3.connect(Env.DB_FILE)
-    ImageMetadata.static_initialize(db)
+    # db = sqlite3.connect(Env.DB_FILE)
+    # ImageMetadataCtrl.static_initialize(db)
 
     app.run(port=Env.SERVER_PORT)

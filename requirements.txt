@@ -7,3 +7,5 @@ MarkupSafe==2.1.2
 Pillow==9.5.0
 python-dotenv==1.0.0
 Werkzeug==2.2.3
+
+SQLAlchemy~=2.0.15

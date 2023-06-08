@@ -29,7 +29,7 @@
                 <span>Study: </span>
                 <select id="study-type" value="{{ image.study_type_id }}">
                     {% for st in study_types %}
-                    <option value="{{ st[0] }}">{{ st[1] }}</option>
+                    <option value="{{ st.id }}">{{ st.type }}</option>
                     {% endfor %}
                 </select>
                 <span class="space"/>

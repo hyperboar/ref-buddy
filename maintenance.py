@@ -3,185 +3,154 @@ import os
 import sys
 import sqlite3
 from PIL import Image
-from image_metadata import ImageMetadata
-import time
+from sqlalchemy import func
+from sqlalchemy.dialects.sqlite import insert
+
+from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
+from models.models_lump import Session, ImageMetadata, ImageTag, engine
 
 
 def get_db_info():
-    if not os.path.isfile(Env.DB_FILE):
-        print(f"Database file '{Env.DB_FILE}' does not exist.")
-        return
-
-    conn = sqlite3.connect(Env.DB_FILE)
-    cursor = conn.cursor()
-
-    table = ImageMetadata.TABLE_NAME
-
-    # Execute the query to check if the table exists
-    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
-
-    # Get the result set and check if the table exists
-    result = cursor.fetchone()
-    if result:
-        print(f"The '{table}' table exists.")
-    else:
-        print(f"The '{table}' table does not exist.")
-        cursor.close()
-        conn.close()
-        return
-
-    cursor.execute(f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}")
-    num_images = cursor.fetchone()[0]
-    print(f"Database file '{Env.DB_FILE}' exists and contains {num_images} images.")
-
-    cursor.close()
-    conn.close()
-
-
-def create_new_db():
-    if not os.path.isfile(Env.DB_FILE):
-        print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
-
-    conn = sqlite3.connect(Env.DB_FILE)
-    cursor = conn.cursor()
-
-    table = ImageMetadata.TABLE_NAME
-
-    # Execute the query to check if the table exists
-    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
-    # Get the result set and check if the table exists
-    result = cursor.fetchone()
-    if result:
-        print(f"The '{table}' table exists. Removing.")
-        cursor.execute('DROP TABLE image_metadata')
-
-    cursor.execute(ImageMetadata.get_table_schema())
-    print(f"New database created at path '{Env.DB_FILE}'.")
-
-    cursor.close()
-    conn.close()
+    # if not os.path.isfile(Env.DB_FILE):
+    #     print(f"Database file '{Env.DB_FILE}' does not exist.")
+    #     return
+    #
+    # conn = sqlite3.connect(Env.DB_FILE)
+    # cursor = conn.cursor()
+    #
+    # table = Ctrl.TABLE_NAME
+    #
+    # # Execute the query to check if the table exists
+    # cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+    #
+    # # Get the result set and check if the table exists
+    # result = cursor.fetchone()
+    # if result:
+    #     print(f"The '{table}' table exists.")
+    # else:
+    #     print(f"The '{table}' table does not exist.")
+    #     cursor.close()
+    #     conn.close()
+    #     return
+    #
+    # cursor.execute(f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}")
+    # num_images = cursor.fetchone()[0]
+    # print(f"Database file '{Env.DB_FILE}' exists and contains {num_images} images.")
+    #
+    # cursor.close()
+    # conn.close()
+    pass
 
 
 def create_new_db():
-    if not os.path.isfile(Env.DB_FILE):
-        print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
-
-    conn = sqlite3.connect(Env.DB_FILE)
-    cursor = conn.cursor()
-
-    table = ImageMetadata.TABLE_NAME
-
-    # Execute the query to check if the table exists
-    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
-    # Get the result set and check if the table exists
-    result = cursor.fetchone()
-    if result:
-        print(f"The '{table}' table exists. Removing.")
-        cursor.execute('DROP TABLE image_metadata')
-
-    cursor.execute(ImageMetadata.get_table_schema())
-    print(f"New database created at path '{Env.DB_FILE}'.")
-
-    cursor.close()
-    conn.close()
-
+    # if not os.path.isfile(Env.DB_FILE):
+    #     print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
+    #
+    # conn = sqlite3.connect(Env.DB_FILE)
+    # cursor = conn.cursor()
+    #
+    # table = ImageMetadata.TABLE_NAME
+    #
+    # # Execute the query to check if the table exists
+    # cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+    # # Get the result set and check if the table exists
+    # result = cursor.fetchone()
+    # if result:
+    #     print(f"The '{table}' table exists. Removing.")
+    #     cursor.execute('DROP TABLE image_metadata')
+    #
+    # cursor.execute(ImageMetadata.get_table_schema())
+    # print(f"New database created at path '{Env.DB_FILE}'.")
+    #
+    # cursor.close()
+    # conn.close()
+    pass
 
 def generate_thumbs():
-    # Connect to SQLite database
-    conn = sqlite3.connect(Env.DB_FILE)
-
-    ImageMetadata.static_initialize(conn)
-
-    # Select all image paths from image_metadata table
-    # c.execute(f"SELECT id, path FROM {ImageMetadata.TABLE_NAME}")
-    c = conn.cursor()
-    c.execute(ImageMetadata.BASE_Q)
-    images = [ImageMetadata.from_full_row(row) for row in  c.fetchall()]
-
     # Create thumbnail folder if it doesn't exist
     if not os.path.exists(Env.THUMB_PATH):
         os.makedirs(Env.THUMB_PATH)
 
+    s = Session()
+
+    max_i = s.query(func.count()).select_from(ImageMetadata).scalar()
+    limit = 500
+    offset = 0
+
     i = 0
     i_step = 42
-    max_i = len(images)
     new_count = 0
-    # Generate thumbnail for each image
-    for img in images:
 
-        i += 1
-        if (i % i_step) == 0:
-            print(f"\rProgress: {int(i / max_i * 100.)}% ({new_count} new)", end='')
-            # time.sleep(1)
-
-        # Generate thumbnail filename by using id from database
-        thumb_filename = os.path.join(Env.THUMB_PATH, f"{img.image_id}.jpg")
-
-        # Skip image if thumbnail already exists
-        if os.path.exists(thumb_filename):
-            continue
-
-        new_count += 1
-
-        path = os.path.join(Env.IMAGES_PATH, img.path)
-
-        # Load image and generate thumbnail
-        image = Image.open(path)
-        image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
-
-        # Save thumbnail as JPEG file
-        image.convert('RGB').save(thumb_filename, 'JPEG')
-
-        if i > max_i:
+    while True:
+        images = s.query(ImageMetadata).limit(limit).offset(offset).all()
+        if len(images) == 0:
             break
 
-    print(f"\rProgress: {int(i / max_i * 100.)}%", end='')
-    # Close database connection
-    conn.close()
+        offset += limit
+
+        # Generate thumbnail for each image
+        for img in images:
+            i += 1
+            if (i % i_step) == 0:
+                print(f"\rProgress: {int(i / max_i * 100.)}% ({new_count} new)", end='')
+                # time.sleep(1)
+
+            # Generate thumbnail filename by using id from database
+            thumb_filename = os.path.join(Env.THUMB_PATH, f"{img.image_id}.jpg")
+
+            # Skip image if thumbnail already exists
+            if os.path.exists(thumb_filename):
+                continue
+
+            new_count += 1
+
+            path = os.path.join(Env.IMAGES_PATH, img.path)
+
+            # Load image and generate thumbnail
+            image = Image.open(path)
+            image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
+
+            # Save thumbnail as JPEG file
+            image.convert('RGB').save(thumb_filename, 'JPEG')
+
+        print(f"\rProgress: {int(i / max_i * 100.)}% ({new_count} new)", end='')
 
 
 def rehash_images(rehash_all):
-    conn = sqlite3.connect(Env.DB_FILE)
+    s = Session()
 
-    ImageMetadata.static_initialize(conn)
+    rows_max = s.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.image_hash.is_(None)).scalar() if rehash_all else s.query(func.count()).select_from(ImageMetadata).scalar()
+    limit = 500
+    offset = 0
 
-    c = conn.cursor()
-    # rows count
-    q = f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}"
-    if not rehash_all:
-        q += " WHERE hash IS NULL"
-    c.execute(q)
+    q = s.query(ImageMetadata)
 
-    rows_max = c.fetchone()[0]
-    rows_step = 500
-    rows_start = 0
+    while True:
+        if rehash_all:
+            images = q.limit(limit).offset(offset).all()
+        else:
+            images = q.filter(ImageMetadata.image_hash.is_(None)).limit(limit).offset(offset).all()
 
-    while rows_start <= rows_max:
-        q = f"{ImageMetadata.BASE_Q}"
-        if not rehash_all:
-            q += " WHERE hash IS NULL"
-        c.execute(q + f" LIMIT {rows_step} OFFSET {rows_start}")
-        images = [ImageMetadata.from_full_row(row) for row in c.fetchall()]
+        if len(images) == 0:
+            break
 
         for image in images:
-            print(f"\r{int(rows_start/rows_max * 100)}%... Hashing {image.image_id} {image.path}", end="")
+            print(f"\r{int(offset/rows_max * 100)}%... Hashing {image.image_id} {image.path}", end="")
             image_path = os.path.join(Env.IMAGES_PATH, image.path)
 
             if not os.path.exists(image_path):
-                image.mark_as_lost(conn, auto_commit=False)
+                image.mark_as_lost(s, auto_commit=False)
                 continue
 
             with open(image_path, 'rb') as file:
                 image_data = file.read()
-            image_hash = hashlib.sha1(image_data).hexdigest()
+            image.image_hash = hashlib.sha1(image_data).hexdigest()
+            s.flush()
 
-            c.execute(f'UPDATE {ImageMetadata.TABLE_NAME} SET hash = "{image_hash}" WHERE id = {image.image_id}')
+        offset += limit
 
-        rows_start += rows_step
-
-    conn.commit()
-    conn.close()
+    s.commit()
 
     print("\r100% Rehashing complete", end="")
 
@@ -196,11 +165,11 @@ def rehash_images(rehash_all):
 
 def assign_folder_tags():
     """Go over all imag_metadata rows and add tags academic, pron, the_bits, artists and frames(video)"""
+
     conn = sqlite3.connect(Env.DB_FILE)
-    ImageMetadata.static_initialize(conn)
 
     c = conn.cursor()
-    c.execute(f"""
+    c.execute("""
         -- academic
         INSERT OR IGNORE INTO image_tags (image_id, tag_id)
         SELECT id, 2
@@ -239,25 +208,22 @@ def assign_folder_tags():
     conn.commit()
     conn.close()
 
-
 def mark_all_lost():
-    conn = sqlite3.connect(Env.DB_FILE)
+    s = Session()
 
-    ImageMetadata.static_initialize(conn)
+    rows_max = s.query(func.count()).select_from(ImageMetadata).scalar()
+    limit = 500
+    offset = 0
+    lost_count = 0
 
-    c = conn.cursor()
-    # rows count
-    q = f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}"
-    c.execute(q)
+    q = s.query(ImageMetadata)
 
-    rows_max = c.fetchone()[0]
-    rows_step = 500
-    rows_start = 0
+    while True:
+        images = q.limit(limit).offset(offset).all()
+        offset += limit
 
-    while rows_start <= rows_max:
-        q = f"{ImageMetadata.BASE_Q}"
-        c.execute(q + f" LIMIT {rows_step} OFFSET {rows_start}")
-        images = [ImageMetadata.from_full_row(row) for row in c.fetchall()]
+        if len(images) == 0:
+            break
 
         for image in images:
             image_path = os.path.join(Env.IMAGES_PATH, image.path)
@@ -265,14 +231,17 @@ def mark_all_lost():
             if os.path.exists(image_path):
                 continue
 
-            print(f"Lost {image.image_id} {image.path}")
-            image.mark_as_lost(conn, auto_commit=False)
+            lost_count += 1
+            print(f"\nLost {image.image_id} {image.path}")
+            image.mark_as_lost(session=s, auto_commit=False)
 
-        rows_start += rows_step
+        print(f"\r{int(offset / rows_max * 100)}%... Searching for lost images. Found {lost_count} lost so far", end="")
 
-    conn.commit()
-    conn.close()
-    pass
+    if lost_count > 0:
+        print(f"\nFound {lost_count} lost images\n")
+        s.commit()
+    else:
+        print(f"\nNothing lost yet!\n")
 
 
 def cleanup_lost_images():
@@ -280,9 +249,14 @@ def cleanup_lost_images():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "--new-db":
-        create_new_db()
-    elif len(sys.argv) > 1 and sys.argv[1] == "--gen-thumb":
-        generate_thumbs()
-    else:
-        get_db_info()
+    pass
+    # print(f"\rAssigning essential tags to new images...", end="")
+    # mark_all_lost()
+    # print(f"\rAssigning essential tags to new images... Done!", end="")
+
+    # if len(sys.argv) > 1 and sys.argv[1] == "--new-db":
+    #     create_new_db()
+    # elif len(sys.argv) > 1 and sys.argv[1] == "--gen-thumb":
+    #     generate_thumbs()
+    # else:
+    #     get_db_info()
