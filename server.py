@@ -136,4 +136,4 @@ if __name__ == '__main__':
     # db = sqlite3.connect(Env.DB_FILE)
     # ImageMetadataCtrl.static_initialize(db)
 
-    app.run(port=Env.SERVER_PORT)
+    app.run(host='0.0.0.0', port=Env.SERVER_PORT)
