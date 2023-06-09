@@ -1,5 +1,3 @@
-import sqlite3
-
 from flask import Flask, render_template_string, request, send_file, abort, send_from_directory, render_template
 from markupsafe import Markup
 

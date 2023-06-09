@@ -1,14 +1,11 @@
 import hashlib
 import os
-import sys
 import sqlite3
 from PIL import Image
 from sqlalchemy import func
-from sqlalchemy.dialects.sqlite import insert
 
-from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
-from models.models_lump import Session, ImageMetadata, ImageTag, engine
+from models.models_lump import Session, ImageMetadata
 
 
 def get_db_info():
