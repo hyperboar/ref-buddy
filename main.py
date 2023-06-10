@@ -3,7 +3,6 @@ import subprocess
 import sys
 import webbrowser
 import tkinter as tk
-from tkinter import filedialog
 from tkinter import messagebox
 
 from export_frames_window import ExportFramesWindow
@@ -26,6 +25,11 @@ class MainWindow(tk.Frame):
 
         self.create_widgets()
         self.create_menus()
+
+        self.web_process = None
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
+
 
         # Check if the database file exists
         if not os.path.isfile(Env.DB_FILE):
@@ -88,12 +92,11 @@ class MainWindow(tk.Frame):
         self.ffmpeg = ExportFramesWindow(self.master)
 
     def launch_server(self):
-        if sys.platform.system() == 'Windows':
+        if sys.platform == 'win32':
             bin_fldr = "Scripts"
         else:
             bin_fldr = "bin"
-        subprocess.Popen([os.path.join(sys.prefix, bin_fldr, 'python'), 'server.py'], cwd=os.getcwd())
-
+        self.web_process = subprocess.Popen([os.path.join(sys.prefix, bin_fldr, 'python'), 'server.py'], cwd=os.getcwd())
         self.link["state"] = "normal"
         self.server_button["state"] = "disabled"
 
@@ -114,6 +117,14 @@ class MainWindow(tk.Frame):
             case "new":
                 print("\nHashing new images...")
                 rehash_images(rehash_all=False)
+
+    def on_closing(self):
+        self.on_app_exit()
+        self.master.quit()
+
+    def on_app_exit(self):
+        if self.web_process is not None and self.web_process.poll() is None:
+            self.web_process.terminate()
 
 
 if __name__ == "__main__":
