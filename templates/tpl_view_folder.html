@@ -12,9 +12,10 @@
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
 </div>
 <div>{{ panel|default('') }}</div>
+<div><button id="toggle-selection-mode-btn">Select</button></div>
 <div class="gallery">
     {% for image in images %}
-    <div class="thumbnail">
+    <div class="thumbnail" data-id="{{ image.image_id }}">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
             <img class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
         </a>
@@ -36,6 +37,120 @@
 
         new ImageLazyLoad('.thumb', false, '300px')
     }, false)
+
+    // Track the selection mode state
+    let selectionMode = false;
+
+    let selectedIds = []
+    let lastClickedTile = null
+
+    // Function to toggle the selection mode
+    function toggleSelectionMode()
+    {
+        selectionMode = !selectionMode;
+
+        // Add or remove event listeners and update UI based on selection mode state
+        if (selectionMode)
+        {
+            document.querySelector('.gallery').classList.add('no-select')
+            document.getElementById('toggle-selection-mode-btn').classList.add('select-mode-btn')
+
+            // Disable other interactions and enable selection mode UI
+            document.querySelectorAll('.thumbnail').forEach((tile) =>
+            {
+                tile.querySelector('a').classList.add('disabled')
+                tile.addEventListener('click', onTileSelectionClick)
+
+                const img = tile.querySelector('img')
+                img.classList.remove('selected')
+                img.classList.add('selectable')
+            });
+        }
+        else
+        {
+            selectedIds = []
+
+            document.querySelector('.gallery').classList.remove('no-select')
+            document.getElementById('toggle-selection-mode-btn').classList.remove('select-mode-btn')
+
+            // Enable other interactions and disable selection mode UI
+            document.querySelectorAll('.thumbnail').forEach((tile) =>
+            {
+                tile.querySelector('a').classList.remove('disabled')
+                tile.removeEventListener('click', onTileSelectionClick);
+
+                const img = tile.querySelector('img')
+                img.classList.remove('selectable')
+                img.classList.remove('selected')
+            });
+        }
+    }
+
+    function onTileSelectionClick(event)
+    {
+        handleTileClick(event.currentTarget, false, event.shiftKey)
+    }
+
+    // Event handler for tile click during selection mode
+    function handleTileClick(tile, isBatch=false, isShift=false)
+    {
+        const tileId = tile.getAttribute('data-id')
+
+        if (isBatch && !selectedIds.includes(tileId))
+        {
+            selectedIds.push(tileId)
+            const img = tile.querySelector('img')
+            img.classList.add('selected');
+        }
+        else if (!isBatch && !selectedIds.includes(tileId))
+        {
+            selectedIds.push(tileId)
+            const img = tile.querySelector('img')
+            img.classList.add('selected');
+        }
+        else if (!isBatch && selectedIds.includes(tileId))
+        {
+            const idx = selectedIds.indexOf(tileId);
+            if (idx !== -1) selectedIds.splice(idx, 1);
+            const img = tile.querySelector('img')
+            img.classList.remove('selected');
+        }
+
+
+        // stop when BATCH select
+        if (isBatch) { return }
+
+        if (isShift && lastClickedTile)
+        {
+            const dir = findSiblingDirection(lastClickedTile, tile)
+            let getNextTile = cur => dir > 0 ? cur.nextElementSibling : cur.previousElementSibling
+            let nextTile = getNextTile(lastClickedTile)
+            while(nextTile != tile)
+            {
+                handleTileClick(nextTile, true)
+                nextTile = getNextTile(nextTile)
+            }
+        }
+
+        lastClickedTile = tile
+    }
+
+    function findSiblingDirection(elem1, elem2)
+    {
+        if (elem1 === elem2) { return 0 }
+
+        let run = elem1
+        while (run != null)
+        {
+            if (run === elem2) { return 1 }
+            run = run.nextElementSibling
+        }
+
+        return -1
+    }
+
+    // Example usage: Toggle selection mode when a button is clicked
+    document.getElementById('toggle-selection-mode-btn').addEventListener('click', toggleSelectionMode);
 </script>
 </body>
 </html>

@@ -43,6 +43,34 @@ body
     opacity: 0.1 !important;
 }
 
+.disabled {
+  pointer-events: none; /* Disable pointer events on the tile */
+}
+
+.selected {
+    outline: 4px solid green;
+}
+
+.selected::before {
+  content: '\2713'; /* Unicode character for checkmark */
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: green;
+  color: white;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.select-mode-btn
+{
+    background-color: green;
+}
+
+.no-select {
+    user-select: none;
+}
+
 /* CSS grid for responsive layout */
 @media (min-width: 768px) {
     .gallery {
