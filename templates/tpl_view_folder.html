@@ -240,6 +240,29 @@
     document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
     document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
     document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
+
+    document.addEventListener('keydown', function(e)
+    {
+        // select all
+        if (selectionMode && e.code === 'KeyA' && e.shiftKey)
+        {
+            document.querySelectorAll('.thumbnail').forEach((tile) =>
+            {
+                handleTileClick(tile)
+                lastClickedTile = null
+            })
+        }
+        // toggle selection mode
+        else if (e.code === 'KeyS' && !e.shiftKey)
+        {
+            toggleSelectionMode()
+        }
+        // toggle tag popup display
+        else if (e.code === 'KeyT' && !e.shiftKey)
+        {
+            toggleTagsPopupDisplay()
+        }
+    });
 </script>
 </body>
 </html>
