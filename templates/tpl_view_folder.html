@@ -12,7 +12,6 @@
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
 </div>
 <div>{{ panel|default('') }}</div>
-<div><button id="toggle-selection-mode-btn">Select</button></div>
 <div class="gallery">
     {% for image in images %}
     <div class="thumbnail" data-id="{{ image.image_id }}">
@@ -22,6 +21,26 @@
     </div>
     {% endfor %}
 </div>
+
+<div class="top-menu">
+    <button id="tags-open-btn">Tags</button>
+    <button id="toggle-selection-mode-btn">Select</button>
+</div>
+
+<div class="tags-popup-background" style="display: none;"></div>
+<div id="tags-popup" class="tags-popup" style="display: none;">
+    <h3>Tags (<span id="images-count"></span> images selected)</h3>
+    <div id="tagList">
+        {% for tag in tags %}
+            <input type="checkbox" id="{{ tag.tag }}" value="{{ tag.tag }}"/>
+            <label for="{{ tag.tag }}">{{ tag.tag }}</label><br>
+        {% endfor %}
+    </div>
+    <button id="tags-submit">Submit</button>
+    <button id="tags-clear">Clear All</button>
+    <button id="tags-close">Close</button>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function()
     {
@@ -151,6 +170,76 @@
 
     // Example usage: Toggle selection mode when a button is clicked
     document.getElementById('toggle-selection-mode-btn').addEventListener('click', toggleSelectionMode);
+</script>
+
+<!-- ################## -->
+<!-- TAGS POPUP SECTION -->
+<!-- ################## -->
+<script>
+
+    function toggleTagsPopupDisplay()
+    {
+        const btn = document.getElementById('tags-popup')
+        if (btn.style.display === 'none')
+        {
+            btn.style.display = 'block'
+            document.querySelector('.tags-popup-background').style.display = 'block'
+            document.getElementById('images-count').textContent = '' + selectedIds.length
+        }
+        else
+        {
+            btn.style.display = 'none'
+            document.querySelector('.tags-popup-background').style.display = 'none'
+        }
+    }
+
+    {#function openTagsPopup()#}
+    {#{#}
+    {#    document.getElementById('tags-popup').style.display = 'block';#}
+    {#    document.getElementById('images-count').textContent = '' + selectedIds.length;#}
+    //}
+
+    function closeTagsPopup()
+    {
+        document.getElementById('tags-popup').style.display = 'none';
+        document.querySelector('.tags-popup-background').style.display = 'none'
+    }
+
+    function clearTagsPopup()
+    {
+        Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.checked = false);
+    }
+
+    function submitTags()
+    {
+        const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.value);
+
+        const idsStr = selectedIds.join(',')
+        const tagsStr = selectedTags.join(',')
+
+        {#const params = `image-id=${idsStr}&tags=${tagsStr}`#}
+        {#console.log('Selected Tags:', params);#}
+
+        document.getElementById('tags-submit').classList.add('loading-fav')
+
+        fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        document.getElementById('tags-submit').classList.remove('loading-fav')
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with the fetch operation:', error);
+                        document.getElementById('tags-submit').classList.remove('loading-fav')
+                    });
+    }
+
+    document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
+    document.getElementById('tags-submit').addEventListener('click', submitTags)
+    document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
+    document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
+    document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
 </script>
 </body>
 </html>

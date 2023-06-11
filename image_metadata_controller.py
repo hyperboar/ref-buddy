@@ -146,6 +146,16 @@ class ImageMetadataController:
         return 1
 
     @staticmethod
+    def add_image_tags(image_ids: [int], tags_str: [str]) -> int:
+        tags = ImageMetadataController.get_tags_by_names(tags_str)
+        s = Session()
+        for i in image_ids:
+            [s.merge(ImageTag(image_id=i, tag_id=t)) for t in tags]
+            s.flush()
+        s.commit()
+        return 1
+
+    @staticmethod
     def set_image_last_viewed(image_id: int, time: 'datetime'):
         s = Session()
         im = s.get(ImageMetadata, image_id)

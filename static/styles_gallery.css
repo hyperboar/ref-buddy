@@ -71,6 +71,45 @@ body
     user-select: none;
 }
 
+.tags-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #918d8d;
+    border: 1px black;
+    padding: 15px;
+}
+
+.tags-popup-background {
+    position: fixed;
+    background-color: black;
+    opacity: 0.5;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.top-menu {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+}
+
+@keyframes rotateFav {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-fav {
+  animation: rotateFav 2s linear infinite;
+}
+
 /* CSS grid for responsive layout */
 @media (min-width: 768px) {
     .gallery {

@@ -8,11 +8,13 @@ from datetime import datetime
 from Env import Env
 from models.models_lump import Session
 from server_ext_rating import routes_rating
+from server_ext_tags import routes_tags
 
 app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
 
 app.register_blueprint(routes_rating)
+app.register_blueprint(routes_tags)
 
 @app.route('/')
 def index():
@@ -22,19 +24,19 @@ def index():
 @app.route('/favs')
 def view_favs():
     images = ImageMetadataCtrl.get_favs(300)
-    return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None)
+    return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags())
 
 @app.route('/last')
 def view_last():
     images = ImageMetadataCtrl.get_last(1000)
-    return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None)
+    return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags())
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
     study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id)
     overview = OverviewPath.from_image_metadata(images[0])
 
-    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview)
+    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags=ImageMetadataCtrl.get_all_tags())
 
 @app.route('/tagged')
 def view_tags():
