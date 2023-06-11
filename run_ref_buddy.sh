@@ -4,19 +4,19 @@
 VENV_DIR=venv
 
 # Check if Python is installed
-python --version >/dev/null 2>&1
+python3 --version >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "Python is not installed. Please install Python 3.10 or higher and try again."
     exit 1
 fi
 
 # Check Python version
-python -c "import sys; assert sys.version_info >= (3, 10), 'Python 3.10 or higher is required'; print('Python version check passed.')"
+python3 -c "import sys; assert sys.version_info >= (3, 10), 'Python 3.10 or higher is required'; print('Python version check passed.')"
 
 # Check if virtual environment exists
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating virtual environment..."
-    python -m venv $VENV_DIR
+    python3 -m venv $VENV_DIR
 fi
 
 # Activate the virtual environment
