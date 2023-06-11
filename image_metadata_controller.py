@@ -176,9 +176,12 @@ class ImageMetadataController:
         return s.query(StudyType).all()
 
     @staticmethod
-    def get_all_tags():
+    def get_all_tags(sort_by_name=False):
         s = Session()
-        return s.query(Tag).all()
+        tags = s.query(Tag).all()
+        if sort_by_name:
+            tags.sort(key=(lambda t : t.tag))
+        return tags
 
     @staticmethod
     def get_tag_names(tags: [int]):

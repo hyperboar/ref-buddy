@@ -24,19 +24,19 @@ def index():
 @app.route('/favs')
 def view_favs():
     images = ImageMetadataCtrl.get_favs(300)
-    return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags())
+    return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
 
 @app.route('/last')
 def view_last():
     images = ImageMetadataCtrl.get_last(1000)
-    return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags())
+    return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
     study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id)
     overview = OverviewPath.from_image_metadata(images[0])
 
-    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags=ImageMetadataCtrl.get_all_tags())
+    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
 
 @app.route('/tagged')
 def view_tags():
