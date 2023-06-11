@@ -30,11 +30,16 @@
 <div class="tags-popup-background" style="display: none;"></div>
 <div id="tags-popup" class="tags-popup" style="display: none;">
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
-    <div id="tagList">
-        {% for tag in tags %}
-            <input type="checkbox" id="{{ tag.tag }}" value="{{ tag.tag }}"/>
-            <label for="{{ tag.tag }}">{{ tag.tag }}</label><br>
+    <div id="tagList" class="tag-container">
+        <div class="tag-column">
+        {% for t in tags %}
+            <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
+            <label for="{{ t.tag }}">{{ t.tag }}</label><br>
+            {% if loop.index % 10 == 0 %}
+                </div><div class="tag-column">
+            {% endif %}
         {% endfor %}
+        </div>
     </div>
     <button id="tags-submit">Submit</button>
     <button id="tags-clear">Clear All</button>

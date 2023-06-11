@@ -97,6 +97,17 @@ body
     right: 10px;
 }
 
+.tag-container {
+    display: flex;
+    padding-bottom: 10px;
+}
+
+.tag-column {
+    flex: 1;
+    padding: 10px;
+    min-width: 150px;
+}
+
 @keyframes rotateFav {
   from {
     transform: rotate(0deg);
