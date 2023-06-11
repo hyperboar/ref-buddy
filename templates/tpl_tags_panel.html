@@ -1,30 +1,84 @@
-<div>
+<div class="tag-panel">
     {% for tag in tags %}
-        <a href="#" onclick="toggle_tag('{{ tag.tag }}')">{{ tag.tag }}</a>&nbsp;
+        <a href="#" class="tag-link" data-tag="{{ tag.tag }}">&nbsp;{{ tag.tag }}&nbsp;</a>&nbsp;
     {% endfor %}
 <script>
-    function toggle_tag(tagId)
-    {
-        let full_url = window.location.href.replace(/#$/, "")
-        if (full_url.indexOf('?') === -1) { full_url = `${full_url}?page=1&tags=` }
-        const pageString = full_url.split('?')[0]
-        let queryString = full_url.split('?')[1]
-        let params = new URLSearchParams(queryString)
-        let tagsList = decodeURIComponent(params.get('tags'))
-        if (!tagsList) { tagsList = "" }
+    let selectedPanelTags = []
 
-        let ids = tagsList.split(',')
+    document.addEventListener('DOMContentLoaded', function()
+    {
+        fixUrl()
+        initTags()
+    }, false)
+
+    function fixUrl()
+    {
+        let url = window.location.href.replace(/#$/, "")
+        if (url.indexOf('?') === -1) { url = `${url}?page=1&tags=` }
+        window.history.replaceState({}, '', url)
+    }
+
+    function initTags()
+    {
+        let tags = getTagsFromUrl(window.location.href)
+        selectedPanelTags = tags
+
+        console.log('test')
+        document.querySelectorAll('.tag-link').forEach(link =>
+        {
+            link.addEventListener('click', toggle_tag)
+
+            const attr = link.getAttribute('data-tag')
+            if (!tags.includes(attr)) { return }
+
+            link.classList.add('tag-selected')
+        })
+    }
+
+    function toggle_tag(event)
+    {
+        console.log('test')
+        const tagId = event.currentTarget.getAttribute('data-tag')
+        const link = event.currentTarget
+
+        console.log(this)
+        let full_url = window.location.href
+        const pageString = full_url.split('?')[0]
+        let ids = getTagsFromUrl(full_url)
 
         // Perform the action based on the provided action parameter
         let index = ids.indexOf(tagId)
         // not found, adding
-        if (index === -1) { ids.push(tagId) }
-        else { ids.splice(index, 1) }
+        if (index === -1)
+        {
+            ids.push(tagId)
+            link.classList.add('tag-selected')
+        }
+        else
+        {
+            ids.splice(index, 1)
+            link.classList.remove('tag-selected')
+        }
+
+        selectedPanelTags = ids
 
         const newTagsList = ids.join(',').replace(/^,/, "")
+        let queryString = full_url.split('?')[1]
+        let params = new URLSearchParams(queryString)
         params.set('tags', encodeURIComponent(newTagsList))
         let newUrl = pageString + '?' + decodeURIComponent(params.toString())
         window.history.replaceState({}, '', newUrl)
+    }
+
+    function getTagsFromUrl(url)
+    {
+        let full_url = url.replace(/#$/, "")
+        let queryString = full_url.split('?')[1]
+        let params = new URLSearchParams(queryString)
+        let tags = decodeURIComponent(params.get('tags'))
+        if (!tags) { tags = "" }
+
+        return tags.split(',')
     }
 </script>
 </div>

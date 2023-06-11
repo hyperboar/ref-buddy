@@ -102,11 +102,43 @@ body
     padding-bottom: 10px;
 }
 
+.tag-panel {
+    margin-bottom: 10px;
+}
+
 .tag-column {
     flex: 1;
     padding: 10px;
     min-width: 150px;
 }
+
+.tag-link {
+    background-color: #b0aeae;
+    text-decoration: none;
+    margin: 2px;
+}
+
+.tag-link {
+    background-color: #b0aeae;
+    text-decoration: none;
+    margin: 2px;
+    transition: background-color 0.2s;
+}
+
+.tag-selected, .tag-selected:hover {
+    background-color: #7ea87e !important;
+}
+
+
+.tag-link:active, .tag-link:visited, .tag-link:hover, .tag-link:focus {
+    text-decoration: none;
+    color: black;
+}
+
+.tag-link:hover {
+    background-color: #cccccc;
+}
+
 
 @keyframes rotateFav {
   from {
