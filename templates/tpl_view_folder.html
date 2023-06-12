@@ -19,14 +19,19 @@
     <div class="thumbnail" data-id="{{ image.image_id }}">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
             <img class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
+            <div class="overlay">
+                <span class="tags-list vis-hide"></span>
+            </div>
         </a>
+
     </div>
     {% endfor %}
 </div>
 
 <div class="top-menu">
-    <button id="tags-open-btn">Tags</button>
-    <button id="toggle-selection-mode-btn">Select</button>
+    <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
+    <button id="tags-open-btn" class="btn-bg-blend">Edit tags</button>
+    <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
 </div>
 
 <div class="tags-popup-background" style="display: none;"></div>
@@ -218,7 +223,7 @@
             .map((checkbox) => checkbox.checked = false);
     }
 
-    function submitTags()
+    function submitAddTags()
     {
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value);
@@ -242,8 +247,30 @@
                     });
     }
 
+    function fetchTags()
+    {
+        const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',');
+        fetch(`/get-image-tags?image-id=${idsStr}`)
+            .then(response => response.json())
+            .then(data =>
+            {
+                if (!data) throw new Error('Network response was not ok');
+                document.querySelectorAll('.thumbnail').forEach((tile) =>
+                {
+                    const id = tile.getAttribute('data-id')
+                    tile.querySelector('.tags-list').textContent = data[id].join(', ')
+                    tile.querySelector('.tags-list').classList.remove('vis-hide')
+                })
+            })
+            .catch(error =>
+            {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+    }
+
+    document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
-    document.getElementById('tags-submit').addEventListener('click', submitTags)
+    document.getElementById('tags-submit').addEventListener('click', submitAddTags)
     document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
     document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
     document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)

@@ -1,8 +1,8 @@
-from flask import Blueprint, request, abort, render_template_string, render_template, redirect
+from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify
 from markupsafe import Markup
 
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Tag, Session
+from models.models_lump import Tag, Session, ImageMetadata
 
 routes_tags = Blueprint('routes_tags', __name__)
 
@@ -50,6 +50,20 @@ def add_image_tag():
 @routes_tags.route('/add-folder-tags')
 def add_folder_tag():
     pass
+
+@routes_tags.route('/get-image-tags')
+def get_image_tags():
+    args = request.args
+    image_ids = [int(img) for img in args.get('image-id', default=[]).split(',')] # [int]
+
+    session = Session()
+    data = {img.image_id: [t.tag.tag for t in img.tags] for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all()}
+
+    print(data)
+
+    if not data:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return jsonify(data)
 
 # ---- CRUD ----
 

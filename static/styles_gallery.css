@@ -15,6 +15,7 @@
     max-width: 100%;
     height: auto;
     object-fit: cover;
+    position: relative;
 }
 
 .gallery .thumb {
@@ -134,6 +135,23 @@
 .loading-fav {
   animation: rotateFav 2s linear infinite;
 }
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: inherit;
+    height: inherit;
+    text-decoration: none;
+    padding: 5px;
+    padding-left: 15px;
+    font-size: 14px;
+    /*word-wrap: break-word;*/
+    color: black;
+    background-color: rgba(122, 118, 118, 0.7);
+}
+
+.tags-list {}
 
 /* CSS grid for responsive layout */
 @media (min-width: 768px) {
