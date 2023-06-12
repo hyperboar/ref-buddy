@@ -1,0 +1,27 @@
+body
+{
+    background-color: #7a7676;
+}
+
+.header
+{
+    display: flex;
+    flex-direction: row;
+    height: 80px;
+    align-items: center;
+}
+
+.header h1, a, p
+{
+    margin-left: 10px;
+}
+
+.header h1 {
+    margin-right: 20px;
+}
+
+.back-btn, .back-btn:active, .back-btn:hover, .back-btn:visited, .back-btn:focus
+{
+    color: #545151;
+    text-decoration: none;
+}

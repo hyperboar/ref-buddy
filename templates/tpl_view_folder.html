@@ -2,14 +2,16 @@
 <html>
 <head>
     <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/styles_global.css">
     <link rel="stylesheet" href="/static/styles_gallery.css">
     <script type="text/javascript" src="/static/image_lazy_load.js"></script>
     <script type="text/javascript" src="/static/mut_attr_observer.js"></script>
 </head>
 <body>
 <div class="header">
-<h1>{{ title }}</h1>
+    <a class="back-btn" href="/">&lt;</a><h1>{{ title }}</h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
+
 </div>
 <div>{{ panel|default('') }}</div>
 <div class="gallery">
