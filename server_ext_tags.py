@@ -1,8 +1,8 @@
-from flask import Blueprint, request, abort, render_template_string, render_template
+from flask import Blueprint, request, abort, render_template_string, render_template, redirect
 from markupsafe import Markup
 
 from image_metadata_controller import ImageMetadataController as Ctrl
-
+from models.models_lump import Tag, Session
 
 routes_tags = Blueprint('routes_tags', __name__)
 
@@ -33,7 +33,7 @@ def view_tags():
     return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=panel, tags=tags_available)
 
 @routes_tags.route('/add-image-tags')
-def add_image_rating():
+def add_image_tag():
     args = request.args
     tags = args.get('tags', default=[]).split(',') # [str]
     image_ids = [int(img) for img in args.get('image-id', default=[]).split(',')] # [int]
@@ -48,5 +48,46 @@ def add_image_rating():
 
 
 @routes_tags.route('/add-folder-tags')
-def add_folder_rating():
+def add_folder_tag():
     pass
+
+# ---- CRUD ----
+
+@routes_tags.route('/tags')
+def show_tags():
+    session = Session()
+    tags = session.query(Tag).all()
+    tags.sort(key=lambda t: t.tag)
+    return render_template('tpl_tags_list.html', tags=tags)
+
+@routes_tags.route('/tags/add', methods=['GET', 'POST'])
+def add_tag():
+    if request.method == 'POST':
+        session = Session()
+        tag = request.form['tag']
+        new_tag = Tag(tag=tag)
+        session.add(new_tag)
+        session.commit()
+        return redirect('/tags')
+    return render_template('tpl_tags_add.html')
+
+@routes_tags.route('/tags/edit/<int:tag_id>', methods=['GET', 'POST'])
+def edit_tag(tag_id):
+    session = Session()
+    tag = session.get(Tag, tag_id)
+    if request.method == 'POST':
+        new_tag = request.form['tag']
+        tag.tag = new_tag
+        session.commit()
+        return redirect('/tags')
+    return render_template('tpl_tags_edit.html', tag=tag)
+
+@routes_tags.route('/tags/delete/<int:tag_id>', methods=['POST'])
+def delete_tag(tag_id):
+    session = Session()
+    tag = session.get(Tag, tag_id)
+    session.delete(tag)
+    session.commit()
+    return redirect('/tags')
+
+# ---- END CRUD ----

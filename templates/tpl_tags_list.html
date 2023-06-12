@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tags list</title>
+</head>
+<body>
+<h1>Tags</h1>
+<a href="/tags/add">Add Tag</a>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Tag</th>
+        <th>Actions</th>
+    </tr>
+    {% for tag in tags %}
+        <tr>
+            <td>{{ tag.id }}</td>
+            <td>{{ tag.tag }}</td>
+            <td>
+                <a href="/tags/edit/{{ tag.id }}">Edit</a>
+                <form method="POST" action="/tags/delete/{{ tag.id }}" style="display: inline;">
+                    <input type="submit" value="Delete" onclick="return confirmDelete('{{ tag.tag }}');">
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+
+<script>
+    function confirmDelete(tag) {
+        return confirm(`Delete tag <b>${tag}</b>?`);
+    }
+</script>
+</body>
+</html>

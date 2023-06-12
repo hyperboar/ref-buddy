@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tag edit</title>
+</head>
+<body>
+<form method="POST" action="/tags/edit/{{ tag.id }}">
+    <label for="tag">Tag:</label>
+    <input type="text" id="tag" name="tag" value="{{ tag.tag }}" required>
+    <br>
+    <input type="submit" value="Update Tag">
+</form>
+</body>
+</html>
