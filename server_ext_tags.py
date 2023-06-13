@@ -59,7 +59,8 @@ def get_image_tags():
     session = Session()
     data = {img.image_id: [t.tag.tag for t in img.tags] for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all()}
 
-    print(data)
+    for key in data:
+        data[key].sort()
 
     if not data:
         abort(404, 'Something went wrong, fav not set, probably...')
