@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{{ title }}</title>
     <link rel="stylesheet" href="/static/styles_global.css">
@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="header">
-    <a class="back-btn" href="/">&lt;</a><h1>{{ title }}</h1>
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>{{ title }}</h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
 
 </div>
@@ -19,8 +19,8 @@
     <div class="thumbnail" data-id="{{ image.image_id }}">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
             <img class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
-            <div class="overlay">
-                <span class="tags-list vis-hide"></span>
+            <div class="overlay vis-hide">
+                <span class="tags-list"></span>
             </div>
         </a>
 
@@ -259,7 +259,7 @@
                 {
                     const id = tile.getAttribute('data-id')
                     tile.querySelector('.tags-list').textContent = data[id].join(', ')
-                    tile.querySelector('.tags-list').classList.remove('vis-hide')
+                    tile.querySelector('.overlay').classList.remove('vis-hide')
                 })
             })
             .catch(error =>
