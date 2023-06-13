@@ -29,6 +29,8 @@
 </div>
 
 <div class="top-menu">
+    <button id="rate-up" class="rate-up btn-bg-blend" value="1"></button>
+    <button id="rate-dn" class="rate-dn btn-bg-blend" value="-1"></button>
     <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
     <button id="tags-open-btn" class="btn-bg-blend">Edit tags</button>
     <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
@@ -249,12 +251,12 @@
 
     function fetchTags()
     {
-        const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',');
+        const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',')
         fetch(`/get-image-tags?image-id=${idsStr}`)
             .then(response => response.json())
             .then(data =>
             {
-                if (!data) throw new Error('Network response was not ok');
+                if (!data) throw new Error('Network response was not ok')
                 document.querySelectorAll('.thumbnail').forEach((tile) =>
                 {
                     const id = tile.getAttribute('data-id')
@@ -264,10 +266,39 @@
             })
             .catch(error =>
             {
-                console.error('There was a problem with the fetch operation:', error);
+                console.error('There was a problem with the fetch operation:', error)
             });
     }
 
+    function rateImages(event)
+    {
+        if (selectedIds.length === 0) { return }
+
+        const btn = event.currentTarget
+        const value = btn.getAttribute('value')
+
+        console.log(value)
+
+        btn.classList.add('loading')
+
+        const idsStr = selectedIds.join(',')
+        fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${value}`)
+            .then(response =>
+            {
+                if (!response.ok) { throw new Error('Network response was not ok') }
+            })
+            .catch(error =>
+            {
+                console.error('There was a problem with the fetch operation:', error)
+            })
+            .finally(() =>
+            {
+                btn.classList.remove('loading')
+            })
+    }
+
+    document.getElementById('rate-up').addEventListener('click', rateImages)
+    document.getElementById('rate-dn').addEventListener('click', rateImages)
     document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
     document.getElementById('tags-submit').addEventListener('click', submitAddTags)

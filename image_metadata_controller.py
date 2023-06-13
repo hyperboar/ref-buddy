@@ -138,12 +138,21 @@ class ImageMetadataController:
         return im
 
     @staticmethod
-    def add_image_rating(image_id: int, rating_add: int) -> int:
+    def add_image_rating(image_id: int=None, image_ids:[int]=None, rating_add: int=None) -> int:
         s = Session()
-        im = s.get(ImageMetadata, image_id)
-        im.rating += rating_add
-        s.commit()
-        return 1
+        if image_id:
+            im = s.get(ImageMetadata, image_id)
+            im.rating += rating_add
+            s.commit()
+            return 1
+        elif image_ids:
+            for im_id in image_ids:
+                im = s.get(ImageMetadata, im_id)
+                im.rating += rating_add
+                s.flush()
+            s.commit()
+            return 1
+        return 0
 
     @staticmethod
     def add_image_tags(image_ids: [int], tags_str: [str]) -> int:

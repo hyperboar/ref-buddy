@@ -37,6 +37,18 @@ button
     text-decoration: none;
 }
 
+/* Rating */
+.rate-up, .rate-dn
+{
+    width: 25px;
+    height: 25px;
+    background-size: cover;
+    border: none;
+    padding: 2px;
+}
+.rate-up {background-image: url("/static/arrow_up.png");}
+.rate-dn {background-image: url("/static/arrow_down.png");}
+
 /* Use instead of style="display: hidden" */
 .vis-hide
 {
@@ -51,4 +63,21 @@ button
 
 .btn-bg-blend:hover {
     opacity: 1;
+}
+
+
+/* Animations */
+
+/* Loading */
+@keyframes rotateLoad {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading {
+    animation: rotateLoad 2s linear infinite;
 }
