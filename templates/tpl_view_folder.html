@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/styles_global.css">
     <link rel="stylesheet" href="/static/styles_gallery.css">
     <script type="text/javascript" src="/static/image_lazy_load.js"></script>
     <script type="text/javascript" src="/static/mut_attr_observer.js"></script>
 </head>
 <body>
 <div class="header">
-<h1>{{ title }}</h1>
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>{{ title }}</h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
+
 </div>
 <div>{{ panel|default('') }}</div>
 <div class="gallery">
@@ -17,24 +19,36 @@
     <div class="thumbnail" data-id="{{ image.image_id }}">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
             <img class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
+            <div class="overlay vis-hide">
+                <span class="tags-list"></span>
+            </div>
         </a>
+
     </div>
     {% endfor %}
 </div>
 
 <div class="top-menu">
-    <button id="tags-open-btn">Tags</button>
-    <button id="toggle-selection-mode-btn">Select</button>
+    <button id="rate-up" class="rate-up btn-bg-blend" value="1"></button>
+    <button id="rate-dn" class="rate-dn btn-bg-blend" value="-1"></button>
+    <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
+    <button id="tags-open-btn" class="btn-bg-blend">Edit tags</button>
+    <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
 </div>
 
 <div class="tags-popup-background" style="display: none;"></div>
 <div id="tags-popup" class="tags-popup" style="display: none;">
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
-    <div id="tagList">
-        {% for tag in tags %}
-            <input type="checkbox" id="{{ tag.tag }}" value="{{ tag.tag }}"/>
-            <label for="{{ tag.tag }}">{{ tag.tag }}</label><br>
+    <div id="tagList" class="tag-container">
+        <div class="tag-column">
+        {% for t in tags %}
+            <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
+            <label for="{{ t.tag }}">{{ t.tag }}</label><br>
+            {% if loop.index % 10 == 0 %}
+                </div><div class="tag-column">
+            {% endif %}
         {% endfor %}
+        </div>
     </div>
     <button id="tags-submit">Submit</button>
     <button id="tags-clear">Clear All</button>
@@ -211,7 +225,7 @@
             .map((checkbox) => checkbox.checked = false);
     }
 
-    function submitTags()
+    function submitAddTags()
     {
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value);
@@ -235,11 +249,85 @@
                     });
     }
 
+    function fetchTags()
+    {
+        const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',')
+        fetch(`/get-image-tags?image-id=${idsStr}`)
+            .then(response => response.json())
+            .then(data =>
+            {
+                if (!data) throw new Error('Network response was not ok')
+                document.querySelectorAll('.thumbnail').forEach((tile) =>
+                {
+                    const id = tile.getAttribute('data-id')
+                    tile.querySelector('.tags-list').textContent = data[id].join(', ')
+                    tile.querySelector('.overlay').classList.remove('vis-hide')
+                })
+            })
+            .catch(error =>
+            {
+                console.error('There was a problem with the fetch operation:', error)
+            });
+    }
+
+    function rateImages(event)
+    {
+        if (selectedIds.length === 0) { return }
+
+        const btn = event.currentTarget
+        const value = btn.getAttribute('value')
+
+        console.log(value)
+
+        btn.classList.add('loading')
+
+        const idsStr = selectedIds.join(',')
+        fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${value}`)
+            .then(response =>
+            {
+                if (!response.ok) { throw new Error('Network response was not ok') }
+            })
+            .catch(error =>
+            {
+                console.error('There was a problem with the fetch operation:', error)
+            })
+            .finally(() =>
+            {
+                btn.classList.remove('loading')
+            })
+    }
+
+    document.getElementById('rate-up').addEventListener('click', rateImages)
+    document.getElementById('rate-dn').addEventListener('click', rateImages)
+    document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
-    document.getElementById('tags-submit').addEventListener('click', submitTags)
+    document.getElementById('tags-submit').addEventListener('click', submitAddTags)
     document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
     document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
     document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
+
+    document.addEventListener('keydown', function(e)
+    {
+        // select all
+        if (selectionMode && e.code === 'KeyA' && e.shiftKey)
+        {
+            document.querySelectorAll('.thumbnail').forEach((tile) =>
+            {
+                handleTileClick(tile)
+                lastClickedTile = null
+            })
+        }
+        // toggle selection mode
+        else if (e.code === 'KeyS' && !e.shiftKey)
+        {
+            toggleSelectionMode()
+        }
+        // toggle tag popup display
+        else if (e.code === 'KeyT' && !e.shiftKey)
+        {
+            toggleTagsPopupDisplay()
+        }
+    });
 </script>
 </body>
 </html>

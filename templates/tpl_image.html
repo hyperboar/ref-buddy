@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	<title>Image ({{ image.image_id }})</title>
+    <link rel="stylesheet" href="/static/styles_global.css">
     <link rel="stylesheet" href="/static/style_image.css">
     <script type="text/javascript" src="/static/img_params.js"></script>
     <script type="text/javascript" src="/static/rating.js"></script>
@@ -18,34 +19,34 @@
             <button class="modal-button-prev"><</button>
             <button class="modal-button-next">></button>
         </div>
-        <div class="modal-controls">
+        <div class="modal-controls btn-bg-blend">
             <div class="row timer">
                 <span class="timer-icon"></span>&nbsp;&nbsp;
                 <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
                 <span class="space"/>
-                <button id="timer-start" started="">Start</button>
+                <button id="timer-start" class="btn-bg-blend" started="">Start</button>
             </div>
             <div class="row">
                 <span>Study: </span>
-                <select id="study-type" value="{{ image.study_type_id }}">
+                <select id="study-type" value="{{ image.study_type_id }}" class="btn-bg-blend">
                     {% for st in study_types %}
                     <option value="{{ st.id }}">{{ st.type }}</option>
                     {% endfor %}
                 </select>
                 <span class="space"/>
-                <button id="toggle-grayscale" value="">Gray</button>
+                <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
                 <span class="space"/>
-                <button id="info-button">info</button>
+                <button id="info-button" class="btn-bg-blend">info</button>
             </div>
             <div class="row">
-                <button class="fav" id="is-fav" value="{{ image.is_fav }}"></button>
+                <button class="fav btn-bg-blend" id="is-fav" value="{{ image.is_fav }}"></button>
                 <span class="space"/>
                 <label for="rate-up">Rating: <span id="image-rating">{{ image.rating }}</span></label>
-                <button class="rate-up" id="rate-up" value="0"></button>
-                <button class="rate-dn" id="rate-dn" value="0"></button>
+                <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
+                <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
                 <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
-                <button class="rate-up" id="rate-up-f" value="0"></button>
-                <button class="rate-dn" id="rate-dn-f" value="0"></button>
+                <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
+                <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
             </div>
             <div class="row">
                 <label for="same-folder">Same folder:</label>
@@ -54,8 +55,8 @@
                 <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
             </div>
             <div class="row">
-                <button id="prev">Prev</button>
-                <button id="next">Next</button>
+                <button id="prev" class="btn-bg-blend">Prev</button>
+                <button id="next" class="btn-bg-blend">Next</button>
             </div>
 
             <div id="popup" class="popup">

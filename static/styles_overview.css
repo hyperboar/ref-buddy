@@ -1,15 +1,18 @@
-body {
+body
+{
     background-color: #7a7676;
 }
 
-.header {
+.header
+{
     display: flex;
     flex-direction: row;
     height: 80px;
     align-items: center;
 }
 
-.header h1, a {
+.header h1, a
+{
     margin-left: 10px;
 }
 

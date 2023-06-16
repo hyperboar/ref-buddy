@@ -138,12 +138,21 @@ class ImageMetadataController:
         return im
 
     @staticmethod
-    def add_image_rating(image_id: int, rating_add: int) -> int:
+    def add_image_rating(image_id: int=None, image_ids:[int]=None, rating_add: int=None) -> int:
         s = Session()
-        im = s.get(ImageMetadata, image_id)
-        im.rating += rating_add
-        s.commit()
-        return 1
+        if image_id:
+            im = s.get(ImageMetadata, image_id)
+            im.rating += rating_add
+            s.commit()
+            return 1
+        elif image_ids:
+            for im_id in image_ids:
+                im = s.get(ImageMetadata, im_id)
+                im.rating += rating_add
+                s.flush()
+            s.commit()
+            return 1
+        return 0
 
     @staticmethod
     def add_image_tags(image_ids: [int], tags_str: [str]) -> int:
@@ -176,9 +185,12 @@ class ImageMetadataController:
         return s.query(StudyType).all()
 
     @staticmethod
-    def get_all_tags():
+    def get_all_tags(sort_by_name=False):
         s = Session()
-        return s.query(Tag).all()
+        tags = s.query(Tag).all()
+        if sort_by_name:
+            tags.sort(key=(lambda t : t.tag))
+        return tags
 
     @staticmethod
     def get_tag_names(tags: [int]):

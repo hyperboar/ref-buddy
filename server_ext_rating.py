@@ -11,7 +11,18 @@ def add_image_rating():
     rating = int(args.get('rating', default='0'))
     image_id = int(args.get('image-id'))
 
-    r = ImageMetadataController.add_image_rating(image_id, rating)
+    r = ImageMetadataController.add_image_rating(image_id=image_id, rating_add=rating)
+    if not r:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return render_template_string(str(r))
+
+@routes_rating.route('/add-mult-image-rating')
+def add_mult_image_rating():
+    args = request.args
+    rating = int(args.get('rating', default='0'))
+    image_ids = args.get('image-id', default='').split(',')
+
+    r = ImageMetadataController.add_image_rating(image_ids=image_ids, rating_add=rating)
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string(str(r))
@@ -27,7 +38,7 @@ def add_folder_rating():
     imgs = ImageMetadataController.get_all_by_path_id(img.path_id)[2]
     res = 0
     for i in imgs:
-        res += ImageMetadataController.add_image_rating(i.image_id, rating)
+        res += ImageMetadataController.add_image_rating(image_id=i.image_id, rating_add=rating)
 
     if res > 0:
         abort(404, 'Something went wrong, fav not set, probably...')
