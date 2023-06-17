@@ -61,9 +61,10 @@ class ImageMetadataController:
         return s.query(ImageMetadata).order_by(ImageMetadata.last_viewed.desc()).limit(count).offset(start).all()
 
     @staticmethod
-    def get_by_id(image_id: int):
-        s = Session()
-        return s.get(ImageMetadata, image_id)
+    def get_by_id(image_id: int, session=None):
+        if session is None:
+            session = Session()
+        return session.get(ImageMetadata, image_id)
 
     @staticmethod
     def get_by_path(path, session=None) -> 'ImageMetadata':
@@ -86,12 +87,13 @@ class ImageMetadataController:
         return targets[0]
 
     @staticmethod
-    def get_all_by_path_id(path_id: int) -> '[ImageMetadata]':
-        s = Session()
+    def get_all_by_path_id(path_id: int, session=None) -> '[ImageMetadata]':
+        if session is None:
+            session = Session()
 
-        rows = s.query(ImageMetadata).filter(ImageMetadata.path_id == path_id).all()
+        rows = session.query(ImageMetadata).filter(ImageMetadata.path_id == path_id).all()
         if len(rows) == 0:
-            p = s.get(Path, path_id)
+            p = session.get(Path, path_id)
             return "", f'No images at path ({p.id}) "{p.path}"', []
 
         return rows[0].study_type, rows[0], rows
@@ -130,29 +132,42 @@ class ImageMetadataController:
         return q.first()
 
     @staticmethod
-    def set_image_fav(image_id: int, is_fav: int):
-        s = Session()
-        im = s.get(ImageMetadata, image_id)
+    def set_image_fav(image_id: int, is_fav: int, session=None):
+        if session is None:
+            session = Session()
+
+        im = session.get(ImageMetadata, image_id)
         im.fav = is_fav
-        s.commit()
+        session.commit()
         return im
 
     @staticmethod
-    def add_image_rating(image_id: int=None, image_ids:[int]=None, rating_add: int=None) -> int:
-        s = Session()
-        if image_id:
-            im = s.get(ImageMetadata, image_id)
+    def add_image_rating(image_id: int=None, rating_add: int=None, session=None) -> int:
+        if session is None:
+            session = Session()
+
+        im = session.get(ImageMetadata, image_id)
+        im.rating += rating_add
+        session.commit()
+        return im.rating
+
+    @staticmethod
+    def add_mult_image_rating(image_ids:[int]=None, rating_add: int=None, session=None) -> int:
+        if session is None:
+            session = Session()
+
+        for im_id in image_ids:
+            im = session.get(ImageMetadata, im_id)
             im.rating += rating_add
-            s.commit()
-            return 1
-        elif image_ids:
-            for im_id in image_ids:
-                im = s.get(ImageMetadata, im_id)
-                im.rating += rating_add
-                s.flush()
-            s.commit()
-            return 1
-        return 0
+            session.flush()
+        session.commit()
+        return len(image_ids)
+
+    @staticmethod
+    def get_image_rating(image_id):
+        s = Session()
+        im = s.get(ImageMetadata, image_id)
+        return im.rating
 
     @staticmethod
     def add_image_tags(image_ids: [int], tags_str: [str]) -> int:

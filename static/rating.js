@@ -8,19 +8,22 @@ class RateSingle
     up
     down
     total
+    loadingStyle
 
     /**
      * @param imageId db image id
      * @param totalId label that shows current rating
      * @param upId rate up button
      * @param downId rate down button
+     * @param loadingStyle
      */
-    constructor(imageId, totalId, upId, downId, )
+    constructor(imageId, totalId, upId, downId, loadingStyle)
     {
         this.imageId = imageId
         this.up    = document.getElementById(upId)
         this.down  = document.getElementById(downId)
         this.total = document.getElementById(totalId)
+        this.loadingStyle = loadingStyle
 
         this.up.addEventListener('click',   () => { this.rate(1) })
         this.down.addEventListener('click', () => { this.rate(-1) })
@@ -33,10 +36,10 @@ class RateSingle
 
         if (rating > 0)
         {
-            this.up.classList.add('loading-fav')
+            this.up.classList.add(this.loadingStyle)
         } else
         {
-            this.down.classList.add('loading-fav')
+            this.down.classList.add(this.loadingStyle)
         }
 
         fetch(`/add-image-rating?image-id=${this.imageId}&rating=${rating}`)
@@ -55,8 +58,8 @@ class RateSingle
             })
             .finally(() =>
             {
-                this.up.classList.remove('loading-fav')
-                this.down.classList.remove('loading-fav')
+                this.up.classList.remove(this.loadingStyle)
+                this.down.classList.remove(this.loadingStyle)
 
                 this.up.removeAttribute('disabled')
                 this.down.removeAttribute('disabled')
@@ -75,19 +78,22 @@ class RateFolder
     up
     down
     result
+    loadingStyle
 
     /**
      * @param imageId db image id
      * @param resultId label that shows operation result
      * @param upId rate up button
      * @param downId rate down button
+     * @param loadingStyle
      */
-    constructor(imageId, resultId, upId, downId, )
+    constructor(imageId, resultId, upId, downId, loadingStyle)
     {
         this.imageId = imageId
         this.up    = document.getElementById(upId)
         this.down  = document.getElementById(downId)
         this.result = document.getElementById(resultId)
+        this.loadingStyle = loadingStyle
 
         this.up.addEventListener('click',   () => { this.rate(1) })
         this.down.addEventListener('click', () => { this.rate(-1) })
@@ -100,21 +106,22 @@ class RateFolder
 
         if (rating > 0)
         {
-            this.up.classList.add('loading-fav')
-        } else
+            this.up.classList.add(this.loadingStyle)
+        }
+        else
         {
-            this.down.classList.add('loading-fav')
+            this.down.classList.add(this.loadingStyle)
         }
 
         fetch(`/add-folder-rating?image-id=${this.imageId}&rating=${rating}`)
             .then(response =>
             {
-                if (!response.ok) throw new Error('Network response was not ok');
-
-                response.text().then(data =>
-                {
-                    this.result.innerText = data
-                })
+                return fetch(`/get-image-rating?image-id=${this.imageId}`)
+            })
+            .then(response => response.text())
+            .then(data =>
+            {
+                this.result.innerText = data
             })
             .catch(error =>
             {
@@ -122,8 +129,8 @@ class RateFolder
             })
             .finally(() =>
             {
-                this.up.classList.remove('loading-fav')
-                this.down.classList.remove('loading-fav')
+                this.up.classList.remove(this.loadingStyle)
+                this.down.classList.remove(this.loadingStyle)
 
                 this.up.removeAttribute('disabled')
                 this.down.removeAttribute('disabled')
