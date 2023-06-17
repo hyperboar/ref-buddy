@@ -125,7 +125,7 @@
             {
                 let val = (parseInt(favButton.value) + 1) % 2;
 
-                favButton.classList.add('loading-fav')
+                favButton.classList.add('loading')
                 fetch(`/set-image-fav?${imgParams.getParamsFav(val)}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
@@ -135,11 +135,11 @@
                         
                         favButton.value = val;
                         console.log(favButton.value)
-                        favButton.classList.remove('loading-fav')
+                        favButton.classList.remove('loading')
                     })
                     .catch(error => {
                         console.error('There was a problem with the fetch operation:', error);
-                        favButton.classList.remove('loading-fav')
+                        favButton.classList.remove('loading')
                     });
             });
 

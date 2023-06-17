@@ -245,17 +245,17 @@
         {#const params = `image-id=${idsStr}&tags=${tagsStr}`#}
         {#console.log('Selected Tags:', params);#}
 
-        document.getElementById('tags-submit').classList.add('loading-fav')
+        document.getElementById('tags-submit').classList.add('loading')
 
         fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        document.getElementById('tags-submit').classList.remove('loading-fav')
-                    })
-                    .catch(error => {
-                        console.error('There was a problem with the fetch operation:', error);
-                        document.getElementById('tags-submit').classList.remove('loading-fav')
-                    });
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                document.getElementById('tags-submit').classList.remove('loading')
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('tags-submit').classList.remove('loading')
+            });
     }
 
     function fetchTags()

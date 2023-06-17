@@ -123,19 +123,6 @@
 }
 
 
-@keyframes rotateFav {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-fav {
-  animation: rotateFav 2s linear infinite;
-}
-
 .overlay {
     position: absolute;
     top: 0;
