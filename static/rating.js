@@ -144,11 +144,20 @@ class RateFolder extends RateBase
 /**
  * Rate multiple individual images at once.<br/>
  * @see setImageIds
+ * @see updateImageIds
  * Call setImageIds before processing buttons
  */
 class RateMultImages extends RateBase
 {
     imageIds
+
+    /**
+     * Override this method so correct ids are fetched right before the up/down click event.
+     */
+    updateImageIds()
+    {
+        throw new Error("Not implemented")
+    }
 
     /**
      * @param imageIds an array of integers
@@ -160,25 +169,15 @@ class RateMultImages extends RateBase
 
     onRate(btn, rating)
     {
+        this.updateImageIds()
+        if (this.imageIds.length === 0) { return }
+        const idsStr = this.imageIds.join(',')
+
         super.onRate(btn, rating);
 
-        const idsStr = selectedIds.join(',')
-
         fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${rating}`)
-            .then(response => fetch(`/get-image-rating?image-id=${this.imageId}`))
-            .then(response => response.text())
-            .then(data =>
-            {
-                this.onSuccess(data)
-                this.total.innerText = data
-            })
-            .catch(error =>
-            {
-                this.onFail(error)
-            })
-            .finally(() =>
-            {
-                this.onFinal()
-            })
+            .then(response => this.onSuccess(response))
+            .catch(error => this.onFail(error))
+            .finally(() => this.onFinal())
     }
 }

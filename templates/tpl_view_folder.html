@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/static/styles_gallery.css">
     <script type="text/javascript" src="/static/image_lazy_load.js"></script>
     <script type="text/javascript" src="/static/mut_attr_observer.js"></script>
+    <script type="text/javascript" src="/static/rating.js"></script>
 </head>
 <body>
 <div class="header">
@@ -56,6 +57,8 @@
 </div>
 
 <script>
+    let rating = null
+
     document.addEventListener('DOMContentLoaded', function()
     {
         // reveal on load
@@ -69,6 +72,12 @@
         })
 
         new ImageLazyLoad('.thumb', false, '300px')
+
+        rating = new RateMultImages('rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
+        rating.updateImageIds = function ()
+        {
+            this.setImageIds(selectedIds)
+        }
     }, false)
 
     // Track the selection mode state
@@ -270,38 +279,6 @@
             });
     }
 
-    function rateImages(event)
-    {
-        if (selectedIds.length === 0) { return }
-
-        const btn = event.currentTarget
-        const value = btn.getAttribute('value')
-
-        console.log(value)
-
-        btn.classList.add('loading')
-        btn.classList.remove('op-success', 'op-fail')
-
-        const idsStr = selectedIds.join(',')
-        fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${value}`)
-            .then(response =>
-            {
-                if (!response.ok) { throw new Error('Network response was not ok') }
-                btn.classList.add('op-success')
-            })
-            .catch(error =>
-            {
-                console.error('There was a problem with the fetch operation:', error)
-                btn.classList.add('op-fail')
-            })
-            .finally(() =>
-            {
-                btn.classList.remove('loading')
-            })
-    }
-
-    document.getElementById('rate-up').addEventListener('click', rateImages)
-    document.getElementById('rate-dn').addEventListener('click', rateImages)
     document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
     document.getElementById('tags-submit').addEventListener('click', submitAddTags)
