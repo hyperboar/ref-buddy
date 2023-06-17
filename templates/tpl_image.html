@@ -125,7 +125,7 @@
             {
                 let val = (parseInt(favButton.value) + 1) % 2;
 
-                favButton.classList.add('loading-fav')
+                favButton.classList.add('loading')
                 fetch(`/set-image-fav?${imgParams.getParamsFav(val)}`)
                     .then(response => {
                         if (!response.ok) throw new Error('Network response was not ok');
@@ -135,16 +135,16 @@
                         
                         favButton.value = val;
                         console.log(favButton.value)
-                        favButton.classList.remove('loading-fav')
+                        favButton.classList.remove('loading')
                     })
                     .catch(error => {
                         console.error('There was a problem with the fetch operation:', error);
-                        favButton.classList.remove('loading-fav')
+                        favButton.classList.remove('loading')
                     });
             });
 
-            const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn')
-            const rateFolder = new RateFolder({{ image.image_id }}, 'rate-fld', 'rate-up-f', 'rate-dn-f')
+            const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
+            const rateFolder = new RateFolder({{ image.image_id }}, 'image-rating', 'rate-up-f', 'rate-dn-f', 'loading', 'op-success', 'op-fail')
 
             // study timer
             const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')

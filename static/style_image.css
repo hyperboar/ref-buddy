@@ -193,19 +193,6 @@ span #time-current {
     background-image: url("/static/fav_on.png");
 }
 
-@keyframes rotateFav {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-fav {
-  animation: rotateFav 2s linear infinite;
-}
-
 .popup {
   position: absolute;
   background-color: #ffffff;
