@@ -280,16 +280,19 @@
         console.log(value)
 
         btn.classList.add('loading')
+        btn.classList.remove('op-success', 'op-fail')
 
         const idsStr = selectedIds.join(',')
         fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${value}`)
             .then(response =>
             {
                 if (!response.ok) { throw new Error('Network response was not ok') }
+                btn.classList.add('op-success')
             })
             .catch(error =>
             {
                 console.error('There was a problem with the fetch operation:', error)
+                btn.classList.add('op-fail')
             })
             .finally(() =>
             {
