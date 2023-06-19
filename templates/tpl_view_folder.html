@@ -7,6 +7,7 @@
     <script type="text/javascript" src="/static/image_lazy_load.js"></script>
     <script type="text/javascript" src="/static/mut_attr_observer.js"></script>
     <script type="text/javascript" src="/static/rating.js"></script>
+    <script type="text/javascript" src="/static/image_selection.js"></script>
 </head>
 <body>
 <div class="header">
@@ -19,7 +20,7 @@
     {% for image in images %}
     <div class="thumbnail" data-id="{{ image.image_id }}">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
-            <img class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
+            <img src="" class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
             <div class="overlay vis-hide">
                 <span class="tags-list"></span>
             </div>
@@ -58,12 +59,13 @@
 
 <script>
     let rating = null
+    let selection = null
 
     document.addEventListener('DOMContentLoaded', function()
     {
         // reveal on load
         const thumbs = document.querySelectorAll('.thumb')
-        thumbs.forEach((elem, idx) =>
+        thumbs.forEach((elem) =>
         {
             new MutationAttributeObserver(elem, 'src', (target) =>
             {
@@ -76,123 +78,11 @@
         rating = new RateMultImages('rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
         rating.updateImageIds = function ()
         {
-            this.setImageIds(selectedIds)
+            this.setImageIds(selection.selectedIds)
         }
+
+        selection = new ImageSelection('toggle-selection-mode-btn', '.gallery', '.thumbnail')
     }, false)
-
-    // Track the selection mode state
-    let selectionMode = false;
-
-    let selectedIds = []
-    let lastClickedTile = null
-
-    // Function to toggle the selection mode
-    function toggleSelectionMode()
-    {
-        selectionMode = !selectionMode;
-
-        // Add or remove event listeners and update UI based on selection mode state
-        if (selectionMode)
-        {
-            document.querySelector('.gallery').classList.add('no-select')
-            document.getElementById('toggle-selection-mode-btn').classList.add('select-mode-btn')
-
-            // Disable other interactions and enable selection mode UI
-            document.querySelectorAll('.thumbnail').forEach((tile) =>
-            {
-                tile.querySelector('a').classList.add('disabled')
-                tile.addEventListener('click', onTileSelectionClick)
-
-                const img = tile.querySelector('img')
-                img.classList.remove('selected')
-                img.classList.add('selectable')
-            });
-        }
-        else
-        {
-            selectedIds = []
-
-            document.querySelector('.gallery').classList.remove('no-select')
-            document.getElementById('toggle-selection-mode-btn').classList.remove('select-mode-btn')
-
-            // Enable other interactions and disable selection mode UI
-            document.querySelectorAll('.thumbnail').forEach((tile) =>
-            {
-                tile.querySelector('a').classList.remove('disabled')
-                tile.removeEventListener('click', onTileSelectionClick);
-
-                const img = tile.querySelector('img')
-                img.classList.remove('selectable')
-                img.classList.remove('selected')
-            });
-        }
-    }
-
-    function onTileSelectionClick(event)
-    {
-        handleTileClick(event.currentTarget, false, event.shiftKey)
-    }
-
-    // Event handler for tile click during selection mode
-    function handleTileClick(tile, isBatch=false, isShift=false)
-    {
-        const tileId = tile.getAttribute('data-id')
-
-        if (isBatch && !selectedIds.includes(tileId))
-        {
-            selectedIds.push(tileId)
-            const img = tile.querySelector('img')
-            img.classList.add('selected');
-        }
-        else if (!isBatch && !selectedIds.includes(tileId))
-        {
-            selectedIds.push(tileId)
-            const img = tile.querySelector('img')
-            img.classList.add('selected');
-        }
-        else if (!isBatch && selectedIds.includes(tileId))
-        {
-            const idx = selectedIds.indexOf(tileId);
-            if (idx !== -1) selectedIds.splice(idx, 1);
-            const img = tile.querySelector('img')
-            img.classList.remove('selected');
-        }
-
-
-        // stop when BATCH select
-        if (isBatch) { return }
-
-        if (isShift && lastClickedTile)
-        {
-            const dir = findSiblingDirection(lastClickedTile, tile)
-            let getNextTile = cur => dir > 0 ? cur.nextElementSibling : cur.previousElementSibling
-            let nextTile = getNextTile(lastClickedTile)
-            while(nextTile != tile)
-            {
-                handleTileClick(nextTile, true)
-                nextTile = getNextTile(nextTile)
-            }
-        }
-
-        lastClickedTile = tile
-    }
-
-    function findSiblingDirection(elem1, elem2)
-    {
-        if (elem1 === elem2) { return 0 }
-
-        let run = elem1
-        while (run != null)
-        {
-            if (run === elem2) { return 1 }
-            run = run.nextElementSibling
-        }
-
-        return -1
-    }
-
-    // Example usage: Toggle selection mode when a button is clicked
-    document.getElementById('toggle-selection-mode-btn').addEventListener('click', toggleSelectionMode);
 </script>
 
 <!-- ################## -->
@@ -207,7 +97,7 @@
         {
             btn.style.display = 'block'
             document.querySelector('.tags-popup-background').style.display = 'block'
-            document.getElementById('images-count').textContent = '' + selectedIds.length
+            document.getElementById('images-count').textContent = '' + selection.selectedIds.length
         }
         else
         {
@@ -215,12 +105,6 @@
             document.querySelector('.tags-popup-background').style.display = 'none'
         }
     }
-
-    {#function openTagsPopup()#}
-    {#{#}
-    {#    document.getElementById('tags-popup').style.display = 'block';#}
-    {#    document.getElementById('images-count').textContent = '' + selectedIds.length;#}
-    //}
 
     function closeTagsPopup()
     {
@@ -239,7 +123,7 @@
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value);
 
-        const idsStr = selectedIds.join(',')
+        const idsStr = selection.selectedIds.join(',')
         const tagsStr = selectedTags.join(',')
 
         {#const params = `image-id=${idsStr}&tags=${tagsStr}`#}
@@ -289,18 +173,19 @@
     document.addEventListener('keydown', function(e)
     {
         // select all
-        if (selectionMode && e.code === 'KeyA' && e.shiftKey)
+        if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
         {
-            document.querySelectorAll('.thumbnail').forEach((tile) =>
-            {
-                handleTileClick(tile)
-                lastClickedTile = null
-            })
+            selection.selectAll()
+            {#document.querySelectorAll('.thumbnail').forEach((tile) =>#}
+            {#{#}
+            {#    selectionhandleTileClick(tile)#}
+            {#    lastClickedTile = null#}
+            {#//})#}
         }
         // toggle selection mode
         else if (e.code === 'KeyS' && !e.shiftKey)
         {
-            toggleSelectionMode()
+            selection.toggleSelectionMode()
         }
         // toggle tag popup display
         else if (e.code === 'KeyT' && !e.shiftKey)
