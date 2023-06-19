@@ -32,7 +32,7 @@ def view_favs():
 
     return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
 
-@app.route('/last')
+@app.route('/latest_study')
 def view_last():
     page, offset, limit = get_current_paging(request.args)
 
