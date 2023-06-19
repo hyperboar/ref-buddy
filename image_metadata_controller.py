@@ -99,15 +99,31 @@ class ImageMetadataController:
         return rows[0].study_type, rows[0], rows
 
     @staticmethod
-    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit=100, offset=0) -> '[ImageMetadata]':
+    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0) -> '[ImageMetadata]':
         s = Session()
 
         l = len(tags_pos)
-        q = s.query(ImageTag).filter(ImageTag.tag_id.in_(tags_pos)).filter(~ImageTag.tag_id.in_(tags_neg)).group_by(ImageTag.image_id).having(func.count(ImageTag.image_id) == l)
-        image_ids = [imt.image_id for imt in q.all()]
 
-        q = s.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).order_by(ImageMetadata.imported_at.desc())
-        result = q.limit(limit).offset(offset).all()
+        # limit by tags_pos
+        if len(tags_pos) > 0:
+            subquery = s.query(ImageTag.image_id)\
+                .filter(ImageTag.tag_id.in_(tags_pos))\
+                .group_by(ImageTag.image_id)\
+                .having(func.count(ImageTag.tag_id) == l)\
+                .subquery()
+        # search in all images
+        else:
+            subquery = s.query(ImageMetadata.image_id)\
+                .subquery()
+
+        # remove tags_neg
+        q = s.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
+        if len(tags_neg) > 0:
+            q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags_neg)))
+
+        q = q.order_by(ImageMetadata.imported_at.desc())
+
+        result = q.offset(offset).limit(limit).all()
 
         return "", result
 
