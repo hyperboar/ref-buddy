@@ -3,6 +3,7 @@ from markupsafe import Markup
 
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Tag, Session, ImageMetadata
+from server_widget_helpers import get_paging_widget
 
 routes_tags = Blueprint('routes_tags', __name__)
 
@@ -30,7 +31,9 @@ def view_tags():
 
     tags_available = Ctrl.get_all_tags(sort_by_name=True)
     panel = Markup(render_template('tpl_tags_panel.html', tags=tags_available))
-    return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=panel, tags=tags_available)
+    paging = get_paging_widget(page)
+
+    return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=panel, paging=paging, tags=tags_available)
 
 @routes_tags.route('/add-image-tags')
 def add_image_tag():

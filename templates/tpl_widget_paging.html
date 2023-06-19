@@ -1,0 +1,24 @@
+<script type="text/javascript" src="/static/paging.js"></script>
+<div class="paging">
+    <div class="paging-btns">
+        <button class="page-btn btn-bg-blend" {{ 'disabled="true"' if start_page == 1 else '' }} value="{{ 1 }}">&lt;&lt;</button>
+        {% set prev = [start_page - 1, 1]|max() %}
+        <button class="page-btn btn-bg-blend" {{ 'disabled="true"' if start_page == 1 else '' }} value="{{ prev }}">&lt;</button>
+        {% set skipPrev = start_page - 10 %}
+        {% set skipPrevVis = [skipPrev, 1]|max() %}
+        <button class="page-btn btn-bg-blend" {{ 'disabled="true"' if skipPrev < 1 else '' }} value="{{ skipPrev }}">{{ skipPrevVis }}...</button>
+        {% for i in pages %}
+            <button class="page-btn btn-bg-blend {{ 'selected' if i == start_page else '' }}" value="{{ i }}">{{ i }}</button>
+        {% endfor %}
+        {% set skipNext = start_page + 10 %}
+        <button class="page-btn btn-bg-blend" value="{{ skipNext }}">...{{ skipNext }}</button>
+        {% set next = start_page + 1 %}
+        <button class="page-btn btn-bg-blend" value="{{ next }}">&gt;</button>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () =>
+    {
+        initializePaging('.page-btn')
+    })
+</script>

@@ -65,6 +65,23 @@ button
     opacity: 1;
 }
 
+/* Paging */
+.paging
+{
+    width: 100%;
+    margin: 15px;
+}
+.paging-btns
+{
+    display: flex;
+    justify-content: center;
+}
+.page-btn
+{
+    margin: 5px;
+}
+
+
 
 /* Animations */
 
@@ -125,3 +142,5 @@ button
 .op-fail {
     animation: animFail 1s ease-out;
 }
+
+/* END Animations */

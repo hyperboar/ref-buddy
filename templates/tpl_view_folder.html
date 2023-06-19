@@ -13,9 +13,9 @@
 <div class="header">
     <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>{{ title }}</h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path|default('') }}</p>
-
 </div>
-<div>{{ panel|default('') }}</div>
+{{ panel|default('') }}
+{{ paging|default('') }}
 <div class="gallery">
     {% for image in images %}
     <div class="thumbnail" data-id="{{ image.image_id }}">
@@ -29,6 +29,8 @@
     </div>
     {% endfor %}
 </div>
+{{ paging|default('') }}
+<div style="height: 20px;"></div>
 
 <div class="top-menu">
     <button id="rate-up" class="rate-up btn-bg-blend" value="1"></button>
