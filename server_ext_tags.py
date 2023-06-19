@@ -3,6 +3,7 @@ from markupsafe import Markup
 
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Tag, Session, ImageMetadata
+from server_args_helpers import get_current_paging, Args, get_arg
 from server_widget_helpers import get_paging_widget
 
 routes_tags = Blueprint('routes_tags', __name__)
@@ -10,23 +11,19 @@ routes_tags = Blueprint('routes_tags', __name__)
 
 @routes_tags.route('/tagged')
 def view_tags():
-    args = request.args
-    tags_all = args.get('tags', default="").split(',')
-    tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
-    tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
+    tags_pos, tags_neg = get_arg(request.args, Args.tags)
 
-    tags_pos = Ctrl.get_tags_by_names(tags_pos)
-    tags_neg = Ctrl.get_tags_by_names(tags_neg)
+    tags_pos_ids = Ctrl.get_tags_by_names(tags_pos)
+    tags_neg_ids = Ctrl.get_tags_by_names(tags_neg)
 
-    page_str = args.get('page', default='1')
-    page = max(int(page_str) - 1, 0)
+    page, offset, limit = get_current_paging(request.args)
 
-    limit = 100
-    offset = limit * page
-    response, images = Ctrl.get_all_by_tags(tags_pos, tags_neg, limit, offset)
+    response, images = Ctrl.get_all_by_tags(tags_pos_ids, tags_neg_ids, limit, offset)
 
     overview = {}
-    overview["study_type"] = ', '.join(tags_all)
+    overview["study_type"] = ', '.join(tags_pos)
+    if len(tags_neg) > 0:
+        overview["study_type"] += ' exclude:' + ', '.join(tags_neg)
     overview["path"] = ""
 
     tags_available = Ctrl.get_all_tags(sort_by_name=True)
@@ -37,9 +34,8 @@ def view_tags():
 
 @routes_tags.route('/add-image-tags')
 def add_image_tag():
-    args = request.args
-    tags = args.get('tags', default=[]).split(',') # [str]
-    image_ids = [int(img) for img in args.get('image-id', default=[]).split(',')] # [int]
+    tags, _ = get_arg(request.args, Args.tags)
+    image_ids = get_arg(request.args, Args.mult_image_ids)
 
     if tags is [] or image_ids is []:
         abort(404, 'Empty tags or image ids')
@@ -49,15 +45,21 @@ def add_image_tag():
         abort(404, 'Something went wrong, fav not set, probably...')
     return render_template_string(str(r))
 
+@routes_tags.route('/remove-image-tags')
+def remove_image_tag():
+    pass
 
 @routes_tags.route('/add-folder-tags')
 def add_folder_tag():
     pass
 
+@routes_tags.route('/remove-folder-tags')
+def remove_folder_tag():
+    pass
+
 @routes_tags.route('/get-image-tags')
 def get_image_tags():
-    args = request.args
-    image_ids = [int(img) for img in args.get('image-id', default=[]).split(',')] # [int]
+    image_ids = get_arg(request.args, Args.mult_image_ids)
 
     session = Session()
     data = {img.image_id: [t.tag.tag for t in img.tags] for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all()}

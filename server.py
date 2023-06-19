@@ -6,8 +6,10 @@ import os
 from datetime import datetime
 from Env import Env
 from models.models_lump import Session
+from server_args_helpers import get_arg, get_offset_by_page, get_current_paging, Args
 from server_ext_rating import routes_rating
 from server_ext_tags import routes_tags
+from server_widget_helpers import get_paging_widget
 
 app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
@@ -22,13 +24,23 @@ def index():
 
 @app.route('/favs')
 def view_favs():
-    images = ImageMetadataCtrl.get_favs(300)
-    return render_template('tpl_view_folder.html', title='Favorites', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
+    page, offset, limit = get_current_paging(request.args)
+
+    images = ImageMetadataCtrl.get_favs(start=offset, count=limit)
+
+    paging = get_paging_widget(page)
+
+    return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
 
 @app.route('/last')
 def view_last():
-    images = ImageMetadataCtrl.get_last(1000)
-    return render_template('tpl_view_folder.html', title='Latest study', images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
+    page, offset, limit = get_current_paging(request.args)
+
+    images = ImageMetadataCtrl.get_last(start=offset, count=limit)
+
+    paging = get_paging_widget(page)
+
+    return render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
@@ -70,7 +82,7 @@ def study_random():
     args = request.args
     study_type = int(args.get('study-type', default='1'))
     same_folder = int(args.get('same-folder', default='false') == "true")
-    prev_image_id = int(args.get('image-id', default='-1'))
+    prev_image_id = get_arg(request.args, Args.image_id)
     timer = int(args.get('time-planned', default='120'))
     rating = int(args.get('min-rating', default='0'))
 
@@ -87,7 +99,7 @@ def study_random():
 def set_image_fav():
     args = request.args
     is_fav = int(args.get('is-fav'))
-    image_id = int(args.get('image-id'))
+    image_id = get_arg(request.args, Args.image_id)
 
     r = ImageMetadataCtrl.set_image_fav(image_id, is_fav)
     if not r:
@@ -96,8 +108,7 @@ def set_image_fav():
 
 @app.route('/set-image-last-viewed')
 def set_image_last_viewed():
-    args = request.args
-    image_id = int(args.get('image-id'))
+    image_id = get_arg(request.args, Args.image_id)
     now = datetime.now()
 
     r = ImageMetadataCtrl.set_image_last_viewed(image_id, now)

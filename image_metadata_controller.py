@@ -53,12 +53,12 @@ class ImageMetadataController:
     @staticmethod
     def get_favs(count: int = 10000, start: int = 0):
         s = Session()
-        return s.query(ImageMetadata).filter(ImageMetadata.fav == 1).order_by(ImageMetadata.last_viewed.desc()).limit(count).offset(start).all()
+        return s.query(ImageMetadata).filter(ImageMetadata.fav == 1).order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
 
     @staticmethod
     def get_last(count: int = 60, start: int = 0):
         s = Session()
-        return s.query(ImageMetadata).order_by(ImageMetadata.last_viewed.desc()).limit(count).offset(start).all()
+        return s.query(ImageMetadata).order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
 
     @staticmethod
     def get_by_id(image_id: int, session=None):
