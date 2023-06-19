@@ -1,5 +1,6 @@
-/*
-
+/**
+ * Helper class that notifies listener when attribute of an element has been changed.<br/>
+ * Might not work in all browsers.
  */
 class MutationAttributeObserver
 {
