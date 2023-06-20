@@ -196,6 +196,23 @@ class ImageMetadataController:
         return 1
 
     @staticmethod
+    def remove_image_tags(image_ids: [int], tags_str: [str]) -> int:
+        tags = ImageMetadataController.get_tags_by_names(tags_str)
+        s = Session()
+        q = s.query(ImageTag)\
+            .filter(ImageTag.image_id.in_(image_ids))\
+            .filter(ImageTag.tag_id.in_(tags))
+
+        rows_to_delete = q.all()
+
+        if len(rows_to_delete) == 0:
+            return 0
+        q.delete()
+        s.commit()
+        return len(rows_to_delete)
+
+
+    @staticmethod
     def set_image_last_viewed(image_id: int, time: 'datetime'):
         s = Session()
         im = s.get(ImageMetadata, image_id)

@@ -47,6 +47,16 @@ def add_image_tag():
 
 @routes_tags.route('/remove-image-tags')
 def remove_image_tag():
+    _ , tags = get_arg(request.args, Args.tags)
+    image_ids = get_arg(request.args, Args.mult_image_ids)
+
+    if tags is [] or image_ids is []:
+        abort(404, 'Empty tags or image ids')
+
+    r = Ctrl.remove_image_tags(image_ids, tags)
+    if not r:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return render_template_string(str(r))
     pass
 
 @routes_tags.route('/add-folder-tags')
