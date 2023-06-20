@@ -125,9 +125,9 @@ def rehash_images(rehash_all):
 
     while True:
         if rehash_all:
-            images = q.limit(limit).offset(offset).all()
+            images = q.offset(offset).limit(limit).all()
         else:
-            images = q.filter(ImageMetadata.image_hash.is_(None)).limit(limit).offset(offset).all()
+            images = q.filter(ImageMetadata.image_hash.is_(None)).limit(limit).all()
 
         if len(images) == 0:
             break
