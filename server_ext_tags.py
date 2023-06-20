@@ -27,7 +27,7 @@ def view_tags():
     overview["path"] = ""
 
     tags_available = Ctrl.get_all_tags(sort_by_name=True)
-    panel = Markup(render_template('tpl_tags_panel.html', tags=tags_available))
+    panel = Markup(render_template('tpl_widget_tags_panel.html', tags=tags_available))
     paging = get_paging_widget(page)
 
     return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=panel, paging=paging, tags=tags_available)
