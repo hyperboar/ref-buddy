@@ -9,7 +9,7 @@ from models.models_lump import Session
 from server_args_helpers import get_arg, get_offset_by_page, get_current_paging, Args
 from server_ext_rating import routes_rating
 from server_ext_tags import routes_tags
-from server_widget_helpers import get_paging_widget
+from server_widget_helpers import get_paging_widget, get_tags_editor
 
 app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
@@ -29,8 +29,9 @@ def view_favs():
     images = ImageMetadataCtrl.get_favs(start=offset, count=limit)
 
     paging = get_paging_widget(page)
+    tags_editor = get_tags_editor()
 
-    return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
+    return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None, tags_editor=tags_editor)
 
 @app.route('/latest_study')
 def view_last():
@@ -39,15 +40,18 @@ def view_last():
     images = ImageMetadataCtrl.get_last(start=offset, count=limit)
 
     paging = get_paging_widget(page)
+    tags_editor = get_tags_editor()
 
-    return render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
+    return render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None, tags_editor=tags_editor)
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
     study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id)
     overview = OverviewPath.from_image_metadata(images[0])
 
-    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags=ImageMetadataCtrl.get_all_tags(sort_by_name=True))
+    tags_editor = get_tags_editor()
+
+    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags_editor=tags_editor)
 
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):

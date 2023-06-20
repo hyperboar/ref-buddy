@@ -1,0 +1,107 @@
+{# This widget requires js varialbe "selection" to exist. #}
+
+<div id="tags-popup" class="tags-popup" style="display: none;">
+    <h3>Tags (<span id="images-count"></span> images selected)</h3>
+    <div id="tagList" class="tag-container">
+        <div class="tag-column">
+        {% for t in tags %}
+            <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
+            <label for="{{ t.tag }}">{{ t.tag }}</label><br>
+            {% if loop.index % 10 == 0 %}
+                </div><div class="tag-column">
+            {% endif %}
+        {% endfor %}
+        </div>
+    </div>
+    <button id="tags-submit-add">Add</button>
+    <button id="tags-submit-del">Del</button>
+    <button id="tags-clear">Clear</button>
+    <button id="tags-close">Close</button>
+</div>
+
+<script>
+
+    function toggleTagsPopupDisplay()
+    {
+        const btn = document.getElementById('tags-popup')
+        if (btn.style.display === 'none')
+        {
+            btn.style.display = 'block'
+            document.querySelector('.tags-popup-background').style.display = 'block'
+            document.getElementById('images-count').textContent = '' + selection.selectedIds.length
+        }
+        else
+        {
+            btn.style.display = 'none'
+            document.querySelector('.tags-popup-background').style.display = 'none'
+        }
+    }
+
+    function closeTagsPopup()
+    {
+        document.getElementById('tags-popup').style.display = 'none';
+        document.querySelector('.tags-popup-background').style.display = 'none'
+    }
+
+    function clearTagsPopup()
+    {
+        Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.checked = false);
+    }
+
+    function submitAddTags()
+    {
+        const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.value);
+
+        const idsStr = selection.selectedIds.join(',')
+        const tagsStr = selectedTags.join(',')
+
+        document.getElementById('tags-submit-add').classList.add('loading')
+
+        fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                document.getElementById('tags-submit-add').classList.remove('loading')
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('tags-submit-add').classList.remove('loading')
+            });
+    }
+
+    function submitRemoveTags()
+    {
+        const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.value);
+
+        const idsStr = selection.selectedIds.join(',')
+        const tagsStr = selectedTags.map(t => '-' + t).join(',')
+
+        document.getElementById('tags-submit-del').classList.add('loading')
+
+        fetch(`/remove-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                document.getElementById('tags-submit-del').classList.remove('loading')
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('tags-submit-del').classList.remove('loading')
+            });
+    }
+
+    document.getElementById('tags-submit-add').addEventListener('click', submitAddTags)
+    document.getElementById('tags-submit-del').addEventListener('click', submitRemoveTags)
+    document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
+    document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
+    document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
+
+    document.addEventListener('keydown', function(e)
+    {
+        if (e.code === 'KeyT' && !e.shiftKey)
+        {
+            toggleTagsPopupDisplay()
+        }
+    });
+</script>

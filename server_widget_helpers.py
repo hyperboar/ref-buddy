@@ -1,4 +1,4 @@
-import random
+from image_metadata_controller import ImageMetadataController as Ctrl
 
 from flask import render_template
 from markupsafe import Markup
@@ -13,9 +13,12 @@ def get_paging_widget(selected_page:int=0, span:int=3, skip=10) -> 'str':
     """
     start = max(selected_page - span, 0) + 1
     count = span * 2 + 1 + start
-    salt = random.randint(100,200) # unique css selector name for querying
     return Markup(render_template('tpl_widget_paging.html', pages=range(start, count), start_page=selected_page+1, skip=skip))
 
+def get_tags_editor(tags=None):
+    if tags is None:
+        tags = Ctrl.get_all_tags(sort_by_name=True)
+    return Markup(render_template('tpl_widget_tags_editor_panel.html', tags=tags))
 
 if __name__ == '__main__':
     print(__name__)
