@@ -23,72 +23,84 @@
 
     function toggleTagsPopupDisplay()
     {
-        const btn = document.getElementById('tags-popup')
-        if (btn.style.display === 'none')
+        const popup = document.getElementById('tags-popup')
+        if (popup.style.display === 'none')
         {
-            btn.style.display = 'block'
+            document.getElementById('tags-popup').style.display = 'block'
             document.querySelector('.tags-popup-background').style.display = 'block'
             document.getElementById('images-count').textContent = '' + selection.selectedIds.length
         }
         else
         {
-            btn.style.display = 'none'
-            document.querySelector('.tags-popup-background').style.display = 'none'
+            closeTagsPopup()
         }
     }
 
     function closeTagsPopup()
     {
-        document.getElementById('tags-popup').style.display = 'none';
+        document.getElementById('tags-popup').style.display = 'none'
         document.querySelector('.tags-popup-background').style.display = 'none'
+
+        document.getElementById('tags-submit-add').classList.remove('op-success', 'op-fail', 'loading')
+        document.getElementById('tags-submit-del').classList.remove('op-success', 'op-fail', 'loading')
     }
 
     function clearTagsPopup()
     {
         Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
-            .map((checkbox) => checkbox.checked = false);
+            .map((checkbox) => checkbox.checked = false)
     }
 
     function submitAddTags()
     {
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
-            .map((checkbox) => checkbox.value);
+            .map((checkbox) => checkbox.value)
 
         const idsStr = selection.selectedIds.join(',')
         const tagsStr = selectedTags.join(',')
 
         document.getElementById('tags-submit-add').classList.add('loading')
+        document.getElementById('tags-submit-add').classList.remove('op-success', 'op-fail')
 
         fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                document.getElementById('tags-submit-add').classList.remove('loading')
+                if (!response.ok) throw new Error('Network response was not ok')
+                document.getElementById('tags-submit-add').classList.add('op-success')
             })
             .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
+                console.error('There was a problem with the fetch operation:', error)
+                document.getElementById('tags-submit-add').classList.add('op-fail')
+            })
+            .finally(() =>
+            {
                 document.getElementById('tags-submit-add').classList.remove('loading')
-            });
+            })
     }
 
     function submitRemoveTags()
     {
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
-            .map((checkbox) => checkbox.value);
+            .map((checkbox) => checkbox.value)
 
         const idsStr = selection.selectedIds.join(',')
         const tagsStr = selectedTags.map(t => '-' + t).join(',')
 
         document.getElementById('tags-submit-del').classList.add('loading')
+        document.getElementById('tags-submit-del').classList.remove('op-success', 'op-fail')
 
         fetch(`/remove-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                document.getElementById('tags-submit-del').classList.remove('loading')
+                if (!response.ok) throw new Error('Network response was not ok')
+                document.getElementById('tags-submit-del').classList.add('op-success')
             })
             .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
+                console.error('There was a problem with the fetch operation:', error)
+                document.getElementById('tags-submit-del').classList.add('op-fail')
+            })
+            .finally(() =>
+            {
                 document.getElementById('tags-submit-del').classList.remove('loading')
-            });
+            })
     }
 
     document.getElementById('tags-submit-add').addEventListener('click', submitAddTags)
@@ -103,5 +115,5 @@
         {
             toggleTagsPopupDisplay()
         }
-    });
+    })
 </script>
