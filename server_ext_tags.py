@@ -89,7 +89,7 @@ def show_tags():
     session = Session()
     tags = session.query(Tag).all()
     tags.sort(key=lambda t: t.tag)
-    return render_template('tpl_tags_list.html', tags=tags)
+    return render_template('crud/tpl_tags_list.html', tags=tags)
 
 @routes_tags.route('/tags/add', methods=['GET', 'POST'])
 def add_tag():
@@ -100,7 +100,7 @@ def add_tag():
         session.add(new_tag)
         session.commit()
         return redirect('/tags')
-    return render_template('tpl_tags_add.html')
+    return render_template('crud/tpl_tags_add.html')
 
 @routes_tags.route('/tags/edit/<int:tag_id>', methods=['GET', 'POST'])
 def edit_tag(tag_id):
@@ -111,7 +111,7 @@ def edit_tag(tag_id):
         tag.tag = new_tag
         session.commit()
         return redirect('/tags')
-    return render_template('tpl_tags_edit.html', tag=tag)
+    return render_template('crud/tpl_tags_edit.html', tag=tag)
 
 @routes_tags.route('/tags/delete/<int:tag_id>', methods=['POST'])
 def delete_tag(tag_id):
