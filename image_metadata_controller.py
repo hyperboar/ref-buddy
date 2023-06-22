@@ -51,14 +51,23 @@ class ImageMetadataController:
     # region Convenience
 
     @staticmethod
-    def get_favs(count: int = 10000, start: int = 0):
-        s = Session()
-        return s.query(ImageMetadata).filter(ImageMetadata.fav == 1).order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
+    def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
+        if session is None:
+            session = Session()
+
+        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
+        q = q.filter(ImageMetadata.fav == 1).order_by(ImageMetadata.imported_at.desc())
+        rows = q.offset(start).limit(count).all()
+        return rows
 
     @staticmethod
-    def get_last(count: int = 60, start: int = 0):
-        s = Session()
-        return s.query(ImageMetadata).order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
+    def get_last(count: int = 60, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
+        if session is None:
+            session = Session()
+
+        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
+        rows = q.order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
+        return rows
 
     @staticmethod
     def get_by_id(image_id: int, session=None):
@@ -87,11 +96,13 @@ class ImageMetadataController:
         return targets[0]
 
     @staticmethod
-    def get_all_by_path_id(path_id: int, session=None) -> '[ImageMetadata]':
+    def get_all_by_path_id(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
         if session is None:
             session = Session()
 
-        rows = session.query(ImageMetadata).filter(ImageMetadata.path_id == path_id).all()
+        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
+        rows =q.filter(ImageMetadata.path_id == path_id).all()
+
         if len(rows) == 0:
             p = session.get(Path, path_id)
             return "", f'No images at path ({p.id}) "{p.path}"', []
@@ -102,25 +113,7 @@ class ImageMetadataController:
     def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0) -> '[ImageMetadata]':
         s = Session()
 
-        l = len(tags_pos)
-
-        # limit by tags_pos
-        if len(tags_pos) > 0:
-            subquery = s.query(ImageTag.image_id)\
-                .filter(ImageTag.tag_id.in_(tags_pos))\
-                .group_by(ImageTag.image_id)\
-                .having(func.count(ImageTag.tag_id) == l)\
-                .subquery()
-        # search in all images
-        else:
-            subquery = s.query(ImageMetadata.image_id)\
-                .subquery()
-
-        # remove tags_neg
-        q = s.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
-        if len(tags_neg) > 0:
-            q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags_neg)))
-
+        q = ImageMetadataController.get_query_imagemetadata(tags=(tags_pos, tags_neg), session=s)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
         result = q.offset(offset).limit(limit).all()
@@ -134,18 +127,56 @@ class ImageMetadataController:
         return [row.id for row in rows]
 
     @staticmethod
-    def get_random_by_study_type(study_type: int, same_folder: int = 0, prev_image_id: int = -1,
-                                 min_rating=0) -> 'ImageMetadata':
+    def get_random_by_study_type(study_type:int=0, same_folder:int=0, prev_image_id:int=0,
+                                 min_rating=0, tags:([int],[int])=([],[])) -> 'ImageMetadata':
         s = Session()
 
-        q = s.query(ImageMetadata).order_by(func.random())
-        q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+        q = ImageMetadataController.get_query_imagemetadata(
+            study_type=study_type, same_folder=same_folder, tags=tags,
+            image_id=prev_image_id, min_rating=min_rating, session=s)
+        q = q.order_by(func.random())
+        row = q.first()
 
-        if same_folder > 0 and prev_image_id > 0:
-            im = s.get(ImageMetadata, prev_image_id)
+        return row
+
+    @staticmethod
+    def get_query_imagemetadata(study_type:int=-1, same_folder:int=0, image_id:int=-1,
+                                min_rating:int=0, tags:([int],[int])=([],[]),
+                                path_id:int=-1, session=None):
+        l = len(tags[0])
+
+        # limit by tags_pos
+        if l > 0:
+            subquery = session.query(ImageTag.image_id)\
+                .filter(ImageTag.tag_id.in_(tags[0]))\
+                .group_by(ImageTag.image_id)\
+                .having(func.count(ImageTag.tag_id) == l)\
+                .subquery()
+            q = session.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
+        else:
+            q = session.query(ImageMetadata)
+
+        # remove tags_neg
+        if len(tags[1]) > 0:
+            q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags[1])))
+
+        # filter by study_type
+        if study_type > 0:
+            q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+
+        # when same_folder get path_id by image_id
+        if same_folder > 0 and image_id > 0:
+            im = session.get(ImageMetadata, image_id)
             q = q.filter(ImageMetadata.path_id == im.path_id)
 
-        return q.first()
+        # filter by path specifically
+        if path_id > 0:
+            q = q.filter(ImageMetadata.path_id == path_id)
+
+        # unconditional min_rating
+        q = q.filter(ImageMetadata.rating >= min_rating)
+
+        return q
 
     @staticmethod
     def set_image_fav(image_id: int, is_fav: int, session=None):

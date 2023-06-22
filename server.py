@@ -5,8 +5,7 @@ from image_metadata_overview import ImageMetadataOverview, OverviewPath
 import os
 from datetime import datetime
 from Env import Env
-from models.models_lump import Session
-from server_args_helpers import get_arg, get_offset_by_page, get_current_paging, Args
+from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_rating import routes_rating
 from server_ext_tags import routes_tags
 from server_widget_helpers import get_paging_widget, get_tags_editor
@@ -25,8 +24,13 @@ def index():
 @app.route('/favs')
 def view_favs():
     page, offset, limit = get_current_paging(request.args)
+    rating = get_arg(request.args, Args.min_rating)
+    tags_pos, tags_neg = get_arg(request.args, Args.tags)
 
-    images = ImageMetadataCtrl.get_favs(start=offset, count=limit)
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+
+    images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating)
 
     paging = get_paging_widget(page)
     tags_editor = get_tags_editor()
@@ -36,8 +40,14 @@ def view_favs():
 @app.route('/latest_study')
 def view_last():
     page, offset, limit = get_current_paging(request.args)
+    rating = get_arg(request.args, Args.min_rating)
 
-    images = ImageMetadataCtrl.get_last(start=offset, count=limit)
+    tags_pos, tags_neg = get_arg(request.args, Args.tags)
+
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+
+    images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating)
 
     paging = get_paging_widget(page)
     tags_editor = get_tags_editor()
@@ -46,8 +56,15 @@ def view_last():
 
 @app.route('/folder/<int:path_id>')
 def view_folder(path_id):
-    study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id)
+    rating = get_arg(request.args, Args.min_rating)
+    tags_pos, tags_neg = get_arg(request.args, Args.tags)
+
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+
+    study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating)
     overview = OverviewPath.from_image_metadata(images[0])
+
 
     tags_editor = get_tags_editor()
 
@@ -81,9 +98,13 @@ def study_random():
     prev_image_id = get_arg(request.args, Args.image_id)
     rating        = get_arg(request.args, Args.min_rating)
     timer         = get_arg(request.args, Args.study_timer)
+    tags_pos, tags_neg = get_arg(request.args, Args.tags)
+
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
 
     study_types = ImageMetadataCtrl.get_study_types()
-    metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating)
+    metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg))
     if metadata is None:
         return f'Error: No images found"'
 
