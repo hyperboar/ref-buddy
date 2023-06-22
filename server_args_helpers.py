@@ -46,7 +46,7 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
             return int(args.get('image-id', default="-1"))
 
         case Args.min_rating:
-            return int(args.get('min-rating', default='0'))
+            return int(args.get('rating', default='0'))
 
         case Args.study_timer:
             return int(args.get('timer', default=Env.DEFAULT_STUDY_TIMER))
