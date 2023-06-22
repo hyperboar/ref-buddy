@@ -12,5 +12,8 @@ class Env:
     SERVER_PORT = os.getenv('SERVER_PORT')
     THUMB_PATH = os.getenv('THUMB_PATH')
     THUMB_MAX_SIZE = int(os.getenv('THUMB_MAX_SIZE'))
-    DEFAULT_FPS_SPLIT = int(os.getenv('DEFAULT_FPS_SPLIT'))
-    DEFAULT_PER_PAGE_LIMIT = int(os.getenv('DEFAULT_PER_PAGE_LIMIT'))
+
+    # defaults
+    DEFAULT_FPS_SPLIT = int(os.getenv('FPS_SPLIT'))
+    DEFAULT_PER_PAGE_LIMIT = int(os.getenv('PER_PAGE_LIMIT'))
+    DEFAULT_STUDY_TIMER = int(os.getenv('STUDY_TIMER'))

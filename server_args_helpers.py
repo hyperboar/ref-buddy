@@ -8,10 +8,13 @@ class Args(Enum):
     mult_image_ids = auto(),
     page          = auto(),
     limit         = auto(),
-    tags          = auto()
+    tags          = auto(),
+    min_rating    = auto(),
+    study_timer   = auto(),
+    is_same_folder = auto()
 
 
-def get_arg(args, arg_name:'Args'):
+def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
     """
     :param args:
     :param arg_name:
@@ -41,6 +44,15 @@ def get_arg(args, arg_name:'Args'):
 
         case Args.image_id:
             return int(args.get('image-id', default="-1"))
+
+        case Args.min_rating:
+            return int(args.get('min-rating', default='0'))
+
+        case Args.study_timer:
+            return int(args.get('timer', default=Env.DEFAULT_STUDY_TIMER))
+
+        case Args.is_same_folder:
+            return int(args.get('same-folder', default='false') == "true")
         
         case _:
             abort(404, f'Error: Unknown argument "{arg_name}"')

@@ -65,12 +65,7 @@ def serve_image(image_id):
 
 @app.route('/study-image/<int:image_id>')
 def study_image(image_id):
-    args = request.args
-    match args.get('time-planned'):
-        case None:
-            timer = 60
-        case s:
-            timer = int(s)
+    timer = get_arg(request.args, Args.study_timer)
 
     metadata = ImageMetadataCtrl.get_by_id(image_id)
     study_types = ImageMetadataCtrl.get_study_types()
@@ -81,12 +76,11 @@ def study_image(image_id):
 
 @app.route('/study-random')
 def study_random():
-    args = request.args
-    study_type = int(args.get('study-type', default='1'))
-    same_folder = int(args.get('same-folder', default='false') == "true")
+    study_type    = int(request.args.get('study-type', default='1'))
+    same_folder   = get_arg(request.args, Args.is_same_folder)
     prev_image_id = get_arg(request.args, Args.image_id)
-    timer = int(args.get('time-planned', default='120'))
-    rating = int(args.get('min-rating', default='0'))
+    rating        = get_arg(request.args, Args.min_rating)
+    timer         = get_arg(request.args, Args.study_timer)
 
     study_types = ImageMetadataCtrl.get_study_types()
     metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating)
