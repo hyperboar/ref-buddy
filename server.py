@@ -72,8 +72,6 @@ def study_image(image_id):
         case s:
             timer = int(s)
 
-    s = Session()
-    s.begin()
     metadata = ImageMetadataCtrl.get_by_id(image_id)
     study_types = ImageMetadataCtrl.get_study_types()
     if metadata is None:
@@ -90,8 +88,6 @@ def study_random():
     timer = int(args.get('time-planned', default='120'))
     rating = int(args.get('min-rating', default='0'))
 
-    s = Session()
-    s.begin()
     study_types = ImageMetadataCtrl.get_study_types()
     metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating)
     if metadata is None:
