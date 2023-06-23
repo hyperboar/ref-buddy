@@ -100,8 +100,8 @@ class ImageMetadataController:
         if session is None:
             session = Session()
 
-        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
-        rows =q.filter(ImageMetadata.path_id == path_id).all()
+        q = ImageMetadataController.get_query_imagemetadata(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
+        rows = q.order_by(ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
 
         if len(rows) == 0:
             p = session.get(Path, path_id)
