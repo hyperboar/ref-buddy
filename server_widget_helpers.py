@@ -15,9 +15,9 @@ def get_paging_widget(selected_page:int=0, span:int=3, skip=10) -> 'str':
     count = span * 2 + 1 + start
     return Markup(render_template('tpl_widget_paging.html', pages=range(start, count), start_page=selected_page+1, skip=skip))
 
-def get_tags_editor(tags=None):
+def get_tags_editor(tags=None, session=None):
     if tags is None:
-        tags = Ctrl.get_all_tags(sort_by_name=True)
+        tags = Ctrl.get_all_tags(sort_by_name=True, session=session)
     return Markup(render_template('tpl_widget_tags_editor_panel.html', tags=tags))
 
 if __name__ == '__main__':

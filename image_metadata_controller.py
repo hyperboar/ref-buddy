@@ -121,19 +121,21 @@ class ImageMetadataController:
         return "", result
 
     @staticmethod
-    def get_tags_by_names(tags: [str]) -> [int]:
-        s = Session()
-        rows = s.query(Tag).filter(Tag.tag.in_(tags)).all()
+    def get_tags_by_names(tags: [str], session=None) -> [int]:
+        if session is None:
+            session = Session()
+        rows = session.query(Tag).filter(Tag.tag.in_(tags)).all()
         return [row.id for row in rows]
 
     @staticmethod
     def get_random_by_study_type(study_type:int=0, same_folder:int=0, prev_image_id:int=0,
-                                 min_rating=0, tags:([int],[int])=([],[])) -> 'ImageMetadata':
-        s = Session()
+                                 min_rating=0, tags:([int],[int])=([],[]), session=None) -> 'ImageMetadata':
+        if session is None:
+            session = Session()
 
         q = ImageMetadataController.get_query_imagemetadata(
             study_type=study_type, same_folder=same_folder, tags=tags,
-            image_id=prev_image_id, min_rating=min_rating, session=s)
+            image_id=prev_image_id, min_rating=min_rating, session=session)
         q = q.order_by(func.random())
         row = q.first()
 
@@ -259,14 +261,17 @@ class ImageMetadataController:
         return img.image_id
 
     @staticmethod
-    def get_study_types():
-        s = Session()
-        return s.query(StudyType).all()
+    def get_study_types(session=None):
+        if session is None:
+            session = Session()
+        return session.query(StudyType).all()
 
     @staticmethod
-    def get_all_tags(sort_by_name=False):
-        s = Session()
-        tags = s.query(Tag).all()
+    def get_all_tags(sort_by_name=False, session=None):
+        if session is None:
+            session = Session()
+
+        tags = session.query(Tag).all()
         if sort_by_name:
             tags.sort(key=(lambda t : t.tag))
         return tags

@@ -5,6 +5,7 @@ from image_metadata_overview import ImageMetadataOverview, OverviewPath
 import os
 from datetime import datetime
 from Env import Env
+from models.models_lump import Session
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_rating import routes_rating
 from server_ext_tags import routes_tags
@@ -59,16 +60,19 @@ def view_folder(path_id):
     rating = get_arg(request.args, Args.min_rating)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
 
-    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
-    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+    session = Session()
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos, session=session)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg, session=session)
 
-    study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating)
+    study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     overview = OverviewPath.from_image_metadata(images[0])
 
 
-    tags_editor = get_tags_editor()
+    tags_editor = get_tags_editor(session=session)
 
-    return render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags_editor=tags_editor)
+    out = render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags_editor=tags_editor)
+    session.close()
+    return out
 
 @app.route('/thumb/<path:path>')
 def send_static_thumb(path):
@@ -84,12 +88,15 @@ def serve_image(image_id):
 def study_image(image_id):
     timer = get_arg(request.args, Args.study_timer)
 
-    metadata = ImageMetadataCtrl.get_by_id(image_id)
+    session = Session()
+    metadata = ImageMetadataCtrl.get_by_id(image_id, session=session)
     study_types = ImageMetadataCtrl.get_study_types()
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
 
-    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
+    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
+    session.close()
+    return out
 
 @app.route('/study-random')
 def study_random():
@@ -100,15 +107,20 @@ def study_random():
     timer         = get_arg(request.args, Args.study_timer)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
 
-    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
-    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+    session = Session()
 
-    study_types = ImageMetadataCtrl.get_study_types()
-    metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg))
+    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos, session=session)
+    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg, session=session)
+
+    study_types = ImageMetadataCtrl.get_study_types(session=session)
+    metadata = ImageMetadataCtrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg), session=session)
     if metadata is None:
         return f'Error: No images found"'
 
-    return render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
+    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
+
+    session.close()
+    return out
 
 @app.route('/set-image-fav')
 def set_image_fav():
