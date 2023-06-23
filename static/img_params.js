@@ -24,7 +24,13 @@ class ImgParams {
         const imageId    = `${this.imageId}=` + document.getElementById(this.imageId).textContent
         const rating     = `${this.minRatingId}=` + document.getElementById(this.minRatingId).value
 
-        return `${sourceType}&${sameFolder}&${timer}&${imageId}&${rating}`
+        // tags, temporary
+        let queryString = window.location.href.split('?')[1]
+        let params = new URLSearchParams(queryString)
+        const tagsValues = params.get('tags') || ''
+        const tags = `tags=${tagsValues}`
+
+        return `${sourceType}&${sameFolder}&${timer}&${imageId}&${rating}&${tags}`
     }
 
     getImgIdAsGET()
