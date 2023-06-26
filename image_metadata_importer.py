@@ -1,6 +1,7 @@
 import os
 import sys
 
+from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
 from maintenance import assign_folder_tags
 from models.models_lump import Session
@@ -11,7 +12,7 @@ class ImageMetadataImporter:
         pass
 
     def import_metadata(self, folder_path):
-        formats = ('.png', '.jpg', '.jpeg', '.webp')
+        formats = Env.IMPORT_FORMATS
         sts = Ctrl.get_study_types()
 
         new_count = 0

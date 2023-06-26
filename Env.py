@@ -18,3 +18,4 @@ class Env:
     DEFAULT_FPS_SPLIT = int(os.getenv('FPS_SPLIT'))
     DEFAULT_PER_PAGE_LIMIT = int(os.getenv('PER_PAGE_LIMIT'))
     DEFAULT_STUDY_TIMER = int(os.getenv('STUDY_TIMER'))
+    IMPORT_FORMATS = list(map(lambda f: '.' + f.strip(), os.getenv('IMPORT_FORMATS').split(',')))
