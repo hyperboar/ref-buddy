@@ -12,7 +12,7 @@ class ImageMetadataImporter:
         pass
 
     def import_metadata(self, folder_path):
-        formats = Env.IMPORT_FORMATS
+        formats = tuple(Env.IMPORT_FORMATS)
         sts = Ctrl.get_study_types()
 
         new_count = 0
