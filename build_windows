@@ -1,1 +1,0 @@
-pyinstaller --name "figure_drawing_trainer" --onefile main.py Env.py image_metadata.py image_metadata_importer.py image_metadata_overview.py maintenance.py server.py export_frames_window.py
