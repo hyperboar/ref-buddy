@@ -84,7 +84,10 @@ class ImageMetadata(Base):
 
 
     def __str__(self):
-        return f"{self.image_id}({self.last_viewed}): {self.path} fav({self.fav})"
+        return f"{self.image_id}({self.last_viewed}): {self.path} fav({self.fav}) r({self.rating}) c({self.count}))"
+
+    def __repr__(self):
+        return str(self)
 
 class Tag(Base):
     __tablename__ = 'tags'
