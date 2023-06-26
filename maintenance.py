@@ -2,11 +2,11 @@ import hashlib
 import os
 import sqlite3
 from PIL import Image
-from sqlalchemy import func
+from sqlalchemy import func, exists
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Session, ImageMetadata, Path
+from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe
 
 
 def get_db_info():
@@ -244,7 +244,77 @@ def mark_all_lost():
     s.close()
 
 def cleanup_lost_images():
-    pass
+    cleanup_image_thumbs()
+
+    print(f'Starting database cleanup.')
+
+    s = Session()
+    delete = lambda row: s.delete(row)
+    subquery = s.query(ImageMetadata.image_id).filter(ImageMetadata.lost == 1).subquery()
+    rows = s.query(ImageTag).join(subquery, ImageTag.image_id == subquery.c.image_id).all()
+    print(f'Removing unused "tag" entries ({len(rows)})...', end='')
+    list(map(delete, rows))
+    s.flush()
+    print(f'\rRemoving unused "tag" entries ({len(rows)})... Done')
+
+    rows = s.query(ImageDupe).join(subquery, ImageDupe.image1 == subquery.c.image_id).all() +\
+           s.query(ImageDupe).join(subquery, ImageDupe.image2 == subquery.c.image_id).all()
+    print(f'Removing unused "duplicate" entries ({len(rows)})...', end='')
+    list(map(delete, rows))
+    s.flush()
+    print(f'\rRemoving unused "duplicate" entries ({len(rows)})... Done')
+
+    rows = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
+    print(f'Removing "lost images" entries ({len(rows)})...', end='')
+    list(map(delete, rows))
+    s.flush()
+    print(f'\rRemoving "lost images" entries ({len(rows)})... Done')
+
+    s.commit()
+    s.close()
+
+    print(f'Database cleanup is done.')
+
+def cleanup_image_thumbs():
+    print(f'Cleaning up thumbs.')
+    print(f'Collecting thumbs info...', end='')
+    ids = [int(os.path.splitext(f)[0]) for f in os.listdir(Env.THUMB_PATH) if os.path.isfile(os.path.join(Env.THUMB_PATH, f))]
+    print(f'\rCollecting thumbs info... Done')
+
+    s = Session()
+    ids_to_remove = []
+    count_max = len(ids)
+    count = 0
+    for i in ids:
+        count += 1
+        print(f'\r{int(count/count_max*100)}% Searching in database...', end='')
+        if s.query(exists().where(ImageMetadata.image_id == i)).scalar():
+            continue
+        ids_to_remove.append(i)
+
+    print(f'\r{int(count / count_max * 100)}% Searching in database... Done')
+    print(f'Appending images marked as "lost"...', end='')
+
+    lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
+    ids_to_remove += [l.image_id for l in lost if l.image_id in ids and l.image_id]
+    print(f'\rAppending images marked as "lost"... Done')
+
+    ids_to_remove = list(set(ids_to_remove))
+
+    if len(ids_to_remove) == 0:
+        print(f'Thumbs are already in a good shape! Nothing to delete!')
+        return
+
+    count_max = len(ids)
+    count = 0
+    for i in ids_to_remove:
+        count += 1
+        print(f'\r{int(count/count_max*100)}% Removing thumbs...', end='')
+        try:
+            os.remove(os.path.join(Env.THUMB_PATH, str(i) + '.jpg'))
+        except FileNotFoundError:
+            print(f'Something went wrong. Tried to remove file with name "' + str(i) + '.jpg' + '".')
+    print(f'\r{int(count / count_max * 100)}% Removing thumbs... Done')
 
 def relink_lost_images():
     """Try to relink by unique name"""
@@ -301,7 +371,7 @@ def relink_lost_images():
     s.close()
 
 if __name__ == "__main__":
-    relink_lost_images()
+    cleanup_lost_images()
     pass
     # print(f"\rAssigning essential tags to new images...", end="")
     # mark_all_lost()
