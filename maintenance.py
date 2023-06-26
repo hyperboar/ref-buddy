@@ -5,7 +5,8 @@ from PIL import Image
 from sqlalchemy import func
 
 from Env import Env
-from models.models_lump import Session, ImageMetadata
+from image_metadata_controller import ImageMetadataController as Ctrl
+from models.models_lump import Session, ImageMetadata, Path
 
 
 def get_db_info():
@@ -211,10 +212,11 @@ def mark_all_lost():
     rows_max = s.query(func.count()).select_from(ImageMetadata).scalar()
     limit = 500
     offset = 0
-    lost_count = 0
 
     q = s.query(ImageMetadata)
 
+    lost = []
+    found = []
     while True:
         images = q.limit(limit).offset(offset).all()
         offset += limit
@@ -225,21 +227,21 @@ def mark_all_lost():
         for image in images:
             image_path = os.path.join(Env.IMAGES_PATH, image.path)
 
-            if os.path.exists(image_path):
-                continue
+            if  image.lost == 1 and os.path.exists(image_path):
+                image.lost = 0
+                found.append(image_path)
+            elif image.lost == 0 and not os.path.exists(image_path):
+                image.mark_as_lost(session=s, auto_commit=False)
+                lost.append(image_path)
+        print(f"\r{int(offset / rows_max * 100)}%... Searching for lost images. {len(lost)} lost, {len(found)} found so far", end="")
 
-            lost_count += 1
-            print(f"\nLost {image.image_id} {image.path}")
-            image.mark_as_lost(session=s, auto_commit=False)
+    print(f"\n{len(lost)} lost images\n")
+    [print(p) for p in lost]
+    print(f"\nUnlost {len(found)} lost images\n")
+    [print(p) for p in found]
 
-        print(f"\r{int(offset / rows_max * 100)}%... Searching for lost images. Found {lost_count} lost so far", end="")
-
-    if lost_count > 0:
-        print(f"\nFound {lost_count} lost images\n")
-        s.commit()
-    else:
-        print(f"\nNothing lost yet!\n")
-
+    s.commit()
+    s.close()
 
 def cleanup_lost_images():
     pass
