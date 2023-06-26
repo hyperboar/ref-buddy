@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+from Env import Env
 from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag
 from sqlalchemy import func
 
@@ -283,6 +284,45 @@ class ImageMetadataController:
         s = Session()
         found = s.query(Tag).filter(Tag.id.in_(tags)).all()
         return [t.tag for t in found]
+
+    @staticmethod
+    def update_paths_containing_images():
+        """Goes through the IMAGES_PATH and adds missing entries to paths table."""
+        session = Session()
+
+        formats = tuple(Env.IMPORT_FORMATS)
+
+        print('Updating folder paths registry...', end='')
+
+        new_paths = []
+        root_path = Env.IMAGES_PATH
+        for dir_path, _, filenames in os.walk(root_path):
+
+            if not any([f.endswith(formats) for f in filenames]):
+                continue
+
+            path = os.path.relpath(dir_path, root_path)
+
+            path_row = session.query(Path).filter(Path.path == path).first()
+            if path_row:
+                continue
+
+            path_ref = Path(path=path)
+            session.add(path_ref)
+            session.flush()
+
+            new_paths.append(path)
+
+        session.rollback()
+        # session.commit()
+
+        print('\rUpdating folder paths registry... Done\n')
+
+        if len(new_paths) > 0:
+            print(f'Found {len(new_paths)} new folders')
+            [print(f'{p}') for p in new_paths]
+
+        pass
 
     # endregion Convenience
 
