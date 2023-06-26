@@ -67,7 +67,7 @@ class ImageMetadata(Base):
 
     @property
     def path(self):
-        return os.path.join(self.study_type_ref.type, self.path_ref.path, self.filename)
+        return os.path.join(self.path_ref.path, self.filename)
 
     def mark_as_lost(self, session=None, auto_commit=True):
         self.lost = 1

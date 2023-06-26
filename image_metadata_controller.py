@@ -25,7 +25,7 @@ class ImageMetadataController:
             return None
 
         stype = stype_list[0]
-        new_path = dir[len(stype.type) + 1:]
+        new_path = dir
 
         if session is None:
             session = Session()
