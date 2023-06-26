@@ -177,6 +177,7 @@ class ImageMetadataController:
 
         # unconditional min_rating
         q = q.filter(ImageMetadata.rating >= min_rating)
+        q = q.filter(ImageMetadata.lost == 0)
 
         return q
 
@@ -250,6 +251,7 @@ class ImageMetadataController:
         s = Session()
         im = s.get(ImageMetadata, image_id)
         im.last_viewed = time
+        im.count += 1
         s.commit()
         return im
 

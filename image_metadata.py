@@ -118,6 +118,15 @@ class ImageMetadata:
             INSERT INTO tags (tag) VALUES ('view_body_3-4');
             INSERT INTO tags (tag) VALUES ('view_body_top');
             INSERT INTO tags (tag) VALUES ('view_body_bottom');
+            
+            CREATE TABLE IF NOT EXISTS dupes (
+                image1 INTEGER,
+                image2 INTEGER,
+                found_at TIMESTAMP DEFAULT (datetime('now')),
+                fp INTEGER DEFAULT 0,
+                r  INTEGER DEFAULT 0,
+                PRIMARY KEY (image1_id, image2_id)
+            );
         """
 
     # region CRUD

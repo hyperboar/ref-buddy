@@ -7,6 +7,7 @@ from datetime import datetime
 from Env import Env
 from models.models_lump import Session
 from server_args_helpers import get_arg, get_current_paging, Args
+from server_ext_dupes import routes_dupes
 from server_ext_rating import routes_rating
 from server_ext_tags import routes_tags
 from server_widget_helpers import get_paging_widget, get_tags_editor
@@ -16,6 +17,7 @@ app.config['THUMB_STATIC'] = Env.THUMB_PATH
 
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
+app.register_blueprint(routes_dupes)
 
 @app.route('/')
 def index():
