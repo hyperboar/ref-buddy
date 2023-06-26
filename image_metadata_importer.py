@@ -51,7 +51,7 @@ class ImageMetadataImporter:
             print("")
             print(f"\rAssigning essential tags to new images...", end="")
             assign_folder_tags()
-            print(f"\rAssigning essential tags to new images... Done!", end="")
+            print(f"\rAssigning essential tags to new images... Done", end="")
 
         print(f"\nImport completed! Found {new_count} new files.")
 
