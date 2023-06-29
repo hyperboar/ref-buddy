@@ -27,12 +27,14 @@ def view_tags():
         overview["study_type"] += ' exclude:' + ', '.join(tags_neg_names)
     overview["path"] = ""
 
-    tags_available = Ctrl.get_all_tags(sort_by_name=True)
-    tags_filter = get_tags_filter(tags_available)
+    tags_available = Ctrl.get_all_tags(sort_by_name=True, session=session)
+    tags_filter = get_tags_filter(tags_available, session=session)
     paging = get_paging_widget(page)
-    tags_editor = get_tags_editor(tags_available)
+    tags_editor = get_tags_editor(tags_available, session=session)
 
-    return render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=tags_filter, paging=paging, tags_editor=tags_editor)
+    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=tags_filter, paging=paging, tags_editor=tags_editor)
+    session.close()
+    return out
 
 @routes_tags.route('/add-image-tags')
 def add_image_tag():
