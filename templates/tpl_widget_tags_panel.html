@@ -2,11 +2,7 @@
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
     <div id="tagList" class="tag-container">
         {% for t in tags %}
-            <div class="tag-filter" data-tag="{{ t.tag }}" data-state="0">
-                <input type="checkbox" class="tight-chk pos" id="{{ t.tag }}" value="{{ t.tag }}"/>
-                <input type="checkbox" class="tight-chk neg" id="-{{ t.tag }}" value="-{{ t.tag }}"/>
-                <label style="color:{{ t.hex }}" >{{ t.tag }}</label>
-            </div>
+            <div class="tag-filter" data-tag="{{ t.tag }}" data-tag-id="{{ t.id }}" data-state="0" style="color:{{ t.hex }}">{{ t.tag }}</div>
         {% endfor %}
     </div>
     <button id="tags-filter-apply">Apply</button>
@@ -75,18 +71,10 @@
             else if (selectedPanelTags.includes('-' + tag)) { updateTagState(tagElem, 2) }
             else { updateTagState(tagElem, 0) }
 
-            tagElem.querySelector('.pos').addEventListener('click', (e) =>
+            tagElem.addEventListener('click', (e) =>
             {
-                toggleTag(e.currentTarget.parentNode, e.currentTarget.checked ? 1 : 0)
+                cycleTagState(e.currentTarget)
             })
-            tagElem.querySelector('.neg').addEventListener('click', (e) =>
-            {
-                toggleTag(e.currentTarget.parentNode, e.currentTarget.checked ? 2 : 0)
-            })
-            {#tagElem.addEventListener('click', (e) =>#}
-            {#{#}
-            {#    cycleTagState(e.currentTarget)#}
-            {#})#}
 
             const attr = tagElem.value
             if (!tags.includes(attr)) { return }
@@ -95,27 +83,17 @@
 
     function updateTagState(tagElem, state)
     {
-        console.log(`state ${state}`)
-        {#let tag = tagElem.getAttribute('data-tag')#}
-        let pos = tagElem.querySelector('.pos')
-        let neg = tagElem.querySelector('.neg')
         tagElem.classList.remove('tag-selected-pos', 'tag-selected-neg')
 
         if (state === 0)
         {
-            pos.checked = false
-            neg.checked = false
         }
         else if (state === 1)
         {
-            pos.checked = true
-            neg.checked = false
             tagElem.classList.add('tag-selected-pos')
         }
         else if (state === 2)
         {
-            pos.checked = false
-            neg.checked = true
             tagElem.classList.add('tag-selected-neg')
         }
 
