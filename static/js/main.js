@@ -1,17 +1,11 @@
 
 
-class Viewer
+Array.prototype.remove = function(elem)
 {
-    imageId;
-
-    constructor(imageId)
+    const idx = this.indexOf(elem)
+    // not found, adding
+    if (idx !== -1)
     {
-        this.imageId = imageId
-    }
-
-    initialize()
-    {
-
+        this.splice(idx, 1)
     }
 }
-
