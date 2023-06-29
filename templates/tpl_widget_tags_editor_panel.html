@@ -3,15 +3,12 @@
 <div id="tags-popup" class="tags-popup" style="display: none;">
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
     <div id="tagList" class="tag-container">
-        <div class="tag-column">
         {% for t in tags %}
+            <div class="tag-edit">
             <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
-            <label for="{{ t.tag }}">{{ t.tag }}</label><br>
-            {% if loop.index % 10 == 0 %}
-                </div><div class="tag-column">
-            {% endif %}
+            <label style="color:{{ t.hex }}" for="{{ t.tag }}">{{ t.tag }}</label><br>
+            </div>
         {% endfor %}
-        </div>
     </div>
     <button id="tags-submit-add">Add</button>
     <button id="tags-submit-del">Del</button>
@@ -48,7 +45,7 @@
     function clearTagsPopup()
     {
         Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
-            .map((checkbox) => checkbox.checked = false)
+            .map((checkbox) => { checkbox.checked = false; checkbox.parentNode.classList.remove('tag-selected') })
     }
 
     function submitAddTags()
@@ -108,6 +105,15 @@
     document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
     document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
     document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
+
+    document.querySelectorAll('.tag-edit input[type="checkbox"]').forEach(elem =>
+    {
+        elem.addEventListener('click', (e) =>
+        {
+            if (e.currentTarget.checked) { e.currentTarget.parentNode.classList.add('tag-selected') }
+            else { e.currentTarget.parentNode.classList.remove('tag-selected') }
+        })
+    })
 
     document.addEventListener('keydown', function(e)
     {

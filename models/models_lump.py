@@ -93,7 +93,12 @@ class Tag(Base):
     __tablename__ = 'tags'
 
     id = Column(Integer, primary_key=True)
-    tag = Column(Text, unique=True)
+    tag = Column(Text, unique=True, nullable=False)
+    color_id = Column(Integer, ForeignKey('colors.id'), name='color', nullable=False)
+
+    @property
+    def hex(self):
+        return self.color
 
     def __lt__(self, other):
         return self.tag < other.tag
@@ -137,6 +142,21 @@ class TagSets(Base):
         tags_neg = [t.tag for t in session.query(Tag).filter(Tag.id.in_(tags_neg))]
 
         return tags_pos, tags_neg
+
+class Color(Base):
+    __tablename__ = 'colors'
+
+    id = Column(Integer, primary_key=True)
+    color_name = Column(Text, unique=True)
+    hex = Column(Text, default='#000000')
+
+    tags = relationship('Tag', backref='color')
+
+    def __str__(self):
+        return self.hex
+
+    def __repr__(self):
+        return str(self)
 
 class ImageDupe(Base):
     __tablename__ = 'dupes'

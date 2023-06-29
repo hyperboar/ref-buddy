@@ -20,8 +20,8 @@
     </tr>
     {% for tag in tags %}
         <tr>
-            <td>{{ tag.id }}</td>
-            <td>{{ tag.tag }}</td>
+            <td style="color: {{ tag.hex }}">{{ tag.id }}</td>
+            <td style="color: {{ tag.hex }}">{{ tag.tag }}</td>
             <td>
                 <a href="/tags/edit/{{ tag.id }}">Edit</a>
                 <form method="POST" action="/tags/delete/{{ tag.id }}" style="display: inline;">

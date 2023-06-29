@@ -17,7 +17,9 @@ def get_paging_widget(selected_page:int=0, span:int=3, skip=10) -> 'str':
 
 def get_tags_editor(tags=None, session=None):
     if tags is None:
-        tags = Ctrl.get_all_tags(sort_by_name=True, session=session)
+        tags = Ctrl.get_all_tags(session=session)
+
+    tags = sorted(tags, key=lambda t: (t.color_id, t.tag))
     return Markup(render_template('tpl_widget_tags_editor_panel.html', tags=tags))
 
 if __name__ == '__main__':

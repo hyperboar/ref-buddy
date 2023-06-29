@@ -65,6 +65,13 @@ CREATE TABLE IF NOT EXISTS dupes (
     PRIMARY KEY (image1, image2)
 );
 
+CREATE TABLE IF NOT EXISTS colors (
+    id INTEGER PRIMARY KEY,
+    hex TEXT NOT NULL DEFAULT '#000000',
+    color_name TEXT NOT NULL UNIQUE
+);
+
+INSERT INTO colors (id, color_name) VALUES (1, 'default');
 
 INSERT INTO tags (id, tag) VALUES (1, 'futanari');
 INSERT INTO tags (id, tag) VALUES (2, 'academic');
