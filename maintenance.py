@@ -44,6 +44,7 @@ def get_db_info():
 
 
 def create_new_db():
+    # make_database_backup(True)
     # if not os.path.isfile(Env.DB_FILE):
     #     print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
     #
@@ -209,6 +210,8 @@ def assign_folder_tags():
     conn.close()
 
 def mark_all_lost():
+    make_database_backup(True)
+
     s = Session()
 
     rows_max = s.query(func.count()).select_from(ImageMetadata).scalar()
@@ -247,6 +250,8 @@ def mark_all_lost():
 
 def cleanup_lost_images():
     cleanup_image_thumbs()
+
+    make_database_backup(True)
 
     print(f'Starting database cleanup.')
 
@@ -320,6 +325,8 @@ def cleanup_image_thumbs():
 
 def relink_lost_images():
     """Try to relink by unique name"""
+    make_database_backup(True)
+
     s = Session()
 
     lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
@@ -372,7 +379,7 @@ def relink_lost_images():
     s.commit()
     s.close()
 
-def make_database_backup():
+def make_database_backup(force:bool=False):
     db_file = os.path.splitext(Env.DB_NAME)
     db_file_name = f'{db_file[0]}_'
     db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
@@ -387,8 +394,8 @@ def make_database_backup():
     dates = [f.replace(db_file_name, '').replace(db_file_ext, '') for f in backup_files]
     dates = sorted([datetime.strptime(d, time_fmt) for d in dates])
 
-    if len(dates) > 0 and \
-       datetime.now().timestamp() < (dates[-1].timestamp() + backup_interval):
+    if not force or \
+            (len(dates) > 0 and datetime.now().timestamp() < (dates[-1].timestamp() + backup_interval)):
         return
 
     print(f'Backing up database. Found {len(backup_files)} backups, making new one.')

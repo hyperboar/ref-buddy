@@ -3,7 +3,7 @@ import sys
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from maintenance import assign_folder_tags
+from maintenance import assign_folder_tags, make_database_backup
 from models.models_lump import Session
 
 
@@ -16,9 +16,10 @@ class ImageMetadataImporter:
         sts = Ctrl.get_study_types()
 
         new_count = 0
-
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
+
+        make_database_backup(True)
 
         session = Session()
 
