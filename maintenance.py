@@ -391,9 +391,9 @@ def make_database_backup(marker:str='',force:bool=False):
         os.mkdir(path)
 
     backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
-    date_len = len(datetime.now().strftime(time_fmt))
-    ext_len = len(db_file_ext)
-    dates = [f[-(date_len + ext_len):-ext_len] for f in backup_files]
+    start_pos = len(db_file_name)
+    end_pos = start_pos + len(datetime.now().strftime(time_fmt))
+    dates = [f[start_pos:end_pos] for f in backup_files]
     dates = sorted([datetime.strptime(d, time_fmt) for d in dates])
 
     if not force and \
@@ -403,8 +403,8 @@ def make_database_backup(marker:str='',force:bool=False):
     print(f'Backing up database. Found {len(backup_files)} backups, making new one.')
 
     if marker != '':
-        marker = f'{marker.lower().replace(" ", "_")}_'
-    backup_name = f'{db_file_name}{marker}{datetime.now().strftime(time_fmt)}{db_file_ext}'
+        marker = f'_{marker.lower().replace(" ", "_")}'
+    backup_name = f'{db_file_name}{datetime.now().strftime(time_fmt)}{marker}{db_file_ext}'
     src = Env.DB_FILE
     dst = os.path.join(path, backup_name)
     shutil.copy(src, dst)
