@@ -47,6 +47,10 @@
     let rating = null
     let selection = null
 
+    // 0 - not showing
+    // 1 - showing
+    let showTagsMode = 0
+
     document.addEventListener('DOMContentLoaded', function()
     {
         // reveal on load
@@ -73,26 +77,34 @@
     // fetch tags button
     function fetchTags()
     {
-        const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',')
-        fetch(`/get-image-tags?image-id=${idsStr}`)
-            .then(response => response.json())
-            .then(data =>
-            {
-                if (!data) throw new Error('Network response was not ok')
-                document.querySelectorAll('.thumbnail').forEach((tile) =>
-                {
-                    const id = tile.getAttribute('data-id')
-                    tile.querySelector('.tags-list').textContent = data[id].join(', ')
-                    tile.querySelector('.overlay').classList.remove('vis-hide')
-                })
-            })
-            .catch(error =>
-            {
-                console.error('There was a problem with the fetch operation:', error)
-            });
-    }
-    document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
+        showTagsMode = (showTagsMode + 1) % 2
 
+        // hide shown tags
+        if (showTagsMode === 0)
+        {
+            document.querySelectorAll('.tags-list').forEach(elem => elem.textContent = '')
+            document.querySelectorAll('.overlay').forEach(elem => elem.classList.remove('vis-hide'))
+        }
+        // fetch tags
+        else if (showTagsMode === 1) {
+            const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',')
+            fetch(`/get-image-tags?image-id=${idsStr}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data) throw new Error('Network response was not ok')
+                    document.querySelectorAll('.thumbnail').forEach((tile) => {
+                        const id = tile.getAttribute('data-id')
+                        tile.querySelector('.tags-list').textContent = data[id].join(', ')
+                        tile.querySelector('.overlay').classList.remove('vis-hide')
+                    })
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error)
+                });
+        }
+    }
+
+    document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
 
     document.addEventListener('keydown', function(e)
@@ -101,6 +113,11 @@
         if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
         {
             selection.selectAll()
+        }
+        // show/hide tags
+        else if (e.code === 'KeyW')
+        {
+            fetchTags()
         }
         // toggle selection mode
         else if (e.code === 'KeyS' && !e.shiftKey)
