@@ -30,7 +30,11 @@ class ImgParams {
         const tagsValues = params.get('tags') || ''
         const tags = `tags=${tagsValues}`
 
-        return `${sourceType}&${sameFolder}&${timer}&${imageId}&${rating}&${tags}`
+        // tag set, temporary
+        const tagSetValue = params.get('tag-set') || ''
+        const tagset = `tag-set=${tagSetValue}`
+
+        return `${sourceType}&${sameFolder}&${timer}&${imageId}&${rating}&${tags}&${tagset}`
     }
 
     getImgIdAsGET()

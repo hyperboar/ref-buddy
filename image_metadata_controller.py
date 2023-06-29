@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from Env import Env
-from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag
+from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSets
 from sqlalchemy import func
 
 class ImageMetadataController:
@@ -111,10 +111,11 @@ class ImageMetadataController:
         return rows[0].study_type, rows[0], rows
 
     @staticmethod
-    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0) -> '[ImageMetadata]':
-        s = Session()
+    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
+        if session is None:
+            session = Session()
 
-        q = ImageMetadataController.get_query_imagemetadata(tags=(tags_pos, tags_neg), session=s)
+        q = ImageMetadataController.get_query_imagemetadata(tags=(tags_pos, tags_neg), session=session)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
         result = q.offset(offset).limit(limit).all()
@@ -127,6 +128,28 @@ class ImageMetadataController:
             session = Session()
         rows = session.query(Tag).filter(Tag.tag.in_(tags)).all()
         return [row.id for row in rows]
+
+    @staticmethod
+    def get_tags_by_set(set_id:int|str, add_pos:[str]=None, add_neg:[str]=None, session=None):
+        if session is None:
+            session = Session()
+
+        try:
+            set_id = int(set_id)
+        except ValueError:
+            set_id = session.query(TagSets).filter(TagSets.set_alias == set_id).first().id
+
+
+        tag_set = session.query(TagSets).filter(TagSets.id == set_id).first()
+        tags_pos, tags_neg = tag_set.get_tags()
+
+        add_pos = ImageMetadataController.get_tags_by_names(add_pos, session=session) if add_pos and len(add_pos) > 0 else []
+        add_neg = ImageMetadataController.get_tags_by_names(add_neg, session=session) if add_neg and len(add_neg) > 0 else []
+
+        tags_pos = list(set(tags_pos) - set(add_neg)) + add_pos
+        tags_neg = list(set(tags_neg) - set(add_pos)) + add_neg
+
+        return tags_pos, tags_neg
 
     @staticmethod
     def get_random_by_study_type(study_type:int=0, same_folder:int=0, prev_image_id:int=0,
@@ -280,9 +303,10 @@ class ImageMetadataController:
         return tags
 
     @staticmethod
-    def get_tag_names(tags: [int]):
-        s = Session()
-        found = s.query(Tag).filter(Tag.id.in_(tags)).all()
+    def get_tag_names(tags: [int], session=None):
+        if session is None:
+            session = Session()
+        found = session.query(Tag).filter(Tag.id.in_(tags)).all()
         return [t.tag for t in found]
 
     @staticmethod

@@ -116,6 +116,28 @@ class ImageTag(Base):
     image = relationship('ImageMetadata', backref='tags')
     tag = relationship('Tag', backref='image_tags')
 
+class TagSets(Base):
+    __tablename__ = 'tag_sets'
+
+    id = Column(Integer, primary_key=True)
+    set_name = Column(Text, nullable=False, unique=True)
+    set_alias = Column(Text, nullable=False, unique=True)
+    tag_list = Column(Text)
+
+    def get_tags(self) -> ([int],[int]):
+        tags_all = list(map(lambda t: t.strip(), self.tag_list.split(','))) if self.tag_list else []
+        tags_pos = [int(t) for t in tags_all if not t.startswith('-')]
+        tags_neg = [int(t[1:]) for t in tags_all if t.startswith('-')]
+        return tags_pos, tags_neg
+
+    def get_tags_names(self) -> ([str],[str]):
+        tags_pos, tags_neg = self.get_tags()
+        session = object_session(self)
+        tags_pos = [t.tag for t in session.query(Tag).filter(Tag.id.in_(tags_pos))]
+        tags_neg = [t.tag for t in session.query(Tag).filter(Tag.id.in_(tags_neg))]
+
+        return tags_pos, tags_neg
+
 class ImageDupe(Base):
     __tablename__ = 'dupes'
 

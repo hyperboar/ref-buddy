@@ -31,20 +31,19 @@ def study_image(image_id):
 
 @routes_image.route('/study-random')
 def study_random():
-    study_type    = int(request.args.get('study-type', default='1'))
+    # study_type    = int(request.args.get('study-type', default='1'))
     same_folder   = get_arg(request.args, Args.is_same_folder)
     prev_image_id = get_arg(request.args, Args.image_id)
     rating        = get_arg(request.args, Args.min_rating)
     timer         = get_arg(request.args, Args.study_timer)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
+    tag_set_id = get_arg(request.args, Args.tag_set)
 
     session = Session()
-
-    tags_pos = Ctrl.get_tags_by_names(tags_pos, session=session)
-    tags_neg = Ctrl.get_tags_by_names(tags_neg, session=session)
+    tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     study_types = Ctrl.get_study_types(session=session)
-    metadata = Ctrl.get_random_by_study_type(study_type, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg), session=session)
+    metadata = Ctrl.get_random_by_study_type(0, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg), session=session)
     if metadata is None:
         return f'Error: No images found"'
 

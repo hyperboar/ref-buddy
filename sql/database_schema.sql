@@ -48,27 +48,13 @@ CREATE TABLE  IF NOT EXISTS image_tags (
     PRIMARY KEY (image_id, tag_id)
 );
 
-INSERT INTO tags (tag) VALUES ('futanari');
 
-INSERT INTO tags (tag) VALUES ('academic');
-INSERT INTO tags (tag) VALUES ('pron');
-INSERT INTO tags (tag) VALUES ('artists');
-INSERT INTO tags (tag) VALUES ('the_bits');
-Insert into tags (tag) values ('video');
-
-INSERT INTO tags (tag) VALUES ('face');
-
-INSERT INTO tags (tag) VALUES ('pose_stand');
-INSERT INTO tags (tag) VALUES ('pose_sit');
-INSERT INTO tags (tag) VALUES ('pose_lay');
-INSERT INTO tags (tag) VALUES ('pose_stand_bent');
-
-INSERT INTO tags (tag) VALUES ('view_body_front');
-INSERT INTO tags (tag) VALUES ('view_body_back');
-INSERT INTO tags (tag) VALUES ('view_body_side');
-INSERT INTO tags (tag) VALUES ('view_body_3-4');
-INSERT INTO tags (tag) VALUES ('view_body_top');
-INSERT INTO tags (tag) VALUES ('view_body_bottom');
+CREATE TABLE IF NOT EXISTS tag_sets (
+    id INTEGER PRIMARY KEY,
+    set_name TEXT NOT NULL UNIQUE,
+    set_alias TEXT NOT NULL UNIQUE,
+    tag_list TEXT
+);
 
 CREATE TABLE IF NOT EXISTS dupes (
     image1 INTEGER,
@@ -78,3 +64,91 @@ CREATE TABLE IF NOT EXISTS dupes (
     r  INTEGER DEFAULT 0,
     PRIMARY KEY (image1, image2)
 );
+
+
+INSERT INTO tags (id, tag) VALUES (1, 'futanari');
+INSERT INTO tags (id, tag) VALUES (2, 'academic');
+INSERT INTO tags (id, tag) VALUES (3, 'pron');
+INSERT INTO tags (id, tag) VALUES (4, 'artists');
+INSERT INTO tags (id, tag) VALUES (5, 'the_bits');
+INSERT INTO tags (id, tag) VALUES (6, 'frames');
+INSERT INTO tags (id, tag) VALUES (7, 'portrait');
+INSERT INTO tags (id, tag) VALUES (8, 'pose_stand');
+INSERT INTO tags (id, tag) VALUES (9, 'pose_sit');
+INSERT INTO tags (id, tag) VALUES (10, 'pose_lay');
+INSERT INTO tags (id, tag) VALUES (11, 'pose_stand_bent');
+INSERT INTO tags (id, tag) VALUES (12, 'view_body_front');
+INSERT INTO tags (id, tag) VALUES (13, 'view_body_rear');
+INSERT INTO tags (id, tag) VALUES (14, 'view_body_side');
+INSERT INTO tags (id, tag) VALUES (15, 'view_body_3-4');
+INSERT INTO tags (id, tag) VALUES (16, 'view_body_upper');
+INSERT INTO tags (id, tag) VALUES (17, 'view_body_lower');
+INSERT INTO tags (id, tag) VALUES (18, 'hands');
+INSERT INTO tags (id, tag) VALUES (19, 'gt_penis');
+INSERT INTO tags (id, tag) VALUES (20, 'belly');
+INSERT INTO tags (id, tag) VALUES (21, 'pussy');
+INSERT INTO tags (id, tag) VALUES (22, 'male');
+INSERT INTO tags (id, tag) VALUES (23, 'female');
+INSERT INTO tags (id, tag) VALUES (24, 'ai');
+INSERT INTO tags (id, tag) VALUES (25, 'easy');
+INSERT INTO tags (id, tag) VALUES (26, 'hard');
+INSERT INTO tags (id, tag) VALUES (27, 'still_life');
+INSERT INTO tags (id, tag) VALUES (28, 'gt_breasts');
+INSERT INTO tags (id, tag) VALUES (29, 'growth');
+INSERT INTO tags (id, tag) VALUES (30, 'ass');
+INSERT INTO tags (id, tag) VALUES (31, 'view_cam_wide');
+INSERT INTO tags (id, tag) VALUES (32, 'pinup');
+INSERT INTO tags (id, tag) VALUES (33, 'legs');
+INSERT INTO tags (id, tag) VALUES (34, 'act_bj');
+INSERT INTO tags (id, tag) VALUES (35, 'multi_person');
+INSERT INTO tags (id, tag) VALUES (36, 'buff');
+INSERT INTO tags (id, tag) VALUES (37, 'b_plus_size');
+INSERT INTO tags (id, tag) VALUES (38, 'b_skinny');
+INSERT INTO tags (id, tag) VALUES (39, 'view_cam_top');
+INSERT INTO tags (id, tag) VALUES (40, 'view_cam_low');
+INSERT INTO tags (id, tag) VALUES (41, 'pose_kneel');
+INSERT INTO tags (id, tag) VALUES (42, 'gt_pose');
+INSERT INTO tags (id, tag) VALUES (43, 'asian');
+INSERT INTO tags (id, tag) VALUES (44, 'milking_bucket');
+INSERT INTO tags (id, tag) VALUES (45, 'test_1');
+INSERT INTO tags (id, tag) VALUES (46, 'penis_only');
+INSERT INTO tags (id, tag) VALUES (47, 'underboob');
+INSERT INTO tags (id, tag) VALUES (48, 'tutorial');
+INSERT INTO tags (id, tag) VALUES (49, 'penis_bulge');
+INSERT INTO tags (id, tag) VALUES (50, 'cum');
+INSERT INTO tags (id, tag) VALUES (51, 'manga');
+INSERT INTO tags (id, tag) VALUES (52, 'furry');
+INSERT INTO tags (id, tag) VALUES (53, 'futa_real');
+INSERT INTO tags (id, tag) VALUES (54, 'penis_horse');
+INSERT INTO tags (id, tag) VALUES (55, 'ppl_busty_alli');
+INSERT INTO tags (id, tag) VALUES (56, 'art_line');
+INSERT INTO tags (id, tag) VALUES (57, 'art_shading_basic');
+INSERT INTO tags (id, tag) VALUES (58, 'props');
+INSERT INTO tags (id, tag) VALUES (59, 'clothes');
+INSERT INTO tags (id, tag) VALUES (60, 'lingerie');
+INSERT INTO tags (id, tag) VALUES (61, 'thick');
+INSERT INTO tags (id, tag) VALUES (62, 'view_body_full');
+INSERT INTO tags (id, tag) VALUES (63, 'emotion');
+INSERT INTO tags (id, tag) VALUES (64, 'pose_fly');
+INSERT INTO tags (id, tag) VALUES (65, 'act_walk');
+INSERT INTO tags (id, tag) VALUES (66, 'pose_crawl');
+INSERT INTO tags (id, tag) VALUES (67, 'pose_gop');
+INSERT INTO tags (id, tag) VALUES (68, 'tagme');
+INSERT INTO tags (id, tag) VALUES (69, 'act_sex');
+INSERT INTO tags (id, tag) VALUES (70, 'act_self_suck');
+INSERT INTO tags (id, tag) VALUES (71, 'act_paizuri');
+INSERT INTO tags (id, tag) VALUES (72, 'rori');
+INSERT INTO tags (id, tag) VALUES (73, 'ai_mine');
+INSERT INTO tags (id, tag) VALUES (74, 'gt_comp');
+INSERT INTO tags (id, tag) VALUES (75, 'gt_thumb');
+INSERT INTO tags (id, tag) VALUES (76, 'slime');
+INSERT INTO tags (id, tag) VALUES (77, 'size_diff');
+INSERT INTO tags (id, tag) VALUES (78, 'penis_boob_side');
+INSERT INTO tags (id, tag) VALUES (79, 'gt_balls');
+
+INSERT INTO tag_sets (set_name, tag_list) VALUES ('all', '');
+INSERT INTO tag_sets (set_name, tag_list) VALUES ('academic', '1');
+INSERT INTO tag_sets (set_name, tag_list) VALUES ('artists', '4');
+INSERT INTO tag_sets (set_name, tag_list) VALUES ('pron', '3');
+INSERT INTO tag_sets (set_name, tag_list) VALUES ('the_bits', '5');
+INSERT INTO tag_sets (set_name, tag_list) VALUES ('frames', '6');

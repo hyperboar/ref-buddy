@@ -1,8 +1,8 @@
-from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify
+from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify, url_for
 from markupsafe import Markup
 
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Tag, Session, ImageMetadata
+from models.models_lump import Tag, Session, ImageMetadata, TagSets
 from server_args_helpers import get_current_paging, Args, get_arg
 from server_widget_helpers import get_paging_widget, get_tags_editor
 
@@ -11,19 +11,21 @@ routes_tags = Blueprint('routes_tags', __name__)
 
 @routes_tags.route('/tagged')
 def view_tags():
+    page, offset, limit = get_current_paging(request.args)
+    tag_set_id = get_arg(request.args, Args.tag_set)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
 
-    tags_pos_ids = Ctrl.get_tags_by_names(tags_pos)
-    tags_neg_ids = Ctrl.get_tags_by_names(tags_neg)
+    session = Session()
+    tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+    tags_pos_names = Ctrl.get_tag_names(tags_pos, session=session)
+    tags_neg_names = Ctrl.get_tag_names(tags_neg, session=session)
 
-    page, offset, limit = get_current_paging(request.args)
-
-    response, images = Ctrl.get_all_by_tags(tags_pos_ids, tags_neg_ids, limit, offset)
+    response, images = Ctrl.get_all_by_tags(tags_pos, tags_neg, limit, offset, session=session)
 
     overview = {}
-    overview["study_type"] = ', '.join(tags_pos)
+    overview["study_type"] = ', '.join(tags_pos_names)
     if len(tags_neg) > 0:
-        overview["study_type"] += ' exclude:' + ', '.join(tags_neg)
+        overview["study_type"] += ' exclude:' + ', '.join(tags_neg_names)
     overview["path"] = ""
 
     tags_available = Ctrl.get_all_tags(sort_by_name=True)
@@ -82,7 +84,7 @@ def get_image_tags():
         abort(404, 'Something went wrong, fav not set, probably...')
     return jsonify(data)
 
-# ---- CRUD ----
+# ---- CRUD TAG ----
 
 @routes_tags.route('/tags')
 def show_tags():
@@ -121,4 +123,31 @@ def delete_tag(tag_id):
     session.commit()
     return redirect('/tags')
 
-# ---- END CRUD ----
+# ---- END CRUD TAG ----
+
+# ---- CRUD TAG SET ----
+
+@routes_tags.route('/tag-sets')
+def list_tag_sets():
+    session = Session()
+    tag_sets = session.query(TagSets).all()
+    return render_template('crud/tpl_tagsets_list.html', tag_sets=tag_sets)
+
+
+@routes_tags.route('/tag_sets/<int:tag_set_id>/edit', methods=['GET', 'POST'])
+def tag_set_edit(tag_set_id):
+    session = Session()
+    tag_set = session.get(TagSets, tag_set_id)
+    if not tag_set:
+        return redirect(url_for('routes_tags.list_tag_sets'))
+
+    if request.method == 'POST':
+        tag_set.set_name  = request.form['set_name']
+        tag_set.set_alias = request.form['set_alias']
+        tag_set.tag_list  = request.form['tag_list']
+        session.commit()
+        return redirect(url_for('routes_tags.list_tag_sets', tag_set_id=tag_set.id))
+
+    return render_template('crud/tpl_tagset_edit.html', tag_set=tag_set)
+
+# ---- END CRUD TAG SET ----

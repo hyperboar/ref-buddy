@@ -2,7 +2,7 @@ from flask import Flask, request, send_from_directory, render_template
 from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 from Env import Env
-from models.models_lump import Session
+from models.models_lump import Session, TagSets
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_dupes import routes_dupes
 from server_ext_rating import routes_rating
@@ -28,11 +28,12 @@ def view_favs():
     page, offset, limit = get_current_paging(request.args)
     rating = get_arg(request.args, Args.min_rating)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
+    tag_set_id = get_arg(request.args, Args.tag_set)
 
-    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
-    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+    session = Session()
+    tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
-    images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating)
+    images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
 
     paging = get_paging_widget(page)
     tags_editor = get_tags_editor()
@@ -43,13 +44,13 @@ def view_favs():
 def view_last():
     page, offset, limit = get_current_paging(request.args)
     rating = get_arg(request.args, Args.min_rating)
-
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
+    tag_set_id = get_arg(request.args, Args.tag_set)
 
-    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos)
-    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg)
+    session = Session()
+    tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
-    images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating)
+    images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
 
     paging = get_paging_widget(page)
     tags_editor = get_tags_editor()
@@ -60,22 +61,19 @@ def view_last():
 def view_folder(path_id):
     rating = get_arg(request.args, Args.min_rating)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
+    tag_set_id = get_arg(request.args, Args.tag_set)
 
     session = Session()
-    tags_pos = ImageMetadataCtrl.get_tags_by_names(tags_pos, session=session)
-    tags_neg = ImageMetadataCtrl.get_tags_by_names(tags_neg, session=session)
+    tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     overview = OverviewPath.from_image_metadata(images[0])
-
 
     tags_editor = get_tags_editor(session=session)
 
     out = render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags_editor=tags_editor)
     session.close()
     return out
-
-
 
 
 if __name__ == '__main__':

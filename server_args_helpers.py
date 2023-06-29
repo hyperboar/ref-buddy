@@ -9,6 +9,7 @@ class Args(Enum):
     page          = auto(),
     limit         = auto(),
     tags          = auto(),
+    tag_set       = auto(),
     min_rating    = auto(),
     study_timer   = auto(),
     is_same_folder = auto()
@@ -37,6 +38,10 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
             # tags_pos = Ctrl.get_tags_by_names(tags_pos)
             # tags_neg = Ctrl.get_tags_by_names(tags_neg)
             return tags_pos, tags_neg
+
+        case Args.tag_set:
+            set_id = args.get('tag-set', default='1')
+            return set_id if not set_id is '' else '1'
 
         case Args.mult_image_ids:
             imgs = args.get('image-id', default="")
