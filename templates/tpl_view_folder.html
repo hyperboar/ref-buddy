@@ -37,6 +37,7 @@
     <button id="rate-up" class="rate-up btn-bg-blend" value="1"></button>
     <button id="rate-dn" class="rate-dn btn-bg-blend" value="-1"></button>
     <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
+    <button id="tags-filter-btn" class="btn-bg-blend">Filter tags</button>
     <button id="tags-open-btn" class="btn-bg-blend">Edit tags</button>
     <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
 </div>
@@ -107,6 +108,7 @@
 
     document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
+    document.getElementById('tags-filter-btn').addEventListener('click', toggleTagsFilterDisplay)
 
     document.addEventListener('keydown', function(e)
     {

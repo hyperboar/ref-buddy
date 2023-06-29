@@ -63,6 +63,7 @@
     border: 1px black;
     padding: 15px;
     overflow: auto;
+    z-index: 999;
 }
 
 .tags-popup-background {
@@ -129,6 +130,14 @@
     background-color: #7ea87e !important;
 }
 
+.tag-selected-pos, .tag-selected-pos:hover {
+    background-color: #7ea87e !important;
+}
+
+.tag-selected-neg, .tag-selected-neg:hover {
+    background-color: #a85c4d !important;
+}
+
 
 .tag-link:active, .tag-link:visited, .tag-link:hover, .tag-link:focus {
     text-decoration: none;
@@ -156,6 +165,28 @@
 }
 
 .tags-list {}
+
+.tight-chk
+{
+    padding-left: 1px;
+    padding-right: 1px;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+.tag-filter
+{
+}
+
+.tag-filter pos
+{
+
+}
+
+.tag-filter neg
+{
+
+}
 
 /* CSS grid for responsive layout */
 @media (min-width: 768px) {
