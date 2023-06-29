@@ -180,14 +180,14 @@
     user-select: none;
 }
 
-.tag-filter pos
+.tag-set-pos
 {
-
+    border: 2px solid #7ea87e;
 }
 
-.tag-filter neg
+.tag-set-neg
 {
-
+    border: 2px solid #a85c4d;
 }
 
 /* CSS grid for responsive layout */

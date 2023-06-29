@@ -1,5 +1,13 @@
 <div id="tags-filter" class="tags-popup" style="display: none;">
-    <h3>Tags (<span id="images-count"></span> images selected)</h3>
+    <h3>Tags Filter</h3>
+    <div>
+        <label for="tag-sets">Sets</label>
+        <select id="tag-sets">
+            {% for ts in tagsets %}
+                <option value="{{ ts.set_alias }}" data-tags="{{ ts.tag_list }}">{{ ts.set_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
     <div id="tagList" class="tag-container">
         {% for t in tags %}
             <div class="tag-filter" data-tag="{{ t.tag }}" data-tag-id="{{ t.id }}" data-state="0" style="color:{{ t.hex }}">{{ t.tag }}</div>
@@ -60,7 +68,13 @@
 
     function initTags()
     {
-        let tags = getTagsFromUrl(window.location.href)
+        const tagset = getTagSetFromUrl(window.location.href)
+        const ts = document.getElementById('tag-sets')
+        ts.value = tagset
+        ts.addEventListener('change', setTagSet)
+        updateTagSetTags(ts)
+
+        const tags = getTagsFromUrl(window.location.href)
         selectedPanelTags = tags
 
         document.querySelectorAll('.tag-filter').forEach(tagElem =>
@@ -148,39 +162,40 @@
         toggleTag(tagElem, newState)
     }
 
-    function toggleTag1(event)
+    function setTagSet(e)
     {
-        console.log('test')
-        const tagId = event.currentTarget.value
-        const link = event.currentTarget
+        const ts = e.currentTarget
+        const curSet = ts.value
 
-        console.log(this)
         let full_url = window.location.href
         const pageString = full_url.split('?')[0]
-        let ids = getTagsFromUrl(full_url)
 
-        // Perform the action based on the provided action parameter
-        let index = ids.indexOf(tagId)
-        // not found, adding
-        if (index === -1)
-        {
-            ids.push(tagId)
-            link.classList.add('tag-selected')
-        }
-        else
-        {
-            ids.splice(index, 1)
-            link.classList.remove('tag-selected')
-        }
-
-        selectedPanelTags = ids
-
-        const newTagsList = ids.join(',').replace(/^,/, "")
         let queryString = full_url.split('?')[1]
         let params = new URLSearchParams(queryString)
-        params.set('tags', encodeURIComponent(newTagsList))
+        params.set('tag-set', encodeURIComponent(curSet))
         let newUrl = pageString + '?' + decodeURIComponent(params.toString())
         window.history.replaceState({}, '', newUrl)
+
+        updateTagSetTags(ts)
+    }
+
+    function updateTagSetTags(ts)
+    {
+        const tags = ts.options[ts.selectedIndex].getAttribute('data-tags').split(',')
+
+        document.querySelectorAll('.tag-filter').forEach(tagElem =>
+        {
+            const id = tagElem.getAttribute('data-tag-id')
+            tagElem.classList.remove('tag-set-pos', 'tag-set-neg')
+            if (tags.includes(id))
+            {
+                tagElem.classList.add('tag-set-pos')
+            }
+            else if (tags.includes('-' + id))
+            {
+                tagElem.classList.add('tag-set-neg')
+            }
+        })
     }
 
     function getTagsFromUrl(url)
@@ -193,4 +208,23 @@
 
         return tags.split(',')
     }
+
+    function getTagSetFromUrl(url)
+    {
+        let full_url = url.replace(/#$/, "")
+        let queryString = full_url.split('?')[1]
+        let params = new URLSearchParams(queryString)
+        let tags = decodeURIComponent(params.has('tag-set') ? params.get('tag-set') : 'all')
+        if (!tags) { tags = "" }
+
+        return tags.split(',')
+    }
+
+    document.addEventListener('keydown', function(e)
+    {
+        if (e.code === 'KeyF' && !e.shiftKey)
+        {
+            toggleTagsFilterDisplay()
+        }
+    })
 </script>
