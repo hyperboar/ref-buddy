@@ -2,6 +2,7 @@ from flask import Flask, request, send_from_directory, render_template
 from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 from Env import Env
+from maintenance import make_database_backup
 from models.models_lump import Session, TagSets
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_dupes import routes_dupes
@@ -17,6 +18,10 @@ app.register_blueprint(routes_image)
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
 app.register_blueprint(routes_dupes)
+
+@app.before_request
+def before_request():
+    make_database_backup()
 
 @app.route('/')
 def index():

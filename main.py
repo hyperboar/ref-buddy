@@ -8,7 +8,8 @@ from tkinter import messagebox
 from export_frames_window import ExportFramesWindow
 
 from image_metadata_importer import ImageMetadataImporter
-from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images
+from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \
+    make_database_backup
 from Env import Env
 from rehash_dialog import RehashDialog
 
@@ -132,6 +133,8 @@ class MainWindow(tk.Frame):
 
 
 if __name__ == "__main__":
+    make_database_backup()
+
     root = tk.Tk()
     app = MainWindow(master=root)
     app.mainloop()

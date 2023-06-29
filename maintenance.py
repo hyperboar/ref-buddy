@@ -1,5 +1,7 @@
+from datetime import datetime
 import hashlib
 import os
+import shutil
 import sqlite3
 from PIL import Image
 from sqlalchemy import func, exists
@@ -369,6 +371,44 @@ def relink_lost_images():
 
     s.commit()
     s.close()
+
+def make_database_backup():
+    db_file = os.path.splitext(Env.DB_NAME)
+    db_file_name = f'{db_file[0]}_'
+    db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
+    time_fmt = '%Y-%m-%d_%H-%M'
+    backup_interval = 60 * Env.DB_BACKUP_INTERVAL # seconds
+    path = Env.DB_BACKUP_PATH
+
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
+    dates = [f.replace(db_file_name, '').replace(db_file_ext, '') for f in backup_files]
+    dates = sorted([datetime.strptime(d, time_fmt) for d in dates])
+
+    if len(dates) > 0 and \
+       datetime.now().timestamp() < (dates[-1].timestamp() + backup_interval):
+        return
+
+    print(f'Backing up database. Found {len(backup_files)} backups, making new one.')
+
+    backup_name = f'{db_file_name}{datetime.now().strftime(time_fmt)}{db_file_ext}'
+    src = Env.DB_FILE
+    dst = os.path.join(path, backup_name)
+    shutil.copy(src, dst)
+
+    backup_files += [backup_name]
+    if len(backup_files) < Env.DB_BACKUP_MAX_COUNT:
+        return
+
+    backups = [(os.path.join(path, f), os.path.getctime(os.path.join(path, f))) for f in backup_files]
+    backups = sorted(backups, key=lambda b: b[1])
+    # print(f'{len(backups)} -> trim {len(backups) - Env.DB_BACKUP_MAX_COUNT}')
+    # [print(p) for p in backups[:len(backups) - Env.DB_BACKUP_MAX_COUNT]]
+    to_remove = backups[:len(backups) - Env.DB_BACKUP_MAX_COUNT]
+    [os.remove(p[0]) for p in to_remove]
+
 
 if __name__ == "__main__":
     cleanup_lost_images()
