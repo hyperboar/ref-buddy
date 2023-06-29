@@ -19,7 +19,7 @@ class ImageMetadataImporter:
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
 
-        make_database_backup(True)
+        make_database_backup(marker='import', force=True)
 
         session = Session()
 

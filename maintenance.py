@@ -210,7 +210,7 @@ def assign_folder_tags():
     conn.close()
 
 def mark_all_lost():
-    make_database_backup(True)
+    make_database_backup(marker='mark_lost', force=True)
 
     s = Session()
 
@@ -251,7 +251,7 @@ def mark_all_lost():
 def cleanup_lost_images():
     cleanup_image_thumbs()
 
-    make_database_backup(True)
+    make_database_backup(marker='cleanup_lost', force=True)
 
     print(f'Starting database cleanup.')
 
@@ -325,7 +325,7 @@ def cleanup_image_thumbs():
 
 def relink_lost_images():
     """Try to relink by unique name"""
-    make_database_backup(True)
+    make_database_backup(marker='relink_imgs', force=True)
 
     s = Session()
 
@@ -379,7 +379,7 @@ def relink_lost_images():
     s.commit()
     s.close()
 
-def make_database_backup(force:bool=False):
+def make_database_backup(marker:str='',force:bool=False):
     db_file = os.path.splitext(Env.DB_NAME)
     db_file_name = f'{db_file[0]}_'
     db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
@@ -391,16 +391,20 @@ def make_database_backup(force:bool=False):
         os.mkdir(path)
 
     backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
-    dates = [f.replace(db_file_name, '').replace(db_file_ext, '') for f in backup_files]
+    date_len = len(datetime.now().strftime(time_fmt))
+    ext_len = len(db_file_ext)
+    dates = [f[-(date_len + ext_len):-ext_len] for f in backup_files]
     dates = sorted([datetime.strptime(d, time_fmt) for d in dates])
 
-    if not force or \
+    if not force and \
             (len(dates) > 0 and datetime.now().timestamp() < (dates[-1].timestamp() + backup_interval)):
         return
 
     print(f'Backing up database. Found {len(backup_files)} backups, making new one.')
 
-    backup_name = f'{db_file_name}{datetime.now().strftime(time_fmt)}{db_file_ext}'
+    if marker != '':
+        marker = f'{marker.lower().replace(" ", "_")}_'
+    backup_name = f'{db_file_name}{marker}{datetime.now().strftime(time_fmt)}{db_file_ext}'
     src = Env.DB_FILE
     dst = os.path.join(path, backup_name)
     shutil.copy(src, dst)
