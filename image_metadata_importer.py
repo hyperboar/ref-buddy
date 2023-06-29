@@ -19,7 +19,7 @@ class ImageMetadataImporter:
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
 
-        make_database_backup(marker='import', force=True)
+        make_database_backup(marker='before_import', force=True)
 
         session = Session()
 
@@ -55,6 +55,7 @@ class ImageMetadataImporter:
             print(f"\rAssigning essential tags to new images... Done", end="")
 
         print(f"\nImport completed! Found {new_count} new files.")
+        make_database_backup(marker='after_import', force=True)
 
     @staticmethod
     def print_begin(msg):
