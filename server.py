@@ -9,7 +9,7 @@ from server_ext_dupes import routes_dupes
 from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
-from server_widget_helpers import get_paging_widget, get_tags_editor
+from server_widget_helpers import get_paging_widget, get_tags_editor, get_tags_filter
 
 app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
@@ -74,9 +74,10 @@ def view_folder(path_id):
     study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     overview = OverviewPath.from_image_metadata(images[0])
 
+    tags_filter = get_tags_filter(session=session)
     tags_editor = get_tags_editor(session=session)
 
-    out = render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview, tags_editor=tags_editor)
+    out = render_template('tpl_view_folder.html', title='Folder', images=images, panel=tags_filter, overview=overview, tags_editor=tags_editor)
     session.close()
     return out
 
