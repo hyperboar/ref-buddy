@@ -4,6 +4,7 @@
 	<title>Image ({{ image.image_id }})</title>
     <link rel="stylesheet" href="/static/styles/global.css">
     <link rel="stylesheet" href="/static/styles/image.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
     <script type="text/javascript" src="/static/js/img_params.js"></script>
     <script type="text/javascript" src="/static/js/rating.js"></script>
     <script type="text/javascript" src="/static/js/image_color_picker.js"></script>
@@ -61,10 +62,10 @@
             <button id="next" class="btn-bg-blend">Next</button>
         </div>
 
-        <div id="popup" class="popup">
+        <div id="image-info-popup" class="popup">
             <div class="popup-row">
-                <span id="path">{{ image.path_abs }}</span>
-                <button id="copyButton">Copy</button>
+                <span id="image-path">{{ image.path_abs }}</span>
+                <button id="image-path-copy-btn">Copy</button>
             </div>
             <div class="popup-row">
                 <ul id="tags">
@@ -402,7 +403,7 @@
 
         // Get references to the button and popup elements
         const button = document.getElementById('info-button');
-        const popup = document.getElementById('popup');
+        const popup = document.getElementById('image-info-popup');
 
         // Show the popup when the button is clicked
         button.addEventListener('click', () => {
@@ -417,12 +418,15 @@
         });
 
         // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
-        const pathElement = document.getElementById('path');
-        const copyButton = document.getElementById('copyButton');
+        const pathElement = document.getElementById('image-path');
+        const copyButton = document.getElementById('image-path-copy-btn');
 
         copyButton.addEventListener('click', () => {
-            const path = pathElement.innerText;
-            // Copy path to clipboard logic goes here...
+            const path = pathElement.textContent;
+            document.copyToClipboard(path, () =>
+            {
+                copyButton.textContent = 'Copied!'
+            })
         });
     }
 </script>

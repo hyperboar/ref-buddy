@@ -105,17 +105,12 @@ class ColorPicker
         newElem.addEventListener('click', e =>
         {
             const elem = e.currentTarget
-            const content = e.currentTarget.innerHTML
-            navigator.clipboard.writeText(content)
-                .then(function ()
-                {
-                    elem.classList.remove('op-success')
-                    setTimeout(() => elem.classList.add('op-success'), 100)
-                })
-                .catch(function (error)
-                {
-                    console.error('Error copying content:', error)
-                });
+            const content = e.currentTarget.textContent
+            document.copyToClipboard(content, () =>
+            {
+                elem.classList.remove('op-success')
+                setTimeout(() => elem.classList.add('op-success'), 100)
+            })
         })
 
         // Append the new element to the div
