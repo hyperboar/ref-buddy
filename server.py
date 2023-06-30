@@ -3,7 +3,7 @@ from image_metadata_controller import ImageMetadataController as ImageMetadataCt
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 from Env import Env
 from maintenance import make_database_backup
-from models.models_lump import Session, TagSets
+from models.models_lump import Session, TagSet
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_dupes import routes_dupes
 from server_ext_rating import routes_rating

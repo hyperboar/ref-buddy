@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from Env import Env
-from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSets
+from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet
 from sqlalchemy import func
 
 class ImageMetadataController:
@@ -137,10 +137,10 @@ class ImageMetadataController:
         try:
             set_id = int(set_id)
         except ValueError:
-            set_id = session.query(TagSets).filter(TagSets.set_alias == set_id).first().id
+            set_id = session.query(TagSet).filter(TagSet.set_alias == set_id).first().id
 
 
-        tag_set = session.query(TagSets).filter(TagSets.id == set_id).first()
+        tag_set = session.query(TagSet).filter(TagSet.id == set_id).first()
         tags_pos, tags_neg = tag_set.get_tags()
 
         add_pos = ImageMetadataController.get_tags_by_names(add_pos, session=session) if add_pos and len(add_pos) > 0 else []

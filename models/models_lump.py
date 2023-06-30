@@ -125,7 +125,7 @@ class ImageTag(Base):
     image = relationship('ImageMetadata', backref='tags')
     tag = relationship('Tag', backref='image_tags')
 
-class TagSets(Base):
+class TagSet(Base):
     __tablename__ = 'tag_sets'
 
     id = Column(Integer, primary_key=True)

@@ -3,7 +3,7 @@ from image_metadata_controller import ImageMetadataController as Ctrl
 from flask import render_template
 from markupsafe import Markup
 
-from models.models_lump import TagSets
+from models.models_lump import TagSet
 
 
 def get_paging_widget(selected_page:int=0, span:int=3, skip=10) -> 'str':
@@ -32,7 +32,7 @@ def get_tags_filter(tags=None, session=None):
     else:
         tags = tags[:]
 
-    tagsets = session.query(TagSets).all()
+    tagsets = session.query(TagSet).all()
 
     tags = sorted(tags, key=lambda t: (t.color_id, t.tag))
     return Markup(render_template('tpl_widget_tags_panel.html', tags=tags, tagsets=tagsets))

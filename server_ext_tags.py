@@ -1,7 +1,7 @@
 from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify, url_for
 
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Tag, Session, ImageMetadata, TagSets
+from models.models_lump import Tag, Session, ImageMetadata, TagSet
 from server_args_helpers import get_current_paging, Args, get_arg
 from server_widget_helpers import get_paging_widget, get_tags_editor, get_tags_filter
 
@@ -131,14 +131,14 @@ def delete_tag(tag_id):
 @routes_tags.route('/tag-sets')
 def list_tag_sets():
     session = Session()
-    tag_sets = session.query(TagSets).all()
+    tag_sets = session.query(TagSet).all()
     return render_template('crud/tpl_tagsets_list.html', tag_sets=tag_sets)
 
 
 @routes_tags.route('/tag_sets/<int:tag_set_id>/edit', methods=['GET', 'POST'])
 def tag_set_edit(tag_set_id):
     session = Session()
-    tag_set = session.get(TagSets, tag_set_id)
+    tag_set = session.get(TagSet, tag_set_id)
     if not tag_set:
         return redirect(url_for('routes_tags.list_tag_sets'))
 
