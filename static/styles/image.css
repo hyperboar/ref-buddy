@@ -99,6 +99,11 @@ body {
 .cursor-stop-p1 {cursor: url("/static/cursor-solid-36.png") , auto !important;}
 .cursor-stop-p2 {cursor: url("/static/cursor-solid-72.png") , auto !important;}
 
+.modal-img-color-picker
+{
+    cursor: crosshair !important;
+}
+
 .modal-button-prev, .modal-button-next
 {
     position: relative;
@@ -209,4 +214,24 @@ span #time-current {
 
 #copyButton {
   margin-left: 10px;
+}
+
+.pallet-container
+{
+    position: fixed;
+    top: 70px;
+    right: 10px;
+    max-width: 200px;
+}
+.pallet-cell
+{
+    font-family: "Courier New", monospace;
+    color: rgba(0,0,0,0.3);
+    width: 150px;
+    height: 25px;
+    display: flex;
+    text-align: right;
+    justify-content: right;
+    align-items: center;
+    border: 2px solid rgba(0,0,0,0.2);
 }

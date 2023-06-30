@@ -1,10 +1,12 @@
 import os
 from datetime import datetime
+
+from PIL import Image
 from flask import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
     current_app
 from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
-from models.models_lump import Session
+from models.models_lump import Session, ImageMetadata
 from server_args_helpers import get_arg, Args
 
 routes_image = Blueprint('routes_image', __name__)
@@ -77,3 +79,32 @@ def set_image_last_viewed():
 @routes_image.route('/thumb/<path:path>')
 def send_static_image_thumb(path):
     return send_from_directory(current_app.config['THUMB_STATIC'], path)
+
+@routes_image.route('/color-at-coord')
+def get_color_at_coord():
+    image_id = get_arg(request.args, Args.image_id)
+    x_r = float(request.args.get('x'))
+    y_r = float(request.args.get('y'))
+
+    session = Session()
+    im = session.get(ImageMetadata, image_id)
+    image_path = os.path.join(Env.IMAGES_PATH, im.path)  # Adjust the path and image format as needed
+
+    hex_color = '#000000'
+    with Image.open(image_path) as image:
+        width, height = image.size
+        x = int(x_r * width)
+        y = int(y_r * height)
+
+        # Calculate the average color of the surrounding pixels
+        surrounding_pixels = []
+        for i in range(x - 1, x + 2):
+            for j in range(y - 1, y + 2):
+                pixel = image.getpixel((i, j))
+                surrounding_pixels.append(pixel)
+        avg_color = tuple(int(sum(channel) / len(channel)) for channel in zip(*surrounding_pixels))
+
+        # Convert the average color to hex
+        hex_color = '#%02x%02x%02x' % avg_color
+
+    return render_template_string(hex_color)

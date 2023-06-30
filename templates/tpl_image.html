@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/static/styles/image.css">
     <script type="text/javascript" src="/static/js/img_params.js"></script>
     <script type="text/javascript" src="/static/js/rating.js"></script>
+    <script type="text/javascript" src="/static/js/image_color_picker.js"></script>
     <script type="text/javascript" src="/static/js/study_timer.js"></script>
 </head>
 <body>
@@ -74,6 +75,9 @@
             </div>
         </div>
     </div>
+
+    <div class="pallet-container">
+    </div>
 </div>
 <script>
     let list = document.getElementById('study-type')
@@ -87,6 +91,7 @@
 
         imgParams.setParamsFromGET()
 
+        const colorPicker = new ColorPicker({{ image.image_id }}, '.modal-img', '.pallet-container', '.modal-img-color-picker')
 
         // next
         const onClickNext = function ()

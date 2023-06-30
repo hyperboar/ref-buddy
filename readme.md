@@ -42,6 +42,7 @@ You'll need to import images and generate thumbs only once (or more if you add i
 - ```Enter``` start timer. Timer is just a guide, it won't do anything other that counting;
 - ```Space``` toggle ```same folder``` checkbox;
 - ```F``` flip image;
+- hold ```X``` and click on image to insert #color under cursor into swatch area. Holding ```X``` and then pressing ```G``` will toggle swatch between grayscale and color;
 - ```Mouse wheel up/down``` zoom in/out. Left click on image to exit zoom mode;
 - ```Q```,```W```,```E```,```R```,```T``` to enter grayscale mode and switch contrast modes
 - ```3```,```4```,```5```,```6```,```7``` change cursor over the image to become "grayscale value hint". 
