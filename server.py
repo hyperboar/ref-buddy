@@ -1,9 +1,9 @@
-from flask import Flask, request, send_from_directory, render_template
+from flask import Flask, request, render_template
 from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 from Env import Env
 from maintenance import make_database_backup
-from models.models_lump import Session, TagSet
+from models.models_lump import Session, TagSet, ImageColor, ImageMetadata
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_dupes import routes_dupes
 from server_ext_rating import routes_rating
@@ -79,6 +79,15 @@ def view_folder(path_id):
 
     out = render_template('tpl_view_folder.html', title='Folder', images=images, panel=tags_filter, overview=overview, tags_editor=tags_editor)
     session.close()
+    return out
+
+@app.route('/image-colors')
+def view_image_colors():
+    session = Session()
+
+    sub = session.query(ImageColor.image_id).group_by(ImageColor.image_id).subquery()
+    images = session.query(ImageMetadata).join(sub, ImageMetadata.image_id == sub.c.image_id).all()
+    out = render_template('tpl_image_colors.html', images=images)
     return out
 
 

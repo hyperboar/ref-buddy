@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, func, TypeDecorator
+from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, func, TypeDecorator, Float
 from sqlalchemy.orm import relationship, declarative_base, object_session, sessionmaker
 
 from Env import Env
@@ -122,7 +122,7 @@ class ImageTag(Base):
     image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
-    image = relationship('ImageMetadata', backref='tags')
+    image = relationship('ImageMetadata', backref='tags') # ?? tag. should it be images?
     tag = relationship('Tag', backref='image_tags')
 
 class TagSet(Base):
@@ -151,7 +151,7 @@ class Color(Base):
     __tablename__ = 'colors'
 
     id = Column(Integer, primary_key=True)
-    color_name = Column(Text, unique=True)
+    color_name = Column(Text)
     hex = Column(Text, default='#000000')
 
     tags = relationship('Tag', backref='color')
@@ -161,6 +161,21 @@ class Color(Base):
 
     def __repr__(self):
         return str(self)
+
+class ImageColor(Base):
+    __tablename__ = 'image_colors'
+
+    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    color_id = Column(Integer, ForeignKey('colors.id'), primary_key=True)
+    x = Column(Float, nullable=False)
+    y = Column(Float, nullable=False)
+
+    image = relationship('ImageMetadata', backref='colors')
+    color = relationship('Color', backref='images')
+
+    @property
+    def position(self):
+        return self.x, self.y
 
 class ImageDupe(Base):
     __tablename__ = 'dupes'

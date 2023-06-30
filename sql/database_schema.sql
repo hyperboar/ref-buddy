@@ -68,7 +68,17 @@ CREATE TABLE IF NOT EXISTS dupes (
 CREATE TABLE IF NOT EXISTS colors (
     id INTEGER PRIMARY KEY,
     hex TEXT NOT NULL DEFAULT '#000000',
-    color_name TEXT NOT NULL UNIQUE
+    color_name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS image_colors (
+    image_id INTEGER,
+    color_id INTEGER,
+    x REAL NOT NULL,
+    y REAL NOT NULL,
+    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (color_id) REFERENCES colors(id),
+    PRIMARY KEY (image_id, color_id)
 );
 
 INSERT INTO colors (id, color_name) VALUES (1, 'default');

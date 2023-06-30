@@ -7,7 +7,9 @@ class ColorPicker
     cursorSel
 
     attrHex = 'data-hex'
-    attrGs = 'data-gs'
+    attrX   = 'data-x'
+    attrY   = 'data-y'
+    attrGs  = 'data-gs'
 
     colors = []
 
@@ -71,7 +73,7 @@ class ColorPicker
             .then(response => response.text())
             .then(hexColor =>
             {
-                this.appendColor(hexColor)
+                this.appendColor(hexColor, x, y)
                 console.log('Average color:', hexColor)
             })
             .catch(error =>
@@ -80,7 +82,7 @@ class ColorPicker
             });
     }
 
-    appendColor(hexColor)
+    appendColor(hexColor, x, y)
     {
         const exists = this.colors.filter(c => c.getAttribute(this.attrHex) === hexColor)
 
@@ -93,16 +95,18 @@ class ColorPicker
         }
 
         // Create a new DOM element to append
-        const newElem = document.createElement('div');
-        newElem.setAttribute(this.attrHex, hexColor)
-        newElem.classList.add('pallet-cell')
-        newElem.style.backgroundColor = hexColor
-        newElem.textContent = hexColor
+        const cell = document.createElement('div')
+        cell.setAttribute(this.attrHex, hexColor)
+        cell.setAttribute(this.attrX, x)
+        cell.setAttribute(this.attrY, y)
+        cell.classList.add('pallet-cell')
+        cell.style.backgroundColor = hexColor
+        cell.textContent = hexColor
 
-        this.colors.push(newElem)
+        this.colors.push(cell)
 
         // clipboard
-        newElem.addEventListener('click', e =>
+        cell.addEventListener('click', e =>
         {
             const elem = e.currentTarget
             const content = e.currentTarget.textContent
@@ -113,8 +117,50 @@ class ColorPicker
             })
         })
 
+        const save = document.createElement('button')
+        save.classList.add('pallet-save-btn', 'btn-bg-blend')
+        save.addEventListener('click', (e) =>
+        {
+            const btn = e.currentTarget
+            btn.setAttribute('disabled', true)
+            btn.classList.remove('op-success', 'op-fail')
+
+            const cell = btn.nextSibling
+            const hex = cell.getAttribute(this.attrHex).replace('#', '')
+            const x = cell.getAttribute(this.attrX)
+            const y = cell.getAttribute(this.attrY)
+
+            console.log(cell)
+            console.log(hex)
+
+            fetch(`/save-image-color?image-id=${this.imageId}&x=${x}&y=${y}&hex=${hex}`)
+                .then(response =>
+                {
+                    if (!response.ok)
+                    {
+                        btn.removeAttribute('disabled')
+                        btn.classList.add('op-fail')
+                        return
+                    }
+
+                    btn.classList.add('op-success')
+                    setTimeout(btn.remove(), 1000)
+                })
+                .catch(error =>
+                {
+                    btn.removeAttribute('disabled')
+                    btn.classList.add('op-fail')
+                    console.log('Error: ' + error)
+                });
+        })
+
+        const wrap = document.createElement('div')
+        wrap.classList.add('pallet-wrap')
+        wrap.appendChild(save)
+        wrap.appendChild(cell)
+
         // Append the new element to the div
-        this.palletTag.appendChild(newElem);
+        this.palletTag.appendChild(wrap);
     }
 
     toggleGrayscale()

@@ -6,7 +6,7 @@ from flask import render_template_string, request, send_file, abort, render_temp
     current_app
 from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
-from models.models_lump import Session, ImageMetadata
+from models.models_lump import Session, ImageMetadata, Color, ImageColor
 from server_args_helpers import get_arg, Args
 
 routes_image = Blueprint('routes_image', __name__)
@@ -103,7 +103,36 @@ def get_color_at_coord():
                 surrounding_pixels.append(pixel)
         avg_color = tuple(int(sum(channel) / len(channel)) for channel in zip(*surrounding_pixels))
 
+        avg_color = avg_color[:3]
         # Convert the average color to hex
         hex_color = '#%02x%02x%02x' % avg_color
 
     return render_template_string(hex_color)
+
+@routes_image.route('/save-image-color')
+def save_image_color():
+    try:
+        image_id = get_arg(request.args, Args.image_id)
+        x = float(request.args.get('x'))
+        y = float(request.args.get('y'))
+        hex_color = '#' + request.args.get('hex')
+        if hex_color == '#':
+            raise ValueError
+    except ValueError:
+        abort(404, 'Some arguments are missing...')
+        return
+
+    print(f'{image_id} {x} {y} {hex_color}')
+    session = Session()
+
+    color = session.query(Color).filter(Color.hex == hex_color).first()
+    if color is None:
+        color = Color(hex=hex_color, color_name=f'image {image_id}')
+        session.add(color)
+        session.flush()
+
+    session.merge(ImageColor(image_id=image_id, color_id=color.id, x=x, y=y))
+    session.commit()
+
+    # color = session.query(Color, )
+    return render_template_string('ok')
