@@ -20,7 +20,7 @@
 <div class="gallery">
     {% for image in images %}
     <div class="thumbnail" data-id="{{ image.image_id }}">
-        <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120">
+        <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=">
             <img src="" class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
             <div class="overlay vis-hide">
                 <span class="tags-list"></span>
