@@ -67,7 +67,7 @@ class ColorPicker
 
     getColorAt(imageId, x, y)
     {
-        return fetch(`/color-at-coord?image_id=${imageId}&x=${x}&y=${y}`)
+        return fetch(`/color-at-coord?image-id=${imageId}&x=${x}&y=${y}`)
             .then(response => response.text())
             .then(hexColor =>
             {
