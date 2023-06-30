@@ -88,10 +88,9 @@ def get_color_at_coord():
 
     session = Session()
     im = session.get(ImageMetadata, image_id)
-    image_path = os.path.join(Env.IMAGES_PATH, im.path)  # Adjust the path and image format as needed
 
     hex_color = '#000000'
-    with Image.open(image_path) as image:
+    with Image.open(im.path_abs) as image:
         width, height = image.size
         x = int(x_r * width)
         y = int(y_r * height)
