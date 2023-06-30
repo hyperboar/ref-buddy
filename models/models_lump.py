@@ -69,6 +69,10 @@ class ImageMetadata(Base):
     def path(self):
         return os.path.join(self.path_ref.path, self.filename)
 
+    @property
+    def path_abs(self):
+        return os.path.join(Env.IMAGES_PATH, self.path)
+
     def mark_as_lost(self, session=None, auto_commit=True):
         self.lost = 1
         if session is None:
