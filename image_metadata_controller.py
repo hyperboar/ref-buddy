@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
 
-from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag
+from Env import Env
+from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet
 from sqlalchemy import func
 
 class ImageMetadataController:
@@ -25,7 +26,7 @@ class ImageMetadataController:
             return None
 
         stype = stype_list[0]
-        new_path = dir[len(stype.type) + 1:]
+        new_path = dir
 
         if session is None:
             session = Session()
@@ -39,7 +40,7 @@ class ImageMetadataController:
         else:
             path_id = path_row.id
 
-        print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
+        # print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
         new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file)
         session.add(new_image)
         session.commit()
@@ -51,14 +52,23 @@ class ImageMetadataController:
     # region Convenience
 
     @staticmethod
-    def get_favs(count: int = 10000, start: int = 0):
-        s = Session()
-        return s.query(ImageMetadata).filter(ImageMetadata.fav == 1).order_by(ImageMetadata.last_viewed.desc()).limit(count).offset(start).all()
+    def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
+        if session is None:
+            session = Session()
+
+        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
+        q = q.filter(ImageMetadata.fav == 1).order_by(ImageMetadata.imported_at.desc())
+        rows = q.offset(start).limit(count).all()
+        return rows
 
     @staticmethod
-    def get_last(count: int = 60, start: int = 0):
-        s = Session()
-        return s.query(ImageMetadata).order_by(ImageMetadata.last_viewed.desc()).limit(count).offset(start).all()
+    def get_last(count: int = 60, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
+        if session is None:
+            session = Session()
+
+        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
+        rows = q.order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
+        return rows
 
     @staticmethod
     def get_by_id(image_id: int, session=None):
@@ -87,11 +97,13 @@ class ImageMetadataController:
         return targets[0]
 
     @staticmethod
-    def get_all_by_path_id(path_id: int, session=None) -> '[ImageMetadata]':
+    def get_all_by_path_id(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
         if session is None:
             session = Session()
 
-        rows = session.query(ImageMetadata).filter(ImageMetadata.path_id == path_id).all()
+        q = ImageMetadataController.get_query_imagemetadata(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
+        rows = q.order_by(ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
+
         if len(rows) == 0:
             p = session.get(Path, path_id)
             return "", f'No images at path ({p.id}) "{p.path}"', []
@@ -99,37 +111,99 @@ class ImageMetadataController:
         return rows[0].study_type, rows[0], rows
 
     @staticmethod
-    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit=100, offset=0) -> '[ImageMetadata]':
-        s = Session()
+    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
+        if session is None:
+            session = Session()
 
-        l = len(tags_pos)
-        q = s.query(ImageTag).filter(ImageTag.tag_id.in_(tags_pos)).filter(~ImageTag.tag_id.in_(tags_neg)).group_by(ImageTag.image_id).having(func.count(ImageTag.image_id) == l)
-        image_ids = [imt.image_id for imt in q.all()]
+        q = ImageMetadataController.get_query_imagemetadata(tags=(tags_pos, tags_neg), session=session)
+        q = q.order_by(ImageMetadata.imported_at.desc())
 
-        q = s.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).order_by(ImageMetadata.imported_at.desc())
-        result = q.limit(limit).offset(offset).all()
+        result = q.offset(offset).limit(limit).all()
 
         return "", result
 
     @staticmethod
-    def get_tags_by_names(tags: [str]) -> [int]:
-        s = Session()
-        rows = s.query(Tag).filter(Tag.tag.in_(tags)).all()
+    def get_tags_by_names(tags: [str], session=None) -> [int]:
+        if session is None:
+            session = Session()
+        rows = session.query(Tag).filter(Tag.tag.in_(tags)).all()
         return [row.id for row in rows]
 
     @staticmethod
-    def get_random_by_study_type(study_type: int, same_folder: int = 0, prev_image_id: int = -1,
-                                 min_rating=0) -> 'ImageMetadata':
-        s = Session()
+    def get_tags_by_set(set_id:int|str, add_pos:[str]=None, add_neg:[str]=None, session=None):
+        if session is None:
+            session = Session()
 
-        q = s.query(ImageMetadata).order_by(func.random())
-        q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+        try:
+            set_id = int(set_id)
+        except ValueError:
+            set_id = session.query(TagSet).filter(TagSet.set_alias == set_id).first().id
 
-        if same_folder > 0 and prev_image_id > 0:
-            im = s.get(ImageMetadata, prev_image_id)
+
+        tag_set = session.query(TagSet).filter(TagSet.id == set_id).first()
+        tags_pos, tags_neg = tag_set.get_tags()
+
+        add_pos = ImageMetadataController.get_tags_by_names(add_pos, session=session) if add_pos and len(add_pos) > 0 else []
+        add_neg = ImageMetadataController.get_tags_by_names(add_neg, session=session) if add_neg and len(add_neg) > 0 else []
+
+        tags_pos = list(set(tags_pos) - set(add_neg)) + add_pos
+        tags_neg = list(set(tags_neg) - set(add_pos)) + add_neg
+
+        return tags_pos, tags_neg
+
+    @staticmethod
+    def get_random_by_study_type(study_type:int=0, same_folder:int=0, prev_image_id:int=0,
+                                 min_rating=0, tags:([int],[int])=([],[]), session=None) -> 'ImageMetadata':
+        if session is None:
+            session = Session()
+
+        q = ImageMetadataController.get_query_imagemetadata(
+            study_type=study_type, same_folder=same_folder, tags=tags,
+            image_id=prev_image_id, min_rating=min_rating, session=session)
+        q = q.order_by(func.random())
+        row = q.first()
+
+        return row
+
+    @staticmethod
+    def get_query_imagemetadata(study_type:int=-1, same_folder:int=0, image_id:int=-1,
+                                min_rating:int=0, tags:([int],[int])=([],[]),
+                                path_id:int=-1, session=None):
+        l = len(tags[0])
+
+        # limit by tags_pos
+        if l > 0:
+            subquery = session.query(ImageTag.image_id)\
+                .filter(ImageTag.tag_id.in_(tags[0]))\
+                .group_by(ImageTag.image_id)\
+                .having(func.count(ImageTag.tag_id) == l)\
+                .subquery()
+            q = session.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
+        else:
+            q = session.query(ImageMetadata)
+
+        # remove tags_neg
+        if len(tags[1]) > 0:
+            q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags[1])))
+
+        # filter by study_type
+        if study_type > 0:
+            q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+
+        # when same_folder get path_id by image_id
+        if same_folder > 0 and image_id > 0:
+            im = session.get(ImageMetadata, image_id)
             q = q.filter(ImageMetadata.path_id == im.path_id)
 
-        return q.first()
+        # filter by path specifically
+        if path_id > 0:
+            q = q.filter(ImageMetadata.path_id == path_id)
+
+        # unconditional min_rating
+        q = q.filter(ImageMetadata.rating >= min_rating)
+        q = q.filter(ImageMetadata.lost == 0)
+
+        return q
 
     @staticmethod
     def set_image_fav(image_id: int, is_fav: int, session=None):
@@ -180,10 +254,28 @@ class ImageMetadataController:
         return 1
 
     @staticmethod
+    def remove_image_tags(image_ids: [int], tags_str: [str]) -> int:
+        tags = ImageMetadataController.get_tags_by_names(tags_str)
+        s = Session()
+        q = s.query(ImageTag)\
+            .filter(ImageTag.image_id.in_(image_ids))\
+            .filter(ImageTag.tag_id.in_(tags))
+
+        rows_to_delete = q.all()
+
+        if len(rows_to_delete) == 0:
+            return 0
+        q.delete()
+        s.commit()
+        return len(rows_to_delete)
+
+
+    @staticmethod
     def set_image_last_viewed(image_id: int, time: 'datetime'):
         s = Session()
         im = s.get(ImageMetadata, image_id)
         im.last_viewed = time
+        im.count += 1
         s.commit()
         return im
 
@@ -195,23 +287,66 @@ class ImageMetadataController:
         return img.image_id
 
     @staticmethod
-    def get_study_types():
-        s = Session()
-        return s.query(StudyType).all()
+    def get_study_types(session=None):
+        if session is None:
+            session = Session()
+        return session.query(StudyType).all()
 
     @staticmethod
-    def get_all_tags(sort_by_name=False):
-        s = Session()
-        tags = s.query(Tag).all()
+    def get_all_tags(sort_by_name=False, session=None):
+        if session is None:
+            session = Session()
+
+        tags = session.query(Tag).all()
         if sort_by_name:
             tags.sort(key=(lambda t : t.tag))
         return tags
 
     @staticmethod
-    def get_tag_names(tags: [int]):
-        s = Session()
-        found = s.query(Tag).filter(Tag.id.in_(tags)).all()
+    def get_tag_names(tags: [int], session=None):
+        if session is None:
+            session = Session()
+        found = session.query(Tag).filter(Tag.id.in_(tags)).all()
         return [t.tag for t in found]
+
+    @staticmethod
+    def update_paths_containing_images():
+        """Goes through the IMAGES_PATH and adds missing entries to paths table."""
+        session = Session()
+
+        formats = tuple(Env.IMPORT_FORMATS)
+
+        print('Updating folder paths registry...', end='')
+
+        new_paths = []
+        root_path = Env.IMAGES_PATH
+        for dir_path, _, filenames in os.walk(root_path):
+
+            if not any([f.endswith(formats) for f in filenames]):
+                continue
+
+            path = os.path.relpath(dir_path, root_path)
+
+            path_row = session.query(Path).filter(Path.path == path).first()
+            if path_row:
+                continue
+
+            path_ref = Path(path=path)
+            session.add(path_ref)
+            session.flush()
+
+            new_paths.append(path)
+
+        session.rollback()
+        # session.commit()
+
+        print('\rUpdating folder paths registry... Done\n')
+
+        if len(new_paths) > 0:
+            print(f'Found {len(new_paths)} new folders')
+            [print(f'{p}') for p in new_paths]
+
+        pass
 
     # endregion Convenience
 

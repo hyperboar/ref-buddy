@@ -1,0 +1,146 @@
+body
+{
+    background-color: #7a7676;
+}
+
+button
+{
+    border-radius: 3%;
+    border: 2px;
+}
+
+.header
+{
+    display: flex;
+    flex-direction: row;
+    height: 80px;
+    align-items: center;
+}
+
+.header h1, a, p
+{
+    margin-left: 10px;
+}
+
+.header h1 {
+    margin-right: 20px;
+}
+
+.back-btn
+{
+    color: #545151;
+}
+
+.no-decor, .no-decor:active, .no-decor:hover, .no-decor:visited, .no-decor:focus
+{
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Rating */
+.rate-up, .rate-dn
+{
+    width: 25px;
+    height: 25px;
+    background-size: cover;
+    border: none;
+    padding: 2px;
+}
+.rate-up {background-image: url("/static/arrow_up.png");}
+.rate-dn {background-image: url("/static/arrow_down.png");}
+
+/* Use instead of style="display: hidden" */
+.vis-hide
+{
+    display: none;
+}
+
+/* Button semi transparent */
+.btn-bg-blend {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.btn-bg-blend:hover {
+    opacity: 1;
+}
+
+/* Paging */
+.paging
+{
+    width: 100%;
+    margin: 15px;
+}
+.paging-btns
+{
+    display: flex;
+    justify-content: center;
+}
+.page-btn
+{
+    margin: 5px;
+}
+
+
+
+/* Animations */
+
+/* Loading */
+@keyframes animLoading {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading {
+    animation: animLoading 2s linear infinite;
+}
+
+/* Operation Success */
+@keyframes animSucc {
+    0% {
+        border: 1px solid rgba(35, 243, 21, 0.0);
+        background-color: rgba(35, 243, 21, 0.0);
+    }
+    10%
+    {
+        border: 1px solid rgba(35, 243, 21, 1);
+        background-color: rgba(35, 243, 21, 1);
+    }
+    100%
+    {
+        border: inherit;
+        background-color: inherit;
+    }
+}
+
+.op-success {
+    animation: animSucc 1s ease-out;
+}
+
+/* Operation Fail */
+@keyframes animFail {
+    0% {
+        border: 1px solid rgb(243, 21, 73, 0.0);
+        background-color: rgb(243, 21, 73, 0.0);
+    }
+    10%
+    {
+        border: 1px solid rgb(243, 21, 73, 1);
+        background-color: rgb(243, 21, 73, 1);
+    }
+    100%
+    {
+        border: inherit;
+        background-color: inherit;
+    }
+}
+
+.op-fail {
+    animation: animFail 1s ease-out;
+}
+
+/* END Animations */

@@ -2,423 +2,442 @@
 <html lang="en">
 <head>
 	<title>Image ({{ image.image_id }})</title>
-    <link rel="stylesheet" href="/static/styles_global.css">
-    <link rel="stylesheet" href="/static/style_image.css">
-    <script type="text/javascript" src="/static/img_params.js"></script>
-    <script type="text/javascript" src="/static/rating.js"></script>
-    <script type="text/javascript" src="/static/study_timer.js"></script>
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <link rel="stylesheet" href="/static/styles/image.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
+    <script type="text/javascript" src="/static/js/img_params.js"></script>
+    <script type="text/javascript" src="/static/js/rating.js"></script>
+    <script type="text/javascript" src="/static/js/image_color_picker.js"></script>
+    <script type="text/javascript" src="/static/js/study_timer.js"></script>
 </head>
 <body>
-    <div style="display: none" id="image-id" >{{ image.image_id }}</div>
-    <div style="display: none">{{ image.path }}</div>
-	<div class="modal">
-        <img class="modal-bg" src="/image/{{ image.image_id }}" alt="{{ image.image_id }}:{{ image.path }}">
-        <div class="modal-img-container">
-            <img class="modal-img" src="/image/{{ image.image_id }}" alt="{{ image.image_id }}:{{ image.path }}" tabindex="0">
-            <div class="magnification"></div>
-            <button class="modal-button-prev"><</button>
-            <button class="modal-button-next">></button>
+<div style="display: none" id="image-id">{{ image.image_id }}</div>
+<div style="display: none">{{ image.path }}</div>
+<div class="modal">
+    <img class="modal-bg" src="/image/{{ image.image_id }}" alt="{{ image.image_id }}:{{ image.path }}">
+    <div class="modal-img-container">
+        <img class="modal-img" src="/image/{{ image.image_id }}" alt="{{ image.image_id }}:{{ image.path }}"
+             tabindex="0">
+        <div class="magnification"></div>
+        <button class="modal-button-prev"><</button>
+        <button class="modal-button-next">></button>
+    </div>
+    <div class="modal-controls btn-bg-blend">
+        <div class="row timer">
+            <span class="timer-icon"></span>&nbsp;&nbsp;
+            <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
+            <span class="space"/>
+            <button id="timer-start" class="btn-bg-blend" started="">Start</button>
         </div>
-        <div class="modal-controls btn-bg-blend">
-            <div class="row timer">
-                <span class="timer-icon"></span>&nbsp;&nbsp;
-                <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
-                <span class="space"/>
-                <button id="timer-start" class="btn-bg-blend" started="">Start</button>
-            </div>
-            <div class="row">
-                <span>Study: </span>
-                <select id="study-type" value="{{ image.study_type_id }}" class="btn-bg-blend">
-                    {% for st in study_types %}
+        <div class="row">
+            <span>Study: </span>
+            <select id="study-type" value="{{ image.study_type_id }}" class="btn-bg-blend">
+                {% for st in study_types %}
                     <option value="{{ st.id }}">{{ st.type }}</option>
-                    {% endfor %}
-                </select>
-                <span class="space"/>
-                <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
-                <span class="space"/>
-                <button id="info-button" class="btn-bg-blend">info</button>
-            </div>
-            <div class="row">
-                <button class="fav btn-bg-blend" id="is-fav" value="{{ image.is_fav }}"></button>
-                <span class="space"/>
-                <label for="rate-up">Rating: <span id="image-rating">{{ image.rating }}</span></label>
-                <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
-                <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
-                <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
-                <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
-                <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
-            </div>
-            <div class="row">
-                <label for="same-folder">Same folder:</label>
-                <input type="checkbox" id="same-folder" value="true">
-                <input type="hidden" id="min-rating" value="0">
-                <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
-            </div>
-            <div class="row">
-                <button id="prev" class="btn-bg-blend">Prev</button>
-                <button id="next" class="btn-bg-blend">Next</button>
-            </div>
+                {% endfor %}
+            </select>
+            <span class="space"/>
+            <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
+            <span class="space"/>
+            <button id="info-button" class="btn-bg-blend">info</button>
+            <button id="pallet-button" class="btn-bg-blend">plt</button>
+        </div>
+        <div class="row">
+            <button class="fav btn-bg-blend" id="is-fav" value="{{ image.is_fav }}"></button>
+            <span class="space"/>
+            <label for="rate-up">Rating: <span id="image-rating">{{ image.rating }}</span></label>
+            <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
+            <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
+            <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
+            <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
+            <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
+        </div>
+        <div class="row">
+            <label for="same-folder">Same folder:</label>
+            <input type="checkbox" id="same-folder" value="true">
+            <input type="hidden" id="min-rating" value="0">
+            <a href="/folder/{{ image.path_id }}"><img class="dir-link" src="/static/link.png"></a>
+        </div>
+        <div class="row">
+            <button id="prev" class="btn-bg-blend">Prev</button>
+            <button id="next" class="btn-bg-blend">Next</button>
+        </div>
 
-            <div id="popup" class="popup">
-                <div class="popup-row">
-                    <span id="path">{{ image.path }}</span>
-                    <button id="copyButton">Copy</button>
-                </div>
-                <div class="popup-row">
-                    <ul id="tags">
-                        {% for tag in tags %}
-                            <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
+        <div id="image-info-popup" class="popup">
+            <div class="popup-row">
+                <span id="image-path">{{ image.path_abs }}</span>
+                <button id="image-path-copy-btn">Copy</button>
+            </div>
+            <div class="popup-row">
+                <ul id="tags">
+                    {% for tag in tags %}
+                        <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
-	</div>
-    <script>
-        let list = document.getElementById('study-type')
-        list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
+    </div>
 
-        window.onload = function()
+    <div class="pallet-container vis-hide">
+        {% for c in image.colors %}
+            <div class="pallet-wrap">
+                <div class="pallet-cell" style="background-color: {{ c.color.hex }};" data-hex="{{ c.color.hex }}" data-x="{{ c.x }}" data-y="{{ c.y }}">{{ c.color.hex }}</div>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="pallet-frame" class="vis-hide"></div>
+</div>
+<script>
+    let list = document.getElementById('study-type')
+    list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
+
+    window.onload = function()
+    {
+        console.log('Page Loaded!')
+
+        let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating')
+
+        imgParams.setParamsFromGET()
+
+        const colorPicker = new ColorPicker({{ image.image_id }}, '.modal-img', '.pallet-container', '.modal-img-color-picker', '#pallet-frame')
+
+        // next
+        const onClickNext = function ()
         {
-            console.log('Page Loaded!')
+            const curParams = imgParams.getParamsAsGET()
+            const curUrl = window.location.href.split('/')
+            const domain = `${curUrl[0]}//${curUrl[2]}`
+            const url = `${domain}/study-random?${curParams}`
 
-            let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating')
-
-            imgParams.setParamsFromGET()
-
-
-            // next
-            const onClickNext = function ()
-            {
-                const curParams = imgParams.getParamsAsGET();
-                const curUrl = window.location.href.split('/');
-                const domain = `${curUrl[0]}//${curUrl[2]}`;
-                const url = `${domain}/study-random?${curParams}`;
-
-                const prevParams = document.getElementById('prev').getAttribute('prev-params');
-                history.replaceState(null, null, `/study-image/{{ image.image_id }}?${prevParams}`);
-                window.location.href = url;
-            }
-            const nextButton = document.getElementById('next');
-            const nextButtonSmall = document.querySelector('.modal-button-next')
-            nextButton.addEventListener('click', onClickNext);
-            nextButtonSmall.addEventListener('click', onClickNext);
-
-            // prev
-            const onClickPrev = function ()
-            {
-                window.history.back()
-            }
-            const prevButton = document.getElementById('prev');
-            const prevButtonSmall = document.querySelector('.modal-button-prev');
-            prevButton.setAttribute('prev-params', imgParams.getParamsAsGET())
-            prevButtonSmall.setAttribute('prev-params', imgParams.getParamsAsGET())
-            prevButton.addEventListener('click', onClickPrev);
-            prevButtonSmall.addEventListener('click', onClickPrev);
-
-            //fab is-fav
-            const favButton = document.getElementById('is-fav');
-            if (favButton.value === '1') {
-                console.log(favButton.value)
-                favButton.classList.add('on') }
-            favButton.addEventListener('click', function ()
-            {
-                let val = (parseInt(favButton.value) + 1) % 2;
-
-                favButton.classList.add('loading')
-                fetch(`/set-image-fav?${imgParams.getParamsFav(val)}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-
-                        if (val === 0) {favButton.classList.remove('on')}
-                        else favButton.classList.add('on')
-                        
-                        favButton.value = val;
-                        console.log(favButton.value)
-                        favButton.classList.remove('loading')
-                    })
-                    .catch(error => {
-                        console.error('There was a problem with the fetch operation:', error);
-                        favButton.classList.remove('loading')
-                    });
-            });
-
-            const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
-            const rateFolder = new RateFolder({{ image.image_id }}, 'image-rating', 'rate-up-f', 'rate-dn-f', 'loading', 'op-success', 'op-fail')
-
-            // study timer
-            const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')
-
-            const onTimerStart = function () {
-                timer.start()
-                timerButton.textContent = 'Alga Only';
-                timerButton.setAttribute('disabled', 'true')
-
-                fetch(`/set-image-last-viewed?${imgParams.getImgIdAsGET()}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        console.log('Last Viewed time updated!')
-                    })
-                    .catch(error => {
-                        console.error('There was a problem with the fetch operation:', error);
-                    });
-            }
-            const timerButton = document.getElementById('timer-start');
-            timerButton.addEventListener('click', onTimerStart);
-
-            const toggleSameFolder = function()
-            {
-                const sf = document.getElementById('same-folder');
-                sf.checked = !sf.checked;
-            }
-
-            const toggleCssClass = function(elem, className)
-            {
-                if (elem.classList.contains(className)) { elem.classList.remove(className) }
-                else { elem.classList.add(className) }
-            }
-
-            // toggle grayscale
-            const toggleGrayscale = function()
-            {
-                toggleCssClass(document.querySelector('.modal-bg'), 'modal-bg-gray')
-                toggleCssClass(document.querySelector('.modal-img'), 'modal-img-gray')
-                toggleCssClass(document.querySelector('.magnification'), 'modal-img-gray')
-            }
-
-            const gsButton = document.getElementById('toggle-grayscale');
-            gsButton.addEventListener('click', toggleGrayscale);
-
-            const disableAllBut = function(elem, oneName, allNames)
-            {
-                allNames.forEach((n) => { if (n === oneName) { return; } elem.classList.remove(n) })
-            }
-
-            // toggle cursor
-            const toggleCursor = function(keycode)
-            {
-                let img  = document.querySelector('.modal-img')
-                // let zoom = document.querySelector('.magnification')
-                const stops = ['cursor-stop-m2', 'cursor-stop-m1', 'cursor-stop-0', 'cursor-stop-p1', 'cursor-stop-p2']
-
-
-                // numpad "5" is 50% brightness or "0 exposure stops" or 18% gray
-                let idx = parseInt(keycode.replace('Numpad', '').replace('Digit', ''))
-                // hit 0, bring default cursor back
-                if (idx === 0)
-                {
-                    disableAllBut(img, '', stops)
-                    return
-                }
-                idx -= 3 // we start from 3 and go up.
-                if (idx < 0 || stops.length <= idx) { return }
-
-                toggleCssClass(img, stops[idx])
-                disableAllBut(img, stops[idx], stops)
-            }
-
-            // toggle image flip
-            let isFlipped = false
-            const toggleFlip = function(event)
-            {
-                isFlipped = !isFlipped
-
-                toggleCssClass(document.querySelector('.modal-img'), 'image-flip')
-                toggleCssClass(document.querySelector('.magnification'), 'image-flip')
-
-                updateMagnifiedOffset(event.clientX, event.clientY)
-            }
-
-            // set image contrast
-            let isContrast = false
-            const toggleContrast = function(keycode)
-            {
-                isContrast = !isContrast
-
-                const img = document.querySelector('.modal-img')
-                const zoom = document.querySelector('.magnification')
-                const bg = document.querySelector('.modal-bg')
-
-                const contrastGray = [
-                    'modal-img-gray',
-                    'modal-img-gray-contrast-150',
-                    'modal-img-gray-contrast-200',
-                    'modal-img-gray-contrast-300',
-                    'modal-img-gray-contrast-1000']
-                const contrastGrayBg = [
-                    'modal-bg-gray']
-
-                disableAllBut(img, '', contrastGray)
-                disableAllBut(zoom, '', contrastGray)
-                disableAllBut(bg, '', contrastGrayBg)
-                switch (keycode) {
-
-                    case 'KeyQ':
-                        break
-                    case 'KeyW':
-                        toggleCssClass(img, contrastGray[1])
-                        toggleCssClass(zoom, contrastGray[1])
-                        toggleCssClass(bg, contrastGrayBg[0])
-                        break
-                    case 'KeyE':
-                        toggleCssClass(img, contrastGray[2])
-                        toggleCssClass(zoom, contrastGray[2])
-                        toggleCssClass(bg, contrastGrayBg[0])
-                        break
-                    case 'KeyR':
-                        toggleCssClass(img, contrastGray[3])
-                        toggleCssClass(zoom, contrastGray[3])
-                        toggleCssClass(bg, contrastGrayBg[0])
-                        break
-                    case 'KeyT':
-                        toggleCssClass(img, contrastGray[4])
-                        toggleCssClass(zoom, contrastGray[4])
-                        toggleCssClass(bg, contrastGrayBg[0])
-                        break
-                }
-            }
-
-            // hotkeys
-            document.addEventListener('keydown', function(e)
-            {
-                if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
-                if (e.code === 'ArrowLeft')  { onClickPrev(); e.preventDefault(); } // <-
-                if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
-                if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
-                if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
-                if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
-                if (['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT'].includes(e.code))
-                                             { toggleContrast(e.code); e.preventDefault(); } // g
-                if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
-                if (e.code.includes('Numpad') || e.code.includes('Digit'))
-                                             { toggleCursor(e.code); e.preventDefault(); } // numbers
-            });
-
-
-            // magnification
-            const modalImage = document.querySelector('.modal-img')
-            const magnification = document.querySelector('.magnification')
-            let mhalf = {x:0, y:0}
-            let msize = {x:0, y:0}
-            let msizeScaled = {x:0, y:0}
-            let mpos = {x:0, y:0}
-            let scale = 1
-            let scaleStep = 0
-            const scaleAdd = 0.3
-            const maxScale = 25
-
-            let isZoomed = false;
-
-            modalImage.addEventListener('wheel', function handleScroll(event)
-            {
-                // Prevent the default scrolling behavior
-                event.preventDefault()
-
-                // Determine the direction of the scroll
-                const delta = Math.sign(event.deltaY) // -1 for scrolling up, 1 for scrolling down
-
-                // Scrolling up
-                if (delta === 1) { scaleStep-- }
-                // Scrolling down
-                else if (delta === -1) { scaleStep++ }
-
-                scaleStep = Math.min(Math.max(scaleStep, 1), maxScale)
-
-                scale = 1 + scaleAdd * scaleStep
-
-                isZoomed = true
-
-                mpos.x = modalImage.getBoundingClientRect().left
-                mpos.y = modalImage.getBoundingClientRect().top
-                msize.x = modalImage.offsetWidth
-                msize.y = modalImage.offsetHeight
-                msizeScaled.x = msize.x * scale
-                msizeScaled.y = msize.y * scale
-                mhalf.x = msize.x * 0.5
-                mhalf.y = msize.y * 0.5
-
-                modalImage.classList.add('modal-img-darken')
-                magnification.style.display = 'block'
-                magnification.style.width  = `${msize.x}px`
-                magnification.style.height = `${msize.y}px`
-
-                magnification.style.backgroundImage = `url('${modalImage.src}')`
-                magnification.style.backgroundSize = `${100 * scale}% auto`
-
-                // Set the magnification container position
-                magnification.style.left = `${mpos.x}px`
-                magnification.style.top = `${mpos.y}px`
-
-                updateMagnifiedOffset(event.clientX, event.clientY)
-            });
-
-            modalImage.addEventListener('mouseup', function ()
-            {
-                if (!isZoomed) { return; }
-
-                isZoomed = false;
-                modalImage.classList.remove('modal-img-darken')
-                magnification.style.display = 'none'
-
-                scaleStep = 1
-                scale = 1 + scaleAdd * scaleStep
-            });
-
-            modalImage.addEventListener('mousemove', function (event)
-            {
-                if (!isZoomed) { return }
-
-                updateMagnifiedOffset(event.clientX, event.clientY)
-            });
-
-            function updateMagnifiedOffset(cx, cy)
-            {
-                // Calculate the position within the image
-                let x = cx - mpos.x
-                let y = cy - mpos.y
-                // clamp 0 to msize
-                x = Math.min(Math.max(x, 0), msize.x) - mhalf.x
-                y = Math.min(Math.max(y, 0), msize.y) - mhalf.y
-                x /= msize.x * (isFlipped ? -1 : 1); y /= msize.y
-
-                x *= -msizeScaled.x; y *= -msizeScaled.y
-
-                x -= (msizeScaled.x - msize.x) * 0.5
-                y -= (msizeScaled.y - msize.y) * 0.5
-
-                magnification.style.backgroundPosition = `${x}px ${y}px`
-            }
-
-
-
-
-            // popup
-
-            // Get references to the button and popup elements
-            const button = document.getElementById('info-button');
-            const popup = document.getElementById('popup');
-
-            // Show the popup when the button is clicked
-            button.addEventListener('click', () => {
-                popup.style.display = 'block';
-            });
-
-            // Hide the popup when clicking outside of it
-            document.addEventListener('click', (event) => {
-                if (!popup.contains(event.target) && event.target !== button) {
-                    popup.style.display = 'none';
-                }
-            });
-
-            // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
-            const pathElement = document.getElementById('path');
-            const copyButton = document.getElementById('copyButton');
-
-            copyButton.addEventListener('click', () => {
-                const path = pathElement.innerText;
-                // Copy path to clipboard logic goes here...
-            });
+            const prevParams = document.getElementById('prev').getAttribute('prev-params')
+            history.replaceState(null, null, `/study-image/{{ image.image_id }}?${prevParams}`)
+            window.location.href = url
         }
-    </script>
+        const nextButton = document.getElementById('next')
+        const nextButtonSmall = document.querySelector('.modal-button-next')
+        nextButton.addEventListener('click', onClickNext)
+        nextButtonSmall.addEventListener('click', onClickNext)
+
+        // prev
+        const onClickPrev = function ()
+        {
+            window.history.back()
+        }
+        const prevButton = document.getElementById('prev')
+        const prevButtonSmall = document.querySelector('.modal-button-prev')
+        prevButton.setAttribute('prev-params', imgParams.getParamsAsGET())
+        prevButtonSmall.setAttribute('prev-params', imgParams.getParamsAsGET())
+        prevButton.addEventListener('click', onClickPrev)
+        prevButtonSmall.addEventListener('click', onClickPrev)
+
+        //fab is-fav
+        const favButton = document.getElementById('is-fav')
+        if (favButton.value === '1') {
+            console.log(favButton.value)
+            favButton.classList.add('on') }
+        favButton.addEventListener('click', function ()
+        {
+            let val = (parseInt(favButton.value) + 1) % 2
+
+            favButton.classList.add('loading')
+            fetch(`/set-image-fav?${imgParams.getParamsFav(val)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok')
+
+                    if (val === 0) {favButton.classList.remove('on')}
+                    else favButton.classList.add('on')
+
+                    favButton.value = val
+                    console.log(favButton.value)
+                    favButton.classList.remove('loading')
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error)
+                    favButton.classList.remove('loading')
+                })
+        })
+
+        const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
+        const rateFolder = new RateFolder({{ image.image_id }}, 'image-rating', 'rate-up-f', 'rate-dn-f', 'loading', 'op-success', 'op-fail')
+
+        // study timer
+        const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')
+
+        const onTimerStart = function () {
+            timer.start()
+            timerButton.textContent = 'Alga Only'
+            timerButton.setAttribute('disabled', 'true')
+
+            fetch(`/set-image-last-viewed?${imgParams.getImgIdAsGET()}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok')
+                    console.log('Last Viewed time updated!')
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error)
+                })
+        }
+        const timerButton = document.getElementById('timer-start')
+        timerButton.addEventListener('click', onTimerStart)
+
+        const toggleSameFolder = function()
+        {
+            const sf = document.getElementById('same-folder')
+            sf.checked = !sf.checked
+        }
+
+        const toggleCssClass = function(elem, className)
+        {
+            if (elem.classList.contains(className)) { elem.classList.remove(className) }
+            else { elem.classList.add(className) }
+        }
+
+        // toggle grayscale
+        const toggleGrayscale = function()
+        {
+            toggleCssClass(document.querySelector('.modal-bg'), 'modal-bg-gray')
+            toggleCssClass(document.querySelector('.modal-img'), 'modal-img-gray')
+            toggleCssClass(document.querySelector('.magnification'), 'modal-img-gray')
+        }
+
+        const gsButton = document.getElementById('toggle-grayscale')
+        gsButton.addEventListener('click', toggleGrayscale)
+
+        const disableAllBut = function(elem, oneName, allNames)
+        {
+            allNames.forEach((n) => { if (n === oneName) { return } elem.classList.remove(n) })
+        }
+
+        // toggle cursor
+        const toggleCursor = function(keycode)
+        {
+            let img  = document.querySelector('.modal-img')
+            // let zoom = document.querySelector('.magnification')
+            const stops = ['cursor-stop-m2', 'cursor-stop-m1', 'cursor-stop-0', 'cursor-stop-p1', 'cursor-stop-p2']
+
+
+            // numpad "5" is 50% brightness or "0 exposure stops" or 18% gray
+            let idx = parseInt(keycode.replace('Numpad', '').replace('Digit', ''))
+            // hit 0, bring default cursor back
+            if (idx === 0)
+            {
+                disableAllBut(img, '', stops)
+                return
+            }
+            idx -= 3 // we start from 3 and go up.
+            if (idx < 0 || stops.length <= idx) { return }
+
+            toggleCssClass(img, stops[idx])
+            disableAllBut(img, stops[idx], stops)
+        }
+
+        // toggle image flip
+        let isFlipped = false
+        const toggleFlip = function(event)
+        {
+            isFlipped = !isFlipped
+
+            toggleCssClass(document.querySelector('.modal-img'), 'image-flip')
+            toggleCssClass(document.querySelector('.magnification'), 'image-flip')
+
+            updateMagnifiedOffset(event.clientX, event.clientY)
+        }
+
+        // set image contrast
+        let isContrast = false
+        const toggleContrast = function(keycode)
+        {
+            isContrast = !isContrast
+
+            const img = document.querySelector('.modal-img')
+            const zoom = document.querySelector('.magnification')
+            const bg = document.querySelector('.modal-bg')
+
+            const contrastGray = [
+                'modal-img-gray',
+                'modal-img-gray-contrast-150',
+                'modal-img-gray-contrast-200',
+                'modal-img-gray-contrast-300',
+                'modal-img-gray-contrast-1000']
+            const contrastGrayBg = [
+                'modal-bg-gray']
+
+            disableAllBut(img, '', contrastGray)
+            disableAllBut(zoom, '', contrastGray)
+            disableAllBut(bg, '', contrastGrayBg)
+            switch (keycode) {
+
+                case 'KeyQ':
+                    break
+                case 'KeyW':
+                    toggleCssClass(img, contrastGray[1])
+                    toggleCssClass(zoom, contrastGray[1])
+                    toggleCssClass(bg, contrastGrayBg[0])
+                    break
+                case 'KeyE':
+                    toggleCssClass(img, contrastGray[2])
+                    toggleCssClass(zoom, contrastGray[2])
+                    toggleCssClass(bg, contrastGrayBg[0])
+                    break
+                case 'KeyR':
+                    toggleCssClass(img, contrastGray[3])
+                    toggleCssClass(zoom, contrastGray[3])
+                    toggleCssClass(bg, contrastGrayBg[0])
+                    break
+                case 'KeyT':
+                    toggleCssClass(img, contrastGray[4])
+                    toggleCssClass(zoom, contrastGray[4])
+                    toggleCssClass(bg, contrastGrayBg[0])
+                    break
+            }
+        }
+
+        // hotkeys
+        document.addEventListener('keydown', function(e)
+        {
+            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
+            if (e.code === 'ArrowLeft')  { onClickPrev(); e.preventDefault(); } // <-
+            if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
+            if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
+            if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
+            if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
+            if (['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT'].includes(e.code))
+                                         { toggleContrast(e.code); e.preventDefault(); } // g
+            if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
+            if (e.code.includes('Numpad') || e.code.includes('Digit'))
+                                         { toggleCursor(e.code); e.preventDefault(); } // numbers
+        })
+
+
+        // magnification
+        const modalImage = document.querySelector('.modal-img')
+        const magnification = document.querySelector('.magnification')
+        let mhalf = {x:0, y:0}
+        let msize = {x:0, y:0}
+        let msizeScaled = {x:0, y:0}
+        let mpos = {x:0, y:0}
+        let scale = 1
+        let scaleStep = 0
+        const scaleAdd = 0.3
+        const maxScale = 25
+
+        let isZoomed = false
+
+        modalImage.addEventListener('wheel', function handleScroll(event)
+        {
+            // Prevent the default scrolling behavior
+            event.preventDefault()
+
+            // Determine the direction of the scroll
+            const delta = Math.sign(event.deltaY) // -1 for scrolling up, 1 for scrolling down
+
+            // Scrolling up
+            if (delta === 1) { scaleStep-- }
+            // Scrolling down
+            else if (delta === -1) { scaleStep++ }
+
+            scaleStep = Math.min(Math.max(scaleStep, 1), maxScale)
+
+            scale = 1 + scaleAdd * scaleStep
+
+            isZoomed = true
+
+            mpos.x = modalImage.getBoundingClientRect().left
+            mpos.y = modalImage.getBoundingClientRect().top
+            msize.x = modalImage.offsetWidth
+            msize.y = modalImage.offsetHeight
+            msizeScaled.x = msize.x * scale
+            msizeScaled.y = msize.y * scale
+            mhalf.x = msize.x * 0.5
+            mhalf.y = msize.y * 0.5
+
+            modalImage.classList.add('modal-img-darken')
+            magnification.style.display = 'block'
+            magnification.style.width  = `${msize.x}px`
+            magnification.style.height = `${msize.y}px`
+
+            magnification.style.backgroundImage = `url('${modalImage.src}')`
+            magnification.style.backgroundSize = `${100 * scale}% auto`
+
+            // Set the magnification container position
+            magnification.style.left = `${mpos.x}px`
+            magnification.style.top = `${mpos.y}px`
+
+            updateMagnifiedOffset(event.clientX, event.clientY)
+        })
+
+        modalImage.addEventListener('mouseup', function ()
+        {
+            if (!isZoomed) { return }
+
+            isZoomed = false
+            modalImage.classList.remove('modal-img-darken')
+            magnification.style.display = 'none'
+
+            scaleStep = 1
+            scale = 1 + scaleAdd * scaleStep
+        })
+
+        modalImage.addEventListener('mousemove', function (event)
+        {
+            if (!isZoomed) { return }
+
+            updateMagnifiedOffset(event.clientX, event.clientY)
+        })
+
+        function updateMagnifiedOffset(cx, cy)
+        {
+            // Calculate the position within the image
+            let x = cx - mpos.x
+            let y = cy - mpos.y
+            // clamp 0 to msize
+            x = Math.min(Math.max(x, 0), msize.x) - mhalf.x
+            y = Math.min(Math.max(y, 0), msize.y) - mhalf.y
+            x /= msize.x * (isFlipped ? -1 : 1); y /= msize.y
+
+            x *= -msizeScaled.x; y *= -msizeScaled.y
+
+            x -= (msizeScaled.x - msize.x) * 0.5
+            y -= (msizeScaled.y - msize.y) * 0.5
+
+            magnification.style.backgroundPosition = `${x}px ${y}px`
+        }
+
+
+
+
+        // popup
+
+        // Get references to the button and popup elements
+        const button = document.getElementById('info-button')
+        const popup = document.getElementById('image-info-popup')
+
+        // Show the popup when the button is clicked
+        button.addEventListener('click', () => {
+            popup.style.display = 'block'
+        })
+
+        // Hide the popup when clicking outside of it
+        document.addEventListener('click', (event) => {
+            if (!popup.contains(event.target) && event.target !== button) {
+                popup.style.display = 'none'
+            }
+        })
+
+        document.getElementById('pallet-button').addEventListener('click', (e) => document.querySelector('.pallet-container').classList.toggle('vis-hide'))
+
+        // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
+        const pathElement = document.getElementById('image-path')
+        const copyButton = document.getElementById('image-path-copy-btn')
+
+        copyButton.addEventListener('click', () => {
+            const path = pathElement.textContent
+            document.copyToClipboard(path, () =>
+            {
+                copyButton.textContent = 'Copied!'
+            })
+        })
+    }
+</script>
 </body>
 </html>

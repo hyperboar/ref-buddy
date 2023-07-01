@@ -1,0 +1,125 @@
+{# This widget requires js varialbe "selection" to exist. #}
+
+<div id="tags-popup" class="tags-popup" style="display: none;">
+    <h3>Tags (<span id="images-count"></span> images selected)</h3>
+    <div id="tagList" class="tag-container">
+        {% for t in tags %}
+            <div class="tag-edit">
+            <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
+            <label style="color:{{ t.hex }}" for="{{ t.tag }}">{{ t.tag }}</label><br>
+            </div>
+        {% endfor %}
+    </div>
+    <button id="tags-submit-add">Add</button>
+    <button id="tags-submit-del">Del</button>
+    <button id="tags-clear">Clear</button>
+    <button id="tags-close">Close</button>
+</div>
+
+<script>
+
+    function toggleTagsPopupDisplay()
+    {
+        const popup = document.getElementById('tags-popup')
+        if (popup.style.display === 'none')
+        {
+            document.getElementById('tags-popup').style.display = 'block'
+            document.querySelector('.tags-popup-background').style.display = 'block'
+            document.getElementById('images-count').textContent = '' + selection.selectedIds.length
+        }
+        else
+        {
+            closeTagsPopup()
+        }
+    }
+
+    function closeTagsPopup()
+    {
+        document.getElementById('tags-popup').style.display = 'none'
+        document.querySelector('.tags-popup-background').style.display = 'none'
+
+        document.getElementById('tags-submit-add').classList.remove('op-success', 'op-fail', 'loading')
+        document.getElementById('tags-submit-del').classList.remove('op-success', 'op-fail', 'loading')
+    }
+
+    function clearTagsPopup()
+    {
+        Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => { checkbox.checked = false; checkbox.parentNode.classList.remove('tag-selected') })
+    }
+
+    function submitAddTags()
+    {
+        const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.value)
+
+        const idsStr = selection.selectedIds.join(',')
+        const tagsStr = selectedTags.join(',')
+
+        document.getElementById('tags-submit-add').classList.add('loading')
+        document.getElementById('tags-submit-add').classList.remove('op-success', 'op-fail')
+
+        fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok')
+                document.getElementById('tags-submit-add').classList.add('op-success')
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error)
+                document.getElementById('tags-submit-add').classList.add('op-fail')
+            })
+            .finally(() =>
+            {
+                document.getElementById('tags-submit-add').classList.remove('loading')
+            })
+    }
+
+    function submitRemoveTags()
+    {
+        const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
+            .map((checkbox) => checkbox.value)
+
+        const idsStr = selection.selectedIds.join(',')
+        const tagsStr = selectedTags.map(t => '-' + t).join(',')
+
+        document.getElementById('tags-submit-del').classList.add('loading')
+        document.getElementById('tags-submit-del').classList.remove('op-success', 'op-fail')
+
+        fetch(`/remove-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok')
+                document.getElementById('tags-submit-del').classList.add('op-success')
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error)
+                document.getElementById('tags-submit-del').classList.add('op-fail')
+            })
+            .finally(() =>
+            {
+                document.getElementById('tags-submit-del').classList.remove('loading')
+            })
+    }
+
+    document.getElementById('tags-submit-add').addEventListener('click', submitAddTags)
+    document.getElementById('tags-submit-del').addEventListener('click', submitRemoveTags)
+    document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
+    document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
+    document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
+
+    document.querySelectorAll('.tag-edit input[type="checkbox"]').forEach(elem =>
+    {
+        elem.addEventListener('click', (e) =>
+        {
+            if (e.currentTarget.checked) { e.currentTarget.parentNode.classList.add('tag-selected') }
+            else { e.currentTarget.parentNode.classList.remove('tag-selected') }
+        })
+    })
+
+    document.addEventListener('keydown', function(e)
+    {
+        if (e.code === 'KeyT' && !e.shiftKey)
+        {
+            toggleTagsPopupDisplay()
+        }
+    })
+</script>

@@ -1,8 +1,9 @@
 import os
 import sys
 
+from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from maintenance import assign_folder_tags
+from maintenance import assign_folder_tags, make_database_backup
 from models.models_lump import Session
 
 
@@ -11,13 +12,14 @@ class ImageMetadataImporter:
         pass
 
     def import_metadata(self, folder_path):
-        formats = ('.png', '.jpg', '.jpeg', '.webp')
+        formats = tuple(Env.IMPORT_FORMATS)
         sts = Ctrl.get_study_types()
 
         new_count = 0
-
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
+
+        make_database_backup(marker='before_import', force=True)
 
         session = Session()
 
@@ -50,9 +52,10 @@ class ImageMetadataImporter:
             print("")
             print(f"\rAssigning essential tags to new images...", end="")
             assign_folder_tags()
-            print(f"\rAssigning essential tags to new images... Done!", end="")
+            print(f"\rAssigning essential tags to new images... Done", end="")
 
         print(f"\nImport completed! Found {new_count} new files.")
+        make_database_backup(marker='after_import', force=True)
 
     @staticmethod
     def print_begin(msg):

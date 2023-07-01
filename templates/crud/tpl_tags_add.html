@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <title>Tag add</title>
+</head>
+<body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="/tags">&lt;</a>
+    <h1>Add Tag</h1>
+</div>
+<form method="POST" action="/tags/add">
+    <label for="tag">Tag:</label>
+    <input type="text" id="tag" name="tag" required>
+    <br>
+    <input type="submit" value="Add Tag">
+</form>
+</body>
+</html>

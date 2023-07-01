@@ -1,7 +1,7 @@
 .idea/
 venv/
 
-database_backup*.db
+db_backups/
 
 # build
 dist/

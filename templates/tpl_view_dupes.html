@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <link rel="stylesheet" href="/static/styles/gallery.css">
+    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
+    <script type="text/javascript" src="/static/js/mut_attr_observer.js"></script>
+    <script type="text/javascript" src="/static/js/rating.js"></script>
+    <script type="text/javascript" src="/static/js/image_selection.js"></script>
+</head>
+<body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>Duplicates</h1>
+</div>
+{{ panel|default('') }}
+{{ paging|default('') }}
+<div class="gallery">
+    {% for d in dupes %}
+        <div id="dupe-set" style="border: 4px solid" data-id="{{ loop.index }}">
+            <button id="inline-resolve" class="btn-bg-blend">resolve</button>
+            <div class="thumbnail" data-id="{{ d[0] }}">
+                <a href="/study-image/{{ d[0] }}?same-folder=true&time-planned=120">
+                    <img src="" class="thumb thumb-hidden" data-src="/thumb/{{ d[0] }}.jpg" alt="{{ d[0] }}">
+                    <div class="overlay vis-hide">
+                        <span class="tags-list"></span>
+                    </div>
+                </a>
+            </div>
+            <div class="thumbnail" data-id="{{ d[1] }}">
+                <a href="/study-image/{{ d[1] }}?same-folder=true&time-planned=120">
+                    <img src="" class="thumb thumb-hidden" data-src="/thumb/{{ d[1] }}.jpg" alt="{{ d[1] }}">
+                    <div class="overlay vis-hide">
+                        <span class="tags-list"></span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{{ paging|default('') }}
+
+<div class="top-menu">
+    <button id="mark-just-remove" class="btn-bg-blend">Remove</button>
+    <button id="mark-not-same" class="btn-bg-blend">Not dupe</button>
+    <button class="btn-bg-blend">i am grut</button>
+    <button id="resolve-selected" class="btn-bg-blend">Resolve Selected</button>
+    <button id="resolve-mode" class="btn-bg-blend">Resolve</button>
+    <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
+</div>
+
+<script>
+    let selection = null
+    let resolveMode = false
+
+    const classSelected ='select-mode-btn'
+    const classDisabled ='disabled'
+
+    document.addEventListener('DOMContentLoaded', function()
+    {
+        // reveal on load
+        const thumbs = document.querySelectorAll('.thumb')
+        thumbs.forEach((elem) =>
+        {
+            new MutationAttributeObserver(elem, 'src', (target) =>
+            {
+                target.classList.remove('thumb-hidden')
+            })
+        })
+
+        new ImageLazyLoad('.thumb', false, '300px')
+
+        selection = new ImageSelection('toggle-selection-mode-btn', '.gallery', '#dupe-set')
+    }, false)
+
+
+
+    function markResolved(btn, ids)
+    {
+        if (!resolveMode) { return }
+        if (ids.length === 0) { return }
+
+        btn.classList.add('loading')
+        btn.classList.remove('op-success', 'op-fail')
+        btn.setAttribute('disabled', true)
+
+        const params = `?image-id=${ids.join(',')}`
+        fetch('/dupes-resolve-pick-largest' + params)
+            .then(response =>
+            {
+                btn.classList.add('op-success')
+                const parent = findThumbContainer(ids[0])
+                parent.classList.add('btn-bg-blend')
+            })
+            .catch(e =>
+            {
+                btn.classList.add('op-fail')
+                btn.removeAttribute('disabled')
+                throw e
+            })
+            .finally(() =>
+            {
+                btn.classList.remove('loading')
+            })
+    }
+
+    function markNotSame(btn, ids)
+    {
+        if (ids.length === 0) { return }
+
+        btn.classList.add('loading')
+        btn.classList.remove('op-success', 'op-fail')
+
+        const params = `?image-id=${ids.join(',')}`
+        fetch('/dupes-not-same' + params)
+            .then(response =>
+            {
+                btn.classList.add('op-success')
+                const parent = findThumbContainer(ids[0])
+                parent.classList.add('btn-bg-blend')
+            })
+            .catch(e =>
+            {
+                btn.classList.add('op-fail')
+                throw e
+            })
+            .finally(() =>
+            {
+                btn.classList.remove('loading')
+            })
+    }
+
+    function markNotSameSelected()
+    {
+        console.log('test')
+        if (!selection.selectionMode || !resolveMode) { return }
+
+        const dupeIds = selection.selectedIds
+        console.log(dupeIds)
+
+        const containers = Array.from(document.querySelectorAll('#dupe-set'))
+            .filter(elem => dupeIds.includes(elem.getAttribute('data-id')))
+            .filter(elem => !elem.classList.contains(classDisabled))
+        containers.forEach(c => {
+            const container = c
+            const btn = container.querySelector('#inline-resolve')
+            const ids = Array.from(container.querySelectorAll('.thumbnail')).map(t => t.getAttribute('data-id'))
+            console.log(ids)
+            markNotSame(btn, ids)
+            c.classList.add(classDisabled)
+        })
+    }
+
+    function markResolvedInline(event)
+    {
+        if (selection.selectionMode) { return }
+        const container = event.currentTarget
+        const btn = container.querySelector('#inline-resolve')
+        const ids = Array.from(container.querySelectorAll('.thumbnail')).map(t => t.getAttribute('data-id'))
+        markResolved(btn, ids)
+
+        container.classList.add(classDisabled)
+    }
+
+    function markResolvedSelected()
+    {
+        console.log('test1')
+        if (!selection.selectionMode || !resolveMode) { return }
+
+        const dupeIds = selection.selectedIds
+
+        const containers = Array.from(document.querySelectorAll('#dupe-set'))
+            .filter(elem => dupeIds.includes(elem.getAttribute('data-id')))
+            .filter(elem => !elem.classList.contains(classDisabled))
+        containers.forEach(c => {
+            const container = c
+            const btn = container.querySelector('#inline-resolve')
+            const ids = Array.from(container.querySelectorAll('.thumbnail')).map(t => t.getAttribute('data-id'))
+            markResolved(btn, ids)
+            c.classList.add(classDisabled)
+        })
+    }
+
+    function markJustRemove(btn, ids)
+    {
+        if (ids.length === 0) { return }
+
+        btn.classList.add('loading')
+        btn.classList.remove('op-success', 'op-fail')
+
+        const params = `?image-id=${ids.join(',')}`
+        fetch('/dupes-remove' + params)
+            .then(response =>
+            {
+                btn.classList.add('op-success')
+                const parent = findThumbContainer(ids[0])
+                setTimeout(() =>
+                {
+                    parent.remove()
+                }, disappearTimeout)
+            })
+            .catch(e =>
+            {
+                btn.classList.add('op-fail')
+                throw e
+            })
+            .finally(() =>
+            {
+                btn.classList.remove('loading')
+            })
+    }
+
+    function findThumbContainer(id)
+    {
+        const thumb = document.querySelector(`.thumbnail[data-id="${id}"]`)
+        return thumb.parentNode
+    }
+
+    function toggleResolveMode(e)
+    {
+        resolveMode = !resolveMode
+
+        const btn = e.currentTarget
+
+        if (resolveMode)
+        {
+            btn.classList.add(classSelected)
+            document.querySelectorAll('#dupe-set').forEach(elem =>
+            {
+                elem.querySelectorAll('a').forEach(a => { a.classList.add(classDisabled) })
+                elem.addEventListener('click', markResolvedInline)
+            })
+        }
+        else
+        {
+            btn.classList.remove(classSelected)
+            document.querySelectorAll('#dupe-set').forEach(elem =>
+            {
+                elem.querySelectorAll('a').forEach(a => { a.classList.remove(classDisabled) })
+                elem.removeEventListener('click', markResolvedInline)
+            })
+        }
+    }
+
+
+    document.getElementById('resolve-mode').addEventListener('click', toggleResolveMode)
+    document.getElementById('resolve-selected').addEventListener('click', markResolvedSelected)
+    document.getElementById('mark-not-same').addEventListener('click', markNotSameSelected)
+    document.getElementById('mark-just-remove').addEventListener('click', (e) => markJustRemove(e.currentTarget, selection.selectedIds))
+
+    document.querySelectorAll('#inline-resolve').forEach(btn => btn.addEventListener('click', markResolvedInline))
+
+    document.addEventListener('keydown', function(e)
+    {
+        // select all
+        if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
+        {
+            {#selection.selectAll()#}
+        }
+        // toggle selection mode
+        else if (e.code === 'KeyS' && !e.shiftKey)
+        {
+            selection.toggleSelectionMode()
+        }
+    });
+</script>
+
+</body>
+</html>
