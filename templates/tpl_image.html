@@ -104,58 +104,58 @@
         // next
         const onClickNext = function ()
         {
-            const curParams = imgParams.getParamsAsGET();
-            const curUrl = window.location.href.split('/');
-            const domain = `${curUrl[0]}//${curUrl[2]}`;
-            const url = `${domain}/study-random?${curParams}`;
+            const curParams = imgParams.getParamsAsGET()
+            const curUrl = window.location.href.split('/')
+            const domain = `${curUrl[0]}//${curUrl[2]}`
+            const url = `${domain}/study-random?${curParams}`
 
-            const prevParams = document.getElementById('prev').getAttribute('prev-params');
-            history.replaceState(null, null, `/study-image/{{ image.image_id }}?${prevParams}`);
-            window.location.href = url;
+            const prevParams = document.getElementById('prev').getAttribute('prev-params')
+            history.replaceState(null, null, `/study-image/{{ image.image_id }}?${prevParams}`)
+            window.location.href = url
         }
-        const nextButton = document.getElementById('next');
+        const nextButton = document.getElementById('next')
         const nextButtonSmall = document.querySelector('.modal-button-next')
-        nextButton.addEventListener('click', onClickNext);
-        nextButtonSmall.addEventListener('click', onClickNext);
+        nextButton.addEventListener('click', onClickNext)
+        nextButtonSmall.addEventListener('click', onClickNext)
 
         // prev
         const onClickPrev = function ()
         {
             window.history.back()
         }
-        const prevButton = document.getElementById('prev');
-        const prevButtonSmall = document.querySelector('.modal-button-prev');
+        const prevButton = document.getElementById('prev')
+        const prevButtonSmall = document.querySelector('.modal-button-prev')
         prevButton.setAttribute('prev-params', imgParams.getParamsAsGET())
         prevButtonSmall.setAttribute('prev-params', imgParams.getParamsAsGET())
-        prevButton.addEventListener('click', onClickPrev);
-        prevButtonSmall.addEventListener('click', onClickPrev);
+        prevButton.addEventListener('click', onClickPrev)
+        prevButtonSmall.addEventListener('click', onClickPrev)
 
         //fab is-fav
-        const favButton = document.getElementById('is-fav');
+        const favButton = document.getElementById('is-fav')
         if (favButton.value === '1') {
             console.log(favButton.value)
             favButton.classList.add('on') }
         favButton.addEventListener('click', function ()
         {
-            let val = (parseInt(favButton.value) + 1) % 2;
+            let val = (parseInt(favButton.value) + 1) % 2
 
             favButton.classList.add('loading')
             fetch(`/set-image-fav?${imgParams.getParamsFav(val)}`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error('Network response was not ok')
 
                     if (val === 0) {favButton.classList.remove('on')}
                     else favButton.classList.add('on')
 
-                    favButton.value = val;
+                    favButton.value = val
                     console.log(favButton.value)
                     favButton.classList.remove('loading')
                 })
                 .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
+                    console.error('There was a problem with the fetch operation:', error)
                     favButton.classList.remove('loading')
-                });
-        });
+                })
+        })
 
         const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
         const rateFolder = new RateFolder({{ image.image_id }}, 'image-rating', 'rate-up-f', 'rate-dn-f', 'loading', 'op-success', 'op-fail')
@@ -165,25 +165,25 @@
 
         const onTimerStart = function () {
             timer.start()
-            timerButton.textContent = 'Alga Only';
+            timerButton.textContent = 'Alga Only'
             timerButton.setAttribute('disabled', 'true')
 
             fetch(`/set-image-last-viewed?${imgParams.getImgIdAsGET()}`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error('Network response was not ok')
                     console.log('Last Viewed time updated!')
                 })
                 .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
-                });
+                    console.error('There was a problem with the fetch operation:', error)
+                })
         }
-        const timerButton = document.getElementById('timer-start');
-        timerButton.addEventListener('click', onTimerStart);
+        const timerButton = document.getElementById('timer-start')
+        timerButton.addEventListener('click', onTimerStart)
 
         const toggleSameFolder = function()
         {
-            const sf = document.getElementById('same-folder');
-            sf.checked = !sf.checked;
+            const sf = document.getElementById('same-folder')
+            sf.checked = !sf.checked
         }
 
         const toggleCssClass = function(elem, className)
@@ -200,12 +200,12 @@
             toggleCssClass(document.querySelector('.magnification'), 'modal-img-gray')
         }
 
-        const gsButton = document.getElementById('toggle-grayscale');
-        gsButton.addEventListener('click', toggleGrayscale);
+        const gsButton = document.getElementById('toggle-grayscale')
+        gsButton.addEventListener('click', toggleGrayscale)
 
         const disableAllBut = function(elem, oneName, allNames)
         {
-            allNames.forEach((n) => { if (n === oneName) { return; } elem.classList.remove(n) })
+            allNames.forEach((n) => { if (n === oneName) { return } elem.classList.remove(n) })
         }
 
         // toggle cursor
@@ -306,7 +306,7 @@
             if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
             if (e.code.includes('Numpad') || e.code.includes('Digit'))
                                          { toggleCursor(e.code); e.preventDefault(); } // numbers
-        });
+        })
 
 
         // magnification
@@ -321,7 +321,7 @@
         const scaleAdd = 0.3
         const maxScale = 25
 
-        let isZoomed = false;
+        let isZoomed = false
 
         modalImage.addEventListener('wheel', function handleScroll(event)
         {
@@ -364,26 +364,26 @@
             magnification.style.top = `${mpos.y}px`
 
             updateMagnifiedOffset(event.clientX, event.clientY)
-        });
+        })
 
         modalImage.addEventListener('mouseup', function ()
         {
-            if (!isZoomed) { return; }
+            if (!isZoomed) { return }
 
-            isZoomed = false;
+            isZoomed = false
             modalImage.classList.remove('modal-img-darken')
             magnification.style.display = 'none'
 
             scaleStep = 1
             scale = 1 + scaleAdd * scaleStep
-        });
+        })
 
         modalImage.addEventListener('mousemove', function (event)
         {
             if (!isZoomed) { return }
 
             updateMagnifiedOffset(event.clientX, event.clientY)
-        });
+        })
 
         function updateMagnifiedOffset(cx, cy)
         {
@@ -409,34 +409,34 @@
         // popup
 
         // Get references to the button and popup elements
-        const button = document.getElementById('info-button');
-        const popup = document.getElementById('image-info-popup');
+        const button = document.getElementById('info-button')
+        const popup = document.getElementById('image-info-popup')
 
         // Show the popup when the button is clicked
         button.addEventListener('click', () => {
-            popup.style.display = 'block';
-        });
+            popup.style.display = 'block'
+        })
 
         // Hide the popup when clicking outside of it
         document.addEventListener('click', (event) => {
             if (!popup.contains(event.target) && event.target !== button) {
-                popup.style.display = 'none';
+                popup.style.display = 'none'
             }
-        });
+        })
 
         document.getElementById('pallet-button').addEventListener('click', (e) => document.querySelector('.pallet-container').classList.toggle('vis-hide'))
 
         // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
-        const pathElement = document.getElementById('image-path');
-        const copyButton = document.getElementById('image-path-copy-btn');
+        const pathElement = document.getElementById('image-path')
+        const copyButton = document.getElementById('image-path-copy-btn')
 
         copyButton.addEventListener('click', () => {
-            const path = pathElement.textContent;
+            const path = pathElement.textContent
             document.copyToClipboard(path, () =>
             {
                 copyButton.textContent = 'Copied!'
             })
-        });
+        })
     }
 </script>
 </body>

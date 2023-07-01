@@ -32,7 +32,7 @@ class ColorPicker
         {
             if (!this.isAltPressed) { return }
 
-            const rect = this.imageTag.getBoundingClientRect();
+            const rect = this.imageTag.getBoundingClientRect()
 
             // Get the click coordinates relative to the image
             const x = (e.pageX - this.imageTag.offsetLeft) / rect.width
@@ -91,7 +91,7 @@ class ColorPicker
             .catch(error =>
             {
                 console.log('Error: ' + error)
-            });
+            })
     }
 
     appendColor(hexColor, x, y)
@@ -153,7 +153,7 @@ class ColorPicker
                     btn.removeAttribute('disabled')
                     btn.classList.add('op-fail')
                     console.log('Error: ' + error)
-                });
+                })
         })
 
         const wrap = document.createElement('div')
@@ -162,7 +162,7 @@ class ColorPicker
         wrap.appendChild(cell)
 
         // Append the new element to the div
-        this.palletTag.appendChild(wrap);
+        this.palletTag.appendChild(wrap)
 
         this.palletTag.classList.remove('vis-hide')
     }
@@ -189,15 +189,15 @@ class ColorPicker
 
     hexToGrayscale(hexColor) {
         // Remove the "#" symbol from the hex color
-        hexColor = hexColor.replace("#", "");
+        hexColor = hexColor.replace("#", "")
 
         // Convert the hex color to RGB values
-        const red = parseInt(hexColor.substr(0, 2), 16);
-        const green = parseInt(hexColor.substr(2, 2), 16);
-        const blue = parseInt(hexColor.substr(4, 2), 16);
+        const red = parseInt(hexColor.substr(0, 2), 16)
+        const green = parseInt(hexColor.substr(2, 2), 16)
+        const blue = parseInt(hexColor.substr(4, 2), 16)
 
         // Calculate the grayscale value using the formula
-        const grayscaleValue = Math.round(0.299 * red + 0.587 * green + 0.114 * blue);
+        const grayscaleValue = Math.round(0.299 * red + 0.587 * green + 0.114 * blue)
 
         // Convert the grayscale value to a hex color
         return "#" + grayscaleValue.toString(16).padStart(2, "0").repeat(3)
@@ -220,12 +220,12 @@ class ColorPicker
         {
             this.placeFrame(cell)
             this.frameTag.classList.remove('vis-hide')
-        });
+        })
 
         cell.addEventListener('mouseleave', () =>
         {
             this.frameTag.classList.add('vis-hide')
-        });
+        })
     }
 
     placeFrame(cell)
@@ -239,8 +239,8 @@ class ColorPicker
         const y = normalizedY * imgRect.height + this.imageTag.offsetTop
 
         // Position the frame element
-        this.frameTag.style.left = x - this.frameSize  * 0.5 + 'px';
-        this.frameTag.style.top  = y - this.frameSize * 0.5 + 'px';
+        this.frameTag.style.left = x - this.frameSize  * 0.5 + 'px'
+        this.frameTag.style.top  = y - this.frameSize * 0.5 + 'px'
 
         console.log(this.frameSize)
     }
