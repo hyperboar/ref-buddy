@@ -163,6 +163,8 @@ class ColorPicker
 
         // Append the new element to the div
         this.palletTag.appendChild(wrap);
+
+        this.palletTag.classList.remove('vis-hide')
     }
 
     toggleGrayscale()
