@@ -98,7 +98,7 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     tag = Column(Text, unique=True, nullable=False)
-    color_id = Column(Integer, ForeignKey('colors.id'), name='color', nullable=False)
+    color_id = Column(Integer, ForeignKey('colors.id'), name='color', nullable=False, default=1)
 
     @property
     def hex(self):
@@ -115,6 +115,9 @@ class Tag(Base):
 
     def __str__(self):
         return f"({self.id}:{self.tag})"
+
+    def __repr__(self):
+        return str(self)
 
 class ImageTag(Base):
     __tablename__ = 'image_tags'

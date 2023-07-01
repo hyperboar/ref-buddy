@@ -37,7 +37,9 @@ INSERT INTO study_types (type) VALUES ('frames');
 
 CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY,
-    tag TEXT UNIQUE
+    tag TEXT NOT NULL UNIQUE,
+    color_id INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (color_id) REFERENCES colors(id)
 );
 
 CREATE TABLE  IF NOT EXISTS image_tags (
