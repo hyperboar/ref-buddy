@@ -97,7 +97,9 @@ class ColorPicker
 
     appendColor(hexColor, x, y)
     {
-        const exists = this.colors.filter(c => c.getAttribute(this.attrHex) === hexColor)
+        this.palletTag.classList.remove('vis-hide')
+
+        const exists = this.colors.filter(c => this.isSameColor(c.getAttribute(this.attrHex), hexColor))
 
         // already have this color in the list
         if (exists.length > 0)
@@ -164,8 +166,6 @@ class ColorPicker
 
         // Append the new element to the div
         this.palletTag.appendChild(wrap)
-
-        this.palletTag.classList.remove('vis-hide')
     }
 
     toggleGrayscale()
@@ -203,6 +203,25 @@ class ColorPicker
 
         // Convert the grayscale value to a hex color
         return "#" + grayscaleValue.toString(16).padStart(2, "0").repeat(3)
+    }
+
+    isSameColor(hexColor1, hexColor2, threshold = 10)
+    {
+        // Remove the "#" symbol from the hex color
+        hexColor1 = hexColor1.replace("#", "")
+        hexColor2 = hexColor2.replace("#", "")
+
+        // Convert the hex color to RGB values
+        const red1 = parseInt(hexColor1.substr(0, 2), 16)
+        const green1 = parseInt(hexColor1.substr(2, 2), 16)
+        const blue1 = parseInt(hexColor1.substr(4, 2), 16)
+
+        const red2 = parseInt(hexColor2.substr(0, 2), 16)
+        const green2 = parseInt(hexColor2.substr(2, 2), 16)
+        const blue2 = parseInt(hexColor2.substr(4, 2), 16)
+
+        const diff = Math.abs(red1 - red2) + Math.abs(green1 - green2) + Math.abs(blue1 - blue2)
+        return diff < threshold
     }
 
     setupCellEvents(cell)
