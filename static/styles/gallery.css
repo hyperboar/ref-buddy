@@ -190,6 +190,11 @@
     border: 2px solid #a85c4d;
 }
 
+.pallet-cell
+{
+    color: rgba(0,0,0,0.4);
+}
+
 /* CSS grid for responsive layout */
 @media (min-width: 768px) {
     .gallery {

@@ -26,7 +26,7 @@
             </div>
             <div>
                 {% for color in image.colors %}
-                    <div style="background-color: {{ color.color.hex }}; display: inline">{{ color.color.hex }}</div>
+                    <div class="pallet-cell" style="background-color: {{ color.color.hex }}; display: inline">{{ color.color.hex }}</div>
                 {% endfor %}
             </div>
         </div>
