@@ -5,15 +5,18 @@ class ColorPicker
     palletTag
     isAltPressed
     cursorSel
+    frameTag
 
     attrHex = 'data-hex'
     attrX   = 'data-x'
     attrY   = 'data-y'
     attrGs  = 'data-gs'
 
+    frameSize = 0
+
     colors = []
 
-    constructor(imageId, imageSel, palletSel, modeOnCursorClass)
+    constructor(imageId, imageSel, palletSel, modeOnCursorClass, frameSel)
     {
         this.imageId = imageId
         this.cursorSel = modeOnCursorClass[0] === '.' ? modeOnCursorClass.substring(1) : modeOnCursorClass
@@ -21,6 +24,9 @@ class ColorPicker
 
         this.palletTag = document.querySelector(palletSel)
         this.palletTag.setAttribute(this.attrGs, '0')
+
+        this.frameTag = document.querySelector(frameSel)
+        this.frameSize = parseInt(window.getComputedStyle(this.frameTag).width.replace('px', ''))
 
         this.imageTag.addEventListener('click', e =>
         {
@@ -34,6 +40,12 @@ class ColorPicker
 
             // Send the AJAX request using fetch and promises
             this.getColorAt(this.imageId, x, y)
+        })
+
+        // init
+        document.querySelectorAll('.pallet-cell').forEach(cell =>
+        {
+            this.setupCellEvents(cell)
         })
 
         // grayscale
@@ -105,17 +117,7 @@ class ColorPicker
 
         this.colors.push(cell)
 
-        // clipboard
-        cell.addEventListener('click', e =>
-        {
-            const elem = e.currentTarget
-            const content = e.currentTarget.textContent
-            document.copyToClipboard(content, () =>
-            {
-                elem.classList.remove('op-success')
-                setTimeout(() => elem.classList.add('op-success'), 100)
-            })
-        })
+        this.setupCellEvents(cell)
 
         const save = document.createElement('button')
         save.classList.add('pallet-save-btn', 'btn-bg-blend')
@@ -197,6 +199,48 @@ class ColorPicker
 
         // Convert the grayscale value to a hex color
         return "#" + grayscaleValue.toString(16).padStart(2, "0").repeat(3)
+    }
+
+    setupCellEvents(cell)
+    {
+        cell.addEventListener('click', e =>
+        {
+            const elem = e.currentTarget
+            const content = e.currentTarget.textContent
+            document.copyToClipboard(content, () =>
+            {
+                elem.classList.remove('op-success')
+                setTimeout(() => elem.classList.add('op-success'), 100)
+            })
+        })
+
+        cell.addEventListener('mouseenter', () =>
+        {
+            this.placeFrame(cell)
+            this.frameTag.classList.remove('vis-hide')
+        });
+
+        cell.addEventListener('mouseleave', () =>
+        {
+            this.frameTag.classList.add('vis-hide')
+        });
+    }
+
+    placeFrame(cell)
+    {
+        const normalizedX = parseFloat(cell.getAttribute(this.attrX))
+        const normalizedY = parseFloat(cell.getAttribute(this.attrY))
+
+        const imgRect = this.imageTag.getBoundingClientRect()
+
+        const x = normalizedX * imgRect.width  + this.imageTag.offsetLeft
+        const y = normalizedY * imgRect.height + this.imageTag.offsetTop
+
+        // Position the frame element
+        this.frameTag.style.left = x - this.frameSize  * 0.5 + 'px';
+        this.frameTag.style.top  = y - this.frameSize * 0.5 + 'px';
+
+        console.log(this.frameSize)
     }
 }
 

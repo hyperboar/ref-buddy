@@ -40,6 +40,7 @@
             <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
             <span class="space"/>
             <button id="info-button" class="btn-bg-blend">info</button>
+            <button id="pallet-button" class="btn-bg-blend">plt</button>
         </div>
         <div class="row">
             <button class="fav btn-bg-blend" id="is-fav" value="{{ image.is_fav }}"></button>
@@ -77,8 +78,14 @@
         </div>
     </div>
 
-    <div class="pallet-container">
+    <div class="pallet-container vis-hide">
+        {% for c in image.colors %}
+            <div class="pallet-wrap">
+                <div class="pallet-cell" style="background-color: {{ c.color.hex }};" data-hex="{{ c.color.hex }}" data-x="{{ c.x }}" data-y="{{ c.y }}">{{ c.color.hex }}</div>
+            </div>
+        {% endfor %}
     </div>
+    <div id="pallet-frame" class="vis-hide"></div>
 </div>
 <script>
     let list = document.getElementById('study-type')
@@ -92,7 +99,7 @@
 
         imgParams.setParamsFromGET()
 
-        const colorPicker = new ColorPicker({{ image.image_id }}, '.modal-img', '.pallet-container', '.modal-img-color-picker')
+        const colorPicker = new ColorPicker({{ image.image_id }}, '.modal-img', '.pallet-container', '.modal-img-color-picker', '#pallet-frame')
 
         // next
         const onClickNext = function ()
@@ -416,6 +423,8 @@
                 popup.style.display = 'none';
             }
         });
+
+        document.getElementById('pallet-button').addEventListener('click', (e) => document.querySelector('.pallet-container').classList.toggle('vis-hide'))
 
         // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
         const pathElement = document.getElementById('image-path');
