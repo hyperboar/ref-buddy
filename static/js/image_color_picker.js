@@ -45,6 +45,7 @@ class ColorPicker
         // init
         document.querySelectorAll('.pallet-cell').forEach(cell =>
         {
+            this.colors.push(cell)
             this.setupCellEvents(cell)
         })
 
@@ -187,7 +188,8 @@ class ColorPicker
         return parseInt(this.palletTag.getAttribute(this.attrGs)) > 0
     }
 
-    hexToGrayscale(hexColor) {
+    hexToGrayscale(hexColor)
+    {
         // Remove the "#" symbol from the hex color
         hexColor = hexColor.replace("#", "")
 
@@ -241,8 +243,6 @@ class ColorPicker
         // Position the frame element
         this.frameTag.style.left = x - this.frameSize  * 0.5 + 'px'
         this.frameTag.style.top  = y - this.frameSize * 0.5 + 'px'
-
-        console.log(this.frameSize)
     }
 }
 
