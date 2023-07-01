@@ -206,6 +206,14 @@ def assign_folder_tags():
         WHERE study_type = 5;
     """)
 
+    c.execute(f"""
+        -- gifs
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 82
+        FROM image_metadata
+        WHERE filename like '%.gif';
+    """)
+
     conn.commit()
     conn.close()
 
