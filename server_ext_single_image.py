@@ -27,7 +27,7 @@ def study_image(image_id):
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
 
-    tag_sets = session.query(TagSet).all()
+    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
 
     out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
     session.close()
@@ -51,7 +51,7 @@ def study_random():
     if metadata is None:
         return f'Error: No images found"'
 
-    tag_sets = session.query(TagSet).all()
+    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
 
     out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
 

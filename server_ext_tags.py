@@ -90,15 +90,14 @@ def get_image_tags():
 @routes_tags.route('/tags')
 def show_tags():
     session = Session()
-    tags = session.query(Tag).all()
-    tags.sort(key=lambda t: t.tag)
+    tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
     return render_template('crud/tpl_tags_list.html', tags=tags)
 
 @routes_tags.route('/tags/add', methods=['GET', 'POST'])
 def add_tag():
     if request.method == 'POST':
         session = Session()
-        tag = request.form['tag']
+        tag = request.form['tag'].strip()
         new_tag = Tag(tag=tag)
         session.add(new_tag)
         session.commit()
@@ -110,8 +109,7 @@ def edit_tag(tag_id):
     session = Session()
     tag = session.get(Tag, tag_id)
     if request.method == 'POST':
-        new_tag = request.form['tag']
-        tag.tag = new_tag
+        tag.tag = request.form['tag'].strip()
         session.commit()
         return redirect('/tags')
     return render_template('crud/tpl_tags_edit.html', tag=tag)
@@ -131,7 +129,7 @@ def delete_tag(tag_id):
 @routes_tags.route('/tag-sets')
 def list_tag_sets():
     session = Session()
-    tag_sets = session.query(TagSet).all()
+    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
     return render_template('crud/tpl_tagsets_list.html', tag_sets=tag_sets)
 
 @routes_tags.route('/tag-sets/add', methods=['GET', 'POST'])
@@ -140,12 +138,10 @@ def tag_set_add():
 
     if request.method == 'POST':
         tag_set = TagSet()
-        tag_set.set_name  = request.form['set_name']
-        tag_set.set_alias = request.form['set_alias']
-        tag_list_pos  = request.form['tag_list_pos'].split(',')
-        tag_list_neg  = request.form['tag_list_neg'].split(',')
-        print(tag_list_pos)
-        print(tag_list_neg)
+        tag_set.set_name  = request.form['set_name'].strip()
+        tag_set.set_alias = request.form['set_alias'].strip()
+        tag_list_pos  = [t.strip() for t in request.form['tag_list_pos'].split(',')]
+        tag_list_neg  = [t.strip() for t in request.form['tag_list_neg'].split(',')]
         tag_set.tag_list = tag_set.names_to_tag_list(tag_list_pos, tag_list_neg)
         session.add(tag_set)
         session.commit()
@@ -164,19 +160,14 @@ def tag_set_edit(tag_set_id):
         return redirect(url_for('routes_tags.list_tag_sets'))
 
     if request.method == 'POST':
-        tag_set.set_name  = request.form['set_name']
-        tag_set.set_alias = request.form['set_alias']
-        tag_list_pos  = request.form['tag_list_pos'].split(',')
-        tag_list_neg  = request.form['tag_list_neg'].split(',')
-        print(tag_list_pos)
-        print(tag_list_neg)
+        tag_set.set_name  = request.form['set_name'].strip()
+        tag_set.set_alias = request.form['set_alias'].strip()
+        tag_list_pos  = [t.strip() for t in request.form['tag_list_pos'].split(',')]
+        tag_list_neg  = [t.strip() for t in request.form['tag_list_neg'].split(',')]
         tag_set.tag_list = tag_set.names_to_tag_list(tag_list_pos, tag_list_neg)
         session.commit()
-        # return redirect(url_for('routes_tags.list_tag_sets'))
 
     tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
-
-
 
     out = render_template('crud/tpl_tagset_edit.html', tag_set=tag_set, tags=tags)
     return out

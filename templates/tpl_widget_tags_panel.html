@@ -71,6 +71,7 @@
         const tagset = getTagSetFromUrl(window.location.href)
         const ts = document.getElementById('tag-sets')
         ts.value = tagset
+
         ts.addEventListener('change', setTagSet)
         updateTagSetTags(ts)
 

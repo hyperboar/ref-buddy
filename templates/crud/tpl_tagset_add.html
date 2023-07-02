@@ -24,6 +24,8 @@
     <input type="text" name="tag_list_neg" id="tag_list_neg" value="">
     <br/>
     <button type="submit">Add</button>
+    <br/>
+    <br/>
     <div>
     {% for t in tags %}
         <div style="color: {{ t.color.hex }}">{{ t.id }}: {{ t.tag }}</div>

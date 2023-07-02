@@ -152,11 +152,16 @@ class TagSet(Base):
 
     def names_to_tag_list(self, pos, neg):
         session = object_session(self)
+        auto_close = False
         if session is None:
+            auto_close = True
             session = Session()
+
         tags = [str(t.id) for t in session.query(Tag).filter(Tag.tag.in_(pos)).all()] + \
                ['-'+str(t.id) for t in session.query(Tag).filter(Tag.tag.in_(neg)).all()]
-        session.close()
+
+        if auto_close:
+            session.close()
         return ','.join(tags)
 
     @property
