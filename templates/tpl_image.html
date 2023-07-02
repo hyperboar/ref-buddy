@@ -30,12 +30,7 @@
             <button id="timer-start" class="btn-bg-blend" started="">Start</button>
         </div>
         <div class="row">
-            <span>Study: </span>
-            <select id="study-type" value="{{ image.study_type_id }}" class="btn-bg-blend">
-                {% for st in study_types %}
-                    <option value="{{ st.id }}">{{ st.type }}</option>
-                {% endfor %}
-            </select>
+            <span>Filter: </span>
             <select id="tag-set" value="none" class="btn-bg-blend">
                 <option value="none">None</option>
                 {% for ts in tag_sets %}
@@ -94,14 +89,11 @@
     <div id="pallet-frame" class="vis-hide"></div>
 </div>
 <script>
-    let list = document.getElementById('study-type')
-    list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
-
     window.onload = function()
     {
         console.log('Page Loaded!')
 
-        let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating', 'tag-set')
+        let imgParams = new ImgParams('image-id', 'same-folder', 'time-planned', 'is-fav', 'min-rating', 'tag-set')
 
         imgParams.setParamsFromGET()
 
