@@ -6,7 +6,7 @@ from flask import render_template_string, request, send_file, abort, render_temp
     current_app
 from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
-from models.models_lump import Session, ImageMetadata, Color, ImageColor
+from models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet
 from server_args_helpers import get_arg, Args
 
 routes_image = Blueprint('routes_image', __name__)
@@ -27,7 +27,9 @@ def study_image(image_id):
     if metadata is None:
         abort(404, f'Error: No images found with id "{image_id}"')
 
-    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
+    tag_sets = session.query(TagSet).all()
+
+    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
     session.close()
     return out
 
@@ -49,7 +51,9 @@ def study_random():
     if metadata is None:
         return f'Error: No images found"'
 
-    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tags=[t.tag for t in metadata.tags])
+    tag_sets = session.query(TagSet).all()
+
+    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
 
     session.close()
     return out

@@ -36,6 +36,12 @@
                     <option value="{{ st.id }}">{{ st.type }}</option>
                 {% endfor %}
             </select>
+            <select id="tag-set" value="none" class="btn-bg-blend">
+                <option value="none">None</option>
+                {% for ts in tag_sets %}
+                    <option value="{{ ts.set_alias }}">{{ ts.set_name }} [{{ ts.desc }}]</option>
+                {% endfor %}
+            </select>
             <span class="space"/>
             <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
             <span class="space"/>
@@ -95,7 +101,7 @@
     {
         console.log('Page Loaded!')
 
-        let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating')
+        let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating', 'tag-set')
 
         imgParams.setParamsFromGET()
 
@@ -269,22 +275,22 @@
 
                 case 'KeyQ':
                     break
-                case 'KeyW':
+                case 'KeyT':
                     toggleCssClass(img, contrastGray[1])
                     toggleCssClass(zoom, contrastGray[1])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyE':
+                case 'KeyR':
                     toggleCssClass(img, contrastGray[2])
                     toggleCssClass(zoom, contrastGray[2])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyR':
+                case 'KeyE':
                     toggleCssClass(img, contrastGray[3])
                     toggleCssClass(zoom, contrastGray[3])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyT':
+                case 'KeyW':
                     toggleCssClass(img, contrastGray[4])
                     toggleCssClass(zoom, contrastGray[4])
                     toggleCssClass(bg, contrastGrayBg[0])
