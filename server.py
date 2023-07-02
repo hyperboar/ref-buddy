@@ -3,7 +3,7 @@ from image_metadata_controller import ImageMetadataController as ImageMetadataCt
 from image_metadata_overview import ImageMetadataOverview, OverviewPath
 from Env import Env
 from maintenance import make_database_backup
-from models.models_lump import Session, TagSet, ImageColor, ImageMetadata
+from models.models_lump import Session, ImageColor, ImageMetadata
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_dupes import routes_dupes
 from server_ext_rating import routes_rating
@@ -72,7 +72,10 @@ def view_folder(path_id):
     tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
-    overview = OverviewPath.from_image_metadata(images[0])
+    if len(images) == 0:
+        overview = None
+    else:
+        overview = OverviewPath.from_image_metadata(images[0])
 
     tags_filter = get_tags_filter(session=session)
     tags_editor = get_tags_editor(session=session)
