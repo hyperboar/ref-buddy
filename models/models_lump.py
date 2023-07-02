@@ -150,6 +150,25 @@ class TagSet(Base):
 
         return tags_pos, tags_neg
 
+    def names_to_tag_list(self, pos, neg):
+        session = object_session(self)
+        if session is None:
+            session = Session()
+        tags = [str(t.id) for t in session.query(Tag).filter(Tag.tag.in_(pos)).all()] + \
+               ['-'+str(t.id) for t in session.query(Tag).filter(Tag.tag.in_(neg)).all()]
+        session.close()
+        return ','.join(tags)
+
+    @property
+    def tag_names_pos_str(self):
+        tags, _ = self.get_tags_names()
+        return ', '.join(tags)
+
+    @property
+    def tag_names_neg_str(self):
+        _, tags = self.get_tags_names()
+        return ', '.join(tags)
+
 class Color(Base):
     __tablename__ = 'colors'
 

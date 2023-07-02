@@ -134,8 +134,29 @@ def list_tag_sets():
     tag_sets = session.query(TagSet).all()
     return render_template('crud/tpl_tagsets_list.html', tag_sets=tag_sets)
 
+@routes_tags.route('/tag-sets/add', methods=['GET', 'POST'])
+def tag_set_add():
+    session = Session()
 
-@routes_tags.route('/tag_sets/<int:tag_set_id>/edit', methods=['GET', 'POST'])
+    if request.method == 'POST':
+        tag_set = TagSet()
+        tag_set.set_name  = request.form['set_name']
+        tag_set.set_alias = request.form['set_alias']
+        tag_list_pos  = request.form['tag_list_pos'].split(',')
+        tag_list_neg  = request.form['tag_list_neg'].split(',')
+        print(tag_list_pos)
+        print(tag_list_neg)
+        tag_set.tag_list = tag_set.names_to_tag_list(tag_list_pos, tag_list_neg)
+        session.add(tag_set)
+        session.commit()
+        return redirect(url_for('routes_tags.list_tag_sets'))
+
+    tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
+
+    out = render_template('crud/tpl_tagset_add.html', tags=tags)
+    return out
+
+@routes_tags.route('/tag-sets/<int:tag_set_id>/edit', methods=['GET', 'POST'])
 def tag_set_edit(tag_set_id):
     session = Session()
     tag_set = session.get(TagSet, tag_set_id)
@@ -145,10 +166,19 @@ def tag_set_edit(tag_set_id):
     if request.method == 'POST':
         tag_set.set_name  = request.form['set_name']
         tag_set.set_alias = request.form['set_alias']
-        tag_set.tag_list  = request.form['tag_list']
+        tag_list_pos  = request.form['tag_list_pos'].split(',')
+        tag_list_neg  = request.form['tag_list_neg'].split(',')
+        print(tag_list_pos)
+        print(tag_list_neg)
+        tag_set.tag_list = tag_set.names_to_tag_list(tag_list_pos, tag_list_neg)
         session.commit()
-        return redirect(url_for('routes_tags.list_tag_sets', tag_set_id=tag_set.id))
+        # return redirect(url_for('routes_tags.list_tag_sets'))
 
-    return render_template('crud/tpl_tagset_edit.html', tag_set=tag_set)
+    tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
+
+
+
+    out = render_template('crud/tpl_tagset_edit.html', tag_set=tag_set, tags=tags)
+    return out
 
 # ---- END CRUD TAG SET ----
