@@ -6,6 +6,7 @@ from maintenance import make_database_backup
 from models.models_lump import Session, ImageColor, ImageMetadata
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_dupes import routes_dupes
+from server_ext_folder import routes_folder
 from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
@@ -15,6 +16,7 @@ app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
 
 app.register_blueprint(routes_image)
+app.register_blueprint(routes_folder)
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
 app.register_blueprint(routes_dupes)
@@ -25,7 +27,10 @@ def before_request():
 
 @app.route('/')
 def index():
-    images = ImageMetadataOverview.get_overview()
+    args = request.args
+    hidden = int(args.get('hidden', default='0')) != 0
+
+    images = ImageMetadataOverview.get_overview(hidden)
     return render_template('tpl_index.html', images=images)
 
 @app.route('/favs')
