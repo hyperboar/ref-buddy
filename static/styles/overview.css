@@ -37,6 +37,10 @@ body
     height: 300px; /* Adjust the tile width as needed */
 }
 
+.tile-hidden {
+    border: 2px dashed white;
+}
+
 .tile .bg-thumb {
     display: block;
     width: 100%;
