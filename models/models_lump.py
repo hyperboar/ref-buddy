@@ -31,6 +31,9 @@ class Path(Base):
 
     id = Column(Integer, primary_key=True)
     path = Column(Text, nullable=False, unique=True)
+    preview = Column(Integer, nullable=False, default=0)
+    hidden = Column(Integer, nullable=False, default=0)
+    ord = Column(Integer, nullable=False, default=0)
 
 class StudyType(Base):
     __tablename__ = 'study_types'

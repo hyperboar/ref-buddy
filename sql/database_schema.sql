@@ -20,7 +20,10 @@ CREATE INDEX fn_index ON image_metadata (filename);
 
 CREATE TABLE IF NOT EXISTS paths (
     id INTEGER PRIMARY KEY,
-    path TEXT NOT NULL UNIQUE
+    path TEXT NOT NULL UNIQUE,
+    preview INTEGER DEFAULT 0 NOT NULL,
+    ord INTEGER DEFAULT 0 NOT NULL,
+    hidden  INTEGER DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS study_types (
