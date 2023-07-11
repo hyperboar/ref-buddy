@@ -28,7 +28,10 @@ class ImageMetadataController:
         stype = stype_list[0]
         new_path = dir
 
+
+        auto_commit = False
         if session is None:
+            auto_commit = True
             session = Session()
 
         path_row = session.query(Path).filter(Path.path == new_path).first()
@@ -43,7 +46,11 @@ class ImageMetadataController:
         # print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
         new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file)
         session.add(new_image)
-        session.commit()
+
+        if auto_commit:
+            session.commit()
+        else:
+            session.flush()
 
         return new_image
 

@@ -49,6 +49,7 @@ class ImageMetadataImporter:
             print(f"")
 
         if new_count > 0:
+            session.commit()
             print("")
             print(f"\rAssigning essential tags to new images...", end="")
             assign_folder_tags()
