@@ -1,6 +1,8 @@
+import os
+
 from flask import Flask, request, render_template
 from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
-from image_metadata_overview import ImageMetadataOverview, OverviewPath
+from image_metadata_overview import ImageMetadataOverview
 from Env import Env
 from maintenance import make_database_backup
 from models.models_lump import Session, ImageColor, ImageMetadata
@@ -80,7 +82,8 @@ def view_folder(path_id):
     if len(images) == 0:
         overview = None
     else:
-        overview = OverviewPath.from_image_metadata(images[0])
+        overview = images[0]
+        overview.path_dir = os.path.dirname(overview.path_abs)
 
     tags_filter = get_tags_filter(session=session)
     tags_editor = get_tags_editor(session=session)

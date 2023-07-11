@@ -1,4 +1,5 @@
 from models.models_lump import Session, ImageMetadata, Path
+import os
 
 class ImageMetadataOverview:
     @staticmethod
