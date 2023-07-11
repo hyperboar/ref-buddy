@@ -177,9 +177,20 @@ class ColorPicker
         // switch colors
         Array.from(this.colors).forEach(elem =>
         {
-            const hex = isGs ? this.hexToGrayscale(elem.getAttribute(this.attrHex)) : elem.getAttribute(this.attrHex)
-            elem.style.backgroundColor = hex
-            elem.textContent = hex
+            if (isGs)
+            {
+                const value = this.hexToGrayscale(elem.getAttribute(this.attrHex))
+                console.log(value)
+                const hex = this.grayscaleToHex(value)
+                elem.style.backgroundColor = hex
+                elem.textContent = `${Math.floor((value/255)*100)}% ${hex}`
+            }
+            else
+            {
+                const hex = elem.getAttribute(this.attrHex)
+                elem.style.backgroundColor = hex
+                elem.textContent = hex
+            }
         })
     }
 
@@ -199,8 +210,11 @@ class ColorPicker
         const blue = parseInt(hexColor.substr(4, 2), 16)
 
         // Calculate the grayscale value using the formula
-        const grayscaleValue = Math.round(0.299 * red + 0.587 * green + 0.114 * blue)
+        return Math.round(0.299 * red + 0.587 * green + 0.114 * blue)
+    }
 
+    grayscaleToHex(grayscaleValue)
+    {
         // Convert the grayscale value to a hex color
         return "#" + grayscaleValue.toString(16).padStart(2, "0").repeat(3)
     }
