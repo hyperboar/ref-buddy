@@ -34,6 +34,10 @@
 <div style="height: 20px;"></div>
 
 <div class="top-menu">
+    <button id="fld-cover" class=" btn-bg-blend">Cover</button>
+    <button id="fld_hide" class="btn-bg-blend">Hide</button>
+    <button id="fld_ord_up" class="btn-bg-blend">OrdUp</button>
+    <button id="fld_ord_dn" class="btn-bg-blend">OrdDn</button>
     <button id="rate-up" class="rate-up btn-bg-blend" value="1"></button>
     <button id="rate-dn" class="rate-dn btn-bg-blend" value="-1"></button>
     <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
@@ -106,9 +110,38 @@
         }
     }
 
+    function setFolderCover(e)
+    {
+        if (selection.selectedIds.length !== 1) { return }
+        fetchAndSimpleFeedback(`/set-folder-cover?image-id=${selection.selectedIds[0]}`, e.currentTarget)
+    }
+
+    function hideFolder(e)
+    {
+        if (selection.selectedIds.length !== 1) { return }
+        fetchAndSimpleFeedback(`/toggle-folder-hide?image-id=${selection.selectedIds[0]}`, e.currentTarget)
+    }
+
+    function folderOrdUp(e)
+    {
+        if (selection.selectedIds.length !== 1) { return }
+        fetchAndSimpleFeedback(`/folder-ord-add?image-id=${selection.selectedIds[0]}&rating=1`, e.currentTarget)
+    }
+
+    function folderOrdDown(e)
+    {
+        if (selection.selectedIds.length !== 1) { return }
+        fetchAndSimpleFeedback(`/folder-ord-add?image-id=${selection.selectedIds[0]}&rating=-1`, e.currentTarget)
+    }
+
     document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
     document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
     document.getElementById('tags-filter-btn').addEventListener('click', toggleTagsFilterDisplay)
+
+    document.getElementById('fld-cover').addEventListener('click', setFolderCover)
+    document.getElementById('fld_hide').addEventListener('click', hideFolder)
+    document.getElementById('fld_ord_up').addEventListener('click', folderOrdUp)
+    document.getElementById('fld_ord_dn').addEventListener('click', folderOrdDown)
 
     document.addEventListener('keydown', function(e)
     {

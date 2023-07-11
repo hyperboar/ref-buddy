@@ -25,3 +25,25 @@ document.copyToClipboard = function (content, onSuccess = null, onFail = null)
             console.error('Error copying content:', error)
         });
 }
+
+function fetchAndSimpleFeedback(url, target)
+{
+    target.classList.remove('op-success', 'op-fail')
+    target.classList.add('loading')
+
+    fetch(url)
+        .then(response =>
+        {
+            if (!response.ok) throw new Error('Network response was not ok')
+            target.classList.add('op-success')
+        })
+        .catch(error =>
+        {
+            target.classList.add('op-fail')
+            console.error('There was a problem with the fetch operation:', error)
+        })
+        .finally(() =>
+        {
+            target.classList.remove('loading')
+        });
+}
