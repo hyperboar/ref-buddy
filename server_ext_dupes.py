@@ -5,7 +5,7 @@ from flask import Blueprint, request, render_template_string, render_template
 from PIL import Image
 
 from Env import Env
-from models.models_lump import Session, ImageDupe, ImageMetadata, ImageTag
+from models.models_lump import Session, ImageDupe, ImageMetadata, ImageTag, ImageColor
 from server_args_helpers import get_arg, Args
 
 routes_dupes = Blueprint('routes_dupes', __name__)
@@ -50,7 +50,7 @@ def pick_largest_and_resolve():
             with Image.open(path) as image:
                 im.size = image.size
 
-    images = sorted(images, key=lambda im:(-im.size[0], im.imported_at))
+    images = sorted(images, key=lambda im:(-im.size[0], im.imported_at, im.image_id))
 
     print('Resolve')
     [print(f'{im.image_id}: {im.size[0]}x{im.size[1]} {im.imported_at} -> {im.path}') for im in images]
@@ -62,6 +62,7 @@ def pick_largest_and_resolve():
     # print(f'c {clones}')
 
     try:
+        sync_colors(masters=masters, clones=clones, session=session)
         sync_tags(masters=masters, clones=clones, session=session)
         sync_image_metadata(masters=masters, clones=clones, session=session)
         remove_clones(clones=clones, session=session)
@@ -226,6 +227,33 @@ def sync_tags(clones:[int], masters:[int]=None, session=None):
     #            session.query(ImageTag).filter(ImageTag.image_id == im.image_id).all()
     #     [session.delete(row) for row in rows]
 
+def sync_colors(clones:[int], masters:[int]=None, session=None):
+    auto_commit = False
+    if session is None:
+        auto_commit = True
+        session = Session
+
+    for clone in clones:
+        if masters is None:
+            masters = get_masters([clone], session=session)
+
+        # get tags
+        image_colors = session.query(ImageColor).filter(ImageColor.image_id.in_([clone])).all()
+        colors = []
+        for t in image_colors:
+            if t in colors:
+                continue
+            colors.append(t.tag_id)
+
+        for im in masters:
+            for t in colors:
+                session.merge(ImageColor(image_id=im, color_id=t))
+
+    if auto_commit:
+        session.commit()
+    else:
+        session.flush()
+
 def remove_clones(clones:[int], session=None):
     auto_commit = False
     if session is None:
@@ -237,6 +265,11 @@ def remove_clones(clones:[int], session=None):
     for im in clones:
         # purge tags
         rows = session.query(ImageTag).filter(ImageTag.image_id == im).all()
+        [session.delete(row) for row in rows]
+        remove_rows_count += len(rows)
+
+        # purge colors
+        rows = session.query(ImageColor).filter(ImageTag.image_id == im).all()
         [session.delete(row) for row in rows]
         remove_rows_count += len(rows)
 
@@ -252,6 +285,7 @@ def remove_clones(clones:[int], session=None):
     # remove image_metadata
     rows = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(clones)).all()
     for row in rows:
+        row.filename = "dupe.jpg"
         row.lost = 1
     update_rows_count += len(rows)
 

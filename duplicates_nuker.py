@@ -6,6 +6,8 @@ from datetime import date
 from PIL import Image
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from sqlalchemy import func, and_
+from sqlalchemy.orm import aliased
 
 from Env import Env
 from models.models_lump import Session, ImageMetadata, ImageDupe
@@ -16,7 +18,7 @@ class DupeSearcher:
     def __init__(self):
         self.img_cache = {}
 
-    def search(self, paths):
+    def search_by_grayscale(self, paths):
         count_max = len(paths)
         count = 0
 
@@ -40,7 +42,7 @@ class DupeSearcher:
             time_left = lap_time * ((1.0 - progress) * 100)
 
             # print(f'{lap_time} = {end_time} - {start_time}')
-            similar_images = self.find_similar_images(target_image_path, running_paths, threshold)
+            similar_images = self.find_similar_images_by_grayscale_print(target_image_path, running_paths, threshold)
             target_id = DupeSearcher.id_from_thumb_path(target_image_path)
             print(
                 f"\r{progress * 100:.2f}% ~({time_left:.0f} sec left) Similar Images for {target_id} ({len(similar_images)}):",
@@ -53,7 +55,74 @@ class DupeSearcher:
 
         return dupes
 
-    def find_similar_images(self, target_image_path, image_paths, threshold):
+    def search_by_hash(self):
+        print("Searching for similar image hashes...", end='')
+        dupes = []
+
+        s = Session()
+        duplicates_query = s.query(ImageMetadata.image_hash)\
+            .filter(ImageMetadata.image_hash.isnot(None)) \
+            .filter(ImageMetadata.lost != 0) \
+            .group_by(ImageMetadata.image_hash)\
+            .having(func.count(ImageMetadata.image_hash) > 1)
+
+        # Retrieve the duplicate hashes
+        duplicate_hashes = [row[0] for row in duplicates_query]
+
+        similar_images = [s.query(ImageMetadata.image_id).filter(ImageMetadata.image_hash == hash).order_by(ImageMetadata.imported_at).all() for hash in duplicate_hashes]
+
+        # print(
+        #     f"\r{progress * 100:.2f}% ~({time_left:.0f} sec left) Similar Images for {target_id} ({len(similar_images)}):",
+        #     end='')
+        for ids in similar_images:
+            # print(f'{target_id};{DupeSearcher.id_from_thumb_path(image_path)};')
+            [dupes.append([ids[0][0], idx[0]]) for idx in ids[1:]]
+
+        print("\rSearching for similar image hashes... Done")
+        return dupes
+
+    def search_by_path_and_filename(self):
+        print("Searching for similar path + image name...", end='')
+        dupes = []
+
+        s = Session()
+        image1 = aliased(ImageMetadata)
+        image2 = aliased(ImageMetadata)
+
+        duplicate_entries = s.query(image1, image2) \
+            .filter(and_(
+                image1.filename == image2.filename,
+                image1.path_id == image2.path_id,
+                image1.image_id != image2.image_id
+            )) \
+            .filter(ImageMetadata.lost != 0) \
+            .all()
+
+        similar_images = []
+        for im in duplicate_entries:
+            similar_images.append(
+                s.query(ImageMetadata.image_id) \
+                .filter(and_(
+                    ImageMetadata.filename == im[0].filename,
+                    ImageMetadata.path_id == im[0].path_id)) \
+                .order_by(ImageMetadata.imported_at).all())
+
+
+        # similar_images = [
+        #     s.query(ImageMetadata.image_id).filter(ImageMetadata.image_hash == hash).order_by(ImageMetadata.imported_at)
+        #     for hash in duplicate_hashes]
+        #
+        # # print(
+        # #     f"\r{progress * 100:.2f}% ~({time_left:.0f} sec left) Similar Images for {target_id} ({len(similar_images)}):",
+        # #     end='')
+        for ids in similar_images:
+            # print(f'{target_id};{DupeSearcher.id_from_thumb_path(image_path)};')
+            [dupes.append([ids[0][0], idx[0]]) for idx in ids[1:]]
+
+        print("\rSearching for similar path + image name... Done")
+        return dupes
+
+    def find_similar_images_by_grayscale_print(self, target_image_path, image_paths, threshold):
         """Finds similar images to the target image from a list of image paths."""
         target_image = Image.open(target_image_path)
 
@@ -133,13 +202,63 @@ class DupeSearcher:
         print(f"Data written to {filename} successfully.")
 
 
-if __name__ == '__main__':
+def search_by_similar_filename_and_record():
+    search = DupeSearcher()
+    dupes = search.search_by_path_and_filename()
+
+    print(f"\nFound ({len(dupes)}) duplicates")
+    s = Session()
+    for pair in dupes:
+        s.merge(ImageDupe(image1=pair[0], image2=pair[1]))
+    s.commit()
+    s.close()
+
+def search_by_hash_and_record():
+    search = DupeSearcher()
+    dupes = search.search_by_hash()
+
+    print(f"\nFound ({len(dupes)}) duplicates")
+    s = Session()
+    for pair in dupes:
+        s.merge(ImageDupe(image1=pair[0], image2=pair[1]))
+    s.commit()
+    s.close()
+
+
+def search_by_grayscale_print_and_record():
+    s = Session()
+    imgs_pron = s.query(ImageMetadata)\
+        .filter(ImageMetadata.study_type_id == 2)\
+        .filter(ImageMetadata.lost != 0) \
+        .order_by(ImageMetadata.imported_at.desc()).all()
+    imgs_art = s.query(ImageMetadata)\
+        .filter(ImageMetadata.study_type_id == 3) \
+        .filter(ImageMetadata.lost != 0) \
+        .order_by(ImageMetadata.imported_at.desc()).all()
+    imgs_bits = s.query(ImageMetadata)\
+        .filter(ImageMetadata.study_type_id == 4) \
+        .filter(ImageMetadata.lost != 0) \
+        .order_by(ImageMetadata.imported_at.desc()).all()
+    imgs = imgs_pron + imgs_bits + imgs_art
+    imgs = DupeSearcher.remove_array_dups(imgs)
+    count_max = len(imgs)
+
+    print(f'Searching for duplicates in {count_max} files! Let\'s goooooooooo!')
+
+    paths = [os.path.join(Env.THUMB_PATH, str(im.image_id)+'.jpg') for im in imgs]
+
+    [print(p) for p in paths]
+
+    search = DupeSearcher()
+
+    dupes = search.search_by_grayscale(paths)
+
+    search.write_to_csv(Env.TMP_PATH, dupes)
+
+    print(f"\nFound ({len(dupes)}) duplicates")
 
     files = [os.path.join(Env.TMP_PATH, f) for f in os.listdir(Env.TMP_PATH) if os.path.isfile(os.path.join(Env.TMP_PATH, f))]
-
-
     [print(f) for f in files]
-
     with open(files[0], 'r', newline='') as file:
         reader = csv.reader(file)
         ids = [list(map(lambda id: int(id), line)) for line in reader]
@@ -152,33 +271,6 @@ if __name__ == '__main__':
     s.commit()
     s.close()
     pass
-    # # search
-    # s = Session()
-    # imgs_pron = s.query(ImageMetadata)\
-    #     .filter(ImageMetadata.study_type_id == 2)\
-    #     .order_by(ImageMetadata.imported_at.desc()).all()
-    # imgs_art = s.query(ImageMetadata)\
-    #     .filter(ImageMetadata.study_type_id == 3)\
-    #     .order_by(ImageMetadata.imported_at.desc()).all()
-    # imgs_bits = s.query(ImageMetadata)\
-    #     .filter(ImageMetadata.study_type_id == 4)\
-    #     .order_by(ImageMetadata.imported_at.desc()).all()
-    # imgs = imgs_pron + imgs_bits + imgs_art
-    # imgs = DupeSearcher.remove_array_dups(imgs)
-    # count_max = len(imgs)
-    #
-    # print(f'Searching for duplicates in {count_max} files! Let\'s goooooooooo!')
-    #
-    # paths = [os.path.join(Env.THUMB_PATH, str(im.image_id)+'.jpg') for im in imgs]
-    #
-    # # [print(p) for p in paths]
-    #
-    # search = DupeSearcher()
-    #
-    # dupes = search.search(paths)
-    #
-    # search.write_to_csv(Env.TMP_PATH, dupes)
-    #
-    # print(f"\nFound ({len(dupes)}) duplicates:")
-    # for d in dupes:
-    #     print(f'{d[0]};{d[1]};')
+
+if __name__ == '__main__':
+    search_by_similar_filename_and_record()
