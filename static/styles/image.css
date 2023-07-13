@@ -204,20 +204,6 @@ span #time-current {
     background-image: url("/static/fav_on.png");
 }
 
-.popup {
-  position: absolute;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  padding: 10px;
-  display: none;
-}
-
-.popup-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
 #copyButton {
   margin-left: 10px;
 }

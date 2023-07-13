@@ -36,6 +36,14 @@ def view_tags():
     session.close()
     return out
 
+@routes_tags.route('/embed-panel-tag-editor')
+def embed_panel_tag_editor():
+    session = Session()
+    out = get_tags_editor(session=session)
+    session.close()
+    return out
+
+
 @routes_tags.route('/add-image-tags')
 def add_image_tag():
     tags, _ = get_arg(request.args, Args.tags)

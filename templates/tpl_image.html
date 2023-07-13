@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/static/styles/image.css">
     <script type="text/javascript" src="/static/js/main.js"></script>
     <script type="text/javascript" src="/static/js/img_params.js"></script>
+    <script type="text/javascript" src="/static/js/image_selection.js"></script>
     <script type="text/javascript" src="/static/js/rating.js"></script>
     <script type="text/javascript" src="/static/js/image_color_picker.js"></script>
     <script type="text/javascript" src="/static/js/study_timer.js"></script>
@@ -41,6 +42,7 @@
             <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
             <span class="space"/>
             <button id="info-button" class="btn-bg-blend">info</button>
+            <button id="tags-button" class="btn-bg-blend">T</button>
             <button id="pallet-button" class="btn-bg-blend">plt</button>
         </div>
         <div class="row">
@@ -63,20 +65,6 @@
             <button id="prev" class="btn-bg-blend">Prev</button>
             <button id="next" class="btn-bg-blend">Next</button>
         </div>
-
-        <div id="image-info-popup" class="popup">
-            <div class="popup-row">
-                <span id="image-path">{{ image.path_abs }}</span>
-                <button id="image-path-copy-btn">Copy</button>
-            </div>
-            <div class="popup-row">
-                <ul id="tags">
-                    {% for tag in tags %}
-                        <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
     </div>
 
     <div class="pallet-container vis-hide">
@@ -88,10 +76,35 @@
     </div>
     <div id="pallet-frame" class="vis-hide"></div>
 </div>
+<div id="image-info-popup" class="popup vis-hide">
+    <div class="popup-row">
+        <span id="image-path">{{ image.path_abs }}</span>
+        <button id="image-path-copy-btn">Copy</button>
+    </div>
+    <div class="popup-row">
+        <ul id="tags">
+            {% for tag in tags %}
+                <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div id="tags-popup-container" class="vis-hide"></div>
+<!-- Stubs for some components -->
+<div style="display: none">
+    <button id="stub-select-btn"></button>
+    <div class="stub-gallery"><div class="stub-thumb" data-id="{{ image.image_id }}"></div></div>
+    <div class="tags-popup-background"></div>
+</div>
 <script>
-    window.onload = function()
+    let selection = null
+
+    document.addEventListener('DOMContentLoaded', () =>
     {
         console.log('Page Loaded!')
+
+        selection = new ImageSelection('stub-select-btn', '.stub-gallery', '.stub-thumb')
+        selection.selectedIds = [{{ image.image_id }}]
 
         let imgParams = new ImgParams('image-id', 'same-folder', 'time-planned', 'is-fav', 'min-rating', 'tag-set')
 
@@ -407,21 +420,69 @@
         // popup
 
         // Get references to the button and popup elements
-        const button = document.getElementById('info-button')
-        const popup = document.getElementById('image-info-popup')
+        const infoBtn = document.getElementById('info-button')
+        const infoPopup = document.getElementById('image-info-popup')
 
         // Show the popup when the button is clicked
-        button.addEventListener('click', () => {
-            popup.style.display = 'block'
+        infoBtn.addEventListener('click', () =>
+        {
+            infoPopup.classList.toggle('vis-hide')
         })
 
         // Hide the popup when clicking outside of it
-        document.addEventListener('click', (event) => {
-            if (!popup.contains(event.target) && event.target !== button) {
-                popup.style.display = 'none'
+        document.addEventListener('click', (event) =>
+        {
+            if (!infoPopup.contains(event.target) && event.target !== infoBtn)
+            {
+                infoPopup.classList.add('vis-hide')
             }
         })
 
+        // tags
+        const tagBtn = document.getElementById('tags-button')
+        const tagsPopupContainer = document.getElementById('tags-popup-container')
+
+        tagBtn.addEventListener('click', (e) =>
+        {
+            // loading
+            if (tagsPopupContainer.textContent === '')
+            {
+                tagBtn.classList.add('loading')
+                fetch('{{ url_for('routes_tags.embed_panel_tag_editor') }}')
+                    .then((r) =>
+                    {
+                        if (!r.ok) { throw new Error('Something went wrong... not ok') }
+                        return r.text()
+                    })
+                    .then((html) =>
+                    {
+                        tagsPopupContainer.innerHTML = html
+                        tagsPopupContainer.querySelector('.tags-popup').style.display = ''
+
+                        const code = tagsPopupContainer.querySelector('script')
+                        const text = code.textContent
+                        code.remove()
+
+                        const jsElem = document.createElement('script')
+                        tagsPopupContainer.appendChild(jsElem)
+                        jsElem.textContent = text
+                    })
+                    .catch((err) =>
+                    {
+                        console.log(err)
+                    })
+                    .finally(() =>
+                    {
+                        tagsPopupContainer.classList.remove('vis-hide')
+                        tagBtn.classList.remove('loading')
+                    })
+            }
+
+            tagsPopupContainer.classList.toggle('vis-hide')
+        })
+
+
+        // palette
         document.getElementById('pallet-button').addEventListener('click', (e) => document.querySelector('.pallet-container').classList.toggle('vis-hide'))
 
         // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
@@ -435,7 +496,7 @@
                 copyButton.textContent = 'Copied!'
             })
         })
-    }
+    })
 </script>
 </body>
 </html>
