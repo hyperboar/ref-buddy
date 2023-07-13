@@ -35,7 +35,7 @@ def get_tags_filter(tags=None, session=None):
     tagsets = session.query(TagSet).all()
 
     tags = sorted(tags, key=lambda t: (t.color_id, t.tag))
-    return Markup(render_template('tpl_widget_tags_panel.html', tags=tags, tagsets=tagsets))
+    return Markup(render_template('tpl_widget_tags_filter_panel.html', tags=tags, tagsets=tagsets))
 
 if __name__ == '__main__':
     print(__name__)
