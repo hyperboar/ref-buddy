@@ -264,6 +264,9 @@
             const zoom = document.querySelector('.magnification')
             const bg = document.querySelector('.modal-bg')
 
+            let idx = parseInt(keycode.replace('Numpad', '').replace('Digit', ''))
+            // hit 0, bring default cursor back
+
             const contrastGray = [
                 'modal-img-gray',
                 'modal-img-gray-contrast-150',
@@ -276,26 +279,31 @@
             disableAllBut(img, '', contrastGray)
             disableAllBut(zoom, '', contrastGray)
             disableAllBut(bg, '', contrastGrayBg)
-            switch (keycode) {
+            switch (idx) {
 
-                case 'KeyQ':
+                case 0:
                     break
-                case 'KeyT':
+                case 5:
+                    toggleCssClass(img, contrastGray[0])
+                    toggleCssClass(zoom, contrastGray[0])
+                    toggleCssClass(bg, contrastGrayBg[0])
+                    break
+                case 4:
                     toggleCssClass(img, contrastGray[1])
                     toggleCssClass(zoom, contrastGray[1])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyR':
+                case 3:
                     toggleCssClass(img, contrastGray[2])
                     toggleCssClass(zoom, contrastGray[2])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyE':
+                case 2:
                     toggleCssClass(img, contrastGray[3])
                     toggleCssClass(zoom, contrastGray[3])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyW':
+                case 1:
                     toggleCssClass(img, contrastGray[4])
                     toggleCssClass(zoom, contrastGray[4])
                     toggleCssClass(bg, contrastGrayBg[0])
@@ -306,17 +314,21 @@
         // hotkeys
         document.addEventListener('keydown', function(e)
         {
-            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
+            if (e.altKey || e.ctrlKey || e.metaKey) { return }
+            if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
+                             { toggleCursor(e.code); e.preventDefault(); return } // cursors
+
+            if (e.shiftKey) { return }
+            if (e.code.includes('Numpad') || e.code.includes('Digit'))
+                             { toggleContrast(e.code); e.preventDefault(); } // g
             if (e.code === 'ArrowLeft')  { onClickPrev(); e.preventDefault(); } // <-
             if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
             if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
             if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
             if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
-            if (['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT'].includes(e.code))
-                                         { toggleContrast(e.code); e.preventDefault(); } // g
+
             if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
-            if (e.code.includes('Numpad') || e.code.includes('Digit'))
-                                         { toggleCursor(e.code); e.preventDefault(); } // numbers
+
         })
 
 
