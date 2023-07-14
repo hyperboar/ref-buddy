@@ -1,0 +1,17 @@
+<div id="boards-popup" class="popup vis-hide">
+    <select id="boards">
+        {% for b in boards %}
+        <option value="{{ b.id }}">{{ b.title }}</option>
+        {% endfor %}
+    </select>
+    <button id="send-btn">Sent to board</button>
+</div>
+<script>
+    function sendSelectionToBoard(board_id)
+    {
+        if (selection == null) { return }
+
+        const ids = selection.selectedIds.join(',')
+        fetch('{{ url_for() }}')
+    }
+</script>

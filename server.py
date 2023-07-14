@@ -7,6 +7,7 @@ from Env import Env
 from maintenance import make_database_backup
 from models.models_lump import Session, ImageColor, ImageMetadata
 from server_args_helpers import get_arg, get_current_paging, Args
+from server_ext_board import routes_board
 from server_ext_dupes import routes_dupes
 from server_ext_folder import routes_folder
 from server_ext_rating import routes_rating
@@ -22,6 +23,7 @@ app.register_blueprint(routes_folder)
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
 app.register_blueprint(routes_dupes)
+app.register_blueprint(routes_board)
 
 @app.before_request
 def before_request():

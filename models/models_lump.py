@@ -216,6 +216,23 @@ class ImageDupe(Base):
     resolved = Column(Integer, name='r', default=0)
     found_at = Column(MyTIMESTAMP, default=datetime.now)
 
+class Board(Base):
+    __tablename__ = 'boards'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(Text)
+
+class BoardImage(Base):
+    __tablename__ = 'board_images'
+
+    board_id = Column(Integer, ForeignKey('boards.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+
+    tr = Column(Text, default='{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}')
+
+    board = relationship('Board', backref='board_images')
+    image = relationship('ImageMetadata', backref='board_images')
+
 # Create the tables
 # Base.metadata.create_all(engine, checkfirst=True)
 

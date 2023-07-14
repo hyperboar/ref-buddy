@@ -86,6 +86,22 @@ CREATE TABLE IF NOT EXISTS image_colors (
     PRIMARY KEY (image_id, color_id)
 );
 
+CREATE TABLE IF NOT EXISTS boards (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    tr TEXT DEFAULT '{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}' -- json transform
+);
+
+CREATE TABLE IF NOT EXISTS board_images (
+    board_id INTEGER,
+    image_id INTEGER,
+    tr TEXT DEFAULT '{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}', -- json transform
+
+    PRIMARY KEY (board_id, image_id),
+    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (board_id) REFERENCES boards(id)
+);
+
 INSERT INTO colors (id, color_name) VALUES (1, 'default');
 
 INSERT INTO tags (id, tag) VALUES (1, 'futanari');

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <link rel="stylesheet" href="/static/styles/board.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
+    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
+    <title>{{ board.title }}</title>
+</head>
+<body>
+<div id="board" class="board">
+</div>
+<script>
+
+    let boardImages = {}
+
+    // Fetch image data from the database
+    function fetchImageData()
+    {
+        // Implement your logic to fetch image data from the database
+        // You can use AJAX, Fetch API, or any other method to make an HTTP request
+        // and retrieve the image paths and positions from the ImageMetadata table
+        // Return a promise that resolves with the image data
+
+        return fetch('{{ url_for("routes_board.get_board_images", b_id=board.id) }}').then(r =>
+            {
+                if (!r.ok) { throw new Error("Something went wrong, " + r.statusText) }
+                return r.json()
+            })
+            .catch(err =>
+            {
+                console.log(err)
+            })
+    }
+
+    // Save image position to the database
+    function saveImageTransform(imageData)
+    {
+        const image = document.querySelector(`.image[data-id="${imageData.image_id}"]`)
+        const strTr = JSON.stringify(imageData.tr)
+
+        image.classList.remove('op-success', 'op-fail')
+        return fetch(`{{ url_for('routes_board.set_board_image_transform') }}?b-id={{ board.id }}&image-id=${imageData.image_id}&tr=${strTr}`)
+            .then(r =>
+            {
+                if (!r.ok) { throw new Error("Transform not saved") }
+            })
+            .catch(err =>
+            {
+                image.classList.add('op-fail')
+                console.log(err)
+            })
+    }
+
+    function renderImage(data)
+    {
+        const image = new Image()
+        image.src = data.path
+        image.onload = () =>
+        {
+            image.id = `image-${data.image_id}`
+            image.setAttribute('data-id', data.image_id)
+            image.classList.add('draggable', 'image')
+            image.style.left = `${data.tr.tx}px`
+            image.style.top = `${data.tr.ty}px`
+            image.style.transform = `scale(${data.tr.s})`
+
+            // Add event listeners for dragging and scaling
+            addDragListeners(image)
+            addScaleListeners(image)
+
+            document.getElementById("board").appendChild(image)
+        }
+    }
+
+    // Add drag listeners to an image
+    function addDragListeners(image)
+    {
+        let offsetX, offsetY
+
+        image.addEventListener("mousedown", startDrag)
+        image.addEventListener("touchstart", startDrag, {passive: false})
+
+        function startDrag(event)
+        {
+            event.preventDefault()
+
+            if (event.type === "touchstart")
+            {
+                offsetX = event.touches[0].clientX - image.offsetLeft
+                offsetY = event.touches[0].clientY - image.offsetTop
+                window.addEventListener("touchmove", dragImage, {passive: false})
+                window.addEventListener("touchend", stopDrag)
+            }
+            else
+            {
+                offsetX = event.clientX - image.offsetLeft
+                offsetY = event.clientY - image.offsetTop
+                window.addEventListener("mousemove", dragImage)
+                window.addEventListener("mouseup", stopDrag)
+            }
+        }
+
+        function dragImage(event)
+        {
+            event.preventDefault()
+
+            if (event.type === "touchmove")
+            {
+                image.style.left = `${event.touches[0].clientX - offsetX}px`
+                image.style.top = `${event.touches[0].clientY - offsetY}px`
+            }
+            else
+            {
+                image.style.left = `${event.clientX - offsetX}px`
+                image.style.top = `${event.clientY - offsetY}px`
+            }
+        }
+
+        function stopDrag()
+        {
+            if (event.type === "touchend") {
+                window.removeEventListener("touchmove", dragImage)
+                window.removeEventListener("touchend", stopDrag)
+            } else {
+                window.removeEventListener("mousemove", dragImage)
+                window.removeEventListener("mouseup", stopDrag)
+            }
+
+            const imageId =  parseInt(image.getAttribute('data-id'))
+            const data = boardImages[imageId]
+            data.tr.tx = parseInt(image.style.left)
+            data.tr.ty = parseInt(image.style.top)
+
+            saveImageTransform(data)
+        }
+    }
+
+    // Add scale listeners to an image
+    function addScaleListeners(image)
+    {
+        const imageId = parseInt(image.getAttribute('data-id'))
+        let scale = boardImages[imageId].tr.s
+        let startDistance, startScale
+
+        image.addEventListener("wheel", zoomImage, {passive: false})
+        image.addEventListener("touchstart", startScaleGesture, {passive: false})
+        image.addEventListener("touchmove", scaleImage, {passive: false})
+
+        function zoomImage(event)
+        {
+            event.preventDefault()
+
+            const zoomSpeed = 0.1
+            const deltaY = event.deltaY || event.wheelDelta
+
+            if (deltaY < 0)
+            {
+                scale = Math.min(scale + zoomSpeed, 10)
+            }
+            else
+            {
+                scale -= zoomSpeed
+                scale = Math.max(scale, 0.1) // Minimum scale limit
+            }
+
+            image.style.transform = `scale(${scale})`
+
+            const imageId = parseInt(image.getAttribute('data-id'))
+            const data = boardImages[imageId]
+            data.tr.tx = parseInt(image.style.left)
+            data.tr.ty = parseInt(image.style.top)
+            data.tr.s  = scale
+            saveImageTransform(data)
+        }
+
+        function startScaleGesture(event)
+        {
+            if (event.touches.length < 2) { return }
+
+            const touch1 = event.touches[0]
+            const touch2 = event.touches[1]
+
+            const dx = touch1.clientX - touch2.clientX
+            const dy = touch1.clientY - touch2.clientY
+            startDistance = Math.hypot(dx, dy)
+            startScale = scale
+        }
+
+        function scaleImage(event)
+        {
+            if (event.touches.length < 2) { return }
+
+            const touch1 = event.touches[0]
+            const touch2 = event.touches[1]
+
+            const dx = touch1.clientX - touch2.clientX
+            const dy = touch1.clientY - touch2.clientY
+            const distance = Math.hypot(dx, dy)
+
+            scale = (distance / startDistance) * startScale
+            scale = Math.max(scale, 0.1) // Min scale limit
+            scale = Math.min(scale, 10) // Max scale limit
+
+            image.style.transform = `scale(${scale})`
+
+            const imageId = parseInt(image.getAttribute('data-id'))
+            const data = boardImages[imageId]
+            data.tr.tx = parseInt(image.style.left)
+            data.tr.ty = parseInt(image.style.top)
+            data.tr.s  = scale
+
+            saveImageTransform(data)
+        }
+    }
+
+    // Initialize the board
+    function initializeBoard()
+    {
+        // Fetch image data from the database
+        fetchImageData().then(imageData =>
+        {
+            console.log(imageData)
+            // Render images on the board
+            imageData.images.forEach(data =>
+            {
+                boardImages[data.image_id] = data
+                renderImage(data)
+            })
+        })
+    }
+
+    // Initialize the board when the page loads
+    document.addEventListener("DOMContentLoaded", initializeBoard)
+</script>
+</body>
+</html>
