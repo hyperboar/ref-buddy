@@ -40,6 +40,7 @@
     <button id="fld_ord_dn" class="btn-bg-blend">OrdDn</button>
     <button id="rate-up" class="rate-up btn-bg-blend" value="1"></button>
     <button id="rate-dn" class="rate-dn btn-bg-blend" value="-1"></button>
+    <button id="board-show-btn" class="btn-bg-blend">Board</button>
     <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
     <button id="tags-filter-btn" class="btn-bg-blend">Filter tags</button>
     <button id="tags-open-btn" class="btn-bg-blend">Edit tags</button>
@@ -48,6 +49,7 @@
 
 <div class="tags-popup-background" style="display: none;"></div>
 {{ tags_editor|default('') }}
+<div id="board-popup-container" class="vis-hide"></div>
 
 <script>
     let rating = null
@@ -78,6 +80,18 @@
         }
 
         selection = new ImageSelection('toggle-selection-mode-btn', '.gallery', '.thumbnail')
+
+
+        // boards
+        simpleShowLoadableWidget(
+            '{{ url_for('routes_board.widget_get_boards_all') }}',
+            '#board-show-btn',
+            '#board-popup-container',
+            (container) =>
+            {
+                container.querySelector('.popup').classList.remove('vis-hide')
+            })
+
     }, false)
 
     // fetch tags button

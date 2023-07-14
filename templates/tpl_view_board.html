@@ -9,6 +9,9 @@
     <title>{{ board.title }}</title>
 </head>
 <body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>{{ board.title }}</h1>
+</div>
 <div id="board" class="board">
 </div>
 <script>
@@ -69,6 +72,7 @@
             // Add event listeners for dragging and scaling
             addDragListeners(image)
             addScaleListeners(image)
+            addRemoveListener(image)
 
             document.getElementById("board").appendChild(image)
         }
@@ -215,6 +219,33 @@
         }
     }
 
+    function addRemoveListener(image)
+    {
+        image.addEventListener('click', (e) =>
+        {
+            if (!isX) { return }
+
+            const image_id = image.getAttribute('data-id')
+
+            image.classList.remove('op-fail')
+            image.classList.add('loading')
+            fetch(`{{ url_for('routes_board.remove_images_from_board') }}?b-id={{ board.id }}&image-id=${image_id}`)
+                .then(r =>
+                {
+                    if (!r.ok) { throw new Error("Image not removed") }
+                    image.classList.add('vis-hide')
+
+                    const imageClone = image.cloneNode(true)
+                    image.parentNode.replaceChild(imageClone, image)
+                })
+                .catch(err =>
+                {
+                    image.classList.add('op-fail')
+                    console.log(err)
+                })
+        })
+    }
+
     // Initialize the board
     function initializeBoard()
     {
@@ -233,6 +264,24 @@
 
     // Initialize the board when the page loads
     document.addEventListener("DOMContentLoaded", initializeBoard)
+
+
+    // hotkeys
+    let isX = false
+
+    document.addEventListener('keydown', (e) =>
+    {
+        isX = e.code === 'KeyX'
+    })
+    document.addEventListener('keyup', (e) =>
+    {
+        isX = !(e.code === 'KeyX')
+    })
+
+    // end hotkeys
+
+
+
 </script>
 </body>
 </html>

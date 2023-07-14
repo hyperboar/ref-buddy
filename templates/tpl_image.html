@@ -43,6 +43,7 @@
             <span class="space"/>
             <button id="info-button" class="btn-bg-blend">info</button>
             <button id="tags-button" class="btn-bg-blend">T</button>
+            <button id="board-button" class="btn-bg-blend">B</button>
             <button id="pallet-button" class="btn-bg-blend">plt</button>
         </div>
         <div class="row">
@@ -90,6 +91,7 @@
     </div>
 </div>
 <div id="tags-popup-container" class="vis-hide"></div>
+<div id="board-popup-container" class="vis-hide"></div>
 <!-- Stubs for some components -->
 <div style="display: none">
     <button id="stub-select-btn"></button>
@@ -451,48 +453,24 @@
         })
 
         // tags
-        const tagBtn = document.getElementById('tags-button')
-        const tagsPopupContainer = document.getElementById('tags-popup-container')
-
-        tagBtn.addEventListener('click', (e) =>
-        {
-            // loading
-            if (tagsPopupContainer.textContent === '')
+        simpleShowLoadableWidget(
+            '{{ url_for('routes_tags.embed_panel_tag_editor') }}',
+            '#tags-button',
+            '#tags-popup-container',
+            (container) =>
             {
-                tagBtn.classList.add('loading')
-                fetch('{{ url_for('routes_tags.embed_panel_tag_editor') }}')
-                    .then((r) =>
-                    {
-                        if (!r.ok) { throw new Error('Something went wrong... not ok') }
-                        return r.text()
-                    })
-                    .then((html) =>
-                    {
-                        tagsPopupContainer.innerHTML = html
-                        tagsPopupContainer.querySelector('.tags-popup').style.display = ''
+                container.querySelector('.tags-popup').style.display = ''
+            })
 
-                        const code = tagsPopupContainer.querySelector('script')
-                        const text = code.textContent
-                        code.remove()
-
-                        const jsElem = document.createElement('script')
-                        tagsPopupContainer.appendChild(jsElem)
-                        jsElem.textContent = text
-                    })
-                    .catch((err) =>
-                    {
-                        console.log(err)
-                    })
-                    .finally(() =>
-                    {
-                        tagsPopupContainer.classList.remove('vis-hide')
-                        tagBtn.classList.remove('loading')
-                    })
-            }
-
-            tagsPopupContainer.classList.toggle('vis-hide')
-        })
-
+        // boards
+        simpleShowLoadableWidget(
+            '{{ url_for('routes_board.widget_get_boards_all') }}',
+            '#board-button',
+            '#board-popup-container',
+            (container) =>
+            {
+                container.querySelector('.popup').classList.remove('vis-hide')
+            })
 
         // palette
         document.getElementById('pallet-button').addEventListener('click', (e) => document.querySelector('.pallet-container').classList.toggle('vis-hide'))

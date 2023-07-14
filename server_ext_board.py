@@ -48,10 +48,43 @@ def set_board_image_transform():
 
     session = Session()
     im = session.query(BoardImage).filter(BoardImage.image_id == image_id, BoardImage.board_id == b_id).first()
+    if im is None:
+        abort(404, f'Image "{image_id}" is not on board "{b_id}"')
+
     im.tr = transform.replace('"', '')
     session.commit()
-    # session.rollback()
     session.close()
+    return 'ok'
+
+@routes_board.route('/board/add-images')
+def add_images_to_board():
+    image_ids = get_arg(request.args, Args.mult_image_ids)
+    b_id = int(request.args.get('b-id', default='-1'))
+
+    if len(image_ids) == 0 or b_id == -1:
+        abort(404, "Something went wrong")
+
+    session = Session()
+    for im in image_ids:
+        session.merge(BoardImage(image_id=im, board_id=b_id))
+
+    session.commit()
+    session.close()
+    return 'ok'
+
+@routes_board.route('/board/del-images')
+def remove_images_from_board():
+    image_ids = get_arg(request.args, Args.mult_image_ids)
+    b_id = int(request.args.get('b-id', default='-1'))
+
+    if len(image_ids) == 0 or b_id == -1:
+        abort(404, "Something went wrong")
+
+    session = Session()
+    [session.delete(bim) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id, BoardImage.image_id.in_(image_ids))]
+    session.commit()
+    session.close()
+
     return 'ok'
 
 @routes_board.route('/widget/get-boards-all')
