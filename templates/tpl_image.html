@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/static/styles/image.css">
     <script type="text/javascript" src="/static/js/main.js"></script>
     <script type="text/javascript" src="/static/js/img_params.js"></script>
+    <script type="text/javascript" src="/static/js/image_selection.js"></script>
     <script type="text/javascript" src="/static/js/rating.js"></script>
     <script type="text/javascript" src="/static/js/image_color_picker.js"></script>
     <script type="text/javascript" src="/static/js/study_timer.js"></script>
@@ -30,16 +31,19 @@
             <button id="timer-start" class="btn-bg-blend" started="">Start</button>
         </div>
         <div class="row">
-            <span>Study: </span>
-            <select id="study-type" value="{{ image.study_type_id }}" class="btn-bg-blend">
-                {% for st in study_types %}
-                    <option value="{{ st.id }}">{{ st.type }}</option>
+            <span>Filter: </span>
+            <select id="tag-set" value="none" class="btn-bg-blend">
+                <option value="none">None</option>
+                {% for ts in tag_sets %}
+                    <option value="{{ ts.set_alias }}">{{ ts.set_name }} [{{ ts.desc }}]</option>
                 {% endfor %}
             </select>
             <span class="space"/>
             <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
             <span class="space"/>
             <button id="info-button" class="btn-bg-blend">info</button>
+            <button id="tags-button" class="btn-bg-blend">T</button>
+            <button id="board-button" class="btn-bg-blend">B</button>
             <button id="pallet-button" class="btn-bg-blend">plt</button>
         </div>
         <div class="row">
@@ -62,20 +66,6 @@
             <button id="prev" class="btn-bg-blend">Prev</button>
             <button id="next" class="btn-bg-blend">Next</button>
         </div>
-
-        <div id="image-info-popup" class="popup">
-            <div class="popup-row">
-                <span id="image-path">{{ image.path_abs }}</span>
-                <button id="image-path-copy-btn">Copy</button>
-            </div>
-            <div class="popup-row">
-                <ul id="tags">
-                    {% for tag in tags %}
-                        <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
     </div>
 
     <div class="pallet-container vis-hide">
@@ -87,15 +77,38 @@
     </div>
     <div id="pallet-frame" class="vis-hide"></div>
 </div>
+<div id="image-info-popup" class="popup vis-hide">
+    <div class="popup-row">
+        <span id="image-path">{{ image.path_abs }}</span>
+        <button id="image-path-copy-btn">Copy</button>
+    </div>
+    <div class="popup-row">
+        <ul id="tags">
+            {% for tag in tags %}
+                <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div id="tags-popup-container" class="vis-hide"></div>
+<div id="board-popup-container" class="vis-hide"></div>
+<!-- Stubs for some components -->
+<div style="display: none">
+    <button id="stub-select-btn"></button>
+    <div class="stub-gallery"><div class="stub-thumb" data-id="{{ image.image_id }}"></div></div>
+    <div class="tags-popup-background"></div>
+</div>
 <script>
-    let list = document.getElementById('study-type')
-    list.options[parseInt(list.getAttribute('value')) - 1].setAttribute('selected', 'selected')
+    let selection = null
 
-    window.onload = function()
+    document.addEventListener('DOMContentLoaded', () =>
     {
         console.log('Page Loaded!')
 
-        let imgParams = new ImgParams('image-id', 'study-type', 'same-folder', 'time-planned', 'is-fav', 'min-rating')
+        selection = new ImageSelection('stub-select-btn', '.stub-gallery', '.stub-thumb')
+        selection.selectedIds = [{{ image.image_id }}]
+
+        let imgParams = new ImgParams('image-id', 'same-folder', 'time-planned', 'is-fav', 'min-rating', 'tag-set')
 
         imgParams.setParamsFromGET()
 
@@ -253,6 +266,9 @@
             const zoom = document.querySelector('.magnification')
             const bg = document.querySelector('.modal-bg')
 
+            let idx = parseInt(keycode.replace('Numpad', '').replace('Digit', ''))
+            // hit 0, bring default cursor back
+
             const contrastGray = [
                 'modal-img-gray',
                 'modal-img-gray-contrast-150',
@@ -265,26 +281,31 @@
             disableAllBut(img, '', contrastGray)
             disableAllBut(zoom, '', contrastGray)
             disableAllBut(bg, '', contrastGrayBg)
-            switch (keycode) {
+            switch (idx) {
 
-                case 'KeyQ':
+                case 0:
                     break
-                case 'KeyW':
+                case 5:
+                    toggleCssClass(img, contrastGray[0])
+                    toggleCssClass(zoom, contrastGray[0])
+                    toggleCssClass(bg, contrastGrayBg[0])
+                    break
+                case 4:
                     toggleCssClass(img, contrastGray[1])
                     toggleCssClass(zoom, contrastGray[1])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyE':
+                case 3:
                     toggleCssClass(img, contrastGray[2])
                     toggleCssClass(zoom, contrastGray[2])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyR':
+                case 2:
                     toggleCssClass(img, contrastGray[3])
                     toggleCssClass(zoom, contrastGray[3])
                     toggleCssClass(bg, contrastGrayBg[0])
                     break
-                case 'KeyT':
+                case 1:
                     toggleCssClass(img, contrastGray[4])
                     toggleCssClass(zoom, contrastGray[4])
                     toggleCssClass(bg, contrastGrayBg[0])
@@ -295,17 +316,21 @@
         // hotkeys
         document.addEventListener('keydown', function(e)
         {
-            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
+            if (e.altKey || e.ctrlKey || e.metaKey) { return }
+            if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
+                             { toggleCursor(e.code); e.preventDefault(); return } // cursors
+
+            if (e.shiftKey) { return }
+            if (e.code.includes('Numpad') || e.code.includes('Digit'))
+                             { toggleContrast(e.code); e.preventDefault(); } // g
             if (e.code === 'ArrowLeft')  { onClickPrev(); e.preventDefault(); } // <-
             if (e.code === 'ArrowRight') { onClickNext(); e.preventDefault(); } // ->
             if (e.code.includes('Enter')){ onTimerStart(); e.preventDefault(); } // enter
             if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
             if (e.code === 'KeyG')       { toggleGrayscale(); e.preventDefault(); } // g
-            if (['KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT'].includes(e.code))
-                                         { toggleContrast(e.code); e.preventDefault(); } // g
+
             if (e.code === 'KeyF')       { toggleFlip(); e.preventDefault(); } // g
-            if (e.code.includes('Numpad') || e.code.includes('Digit'))
-                                         { toggleCursor(e.code); e.preventDefault(); } // numbers
+
         })
 
 
@@ -409,21 +434,45 @@
         // popup
 
         // Get references to the button and popup elements
-        const button = document.getElementById('info-button')
-        const popup = document.getElementById('image-info-popup')
+        const infoBtn = document.getElementById('info-button')
+        const infoPopup = document.getElementById('image-info-popup')
 
         // Show the popup when the button is clicked
-        button.addEventListener('click', () => {
-            popup.style.display = 'block'
+        infoBtn.addEventListener('click', () =>
+        {
+            infoPopup.classList.toggle('vis-hide')
         })
 
         // Hide the popup when clicking outside of it
-        document.addEventListener('click', (event) => {
-            if (!popup.contains(event.target) && event.target !== button) {
-                popup.style.display = 'none'
+        document.addEventListener('click', (event) =>
+        {
+            if (!infoPopup.contains(event.target) && event.target !== infoBtn)
+            {
+                infoPopup.classList.add('vis-hide')
             }
         })
 
+        // tags
+        simpleShowLoadableWidget(
+            '{{ url_for('routes_tags.embed_panel_tag_editor') }}',
+            '#tags-button',
+            '#tags-popup-container',
+            (container) =>
+            {
+                container.querySelector('.tags-popup').style.display = ''
+            })
+
+        // boards
+        simpleShowLoadableWidget(
+            '{{ url_for('routes_board.widget_get_boards_all') }}',
+            '#board-button',
+            '#board-popup-container',
+            (container) =>
+            {
+                container.querySelector('.popup').classList.remove('vis-hide')
+            })
+
+        // palette
         document.getElementById('pallet-button').addEventListener('click', (e) => document.querySelector('.pallet-container').classList.toggle('vis-hide'))
 
         // Copy the path to clipboard when the "Copy to Clipboard" button is clicked
@@ -437,7 +486,7 @@
                 copyButton.textContent = 'Copied!'
             })
         })
-    }
+    })
 </script>
 </body>
 </html>

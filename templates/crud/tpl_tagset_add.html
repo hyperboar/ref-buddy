@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <title>Title</title>
+</head>
+<body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="{{ url_for('routes_tags.list_tag_sets')}}">&lt;</a>
+    <h1>Add Set</h1>
+</div>
+<form method="POST" action="{{ url_for('routes_tags.tag_set_add') }}">
+    <label for="set_name">Set Name:</label>
+    <input type="text" name="set_name" id="set_name" value="">
+    <br/>
+    <label for="set_alias">Set Alias:</label>
+    <input type="text" name="set_alias" id="set_alias" value="">
+    <br/>
+    <label for="tag_list_pos">Tag positive:</label>
+    <input type="text" name="tag_list_pos" id="tag_list_pos" value="">
+    <br/>
+    <label for="tag_list_neg">Tag negative:</label>
+    <input type="text" name="tag_list_neg" id="tag_list_neg" value="">
+    <br/>
+    <button type="submit">Add</button>
+    <br/>
+    <br/>
+    <div>
+    {% for t in tags %}
+        <div style="color: {{ t.color.hex }}">{{ t.id }}: {{ t.tag }}</div>
+    {% endfor %}
+    </div>
+</form>
+</body>
+</html>

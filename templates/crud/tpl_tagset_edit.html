@@ -6,7 +6,10 @@
     <title>Title</title>
 </head>
 <body>
-<h2>{{ tag_set.set_name }}</h2>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="{{ url_for('routes_tags.list_tag_sets')}}">&lt;</a>
+    <h1>{{ tag_set.set_name }}</h1>
+</div>
 <form method="POST" action="{{ url_for('routes_tags.tag_set_edit', tag_set_id=tag_set.id) }}">
     <label for="set_name">Set Name:</label>
     <input type="text" name="set_name" id="set_name" value="{{ tag_set.set_name }}">
@@ -14,10 +17,20 @@
     <label for="set_alias">Set Alias:</label>
     <input type="text" name="set_alias" id="set_alias" value="{{ tag_set.set_alias }}">
     <br/>
-    <label for="tag_list">Tag List:</label>
-    <input type="text" name="tag_list" id="tag_list" value="{{ tag_set.tag_list }}">
+    <label for="tag_list_pos">Tag positive:</label>
+    <input type="text" name="tag_list_pos" id="tag_list_pos" value="{{ tag_set.tag_names_pos_str }}">
+    <br/>
+    <label for="tag_list_neg">Tag negative:</label>
+    <input type="text" name="tag_list_neg" id="tag_list_neg" value="{{ tag_set.tag_names_neg_str }}">
     <br/>
     <button type="submit">Update</button>
+    <br/>
+    <br/>
+    <div>
+    {% for t in tags %}
+        <div style="color: {{ t.color.hex }}">{{ t.id }}: {{ t.tag }}</div>
+    {% endfor %}
+    </div>
 </form>
 </body>
 </html>

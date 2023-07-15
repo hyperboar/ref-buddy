@@ -44,8 +44,8 @@ You'll need to import images and generate thumbs only once (or more if you add i
 - ```F``` flip image;
 - hold ```X``` and click on image to insert #color under cursor into swatch area. Holding ```X``` and then pressing ```G``` will toggle swatch between grayscale and color;
 - ```Mouse wheel up/down``` zoom in/out. Left click on image to exit zoom mode;
-- ```Q```,```W```,```E```,```R```,```T``` to enter grayscale mode and switch contrast modes
-- ```3```,```4```,```5```,```6```,```7``` change cursor over the image to become "grayscale value hint". 
+- ```0```, ```1```,```2```,```3```,```4```,```5```,```6``` to enter grayscale mode and switch contrast modes. ```0``` turn image back to its original color, ```1``` is the strongest contrst, ```6``` is just a grayscale; 
+- ```SHIFT``` + ```3```,```4```,```5```,```6```,```7``` change cursor over the image to become "grayscale value hint". 
 ```5``` is neutral 50% brightness. Rest of the numbers switch cursor brightness according to "light stops" in photography: 
 ```4``` is two times less light than ```5```, ```6``` is two times more light that ```5```, etc.
 

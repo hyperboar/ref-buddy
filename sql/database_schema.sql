@@ -20,7 +20,10 @@ CREATE INDEX fn_index ON image_metadata (filename);
 
 CREATE TABLE IF NOT EXISTS paths (
     id INTEGER PRIMARY KEY,
-    path TEXT NOT NULL UNIQUE
+    path TEXT NOT NULL UNIQUE,
+    preview INTEGER DEFAULT 0 NOT NULL,
+    ord INTEGER DEFAULT 0 NOT NULL,
+    hidden  INTEGER DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS study_types (
@@ -81,6 +84,22 @@ CREATE TABLE IF NOT EXISTS image_colors (
     FOREIGN KEY (image_id) REFERENCES image_metadata(id),
     FOREIGN KEY (color_id) REFERENCES colors(id),
     PRIMARY KEY (image_id, color_id)
+);
+
+CREATE TABLE IF NOT EXISTS boards (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    tr TEXT DEFAULT '{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}' -- json transform
+);
+
+CREATE TABLE IF NOT EXISTS board_images (
+    board_id INTEGER,
+    image_id INTEGER,
+    tr TEXT DEFAULT '{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}', -- json transform
+
+    PRIMARY KEY (board_id, image_id),
+    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (board_id) REFERENCES boards(id)
 );
 
 INSERT INTO colors (id, color_name) VALUES (1, 'default');

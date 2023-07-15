@@ -1,24 +1,37 @@
 
 class ImgParams {
     imageId
-    studyTypeId
     sameFolderId
     timePlannedId
     minRatingId
+    tagSetId
 
-    constructor(imageId, sourceType, sameFolder, timePlanned, isFav, minRating) {
+    constructor(imageId, sameFolder, timePlanned, isFav, minRating, tagSetId) {
         // html ids AND GET param names
         this.imageId = imageId
-        this.studyTypeId = sourceType
         this.sameFolderId = sameFolder
         this.timePlannedId = timePlanned
         this.isFavId = isFav
         this.minRatingId = minRating
+        this.tagSetId = tagSetId
+
+        document.getElementById(this.tagSetId).addEventListener('change', (e) =>
+        {
+            const curSet = e.currentTarget.value
+
+            let full_url = window.location.href
+            const pageString = full_url.split('?')[0]
+
+            let queryString = full_url.split('?')[1]
+            let params = new URLSearchParams(queryString)
+            params.set('tag-set', encodeURIComponent(curSet))
+            let newUrl = pageString + '?' + decodeURIComponent(params.toString())
+            window.history.replaceState({}, '', newUrl)
+        })
     }
 
     getParamsAsGET()
     {
-        const sourceType = `${this.studyTypeId}=` + document.getElementById(this.studyTypeId).value
         const sameFolder = `${this.sameFolderId}=` + document.getElementById(this.sameFolderId).checked
         const timer      = `${this.timePlannedId}=` + document.getElementById(this.timePlannedId).getAttribute('value')
         const imageId    = `${this.imageId}=` + document.getElementById(this.imageId).textContent
@@ -31,10 +44,10 @@ class ImgParams {
         const tags = `tags=${tagsValues}`
 
         // tag set, temporary
-        const tagSetValue = params.get('tag-set') || ''
-        const tagset = `tag-set=${tagSetValue}`
+        const tagSetValue = document.getElementById(this.tagSetId).value || params.get(this.tagSetId)
+        const tagset = `${this.tagSetId}=${tagSetValue}`
 
-        return `${sourceType}&${sameFolder}&${timer}&${imageId}&${rating}&${tags}&${tagset}`
+        return `${sameFolder}&${timer}&${imageId}&${rating}&${tags}&${tagset}`
     }
 
     getImgIdAsGET()
@@ -49,6 +62,25 @@ class ImgParams {
         const isFav      = `${this.isFavId}=` + fav
 
         return `${imageId}&${isFav}`
+    }
+
+    getParamTagSet()
+    {
+        const elem = document.getElementById(this.tagSetId)
+        let value = elem.value
+        if (value === 'none')
+        {
+            let queryString = window.location.href.split('?')[1]
+            let params = new URLSearchParams(queryString)
+            value = params.get(this.tagSetId) || 'none'
+        }
+        if (value === 'none')
+        {
+            elem.selectedIndex = 1
+            value = elem.options[1]
+        }
+
+        return value
     }
 
     setParamsFromGET()
@@ -67,6 +99,15 @@ class ImgParams {
         if (urlParams.get(this.minRatingId) !== null)
         {
             document.getElementById(this.minRatingId).setAttribute('value', urlParams.get(this.minRatingId))
+        }
+
+        if (urlParams.get(this.tagSetId) !== null)
+        {
+            const list = Array.from(document.getElementById(this.tagSetId).options)
+            const value = this.getParamTagSet()
+            document.getElementById(this.tagSetId).selectedIndex = list.findIndex(o => o.value === value)
+
+            document.getElementById(this.tagSetId).setAttribute('value', urlParams.get(this.tagSetId))
         }
     }
 }

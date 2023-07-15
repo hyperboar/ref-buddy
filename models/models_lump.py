@@ -31,6 +31,9 @@ class Path(Base):
 
     id = Column(Integer, primary_key=True)
     path = Column(Text, nullable=False, unique=True)
+    preview = Column(Integer, nullable=False, default=0)
+    hidden = Column(Integer, nullable=False, default=0)
+    ord = Column(Integer, nullable=False, default=0)
 
 class StudyType(Base):
     __tablename__ = 'study_types'
@@ -150,6 +153,30 @@ class TagSet(Base):
 
         return tags_pos, tags_neg
 
+    def names_to_tag_list(self, pos, neg):
+        session = object_session(self)
+        auto_close = False
+        if session is None:
+            auto_close = True
+            session = Session()
+
+        tags = [str(t.id) for t in session.query(Tag).filter(Tag.tag.in_(pos)).all()] + \
+               ['-'+str(t.id) for t in session.query(Tag).filter(Tag.tag.in_(neg)).all()]
+
+        if auto_close:
+            session.close()
+        return ','.join(tags)
+
+    @property
+    def tag_names_pos_str(self):
+        tags, _ = self.get_tags_names()
+        return ', '.join(tags)
+
+    @property
+    def tag_names_neg_str(self):
+        _, tags = self.get_tags_names()
+        return ', '.join(tags)
+
 class Color(Base):
     __tablename__ = 'colors'
 
@@ -188,6 +215,23 @@ class ImageDupe(Base):
     false_positive = Column(Integer, name='fp', default=0)
     resolved = Column(Integer, name='r', default=0)
     found_at = Column(MyTIMESTAMP, default=datetime.now)
+
+class Board(Base):
+    __tablename__ = 'boards'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(Text)
+
+class BoardImage(Base):
+    __tablename__ = 'board_images'
+
+    board_id = Column(Integer, ForeignKey('boards.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+
+    tr = Column(Text, default='{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}')
+
+    board = relationship('Board', backref='board_images')
+    image = relationship('ImageMetadata', backref='board_images')
 
 # Create the tables
 # Base.metadata.create_all(engine, checkfirst=True)

@@ -146,6 +146,7 @@ body {
     /*flex-wrap: wrap;*/
     align-self: flex-start;
     /*justify-content: space-between;*/
+    transition: background-color 0.15s;
 }
 .modal-controls .row {
     display: flex;
@@ -162,6 +163,11 @@ body {
 .modal-controls .space
 {
     margin-left: 10px;
+}
+
+.modal-controls:hover
+{
+    background-color: rgba(84, 81, 81, 60%);
 }
 
 @media only screen and (max-width: 768px) {
@@ -196,20 +202,6 @@ span #time-current {
 .on
 {
     background-image: url("/static/fav_on.png");
-}
-
-.popup {
-  position: absolute;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  padding: 10px;
-  display: none;
-}
-
-.popup-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
 }
 
 #copyButton {

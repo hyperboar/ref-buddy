@@ -1,0 +1,26 @@
+<div id="boards-popup" class="popup vis-hide">
+    <label for="boards">Board</label><select id="boards">
+        <option value="-1">None</option>
+        {% for b in boards %}
+        <option value="{{ b.id }}">{{ b.title }}</option>
+        {% endfor %}
+    </select>
+    <button id="send-btn">Sent to board</button>
+    <button id="send-close-btn">Close</button>
+</div>
+<script>
+    document.getElementById('send-btn').addEventListener('click', (e) =>
+    {
+        if (selection == null || selection.selectedIds.length === 0) { return }
+
+        const ids = selection.selectedIds.join(',')
+
+        const btn = e.currentTarget
+        const board_id = document.getElementById('boards').value
+        fetchAndSimpleFeedback(`{{ url_for('routes_board.add_images_to_board') }}?b-id=${board_id}&image-id=${ids}`, btn)
+    })
+    document.getElementById('send-close-btn').addEventListener('click', () =>
+    {
+        document.getElementById('boards-popup').classList.toggle('vis-hide')
+    })
+</script>
