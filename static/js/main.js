@@ -111,3 +111,45 @@ function simpleShowLoadableWidget(url, triggerSelector, containerSelector, onLoa
         container.firstChild.classList.toggle('vis-hide')
     })
 }
+
+/**
+ * Help handle hotkeys in a more generalized ways.
+ */
+class Hotkeys
+{
+    pressedKeys = {}
+
+    constructor()
+    {
+        document.addEventListener('keydown', (e) =>
+        {
+            if (e.code === 'Space') { e.preventDefault() }
+
+            this.pressedKeys[e.code] = true
+
+            if (e.ctrlKey)
+            {
+                this.pressedKeys['KeyCtrl'] = true
+            }
+        })
+        document.addEventListener('keyup', (e) =>
+        {
+            delete this.pressedKeys[e.code]
+
+            if (!e.ctrlKey)
+            {
+                delete this.pressedKeys['KeyCtrl']
+            }
+        })
+    }
+
+    isPressed(code)
+    {
+        return this.pressedKeys[code] === true
+    }
+
+    isPressedMult(codeArr)
+    {
+        !Array.from(codeArr).some(code => this.pressedKeys[code] !== true)
+    }
+}
