@@ -101,7 +101,7 @@ const ScalableMixin =
 {
     scale: 1.0,
 
-    _node: null,
+    _sclNode: null,
     _startDistance: 0,
     _startScale:1.0,
 
@@ -112,7 +112,7 @@ const ScalableMixin =
     // Add scale listeners to an image
     initScalable: function(node)
     {
-        this._node = node
+        this._sclNode = node
         this._tmp_wheelZoom = (e) => { this.wheelZoom(e) }
         this._tmp_startTouchScale = (e) => { this.startTouchScale(e) }
         this._tmp_touchScaleImage = (e) => { this.touchScaleImage(e) }
@@ -125,7 +125,7 @@ const ScalableMixin =
     setScale: function(scale)
     {
         this.scale = scale
-        this._node.style.transform = `scale(${this.scale})`
+        this._sclNode.style.transform = `scale(${this.scale})`
     },
 
     wheelZoom: function(e)
@@ -199,7 +199,10 @@ const ImageRenderMixin =
     thumb_image_path: 'Not assigned',
     full_image_path:  'Not assigned',
 
-    _image: null,
+    _imRNode: null,
+
+    isRenderHigh: false,
+
 
     // "virtual methods"
     onRenderCompleted: function() { throw new Error("Not implemented") },
@@ -209,15 +212,15 @@ const ImageRenderMixin =
      */
     renderImage: function()
     {
-        this._image = new Image()
-        this._image.src = this.thumb_image_path
-        this._image.onload = () =>
+        this._imRNode = new Image()
+        this._imRNode.src = this.thumb_image_path
+        this._imRNode.onload = () =>
         {
-            this._image.onload = null
-            this._image.style.width = `${this._image.naturalWidth}px`;
-            this._image.style.height = `${this._image.naturalHeight}px`;
+            this._imRNode.onload = null
+            this._imRNode.style.width = `${this._imRNode.naturalWidth}px`;
+            this._imRNode.style.height = `${this._imRNode.naturalHeight}px`;
 
-            this.onRenderCompleted(this._image)
+            this.onRenderCompleted(this._imRNode)
         }
     },
 
@@ -230,8 +233,37 @@ const ImageRenderMixin =
         full.src = this.full_image_path
         full.onload = () =>
         {
-            this._image.src = this.full_image_path
+            this._imRNode.src = this.full_image_path
+            this.isRenderHigh = true
         }
+    }
+}
+
+const VisibilityMixin =
+{
+    _visNode: null,
+    _isDirty: true,
+
+    initVisibility: function(node)
+    {
+        this._visNode = node
+    },
+
+    isVisible: function ()
+    {
+        const rect = this._visNode.getBoundingClientRect()
+        const vh = window.innerHeight
+        const vw = window.innerWidth
+
+        return rect.bottom < 0 || rect.top > vh || rect.left < 0 || rect.right > vw
+    },
+
+    setVisDirty: function() { this._isDirty = true },
+
+    sizeToViewport: function()
+    {
+        const rect = this._visNode.getBoundingClientRect()
+        return [rect.width/window.innerWidth, rect.height/window.innerHeight]
     }
 }
 
@@ -315,8 +347,22 @@ class BoardImage
         this.full_image_path = this.data.full_path
         this.renderImage()
     }
+
+    checkFullRes()
+    {
+        if (!this.isRenderHigh && this.isVisible()) { return }
+
+        const p = this.sizeToViewport()
+
+        const threshold = 0.3
+        if (p[0] < threshold && p[1] < threshold) { return }
+
+        this.isRenderHigh = true
+        this.renderFullImage()
+    }
 }
 Object.assign(BoardImage.prototype, ImageRenderMixin)
+Object.assign(BoardImage.prototype, VisibilityMixin)
 Object.assign(BoardImage.prototype, GoToImageStudyMixin)
 Object.assign(BoardImage.prototype, RemoveItemMixin)
 Object.assign(BoardImage.prototype, DraggableMixin)
@@ -330,6 +376,7 @@ BoardImage.prototype.onRenderCompleted = function(image)
 
     image.classList.add('image')
 
+    this.initVisibility(image)
     this.initRemove(image)
     this.initStudy(image)
     this.initDraggable(image)
@@ -338,6 +385,8 @@ BoardImage.prototype.onRenderCompleted = function(image)
     this.setScale(this.data.tr.s)
 
     document.getElementById("board").appendChild(image)
+
+    this.checkFullRes()
 }
 
 BoardImage.prototype.onMoveCompleted = function(left, top)
@@ -347,6 +396,9 @@ BoardImage.prototype.onMoveCompleted = function(left, top)
     data.tr.tx = left
     data.tr.ty = top
     saveImageTransform(data)
+
+    this.setVisDirty()
+    this.checkFullRes()
 }
 BoardImage.prototype.isDragAllowed = function()
 {
@@ -359,6 +411,9 @@ BoardImage.prototype.onScaleCompleted = function(scale)
     const data = boardImages[imageId]
     data.tr.s = scale
     saveImageTransform(data)
+
+    this.setVisDirty()
+    this.checkFullRes()
 }
 BoardImage.prototype.isScaleAllowed = function()
 {
