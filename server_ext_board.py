@@ -40,21 +40,14 @@ def board_add():
 def get_board_images(b_id):
     session = Session()
 
-    images = [(bim.image, bim.tr) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
+    images = [(bim.image, bim.tr_json) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
     json_images = []
     for im, tr in images:
-        json_tr = tr\
-            .replace('tx', '"tx"')\
-            .replace('ty', '"ty"')\
-            .replace('rx', '"rx"')\
-            .replace('ry', '"ry"')\
-            .replace('s', '"s"')
         study_url = url_for('routes_image.study_image', image_id=im.image_id) + "?same-folder=true&tags=&tag-set="
-        json = '{' + f'"image_id":{im.image_id},"path":"/thumb/{im.image_id}.jpg","tr":{json_tr},"study_url":"{study_url}"' + '}'
+        json = {"image_id":im.image_id,"path":f"/thumb/{im.image_id}.jpg","tr":tr,"study_url":study_url}
         json_images.append(json)
 
-    str_json = ",".join(json_images)
-    out = render_template_string('{' + f'"images":[{str_json}]' + '}')
+    out = jsonify({"images":json_images})
     session.close()
     return out
 

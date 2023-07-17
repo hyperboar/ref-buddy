@@ -233,6 +233,15 @@ class BoardImage(Base):
     board = relationship('Board', backref='board_images')
     image = relationship('ImageMetadata', backref='board_images')
 
+    @property
+    def tr_json(self):
+        return self.tr\
+            .replace('tx', '"tx"')\
+            .replace('ty', '"ty"')\
+            .replace('rx', '"rx"')\
+            .replace('ry', '"ry"')\
+            .replace('s', '"s"')
+
 # Create the tables
 # Base.metadata.create_all(engine, checkfirst=True)
 
