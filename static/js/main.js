@@ -163,4 +163,9 @@ class Hotkeys
     {
         return !Array.from(codeArr).some(code => this.pressedKeys[code] !== true)
     }
+
+    isPressedNothing()
+    {
+        return Object.keys(this.pressedKeys).length === 0
+    }
 }
