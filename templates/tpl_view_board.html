@@ -64,6 +64,7 @@
         {
             image.id = `image-${data.image_id}`
             image.setAttribute('data-id', data.image_id)
+            image.setAttribute('data-study', data.study_url)
             image.classList.add('draggable', 'image')
             image.style.left = `${data.tr.tx}px`
             image.style.top = `${data.tr.ty}px`

@@ -49,7 +49,8 @@ def get_board_images(b_id):
             .replace('rx', '"rx"')\
             .replace('ry', '"ry"')\
             .replace('s', '"s"')
-        json = '{' + f'"image_id":{im.image_id},"path":"/thumb/{im.image_id}.jpg","tr":{json_tr}' + '}'
+        study_url = url_for('routes_image.study_image', image_id=im.image_id)
+        json = '{' + f'"image_id":{im.image_id},"path":"/thumb/{im.image_id}.jpg","tr":{json_tr},"study_url":"{study_url}"' + '}'
         json_images.append(json)
 
     str_json = ",".join(json_images)
