@@ -454,6 +454,9 @@ BoardBoard.prototype.onMoveCompleted = function(left, top)
 {
     this.transform.tx = left
     this.transform.ty = top
+
+    const items = Object.values(boardItems);
+    items.forEach(item => { item.setVisDirty(); item.checkFullRes() })
 }
 BoardBoard.prototype.isDragAllowed = function()
 {
@@ -463,6 +466,9 @@ BoardBoard.prototype.isDragAllowed = function()
 BoardBoard.prototype.onScaleCompleted = function(scale)
 {
     this.transform.s = scale
+
+    const items = Object.values(boardItems);
+    items.forEach(item => { item.setVisDirty(); item.checkFullRes() })
 }
 BoardBoard.prototype.isScaleAllowed = function()
 {
