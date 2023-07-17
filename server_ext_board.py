@@ -2,6 +2,7 @@ from flask import Blueprint, request, abort, render_template_string, render_temp
 from models.models_lump import Session, ImageMetadata, Path, BoardImage, Board
 from server_args_helpers import get_arg, Args
 from server_widget_helpers import get_boards_all
+import json
 
 routes_board = Blueprint('routes_board', __name__)
 
@@ -40,12 +41,17 @@ def board_add():
 def get_board_images(b_id):
     session = Session()
 
-    images = [(bim.image, bim.tr_json) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
+    images = [(bim.image, bim.tr_json, bim.board_id) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
     json_images = []
-    for im, tr in images:
-        study_url = url_for('routes_image.study_image', image_id=im.image_id) + "?same-folder=true&tags=&tag-set="
-        json = {"image_id":im.image_id,"path":f"/thumb/{im.image_id}.jpg","tr":tr,"study_url":study_url}
-        json_images.append(json)
+    for im, tr, b_id in images:
+        item = {
+            "image_id":im.image_id,
+            "thumb_path":f"/thumb/{im.image_id}.jpg",
+            "full_path":f"/image/{im.image_id}",
+            "tr":json.loads(tr),
+            "study_url":url_for('routes_image.study_image', image_id=im.image_id) + "?same-folder=true&tags=&tag-set=",
+            "remove_url":  url_for('routes_board.remove_images_from_board') + f'?b-id={b_id}&image-id={im.image_id}'}
+        json_images.append(item)
 
     out = jsonify({"images":json_images})
     session.close()
