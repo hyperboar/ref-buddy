@@ -74,6 +74,7 @@
             addDragListeners(image)
             addScaleListeners(image)
             addRemoveListener(image)
+            addStudyListener(image)
 
             document.getElementById("board").appendChild(image)
         }
@@ -89,6 +90,8 @@
 
         function startDrag(event)
         {
+            if (!event.ctrlKey) { return }
+
             event.preventDefault()
 
             if (event.type === "touchstart")
@@ -150,11 +153,13 @@
         let startDistance, startScale
 
         image.addEventListener("wheel", zoomImage, {passive: false})
-        image.addEventListener("touchstart", startScaleGesture, {passive: false})
-        image.addEventListener("touchmove", scaleImage, {passive: false})
+        image.addEventListener("touchstart", startTouchScale, {passive: false})
+        image.addEventListener("touchmove", touchScaleImage, {passive: false})
 
         function zoomImage(event)
         {
+            if (!event.ctrlKey) { return }
+
             event.preventDefault()
 
             const zoomSpeed = 0.1
@@ -180,8 +185,9 @@
             saveImageTransform(data)
         }
 
-        function startScaleGesture(event)
+        function startTouchScale(event)
         {
+            if (!event.ctrlKey) { return }
             if (event.touches.length < 2) { return }
 
             const touch1 = event.touches[0]
@@ -193,8 +199,9 @@
             startScale = scale
         }
 
-        function scaleImage(event)
+        function touchScaleImage(event)
         {
+            if (!event.ctrlKey) { return }
             if (event.touches.length < 2) { return }
 
             const touch1 = event.touches[0]
@@ -247,6 +254,17 @@
         })
     }
 
+    function addStudyListener(image)
+    {
+        image.addEventListener('click', (e) =>
+        {
+            if (!isS) { return }
+
+            const url = image.getAttribute('data-study')
+            window.open(url, '_blank')
+        })
+    }
+
     // Initialize the board
     function initializeBoard()
     {
@@ -269,14 +287,17 @@
 
     // hotkeys
     let isX = false
+    let isS = false // study
 
     document.addEventListener('keydown', (e) =>
     {
         isX = e.code === 'KeyX'
+        isS = e.code === 'KeyS'
     })
     document.addEventListener('keyup', (e) =>
     {
-        isX = !(e.code === 'KeyX')
+        isX = !(e.code === 'KeyX') && isX
+        isS = !(e.code === 'KeyS') && isS
     })
 
     // end hotkeys
