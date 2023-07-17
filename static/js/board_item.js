@@ -99,11 +99,16 @@ const DraggableMixin =
 
 const ScalableMixin =
 {
+    kMinScale: 0.3,
+    kMaxScale: 7.0,
+
     scale: 1.0,
 
     _sclNode: null,
     _startDistance: 0,
     _startScale:1.0,
+    _wheelStepFactor:0.1,
+
 
     // "virtual methods"
     onScaleCompleted: function(scale) { throw new Error("Not implemented") },
@@ -134,19 +139,16 @@ const ScalableMixin =
 
         e.preventDefault()
 
-        const node = e.currentTarget
-
-        const zoomSpeed = 0.1
         const deltaY = e.deltaY || e.wheelDelta
 
         if (deltaY < 0)
         {
-            this.scale = Math.min(this.scale + zoomSpeed, 10)
+            this.scale = Math.min(this.scale * (1.0 + this._wheelStepFactor), this.kMaxScale)
         }
         else
         {
-            this.scale -= zoomSpeed
-            this.scale = Math.max(this.scale, 0.1) // Minimum scale limit
+            this.scale *= (1.0 - this._wheelStepFactor)
+            this.scale = Math.max(this.scale, this.kMinScale) // Minimum scale limit
         }
 
         this.setScale(this.scale)
@@ -181,8 +183,8 @@ const ScalableMixin =
         const distance = Math.hypot(dx, dy)
 
         this.scale = (distance / this._startDistance) * this._startScale
-        this.scale = Math.max(this.scale, 0.1) // Min scale limit
-        this.scale = Math.min(this.scale, 10) // Max scale limit
+        this.scale = Math.max(this.scale, this.kMinScale) // Min scale limit
+        this.scale = Math.min(this.scale, this.kMaxScale) // Max scale limit
 
         this.setScale(this.scale)
 
