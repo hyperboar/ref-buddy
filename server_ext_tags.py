@@ -106,7 +106,8 @@ def add_tag():
     if request.method == 'POST':
         session = Session()
         tag = request.form['tag'].strip()
-        new_tag = Tag(tag=tag)
+        color_id = int(request.form['color'].strip())
+        new_tag = Tag(tag=tag, color_id=color_id)
         session.add(new_tag)
         session.commit()
         return redirect('/tags')
@@ -118,6 +119,7 @@ def edit_tag(tag_id):
     tag = session.get(Tag, tag_id)
     if request.method == 'POST':
         tag.tag = request.form['tag'].strip()
+        tag.color_id = int(request.form['color'].strip())
         session.commit()
         return redirect('/tags')
     return render_template('crud/tpl_tags_edit.html', tag=tag)
