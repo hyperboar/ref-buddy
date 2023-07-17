@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, render_template_string, render_template
+from flask import Blueprint, request, abort, render_template_string, render_template, jsonify, url_for
 from models.models_lump import Session, ImageMetadata, Path, BoardImage, Board
 from server_args_helpers import get_arg, Args
 from server_widget_helpers import get_boards_all
@@ -21,6 +21,19 @@ def view_board(b_id):
     board = session.get(Board, b_id)
     out = render_template('tpl_view_board.html', board=board)
     session.close()
+    return out
+
+@routes_board.route('/board/add', methods=['POST'])
+def board_add():
+    title = request.form.get('title')
+
+    session = Session()
+    board = Board(title=title)
+    session.add(board)
+    session.commit()
+
+    b = {"id":board.id, "title":board.title, "url":url_for('routes_board.view_board', b_id=board.id)}
+    out = jsonify(b)
     return out
 
 @routes_board.route('/board-images/<int:b_id>')
