@@ -13,9 +13,12 @@ routes_image = Blueprint('routes_image', __name__)
 
 @routes_image.route('/image/<int:image_id>')
 def send_static_image(image_id):
-    metadata = Ctrl.get_by_id(image_id)
-    ext = os.path.splitext(metadata.path)[1]
-    return send_file(os.path.join(Env.IMAGES_PATH, metadata.path), mimetype=f'image/{ext}')
+    session = Session()
+    metadata = Ctrl.get_by_id(image_id, session=session)
+    ext = os.path.splitext(metadata.filename)[1]
+    out = send_file(metadata.path_abs, mimetype=f'image/{ext}')
+    session.close()
+    return out
 
 @routes_image.route('/study-image/<int:image_id>')
 def study_image(image_id):
