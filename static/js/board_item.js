@@ -14,18 +14,20 @@ const DraggableMixin =
     onMoveCompleted: function(left, top) { throw new Error('Not implemented') },
     isDragAllowed: function() { throw new Error('Not implemented') },
 
-    initDraggable: function(node)
+    initDraggable: function(node, proxyNode = null)
     {
         this._mvNode = node
+        this._mvInter = proxyNode === null ? node : proxyNode
 
         this._mvNode.classList.add(this.kClassDraggable)
+        this._mvInter.classList.add(this.kClassDraggable)
 
         this._tmp_startDrag = (event) => this.startDrag(event)
         this._tmp_drag      = (event) => this.drag(event)
         this._tmp_stopDrag  = (event) => this.stopDrag(event)
 
-        this._mvNode.addEventListener("mousedown",  this._tmp_startDrag)
-        this._mvNode.addEventListener("touchstart", this._tmp_startDrag, {passive: false})
+        this._mvInter.addEventListener("mousedown",  this._tmp_startDrag)
+        this._mvInter.addEventListener("touchstart", this._tmp_startDrag, {passive: false})
     },
 
     setPosition: function(x, y)
@@ -105,6 +107,7 @@ const ScalableMixin =
     scale: 1.0,
 
     _sclNode: null,
+    _sclProxy: null,
     _startDistance: 0,
     _startScale:1.0,
     _wheelStepFactor:0.1,
@@ -115,16 +118,18 @@ const ScalableMixin =
     isScaleAllowed: function () { { throw new Error("Not implemented") } },
 
     // Add scale listeners to an image
-    initScalable: function(node)
+    initScalable: function(node, proxyNode = null)
     {
         this._sclNode = node
+        this._sclInter = proxyNode === null ? node : proxyNode
+
         this._tmp_wheelZoom = (e) => { this.wheelZoom(e) }
         this._tmp_startTouchScale = (e) => { this.startTouchScale(e) }
         this._tmp_touchScaleImage = (e) => { this.touchScaleImage(e) }
 
-        node.addEventListener("wheel", this._tmp_wheelZoom, {passive: false})
-        node.addEventListener("touchstart", this._tmp_startTouchScale, {passive: false})
-        node.addEventListener("touchmove", this._tmp_touchScaleImage, {passive: false})
+        this._sclInter.addEventListener("wheel", this._tmp_wheelZoom, {passive: false})
+        this._sclInter.addEventListener("touchstart", this._tmp_startTouchScale, {passive: false})
+        this._sclInter.addEventListener("touchmove", this._tmp_touchScaleImage, {passive: false})
     },
 
     setScale: function(scale)
@@ -440,10 +445,11 @@ class BoardBoard
     constructor()
     {
         this.board = document.getElementById("board")
+        this.boardInteract = document.querySelector(".board-interact-bg")
 
-        this.initDraggable(this.board)
-        this.setPosition(100, 0)
-        this.initScalable(this.board)
+        this.initDraggable(this.board, this.boardInteract)
+        this.setPosition(0, 0)
+        this.initScalable(this.board, this.boardInteract)
         this.setScale(1)
     }
 }
