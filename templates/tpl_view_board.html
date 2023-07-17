@@ -19,6 +19,8 @@
 
     let boardImages = {}
     let boardItems = {}
+    let board = null
+    let hotkeys = null
 
     function fetchImageData()
     {
@@ -56,7 +58,8 @@
     // Initialize the board
     function initializeBoard()
     {
-        {#new BoardBoard()#}
+        hotkeys = new Hotkeys()
+        board = new BoardBoard()
 
         // Fetch image data from the database
         fetchImageData().then(imageData =>
@@ -72,34 +75,6 @@
 
     // Initialize the board when the page loads
     document.addEventListener("DOMContentLoaded", initializeBoard)
-
-
-    // hotkeys
-    let isX = false
-    let isS = false // study
-    let isSpace = false // move board
-
-    document.addEventListener('keydown', (e) =>
-    {
-        isX = e.code === 'KeyX'
-        isS = e.code === 'KeyS'
-        isSpace = e.code === 'Space'
-
-        console.log(`sp d ${isSpace}`)
-    })
-    document.addEventListener('keyup', (e) =>
-    {
-        isX = !(e.code === 'KeyX') && isX
-        isS = !(e.code === 'KeyS') && isS
-        isSpace = !(e.code === 'Space') && isSpace
-
-        console.log(`sp u ${isSpace}`)
-    })
-
-    // end hotkeys
-
-
-
 </script>
 </body>
 </html>

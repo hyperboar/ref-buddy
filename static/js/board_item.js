@@ -12,7 +12,7 @@ const DraggableMixin =
 
     // "virtual methods"
     onMoveCompleted: function(left, top) { throw new Error('Not implemented') },
-    isDragAllowed: function(e) { throw new Error('Not implemented') },
+    isDragAllowed: function() { throw new Error('Not implemented') },
 
     initDraggable: function(node)
     {
@@ -39,7 +39,7 @@ const DraggableMixin =
 
     startDrag: function(e)
     {
-        if (!this.isDragAllowed(e)) { return }
+        if (!this.isDragAllowed()) { return }
 
         e.preventDefault()
 
@@ -107,7 +107,7 @@ const ScalableMixin =
 
     // "virtual methods"
     onScaleCompleted: function(scale) { throw new Error("Not implemented") },
-    isScaleAllowed: function (e) { { throw new Error("Not implemented") } },
+    isScaleAllowed: function () { { throw new Error("Not implemented") } },
 
     // Add scale listeners to an image
     initScalable: function(node)
@@ -130,7 +130,7 @@ const ScalableMixin =
 
     wheelZoom: function(e)
     {
-        if (!this.isScaleAllowed(e)) { return }
+        if (!this.isScaleAllowed()) { return }
 
         e.preventDefault()
 
@@ -156,7 +156,7 @@ const ScalableMixin =
 
     startTouchScale: function(event)
     {
-        if (!event.ctrlKey) { return }
+        if (!this.isScaleAllowed()) { return }
         if (event.touches.length < 2) { return }
 
         const touch1 = event.touches[0]
@@ -164,13 +164,13 @@ const ScalableMixin =
 
         const dx = touch1.clientX - touch2.clientX
         const dy = touch1.clientY - touch2.clientY
-        startDistance = Math.hypot(dx, dy)
-        startScale = scale
+        this._startDistance = Math.hypot(dx, dy)
+        this._startScale = this.scale
     },
 
     touchScaleImage: function(event)
     {
-        if (!event.ctrlKey) { return }
+        if (!this.isScaleAllowed()) { return }
         if (event.touches.length < 2) { return }
 
         const touch1 = event.touches[0]
@@ -180,19 +180,13 @@ const ScalableMixin =
         const dy = touch1.clientY - touch2.clientY
         const distance = Math.hypot(dx, dy)
 
-        scale = (distance / startDistance) * startScale
-        scale = Math.max(scale, 0.1) // Min scale limit
-        scale = Math.min(scale, 10) // Max scale limit
+        this.scale = (distance / this._startDistance) * this._startScale
+        this.scale = Math.max(this.scale, 0.1) // Min scale limit
+        this.scale = Math.min(this.scale, 10) // Max scale limit
 
-        image.style.transform = `scale(${scale})`
+        this.setScale(this.scale)
 
-        const imageId = parseInt(image.getAttribute('data-id'))
-        const data = boardImages[imageId]
-        data.tr.tx = parseInt(image.style.left)
-        data.tr.ty = parseInt(image.style.top)
-        data.tr.s  = scale
-
-        saveImageTransform(data)
+        this.onScaleCompleted(this.scale)
     }
 }
 
@@ -223,11 +217,14 @@ const ImageRenderMixin =
  */
 const GoToImageStudyMixin =
 {
+    // "virtual methods"
+    isStudyAllowed: function () { throw new Error('Not implemented') },
+
     initStudy: function(image)
     {
         image.addEventListener('click', (e) =>
         {
-            if (!isS) { return }
+            if (!this.isStudyAllowed()) { return }
 
             const url = image.getAttribute('data-study')
             window.open(url, '_blank')
@@ -243,11 +240,14 @@ const RemoveItemMixin =
 {
     remove_url: 'Not implemented',
 
+    // "virtual methods"
+    isRemoveAllowed: function () { throw new Error('Not implemented') },
+
     initRemove: function(image)
     {
         image.addEventListener('click', (e) =>
         {
-            if (!isX) { return }
+            if (!this.isRemoveAllowed()) { return }
 
             // const image_id = image.getAttribute('data-id')
 
@@ -302,8 +302,6 @@ Object.assign(BoardImage.prototype, ScalableMixin)
 
 BoardImage.prototype.onRenderCompleted = function(image)
 {
-    console.log(this.data)
-
     image.id = `image-${this.data.image_id}`
     image.setAttribute('data-id', this.data.image_id)
     image.setAttribute('data-study', this.data.study_url)
@@ -328,9 +326,9 @@ BoardImage.prototype.onMoveCompleted = function(left, top)
     data.tr.ty = top
     saveImageTransform(data)
 }
-BoardImage.prototype.isDragAllowed = function(e)
+BoardImage.prototype.isDragAllowed = function()
 {
-    return e.ctrlKey
+    return hotkeys.isPressed('KeyCtrl')
 }
 
 BoardImage.prototype.onScaleCompleted = function(scale)
@@ -340,45 +338,54 @@ BoardImage.prototype.onScaleCompleted = function(scale)
     data.tr.s = scale
     saveImageTransform(data)
 }
-BoardImage.prototype.isScaleAllowed = function(e)
+BoardImage.prototype.isScaleAllowed = function()
 {
-    return e.ctrlKey
+    return hotkeys.isPressed('KeyCtrl')
+}
+
+BoardImage.prototype.isRemoveAllowed = function()
+{
+    return hotkeys.isPressed('KeyX')
+}
+BoardImage.prototype.isStudyAllowed = function()
+{
+    return hotkeys.isPressed('KeyS')
 }
 
 
-// class BoardBoard
-// {
-//     transform = {tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}
-//     board = null
-//
-//     constructor()
-//     {
-//         this.board = document.getElementById("board")
-//
-//         this.initDraggable(this.board)
-//         this.setPosition(100, 0)
-//         this.initScalable(this.board)
-//         this.setScale(1)
-//     }
-// }
-// Object.assign(BoardBoard.prototype, DraggableMixin)
-// Object.assign(BoardBoard.prototype, ScalableMixin)
-//
-// BoardBoard.prototype.onMoveCompleted = function(left, top)
-// {
-//     this.transform.tx = left
-//     this.transform.ty = top
-// }
-// BoardBoard.prototype.isDragAllowed = function(e)
-// {
-//     return isSpace
-// }
-//
-// BoardBoard.prototype.onScaleCompleted = function(scale)
-// {
-//     this.transform.s = scale
-// }
-// BoardBoard.prototype.isScaleAllowed = function(e)
-// {
-//     return isSpace
-// }
+class BoardBoard
+{
+    transform = {tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}
+    board = null
+
+    constructor()
+    {
+        this.board = document.getElementById("board")
+
+        this.initDraggable(this.board)
+        this.setPosition(100, 0)
+        this.initScalable(this.board)
+        this.setScale(1)
+    }
+}
+Object.assign(BoardBoard.prototype, DraggableMixin)
+Object.assign(BoardBoard.prototype, ScalableMixin)
+
+BoardBoard.prototype.onMoveCompleted = function(left, top)
+{
+    this.transform.tx = left
+    this.transform.ty = top
+}
+BoardBoard.prototype.isDragAllowed = function()
+{
+    return hotkeys.isPressed('Space')
+}
+
+BoardBoard.prototype.onScaleCompleted = function(scale)
+{
+    this.transform.s = scale
+}
+BoardBoard.prototype.isScaleAllowed = function()
+{
+    return hotkeys.isPressed('Space')
+}
