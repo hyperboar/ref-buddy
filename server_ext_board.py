@@ -5,11 +5,19 @@ from server_widget_helpers import get_boards_all
 
 routes_board = Blueprint('routes_board', __name__)
 
+@routes_board.route('/boards')
+def view_board_all():
+    session = Session()
+
+    boards = session.query(Board).all()
+    out = render_template('tpl_view_board_all.html', boards=boards)
+    session.close()
+    return out
+
 @routes_board.route('/board/<int:b_id>')
 def view_board(b_id):
     session = Session()
 
-    # ids = [92245, 92242, 92240, 85145, 85132, 85126, 85096, 3036]
     board = session.get(Board, b_id)
     out = render_template('tpl_view_board.html', board=board)
     session.close()

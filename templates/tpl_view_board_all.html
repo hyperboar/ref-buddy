@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <link rel="stylesheet" href="/static/styles/board.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
+    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
+    <title>Boards</title>
+</head>
+<body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>Boards</h1>
+</div>
+<div class="boards">
+    {% for b in boards %}
+    <div class="board-line" data-id="{{ b.id }}">
+        <span>[{{ b.id }}]</span>&nbsp;&nbsp;<span>{{ b.title }}</span>
+        <a href="{{ url_for('routes_board.view_board', b_id=b.id) }}" target="_blank" class="no-decor but-decor-hover">Open <img class="dir-link" src="/static/link.png"></a>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>
