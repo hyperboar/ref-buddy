@@ -24,9 +24,9 @@
 
     function fetchImageData()
     {
-        return fetch('{{ url_for("routes_board.get_board_images", b_id=board.id) }}').then(r =>
+        return fetch('{{ url_for('routes_board.get_board_images', b_id=board.id) }}').then(r =>
             {
-                if (!r.ok) { throw new Error("Something went wrong, " + r.statusText) }
+                if (!r.ok) { throw new Error('Something went wrong, ' + r.statusText) }
                 return r.json()
             })
             .catch(err =>
@@ -45,7 +45,7 @@
         return fetch(`{{ url_for('routes_board.set_board_image_transform') }}?b-id={{ board.id }}&image-id=${imageData.image_id}&tr=${strTr}`)
             .then(r =>
             {
-                if (!r.ok) { throw new Error("Transform not saved") }
+                if (!r.ok) { throw new Error('Transform not saved') }
             })
             .catch(err =>
             {
@@ -74,7 +74,15 @@
     }
 
     // Initialize the board when the page loads
-    document.addEventListener("DOMContentLoaded", initializeBoard)
+    document.addEventListener('DOMContentLoaded', initializeBoard)
+
+    document.addEventListener('hotkeyDown', (e) =>
+    {
+        if (!e.detail.isPressedMult(['Space', 'KeyR'])) { return }
+
+        board.setPosition(0,0)
+        board.setScale(1)
+    })
 </script>
 </body>
 </html>

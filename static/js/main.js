@@ -118,9 +118,18 @@ function simpleShowLoadableWidget(url, triggerSelector, containerSelector, onLoa
 class Hotkeys
 {
     pressedKeys = {}
+    hotkeyEvent = null
 
     constructor()
     {
+        this.hotkeyEvent = new CustomEvent(
+            "hotkeyDown",
+            {
+                bubbles: true, // Allow event to bubble up through the DOM tree
+                cancelable: true, // Allow event to be canceled
+                detail: this // Optional data to pass with the event
+            })
+
         document.addEventListener('keydown', (e) =>
         {
             if (e.code === 'Space') { e.preventDefault() }
@@ -131,6 +140,8 @@ class Hotkeys
             {
                 this.pressedKeys['KeyCtrl'] = true
             }
+
+            document.dispatchEvent(this.hotkeyEvent)
         })
         document.addEventListener('keyup', (e) =>
         {
@@ -150,6 +161,6 @@ class Hotkeys
 
     isPressedMult(codeArr)
     {
-        !Array.from(codeArr).some(code => this.pressedKeys[code] !== true)
+        return !Array.from(codeArr).some(code => this.pressedKeys[code] !== true)
     }
 }
