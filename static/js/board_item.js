@@ -332,6 +332,8 @@ const RemoveItemMixin =
  */
 class BoardImage
 {
+    kHighResThreshold = 0.2
+
     data
 
     /**
@@ -355,9 +357,7 @@ class BoardImage
         if (!this.isRenderHigh && this.isVisible()) { return }
 
         const p = this.sizeToViewport()
-
-        const threshold = 0.3
-        if (p[0] < threshold && p[1] < threshold) { return }
+        if (p[0] < this.kHighResThreshold && p[1] < this.kHighResThreshold) { return }
 
         this.isRenderHigh = true
         this.renderFullImage()
