@@ -199,15 +199,39 @@ const ImageRenderMixin =
     thumb_image_path: 'Not assigned',
     full_image_path:  'Not assigned',
 
-    onRenderCompleted: function()
-    {
-        throw new Error("Not implemented")
-    },
+    _image: null,
+
+    // "virtual methods"
+    onRenderCompleted: function() { throw new Error("Not implemented") },
+
+    /**
+     * Renders THUMB of an image.
+     */
     renderImage: function()
     {
-        const image = new Image()
-        image.src = this.thumb_image_path
-        image.onload = () => this.onRenderCompleted(image)
+        this._image = new Image()
+        this._image.src = this.thumb_image_path
+        this._image.onload = () =>
+        {
+            this._image.onload = null
+            this._image.style.width = `${this._image.naturalWidth}px`;
+            this._image.style.height = `${this._image.naturalHeight}px`;
+
+            this.onRenderCompleted(this._image)
+        }
+    },
+
+    /**
+     * Replaces THUMB with full resolution image.
+     */
+    renderFullImage: function()
+    {
+        const full = new Image()
+        full.src = this.full_image_path
+        full.onload = () =>
+        {
+            this._image.src = this.full_image_path
+        }
     }
 }
 
@@ -243,28 +267,26 @@ const RemoveItemMixin =
     // "virtual methods"
     isRemoveAllowed: function () { throw new Error('Not implemented') },
 
-    initRemove: function(image)
+    initRemove: function(node)
     {
-        image.addEventListener('click', (e) =>
+        node.addEventListener('click', (e) =>
         {
             if (!this.isRemoveAllowed()) { return }
 
-            // const image_id = image.getAttribute('data-id')
-
-            image.classList.remove('op-fail')
-            image.classList.add('loading')
+            node.classList.remove('op-fail')
+            node.classList.add('loading')
             fetch(this.remove_url)
                 .then(r =>
                 {
-                    if (!r.ok) { throw new Error("Image not removed") }
-                    image.classList.add('vis-hide')
+                    if (!r.ok) { throw new Error("Node not removed") }
+                    node.classList.add('vis-hide')
 
-                    const imageClone = image.cloneNode(true)
-                    image.parentNode.replaceChild(imageClone, image)
+                    const clone = node.cloneNode(true)
+                    node.parentNode.replaceChild(clone, node)
                 })
                 .catch(err =>
                 {
-                    image.classList.add('op-fail')
+                    node.classList.add('op-fail')
                     console.log(err)
                 })
         })
