@@ -85,7 +85,7 @@ class MainWindow(tk.Frame):
             return
 
         try:
-            importer = ImageMetadataImporter(Env.DB_FILE)
+            importer = ImageMetadataImporter()
             importer.import_metadata(Env.IMAGES_PATH)
         except Exception as e:
             messagebox.showinfo("Nope", "Something went wrong. Check logs for details.")
