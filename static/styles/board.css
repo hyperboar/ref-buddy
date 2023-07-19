@@ -31,3 +31,8 @@ body {
 {
     font-size: 20px;
 }
+
+.inter-disable
+{
+    pointer-events: none;
+}

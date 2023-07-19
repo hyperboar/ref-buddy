@@ -1,6 +1,7 @@
 
 const DraggableMixin =
 {
+    kNoInteractionClass:'inter-disable',
     kClassDraggable: 'draggable',
 
     left:0,
@@ -9,6 +10,8 @@ const DraggableMixin =
     _mvNode: null,
     _offsetX: 0,
     _offsetY: 0,
+
+    _enabledMv: true,
 
     // "virtual methods"
     onMoveCompleted: function(left, top) { throw new Error('Not implemented') },
@@ -28,6 +31,21 @@ const DraggableMixin =
 
         this._mvInter.addEventListener("mousedown",  this._tmp_startDrag)
         this._mvInter.addEventListener("touchstart", this._tmp_startDrag, {passive: false})
+    },
+
+    setMovableEnabled(on)
+    {
+        if (this._enabledMv === on) { return }
+        this._enabledMv = on
+
+        if (on)
+        {
+            this._mvNode.classList.remove(this.kNoInteractionClass)
+        }
+        else
+        {
+            this._mvNode.classList.add(this.kNoInteractionClass)
+        }
     },
 
     setPosition: function(x, y)
@@ -101,6 +119,7 @@ const DraggableMixin =
 
 const ScalableMixin =
 {
+    kNoInteractionClass:'inter-disable',
     kMinScale: 0.3,
     kMaxScale: 7.0,
 
@@ -111,6 +130,8 @@ const ScalableMixin =
     _startDistance: 0,
     _startScale:1.0,
     _wheelStepFactor:0.1,
+
+    _enabledScl:true,
 
 
     // "virtual methods"
@@ -130,6 +151,21 @@ const ScalableMixin =
         this._sclInter.addEventListener("wheel", this._tmp_wheelZoom, {passive: false})
         this._sclInter.addEventListener("touchstart", this._tmp_startTouchScale, {passive: false})
         this._sclInter.addEventListener("touchmove", this._tmp_touchScaleImage, {passive: false})
+    },
+
+    setScalableEnabled(on)
+    {
+        if (this._enabledScl === on) { return }
+        this._enabledScl = on
+
+        if (on)
+        {
+            this._sclNode.classList.remove(this.kNoInteractionClass)
+        }
+        else
+        {
+            this._sclNode.classList.add(this.kNoInteractionClass)
+        }
     },
 
     setScale: function(scale)

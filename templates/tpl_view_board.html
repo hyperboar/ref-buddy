@@ -79,10 +79,31 @@
 
     document.addEventListener('hotkeyDown', (e) =>
     {
-        if (!e.detail.isPressedMult(['Space', 'KeyR'])) { return }
+        if (e.detail.isPressedMult(['Space', 'KeyR']))
+        {
+            board.setPosition(0,0)
+            board.setScale(1)
+        }
 
-        board.setPosition(0,0)
-        board.setScale(1)
+        if (e.detail.isPressed(['Space']))
+        {
+            Object.values(boardItems).forEach(item =>
+            {
+                item.setMovableEnabled(false)
+                item.setScalableEnabled(false)
+            })
+        }
+    })
+    document.addEventListener('hotkeyUp', (e) =>
+    {
+        if (!e.detail.isPressed(['Space']))
+        {
+            Object.values(boardItems).forEach(item =>
+            {
+                item.setMovableEnabled(true)
+                item.setScalableEnabled(true)
+            })
+        }
     })
 </script>
 </body>
