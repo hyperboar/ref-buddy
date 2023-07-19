@@ -117,13 +117,25 @@ function simpleShowLoadableWidget(url, triggerSelector, containerSelector, onLoa
  */
 class Hotkeys
 {
+    evt_down = 'hotkeyDown'
+    evt_up   = 'hotkeyUp'
+
     pressedKeys = {}
-    hotkeyEvent = null
+    eventDown = null
+    eventUp = null
 
     constructor()
     {
-        this.hotkeyEvent = new CustomEvent(
-            "hotkeyDown",
+        this.eventDown = new CustomEvent(
+            this.evt_down,
+            {
+                bubbles: true, // Allow event to bubble up through the DOM tree
+                cancelable: true, // Allow event to be canceled
+                detail: this // Optional data to pass with the event
+            })
+
+        this.eventUp = new CustomEvent(
+            this.evt_up,
             {
                 bubbles: true, // Allow event to bubble up through the DOM tree
                 cancelable: true, // Allow event to be canceled
@@ -141,7 +153,7 @@ class Hotkeys
                 this.pressedKeys['KeyCtrl'] = true
             }
 
-            document.dispatchEvent(this.hotkeyEvent)
+            document.dispatchEvent(this.eventDown)
         })
         document.addEventListener('keyup', (e) =>
         {
@@ -151,6 +163,8 @@ class Hotkeys
             {
                 delete this.pressedKeys['KeyCtrl']
             }
+
+            document.dispatchEvent(this.eventUp)
         })
     }
 
