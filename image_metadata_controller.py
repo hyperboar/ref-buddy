@@ -43,8 +43,10 @@ class ImageMetadataController:
         else:
             path_id = path_row.id
 
+        source_type = ImageMetadata.source_type_by_path(path)
+
         # print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
-        new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file)
+        new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type)
         session.add(new_image)
 
         if auto_commit:

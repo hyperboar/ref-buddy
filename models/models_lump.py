@@ -4,6 +4,8 @@ from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, func, TypeDecorator, Float
 from sqlalchemy.orm import relationship, declarative_base, object_session, sessionmaker
 
+from PIL import Image
+
 from Env import Env
 
 # Create an in-memory SQLite database
@@ -48,6 +50,7 @@ class ImageMetadata(Base):
     image_id = Column(Integer, name='id', primary_key=True)
     filename = Column(Text, nullable=False)
     study_type_id = Column(Integer, ForeignKey('study_types.id'), name='study_type', nullable=False)
+    source_type_id = Column(Integer, name='source_type', default=0, nullable=False)
     path_id = Column(Integer, ForeignKey('paths.id'), name='path', nullable=False)
     fav = Column(Integer, default=0)
     count = Column(Integer, default=0)
@@ -89,6 +92,25 @@ class ImageMetadata(Base):
 
         session.flush()
 
+    @staticmethod
+    def source_type_by_path(path:str) -> int:
+        """
+        0 - not set, need update
+        1 - static image
+        2 - animation
+        3 - video
+        """
+        ext = os.path.splitext(path)[1][1:]
+        match ext:
+            case 'mp4', 'webm': return 3
+            case 'gif': return 2
+
+        if ext == 'webp':
+            with Image.open(path) as img:
+                if hasattr(img, 'is_animated') and img.is_animated:
+                    return 2
+
+        return 1 # simple image
 
     def __str__(self):
         return f"{self.image_id}({self.last_viewed}): {self.path} fav({self.fav}) r({self.rating}) c({self.count}))"

@@ -8,7 +8,7 @@ from sqlalchemy import func, exists
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe
+from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag
 
 
 def get_db_info():
@@ -167,10 +167,14 @@ def rehash_images(rehash_all:bool):
     # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
-def assign_folder_tags():
+def assign_folder_tags(session=None):
     """Go over all imag_metadata rows and add tags academic, pron, the_bits, artists and frames(video)"""
 
     print(f'Assigning essential tags to new images...', end='')
+
+    if session is None:
+        session = Session()
+
     conn = sqlite3.connect(Env.DB_FILE)
 
     c = conn.cursor()
@@ -210,18 +214,45 @@ def assign_folder_tags():
         WHERE study_type = 5;
     """)
 
-    c.execute(f"""
-        -- gifs
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 82
-        FROM image_metadata
-        WHERE filename like '%.gif';
-    """)
-
     conn.commit()
     conn.close()
 
     print(f'\rAssigning essential tags to new images... Done')
+
+def assign_animation_tags(session=None):
+    print('Assigning tags to animations and videos...', end='')
+    if session is None:
+        session = Session()
+
+    tag_anim = session.query(Tag).filter(Tag.tag == 'animated').first()
+    # tag_vid = session.query(Tag).filter(Tag.tag == 'video').first()
+
+
+    if tag_anim is None:
+        raise ValueError('Tag "animated" not found')
+    # if tag_vid is None:
+    #     raise ValueError('Tag "video" not found')
+
+    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.webp')).all() + \
+             session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.gif')).all()
+    for im in images:
+        st = ImageMetadata.source_type_by_path(im.path_abs)
+        if st == 1:
+            continue
+        session.merge(ImageTag(image_id=im.image_id, tag_id=tag_anim.id))
+        session.flush()
+
+    # images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4')).all()
+    # for im in images:
+    #     st = ImageMetadata.source_type_by_path(im.path_abs)
+    #     if st == 1:
+    #         continue
+    #     session.merge(ImageTag(image_id=im.image_id, tag_id=tag_vid.id))
+    #     session.flush()
+
+    session.commit()
+
+    print('\rAssigning tags to animations and videos... Done', end='')
 
 def mark_all_lost():
     make_database_backup(marker='mark_lost', force=True)
@@ -434,9 +465,27 @@ def make_database_backup(marker:str='',force:bool=False):
     to_remove = backups[:len(backups) - Env.DB_BACKUP_MAX_COUNT]
     [os.remove(p[0]) for p in to_remove]
 
+def reassign_source_type_to_all():
+    session = Session()
+    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0)
+
+    offset = 0
+    limit = 500
+    while True:
+        images = q.offset(offset).limit(limit).all()
+        if len(images) == 0:
+            break
+
+        for im in images:
+            im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
+        session.flush()
+
+    session.commit()
 
 if __name__ == '__main__':
-    cleanup_lost_images()
+    # cleanup_lost_images()
+
+    reassign_source_type_to_all()
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
