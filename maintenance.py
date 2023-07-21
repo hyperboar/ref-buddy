@@ -8,12 +8,12 @@ from sqlalchemy import func, exists
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe
+from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag
 
 
 def get_db_info():
     # if not os.path.isfile(Env.DB_FILE):
-    #     print(f"Database file '{Env.DB_FILE}' does not exist.")
+    #     print(f'Database file '{Env.DB_FILE}' does not exist.')
     #     return
     #
     # conn = sqlite3.connect(Env.DB_FILE)
@@ -22,21 +22,21 @@ def get_db_info():
     # table = Ctrl.TABLE_NAME
     #
     # # Execute the query to check if the table exists
-    # cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+    # cursor.execute(f'SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'')
     #
     # # Get the result set and check if the table exists
     # result = cursor.fetchone()
     # if result:
-    #     print(f"The '{table}' table exists.")
+    #     print(f'The '{table}' table exists.')
     # else:
-    #     print(f"The '{table}' table does not exist.")
+    #     print(f'The '{table}' table does not exist.')
     #     cursor.close()
     #     conn.close()
     #     return
     #
-    # cursor.execute(f"SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}")
+    # cursor.execute(f'SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}')
     # num_images = cursor.fetchone()[0]
-    # print(f"Database file '{Env.DB_FILE}' exists and contains {num_images} images.")
+    # print(f'Database file '{Env.DB_FILE}' exists and contains {num_images} images.')
     #
     # cursor.close()
     # conn.close()
@@ -46,7 +46,7 @@ def get_db_info():
 def create_new_db():
     # make_database_backup(True)
     # if not os.path.isfile(Env.DB_FILE):
-    #     print(f"Database file '{Env.DB_FILE}' do not exist. Creating one.")
+    #     print(f'Database file '{Env.DB_FILE}' do not exist. Creating one.')
     #
     # conn = sqlite3.connect(Env.DB_FILE)
     # cursor = conn.cursor()
@@ -54,15 +54,15 @@ def create_new_db():
     # table = ImageMetadata.TABLE_NAME
     #
     # # Execute the query to check if the table exists
-    # cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+    # cursor.execute(f'SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'')
     # # Get the result set and check if the table exists
     # result = cursor.fetchone()
     # if result:
-    #     print(f"The '{table}' table exists. Removing.")
+    #     print(f'The '{table}' table exists. Removing.')
     #     cursor.execute('DROP TABLE image_metadata')
     #
     # cursor.execute(ImageMetadata.get_table_schema())
-    # print(f"New database created at path '{Env.DB_FILE}'.")
+    # print(f'New database created at path '{Env.DB_FILE}'.')
     #
     # cursor.close()
     # conn.close()
@@ -83,6 +83,7 @@ def generate_thumbs():
     i_step = 42
     new_count = 0
 
+    print(f'0% Generating thumbs. {new_count} new', end='')
     while True:
         images = s.query(ImageMetadata).limit(limit).offset(offset).all()
         if len(images) == 0:
@@ -90,15 +91,16 @@ def generate_thumbs():
 
         offset += limit
 
+
         # Generate thumbnail for each image
         for img in images:
             i += 1
             if (i % i_step) == 0:
-                print(f"\rProgress: {int(i / max_i * 100.)}% ({new_count} new)", end='')
+                print(f'\r{int(i / max_i * 100.)}% Generating thumbs. {new_count} new', end='')
                 # time.sleep(1)
 
             # Generate thumbnail filename by using id from database
-            thumb_filename = os.path.join(Env.THUMB_PATH, f"{img.image_id}.jpg")
+            thumb_filename = os.path.join(Env.THUMB_PATH, f'{img.image_id}.jpg')
 
             # Skip image if thumbnail already exists
             if os.path.exists(thumb_filename):
@@ -115,10 +117,10 @@ def generate_thumbs():
             # Save thumbnail as JPEG file
             image.convert('RGB').save(thumb_filename, 'JPEG')
 
-        print(f"\rProgress: {int(i / max_i * 100.)}% ({new_count} new)", end='')
+    print(f'\r{int(i / max_i * 100.)}% Generating thumbs. {new_count} new... Done')
 
 
-def rehash_images(rehash_all):
+def rehash_images(rehash_all:bool):
     s = Session()
 
     rows_max = s.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.image_hash.is_(None)).scalar() if rehash_all else s.query(func.count()).select_from(ImageMetadata).scalar()
@@ -127,6 +129,7 @@ def rehash_images(rehash_all):
 
     q = s.query(ImageMetadata)
 
+    print(f'0% Hashing images...', end='')
     while True:
         if rehash_all:
             images = q.offset(offset).limit(limit).all()
@@ -137,7 +140,7 @@ def rehash_images(rehash_all):
             break
 
         for image in images:
-            print(f"\r{int(offset/rows_max * 100)}%... Hashing {image.image_id} {image.path}", end="")
+            print(f'\r{int(offset/rows_max * 100)}% Hashing images {image.image_id} {image.path}', end='')
             image_path = os.path.join(Env.IMAGES_PATH, image.path)
 
             if not os.path.exists(image_path):
@@ -153,7 +156,7 @@ def rehash_images(rehash_all):
 
     s.commit()
 
-    print("\r100% Rehashing complete", end="")
+    print('\r100% Hashing images... Done' + (' ' * 50))
 
     # display duplicates
     # SELECT pa.path, A.filename, A.lost, pb.path, B.filename
@@ -164,8 +167,13 @@ def rehash_images(rehash_all):
     # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
-def assign_folder_tags():
+def assign_folder_tags(session=None):
     """Go over all imag_metadata rows and add tags academic, pron, the_bits, artists and frames(video)"""
+
+    print(f'Assigning essential tags to new images...', end='')
+
+    if session is None:
+        session = Session()
 
     conn = sqlite3.connect(Env.DB_FILE)
 
@@ -206,16 +214,45 @@ def assign_folder_tags():
         WHERE study_type = 5;
     """)
 
-    c.execute(f"""
-        -- gifs
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 82
-        FROM image_metadata
-        WHERE filename like '%.gif';
-    """)
-
     conn.commit()
     conn.close()
+
+    print(f'\rAssigning essential tags to new images... Done')
+
+def assign_animation_tags(session=None):
+    print('Assigning tags to animations and videos...', end='')
+    if session is None:
+        session = Session()
+
+    tag_anim = session.query(Tag).filter(Tag.tag == 'animated').first()
+    # tag_vid = session.query(Tag).filter(Tag.tag == 'video').first()
+
+
+    if tag_anim is None:
+        raise ValueError('Tag "animated" not found')
+    # if tag_vid is None:
+    #     raise ValueError('Tag "video" not found')
+
+    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.webp')).all() + \
+             session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.gif')).all()
+    for im in images:
+        st = ImageMetadata.source_type_by_path(im.path_abs)
+        if st == 1:
+            continue
+        session.merge(ImageTag(image_id=im.image_id, tag_id=tag_anim.id))
+        session.flush()
+
+    # images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4')).all()
+    # for im in images:
+    #     st = ImageMetadata.source_type_by_path(im.path_abs)
+    #     if st == 1:
+    #         continue
+    #     session.merge(ImageTag(image_id=im.image_id, tag_id=tag_vid.id))
+    #     session.flush()
+
+    session.commit()
+
+    print('\rAssigning tags to animations and videos... Done', end='')
 
 def mark_all_lost():
     make_database_backup(marker='mark_lost', force=True)
@@ -246,11 +283,11 @@ def mark_all_lost():
             elif image.lost == 0 and not os.path.exists(image_path):
                 image.mark_as_lost(session=s, auto_commit=False)
                 lost.append(image_path)
-        print(f"\r{int(offset / rows_max * 100)}%... Searching for lost images. {len(lost)} lost, {len(found)} found so far", end="")
+        print(f'\r{int(offset / rows_max * 100)}%... Searching for lost images. {len(lost)} lost, {len(found)} found so far', end='')
 
-    print(f"\n{len(lost)} lost images\n")
+    print(f'\n{len(lost)} lost images\n')
     [print(p) for p in lost]
-    print(f"\nUnlost {len(found)} lost images\n")
+    print(f'\nUnlost {len(found)} lost images\n')
     [print(p) for p in found]
 
     s.commit()
@@ -428,17 +465,38 @@ def make_database_backup(marker:str='',force:bool=False):
     to_remove = backups[:len(backups) - Env.DB_BACKUP_MAX_COUNT]
     [os.remove(p[0]) for p in to_remove]
 
+def reassign_source_type_to_all():
+    session = Session()
+    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0, ImageMetadata.lost == 0)
 
-if __name__ == "__main__":
-    cleanup_lost_images()
+    offset = 0
+    limit = 500
+    while True:
+        images = q.offset(offset).limit(limit).all()
+        if len(images) == 0:
+            break
+
+        for im in images:
+            if not os.path.exists(im.path_abs):
+                im.lost = 1
+                continue
+            im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
+        session.flush()
+
+    session.commit()
+
+if __name__ == '__main__':
+    # cleanup_lost_images()
+
+    reassign_source_type_to_all()
     pass
-    # print(f"\rAssigning essential tags to new images...", end="")
+    # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
-    # print(f"\rAssigning essential tags to new images... Done!", end="")
+    # print(f'\rAssigning essential tags to new images... Done!', end='')
 
-    # if len(sys.argv) > 1 and sys.argv[1] == "--new-db":
+    # if len(sys.argv) > 1 and sys.argv[1] == '--new-db':
     #     create_new_db()
-    # elif len(sys.argv) > 1 and sys.argv[1] == "--gen-thumb":
+    # elif len(sys.argv) > 1 and sys.argv[1] == '--gen-thumb':
     #     generate_thumbs()
     # else:
     #     get_db_info()

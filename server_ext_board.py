@@ -1,38 +1,59 @@
-from flask import Blueprint, request, abort, render_template_string, render_template
+from flask import Blueprint, request, abort, render_template_string, render_template, jsonify, url_for
 from models.models_lump import Session, ImageMetadata, Path, BoardImage, Board
 from server_args_helpers import get_arg, Args
 from server_widget_helpers import get_boards_all
+import json
 
 routes_board = Blueprint('routes_board', __name__)
+
+@routes_board.route('/boards')
+def view_board_all():
+    session = Session()
+
+    boards = session.query(Board).all()
+    out = render_template('tpl_view_board_all.html', boards=boards)
+    session.close()
+    return out
 
 @routes_board.route('/board/<int:b_id>')
 def view_board(b_id):
     session = Session()
 
-    # ids = [92245, 92242, 92240, 85145, 85132, 85126, 85096, 3036]
     board = session.get(Board, b_id)
     out = render_template('tpl_view_board.html', board=board)
     session.close()
+    return out
+
+@routes_board.route('/board/add', methods=['POST'])
+def board_add():
+    title = request.form.get('title')
+
+    session = Session()
+    board = Board(title=title)
+    session.add(board)
+    session.commit()
+
+    b = {"id":board.id, "title":board.title, "url":url_for('routes_board.view_board', b_id=board.id)}
+    out = jsonify(b)
     return out
 
 @routes_board.route('/board-images/<int:b_id>')
 def get_board_images(b_id):
     session = Session()
 
-    images = [(bim.image, bim.tr) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
+    images = [(bim.image, bim.tr_json, bim.board_id) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
     json_images = []
-    for im, tr in images:
-        json_tr = tr\
-            .replace('tx', '"tx"')\
-            .replace('ty', '"ty"')\
-            .replace('rx', '"rx"')\
-            .replace('ry', '"ry"')\
-            .replace('s', '"s"')
-        json = '{' + f'"image_id":{im.image_id},"path":"/thumb/{im.image_id}.jpg","tr":{json_tr}' + '}'
-        json_images.append(json)
+    for im, tr, b_id in images:
+        item = {
+            "image_id":im.image_id,
+            "thumb_path":f"/thumb/{im.image_id}.jpg",
+            "full_path":f"/image/{im.image_id}",
+            "tr":json.loads(tr),
+            "study_url":url_for('routes_image.study_image', image_id=im.image_id) + "?same-folder=true&tags=&tag-set=",
+            "remove_url":  url_for('routes_board.remove_images_from_board') + f'?b-id={b_id}&image-id={im.image_id}'}
+        json_images.append(item)
 
-    str_json = ",".join(json_images)
-    out = render_template_string('{' + f'"images":[{str_json}]' + '}')
+    out = jsonify({"images":json_images})
     session.close()
     return out
 

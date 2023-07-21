@@ -43,8 +43,10 @@ class ImageMetadataController:
         else:
             path_id = path_row.id
 
+        source_type = ImageMetadata.source_type_by_path(os.path.join(Env.IMAGES_PATH, path))
+
         # print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
-        new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file)
+        new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type)
         session.add(new_image)
 
         if auto_commit:
@@ -109,7 +111,7 @@ class ImageMetadataController:
             session = Session()
 
         q = ImageMetadataController.get_query_imagemetadata(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
-        rows = q.order_by(ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
+        rows = q.order_by(-ImageMetadata.rating,ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
 
         if len(rows) == 0:
             p = session.get(Path, path_id)

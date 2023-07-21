@@ -20,11 +20,6 @@ body
     margin-right: 20px;
 }
 
-.dir-link {
-    width: 15px;
-    height: 15px;
-}
-
 .tiles-container {
     display: flex;
     flex-wrap: wrap;

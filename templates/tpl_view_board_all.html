@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <link rel="stylesheet" href="/static/styles/board.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
+    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
+    <title>Boards</title>
+</head>
+<body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a>
+    <h1>Boards</h1>
+</div>
+<div><button id="add-btn">Add</button></div>
+<form id="board-form" class="vis-hide">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title">
+
+    <button type="submit">Create</button>
+</form>
+<div class="boards">
+    {% for b in boards %}
+        <div class="board-line" data-id="{{ b.id }}">
+            <span>[{{ b.id }}]</span>&nbsp;&nbsp;<span>{{ b.title }}</span>
+            <a href="{{ url_for('routes_board.view_board', b_id=b.id) }}" target="_blank"
+               class="no-decor but-decor-hover">Open <img class="dir-link" src="/static/link.png"></a>
+        </div>
+    {% endfor %}
+</div>
+</body>
+<script>
+
+    document.getElementById('add-btn').addEventListener('click', e =>
+    {
+        document.getElementById('board-form').classList.remove('vis-hide')
+    })
+
+    document.getElementById('board-form').addEventListener('submit', e =>
+    {
+        e.preventDefault();
+
+        const form = new FormData(e.target);
+        const url = '/board/add';
+
+        const btn = document.getElementById('board-form').querySelector('button[type="submit"]')
+        btn.classList.remove('op-success', 'op-fail')
+        btn.classList.add('loading')
+        fetch(url, {method: 'POST', body: form})
+            .then(r =>
+            {
+                if (!r.ok) { throw new Error("Something went wrong") }
+                console.log(r)
+                return r.json()
+            })
+            .then(data =>
+            {
+                const brds = document.querySelector('.boards')
+                const tpl = brds.firstElementChild.cloneNode(true)
+
+                tpl.setAttribute('data-id', data.id)
+                tpl.querySelector('a').href = data.url
+                tpl.querySelectorAll('span')[0].textContent = `[${data.id}]`
+                tpl.querySelectorAll('span')[1].textContent =  data.title
+
+                brds.appendChild(tpl)
+
+                document.getElementById('board-form').classList.add('vis-hide')
+            })
+            .catch(function (error)
+            {
+                console.log('Error:', error)
+                btn.classList.add('op-fail')
+            })
+            .finally(() =>
+            {
+                btn.classList.remove('loading')
+            })
+    });
+</script>
+</html>

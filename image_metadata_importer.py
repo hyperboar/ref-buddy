@@ -3,12 +3,12 @@ import sys
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from maintenance import assign_folder_tags, make_database_backup
+from maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags
 from models.models_lump import Session
 
 
 class ImageMetadataImporter:
-    def __init__(self, db_path):
+    def __init__(self):
         pass
 
     def import_metadata(self, folder_path):
@@ -26,7 +26,7 @@ class ImageMetadataImporter:
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
             max_count = len(filenames)
-            msg_dir = f"Importing '{dir_path}'..."
+            msg_dir = f'Importing "{dir_path}"...'
             self.print_total(msg_dir, len(filenames))
             for file_name in filenames:
                 if not file_name.endswith(formats):
@@ -44,19 +44,22 @@ class ImageMetadataImporter:
                         count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, False)
                 except Exception as e:
-                    print(f"\nError processing  {file_path}: {sys.exc_info()[0]}")
+                    print(f'\nError processing  {file_path}: {sys.exc_info()[0]}. {e}')
                     raise
-            print(f"")
+            print(f'')
 
-        if new_count > 0:
+        if new_count == 0:
+            print(f'Images import completed! Found {new_count} new files.')
+        else:
             session.commit()
-            print("")
-            print(f"\rAssigning essential tags to new images...", end="")
-            assign_folder_tags()
-            print(f"\rAssigning essential tags to new images... Done", end="")
+            print(f'Images import completed! Found {new_count} new files.')
+            assign_folder_tags(session)
+            assign_animation_tags(session)
+            rehash_images(False)
+            make_database_backup(marker='after_import', force=True)
+            generate_thumbs()
 
-        print(f"\nImport completed! Found {new_count} new files.")
-        make_database_backup(marker='after_import', force=True)
+        print(f'Import completed.')
 
     @staticmethod
     def print_begin(msg):
@@ -64,21 +67,21 @@ class ImageMetadataImporter:
 
     @staticmethod
     def print_total(msg_dir, total: int):
-        print(f"\r{msg_dir}. {total} files in this folder", end='')
+        print(f'\r{msg_dir}. {total} files in this folder', end='')
 
     @staticmethod
     def print_progress(msg_dir, file_name: str, cur: int, total: int, is_new: bool):
         if is_new:
-            print(f"\r{msg_dir} ({cur}/{total}) New '{file_name}'", end='')
+            print(f'\r{msg_dir} ({cur}/{total}) New "{file_name}"', end='')
         else:
             pass
-            # print(f"\r{msg_dir} ({cur}/{total}) File exists '{file_name}'", end='')
+            # print(f'\r{msg_dir} ({cur}/{total}) File exists '{file_name}'', end='')
 
 
 if __name__ == '__main__':
     path = sys.argv[1]
     if not os.path.isabs(path):
-        print("Error: Please provide a valid absolute path to the folder.")
+        print('Error: Please provide a valid absolute path to the folder.')
         sys.exit(1)
 
     ImageMetadataImporter.import_images(path)

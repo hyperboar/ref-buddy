@@ -37,6 +37,16 @@ button
     text-decoration: none;
 }
 
+.but-decor-hover:hover
+{
+    text-decoration: underline;
+}
+
+.dir-link {
+    width: 15px;
+    height: 15px;
+}
+
 /* Rating */
 .rate-up, .rate-dn
 {

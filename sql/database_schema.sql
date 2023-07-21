@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS image_metadata (
     count INTEGER DEFAULT 0,
     rating INTEGER DEFAULT 0,
     lost INTEGER DEFAULT 0,
+    image_type INTEGER DEFAULT 0,
     last_viewed TIMESTAMP DEFAULT '1999-01-01 00:00:00',
     imported_at TIMESTAMP DEFAULT (datetime('now')),
     hash TEXT,
