@@ -467,7 +467,7 @@ def make_database_backup(marker:str='',force:bool=False):
 
 def reassign_source_type_to_all():
     session = Session()
-    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0)
+    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0, ImageMetadata.lost == 0)
 
     offset = 0
     limit = 500
@@ -477,6 +477,9 @@ def reassign_source_type_to_all():
             break
 
         for im in images:
+            if not os.path.exists(im.path_abs):
+                im.lost = 1
+                continue
             im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
         session.flush()
 
