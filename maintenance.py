@@ -233,8 +233,10 @@ def assign_animation_tags(session=None):
     # if tag_vid is None:
     #     raise ValueError('Tag "video" not found')
 
-    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.webp')).all() + \
-             session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.gif')).all()
+    q = session.query(ImageMetadata).filter(ImageMetadata.lost == 0)
+
+    images = q.filter(ImageMetadata.filename.like('%.webp')).all() + \
+             q.filter(ImageMetadata.filename.like('%.gif')).all()
     for im in images:
         st = ImageMetadata.source_type_by_path(im.path_abs)
         if st == 1:
