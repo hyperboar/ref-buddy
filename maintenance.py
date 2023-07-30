@@ -75,7 +75,7 @@ def generate_thumbs():
 
     s = Session()
 
-    max_i = s.query(func.count()).select_from(ImageMetadata).scalar()
+    max_i = s.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.lost == 0).scalar()
     limit = 500
     offset = 0
 
@@ -83,9 +83,13 @@ def generate_thumbs():
     i_step = 42
     new_count = 0
 
+    broken_files = []
+
+    q = s.query(ImageMetadata).filter(ImageMetadata.lost == 0)
+
     print(f'0% Generating thumbs. {new_count} new', end='')
     while True:
-        images = s.query(ImageMetadata).limit(limit).offset(offset).all()
+        images = q.offset(offset).limit(limit).all()
         if len(images) == 0:
             break
 
@@ -106,18 +110,25 @@ def generate_thumbs():
             if os.path.exists(thumb_filename):
                 continue
 
+            if not os.path.exists(img.path_abs):
+                broken_files.append(img.path_abs)
+                continue
+
             new_count += 1
 
-            path = os.path.join(Env.IMAGES_PATH, img.path)
+            try:
+                with Image.open(img.path_abs) as image:
+                    image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
 
-            # Load image and generate thumbnail
-            image = Image.open(path)
-            image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
-
-            # Save thumbnail as JPEG file
-            image.convert('RGB').save(thumb_filename, 'JPEG')
+                    # Save thumbnail as JPEG file
+                    image.convert('RGB').save(thumb_filename, 'JPEG')
+            except:
+                broken_files.append(img.path_abs)
 
     print(f'\r{int(i / max_i * 100.)}% Generating thumbs. {new_count} new... Done')
+    if len(broken_files) > 0:
+        print(f'{len(broken_files)} files had issues:')
+        [print(p) for p in broken_files]
 
 
 def rehash_images(rehash_all:bool):
