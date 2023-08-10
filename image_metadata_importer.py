@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
@@ -23,6 +24,8 @@ class ImageMetadataImporter:
 
         session = Session()
 
+        time_of_import = datetime.now()
+
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
             max_count = len(filenames)
@@ -39,7 +42,7 @@ class ImageMetadataImporter:
                         count += 1
                         new_count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, True)
-                        Ctrl.create(file_path, sts, session=session)
+                        Ctrl.create(file_path, sts, time_of_import, session=session)
                     else:
                         count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, False)

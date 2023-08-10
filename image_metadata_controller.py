@@ -13,7 +13,7 @@ class ImageMetadataController:
     # region CRUD
 
     @staticmethod
-    def create(path: str, study_types=None, session=None) -> 'ImageMetadata':
+    def create(path: str, study_types=None, import_at=None, session=None) -> 'ImageMetadata':
 
         dir = os.path.dirname(path)
         file = os.path.basename(path)
@@ -46,7 +46,10 @@ class ImageMetadataController:
         source_type = ImageMetadata.source_type_by_path(os.path.join(Env.IMAGES_PATH, path))
 
         # print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
-        new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type)
+        if import_at is None:
+            new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type)
+        else:
+            new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type, imported_at=import_at)
         session.add(new_image)
 
         if auto_commit:
