@@ -1,4 +1,5 @@
-from datetime import datetime
+import math
+from datetime import datetime, timedelta
 import hashlib
 import os
 import shutil
@@ -75,7 +76,7 @@ def generate_thumbs():
 
     s = Session()
 
-    max_i = s.query(func.count()).select_from(ImageMetadata).scalar()
+    max_i = s.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.lost == 0).scalar()
     limit = 500
     offset = 0
 
@@ -83,9 +84,13 @@ def generate_thumbs():
     i_step = 42
     new_count = 0
 
+    broken_files = []
+
+    q = s.query(ImageMetadata).filter(ImageMetadata.lost == 0)
+
     print(f'0% Generating thumbs. {new_count} new', end='')
     while True:
-        images = s.query(ImageMetadata).limit(limit).offset(offset).all()
+        images = q.offset(offset).limit(limit).all()
         if len(images) == 0:
             break
 
@@ -106,18 +111,25 @@ def generate_thumbs():
             if os.path.exists(thumb_filename):
                 continue
 
+            if not os.path.exists(img.path_abs):
+                broken_files.append(img.path_abs)
+                continue
+
             new_count += 1
 
-            path = os.path.join(Env.IMAGES_PATH, img.path)
+            try:
+                with Image.open(img.path_abs) as image:
+                    image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
 
-            # Load image and generate thumbnail
-            image = Image.open(path)
-            image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
-
-            # Save thumbnail as JPEG file
-            image.convert('RGB').save(thumb_filename, 'JPEG')
+                    # Save thumbnail as JPEG file
+                    image.convert('RGB').save(thumb_filename, 'JPEG')
+            except:
+                broken_files.append(img.path_abs)
 
     print(f'\r{int(i / max_i * 100.)}% Generating thumbs. {new_count} new... Done')
+    if len(broken_files) > 0:
+        print(f'{len(broken_files)} files had issues:')
+        [print(p) for p in broken_files]
 
 
 def rehash_images(rehash_all:bool):
@@ -233,8 +245,10 @@ def assign_animation_tags(session=None):
     # if tag_vid is None:
     #     raise ValueError('Tag "video" not found')
 
-    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.webp')).all() + \
-             session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.gif')).all()
+    q = session.query(ImageMetadata).filter(ImageMetadata.lost == 0)
+
+    images = q.filter(ImageMetadata.filename.like('%.webp')).all() + \
+             q.filter(ImageMetadata.filename.like('%.gif')).all()
     for im in images:
         st = ImageMetadata.source_type_by_path(im.path_abs)
         if st == 1:
@@ -485,10 +499,52 @@ def reassign_source_type_to_all():
 
     session.commit()
 
+def collapse_import_times():
+    session = Session()
+    q = session.query(ImageMetadata)
+
+    current_im = q.order_by(ImageMetadata.imported_at).first()
+    interval = 5 * 60
+
+    max_i = session.query(func.count()).select_from(ImageMetadata).scalar()
+    i = 0
+
+    make_database_backup('before_collapse_import_times' ,True)
+
+    print(f'{i} checks passed. Last timestamp was {current_im.imported_at}', end='')
+    while i < max_i:
+        i += 1
+        cur_time = current_im.imported_at
+        cur_time_ts = cur_time.timestamp()
+        start_time = cur_time - timedelta(seconds=1)
+        end_time = cur_time   + timedelta(seconds=interval)
+        images = q.filter(ImageMetadata.imported_at.between(start_time,end_time)).all()
+        for im in images:
+            if math.isclose(im.imported_at.timestamp(), cur_time_ts, rel_tol=1e-4, abs_tol=1e-4):
+                continue
+            im.imported_at = cur_time
+
+        session.commit()
+
+        print(f'\r{i} checks passed. Last timestamp was {cur_time}', end='')
+
+        current_im = q.filter(ImageMetadata.imported_at > cur_time).order_by(ImageMetadata.imported_at).first()
+
+        if current_im is None:
+            break
+
+    print(f'\r{i} checks passed. Last timestamp was {cur_time}... Done')
+
+    session.close()
+
+    make_database_backup('after_collapse_import_times', True)
+
+
 if __name__ == '__main__':
     # cleanup_lost_images()
 
-    reassign_source_type_to_all()
+    # reassign_source_type_to_all()
+    collapse_import_times()
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()

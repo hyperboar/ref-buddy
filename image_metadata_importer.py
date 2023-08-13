@@ -1,10 +1,12 @@
 import os
 import sys
+import time
+from datetime import datetime
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
 from maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags
-from models.models_lump import Session
+from models.models_lump import Session, Path, ImageMetadata
 
 
 class ImageMetadataImporter:
@@ -15,6 +17,7 @@ class ImageMetadataImporter:
         formats = tuple(Env.IMPORT_FORMATS)
         sts = Ctrl.get_study_types()
 
+        start_time = time.time()
         new_count = 0
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
@@ -23,23 +26,31 @@ class ImageMetadataImporter:
 
         session = Session()
 
+        time_of_import = datetime.now()
+
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
             max_count = len(filenames)
             msg_dir = f'Importing "{dir_path}"...'
             self.print_total(msg_dir, len(filenames))
+
+            rel_path = os.path.relpath(dir_path, folder_path)
+            path_obj = session.query(Path).filter(Path.path == rel_path).first()
+            if path_obj is not None:
+                existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
+                filenames = [f for f in filenames if f not in existing_files]
+
             for file_name in filenames:
                 if not file_name.endswith(formats):
                     continue
-                file_path = os.path.join(dir_path, file_name)
-                file_path = os.path.relpath(file_path, folder_path)
+                file_path = os.path.join(rel_path, file_name)
                 try:
                     existing_metadata = Ctrl.get_by_path(file_path, session=session)
                     if not existing_metadata:
                         count += 1
                         new_count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, True)
-                        Ctrl.create(file_path, sts, session=session)
+                        Ctrl.create(file_path, sts, time_of_import, session=session)
                     else:
                         count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, False)
@@ -59,7 +70,7 @@ class ImageMetadataImporter:
             make_database_backup(marker='after_import', force=True)
             generate_thumbs()
 
-        print(f'Import completed.')
+        print(f'Import completed ({int(time.time() - start_time)} sec).')
 
     @staticmethod
     def print_begin(msg):
