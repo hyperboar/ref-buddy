@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resolution Viewer</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #drop-zone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            cursor: pointer;
+        }
+        #image-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Resolution Viewer</h1>
+    <div id="drop-zone">
+        <p>Drop an image here</p>
+    </div>
+    <div id="image-container">
+        <div id="resolution"></div>
+        <img id="image" alt="Dropped Image">
+    </div>
+    
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const imageContainer = document.getElementById('image-container');
+        const image = document.getElementById('image');
+        const resolutionLabel = document.getElementById('resolution');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.border = '2px dashed #000';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.border = '2px dashed #ccc';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+
+            const file = e.dataTransfer.files[0];
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imgDataUrl = event.target.result;
+                    image.src = imgDataUrl;
+
+                    const img = new Image();
+                    img.src = imgDataUrl;
+                    img.onload = () => {
+                        const width = Math.floor(img.width/8)*8;
+                        const height = Math.floor(img.height/8)*8;
+
+                        const bw = `<button onclick="navigator.clipboard.writeText(${width})">w</button>`
+                        const bh = `<button onclick="navigator.clipboard.writeText(${height})">h</button>`
+                        navigator.clipboard.writeText(width + "");
+                        navigator.clipboard.writeText(height + "");
+                        resolutionLabel.innerHTML = `Resolution: w(${width}) ${bw} x h(${height}) ${bh}`;
+                    };
+                };
+                reader.readAsDataURL(file);
+
+                dropZone.style.border = '2px dashed #ccc';
+                dropZone.innerHTML = '';
+            } else {
+                dropZone.innerHTML = 'Invalid file type. Please drop an image.';
+            }
+        });
+    </script>
+</body>
+</html>
