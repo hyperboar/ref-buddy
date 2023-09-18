@@ -226,6 +226,14 @@ def assign_folder_tags(session=None):
         WHERE study_type = 5;
     """)
 
+    c.execute(f"""
+        -- manga tag for doujin folder
+        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
+        SELECT id, 51
+        FROM image_metadata
+        WHERE study_type = 6;
+    """)
+
     conn.commit()
     conn.close()
 
@@ -544,7 +552,8 @@ if __name__ == '__main__':
     # cleanup_lost_images()
 
     # reassign_source_type_to_all()
-    collapse_import_times()
+    # collapse_import_times()
+    assign_folder_tags()
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
