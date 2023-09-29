@@ -3,6 +3,11 @@ body
     background-color: #7a7676;
 }
 
+.body-sel-mode-on
+{
+    background-color: #737771 !important;
+}
+
 button
 {
     border-radius: 3%;
