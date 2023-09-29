@@ -35,7 +35,6 @@
 }
 
 .selected::before {
-  content: '\2713'; /* Unicode character for checkmark */
   position: absolute;
   top: 0;
   right: 0;
