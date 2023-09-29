@@ -100,6 +100,7 @@
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok')
                 elem.classList.add('op-success')
+                showNewTags(selection.selectedIds, selectedTags, [])
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error)
@@ -129,6 +130,7 @@
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok')
                 elem.classList.add('op-success')
+                showNewTags(selection.selectedIds, [], selectedTags)
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error)
@@ -138,6 +140,33 @@
             {
                 elem.classList.remove('loading')
             })
+    }
+
+    function showNewTags(ids, ptags = [], ntags = [])
+    {
+        document.querySelectorAll('.thumbnail').forEach(elem =>
+        {
+            const id = elem.getAttribute('data-id')
+            if (!ids.includes(id)) { return }
+
+            elem.querySelector('.overlay').classList.remove('vis-hide')
+
+            const tl = elem.querySelector('.tags-list')
+            if (ptags.length > 0)
+            {
+                let tmp = tl.textContent === '' ? [] : tl.textContent.split(', ')
+                tmp = Array.from(new Set([].concat(tmp, ptags)))
+                tmp.sort()
+                elem.querySelector('.tags-list').textContent = tmp.join(', ')
+            }
+            if (ntags.length > 0)
+            {
+                let tmp = tl.textContent === '' ? [] : tl.textContent.split(', ')
+                tmp = Array.from(tmp).filter(t => !ntags.includes(t))
+                tmp.sort()
+                elem.querySelector('.tags-list').textContent = tmp.join(', ')
+            }
+        })
     }
 
     function populatePinnedTags()
