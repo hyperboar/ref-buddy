@@ -4,19 +4,43 @@
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
     <div id="tagList" class="tag-container">
         {% for t in tags %}
-            <div class="tag-edit">
-            <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
-            <label style="color:{{ t.hex }}" for="{{ t.tag }}">{{ t.tag }}</label><br>
+            <div class="tag-edit" data-id="{{ t.tag }}" data-color="{{ t.hex }}">
+                <button class="tag-pin vis-hide" id="{{ t.tag }}" value="{{ t.tag }}"></button>
+                <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
+                <label style="color:{{ t.hex }}" for="{{ t.tag }}">{{ t.tag }}</label>
             </div>
         {% endfor %}
     </div>
     <button id="tags-submit-add">Add</button>
     <button id="tags-submit-del">Del</button>
     <button id="tags-clear">Clear</button>
+    <button id="pins-clear">Clear Pins</button>
     <button id="tags-close">Close</button>
 </div>
 
+
+<div id="tags-pins">
+    <div id="buttons"></div>
+    <div id="controls">
+        <button id="tags-pins-submit-add">Add</button>
+        <button id="tags-pins-submit-del">Del</button>
+        <button id="tags-pins-clear">Clear</button>
+    </div>
+</div>
+<template id="tag-pin-template" class="vis-hide">
+    <div class="tag-edit-pin" data-id="futanari">
+        <input type="checkbox" id="futanari" value="futanari"/>
+        <label style="" for="futanari">futanari</label>
+    </div>
+</template>
+
 <script>
+
+    // init pins list
+    const PINS = 'pins_list'
+    let pinsList = [];
+    const storedList = localStorage.getItem(PINS)
+    if (storedList) { pinsList = JSON.parse(storedList) }
 
     function toggleTagsPopupDisplay()
     {
@@ -33,6 +57,12 @@
         }
     }
 
+    function toggleTagsPinsDisplay()
+    {
+        const popup = document.getElementById('tags-pins')
+        popup.classList.toggle('tags-pins-hide')
+    }
+
     function closeTagsPopup()
     {
         document.getElementById('tags-popup').style.display = 'none'
@@ -40,71 +70,228 @@
 
         document.getElementById('tags-submit-add').classList.remove('op-success', 'op-fail', 'loading')
         document.getElementById('tags-submit-del').classList.remove('op-success', 'op-fail', 'loading')
+        document.getElementById('tags-pins-submit-add').classList.remove('op-success', 'op-fail', 'loading')
+        document.getElementById('tags-pins-submit-del').classList.remove('op-success', 'op-fail', 'loading')
     }
 
     function clearTagsPopup()
     {
+        Array.from(document.querySelectorAll('#tags-pins input[type="checkbox"]:checked'))
+            .map((checkbox) => { checkbox.checked = false; checkbox.parentNode.classList.remove('tag-selected') })
         Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => { checkbox.checked = false; checkbox.parentNode.classList.remove('tag-selected') })
     }
 
-    function submitAddTags()
+    function submitAddTags(evt)
     {
+        if (!selection.selectionMode) { return }
+
+        const elem = evt.currentTarget
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value)
 
         const idsStr = selection.selectedIds.join(',')
         const tagsStr = selectedTags.join(',')
 
-        document.getElementById('tags-submit-add').classList.add('loading')
-        document.getElementById('tags-submit-add').classList.remove('op-success', 'op-fail')
+        elem.classList.add('loading')
+        elem.classList.remove('op-success', 'op-fail')
 
         fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok')
-                document.getElementById('tags-submit-add').classList.add('op-success')
+                elem.classList.add('op-success')
+                showNewTags(selection.selectedIds, selectedTags, [])
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error)
-                document.getElementById('tags-submit-add').classList.add('op-fail')
+                elem.classList.add('op-fail')
             })
             .finally(() =>
             {
-                document.getElementById('tags-submit-add').classList.remove('loading')
+                elem.classList.remove('loading')
             })
     }
 
-    function submitRemoveTags()
+    function submitRemoveTags(evt)
     {
+        if (!selection.selectionMode) { return }
+
+        const elem = evt.currentTarget
         const selectedTags = Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value)
 
         const idsStr = selection.selectedIds.join(',')
         const tagsStr = selectedTags.map(t => '-' + t).join(',')
 
-        document.getElementById('tags-submit-del').classList.add('loading')
-        document.getElementById('tags-submit-del').classList.remove('op-success', 'op-fail')
+        elem.classList.add('loading')
+        elem.classList.remove('op-success', 'op-fail')
 
         fetch(`/remove-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok')
-                document.getElementById('tags-submit-del').classList.add('op-success')
+                elem.classList.add('op-success')
+                showNewTags(selection.selectedIds, [], selectedTags)
             })
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error)
-                document.getElementById('tags-submit-del').classList.add('op-fail')
+                elem.classList.add('op-fail')
             })
             .finally(() =>
             {
-                document.getElementById('tags-submit-del').classList.remove('loading')
+                elem.classList.remove('loading')
             })
     }
+
+    function showNewTags(ids, ptags = [], ntags = [])
+    {
+        document.querySelectorAll('.thumbnail').forEach(elem =>
+        {
+            const id = elem.getAttribute('data-id')
+            if (!ids.includes(id)) { return }
+
+            elem.querySelector('.overlay').classList.remove('vis-hide')
+
+            const tl = elem.querySelector('.tags-list')
+            if (ptags.length > 0)
+            {
+                let tmp = tl.textContent === '' ? [] : tl.textContent.split(', ')
+                tmp = Array.from(new Set([].concat(tmp, ptags)))
+                tmp.sort()
+                elem.querySelector('.tags-list').textContent = tmp.join(', ')
+            }
+            if (ntags.length > 0)
+            {
+                let tmp = tl.textContent === '' ? [] : tl.textContent.split(', ')
+                tmp = Array.from(tmp).filter(t => !ntags.includes(t))
+                tmp.sort()
+                elem.querySelector('.tags-list').textContent = tmp.join(', ')
+            }
+        })
+    }
+
+    function populatePinnedTags()
+    {
+        // add buttons
+        const tpl = document.getElementById('tag-pin-template')
+        const pins = document.querySelector('#tags-pins #buttons')
+        for (const id of pinsList)
+        {
+            const btn = document.importNode(tpl.content, true)
+
+            const inpt = btn.querySelector('input')
+            const label = btn.querySelector('label')
+
+            btn.querySelector('div').setAttribute('data-id', id)
+            inpt.id = 'pin-' + id
+            inpt.value = id
+            label.setAttribute('for', 'pin-' + id)
+            label.textContent = id
+            label.style.color = document.querySelector(`#tagList div[data-id="${id}"]`).getAttribute('data-color')
+
+            pins.appendChild(btn)
+        }
+
+        // initialize MAIN tag panel "pin" buttons
+        document.querySelectorAll('#tagList .tag-pin').forEach(elem =>
+        {
+            elem.addEventListener('click', evt =>
+            {
+                evt.preventDefault()
+                evt.stopPropagation()
+
+                const pin = evt.currentTarget
+                console.log(pin)
+                console.log(pinsList)
+                const index = pinsList.indexOf(pin.id)
+                if (index === -1) {pinsList.push(pin.id)}
+                else { pinsList.splice(index, 1) }
+
+                pinsList.sort()
+
+                localStorage.setItem(PINS, JSON.stringify(pinsList))
+
+                console.log(pinsList)
+
+                updatePinButtonState(pinsList, pin)
+            })
+
+            updatePinButtonState(pinsList, elem)
+
+            elem.classList.remove('vis-hide')
+        })
+
+        // pin checkbox proxy
+        document.querySelectorAll('#tags-pins input[type="checkbox"]').forEach(elem =>
+        {
+            elem.parentNode.addEventListener('click', evt =>
+            {
+                evt.preventDefault()
+
+                const item = evt.currentTarget.querySelector('input')
+                console.log(`proxy ${item}`)
+                console.log(item)
+                item.checked = !item.checked
+
+                const id = evt.currentTarget.getAttribute('data-id')
+                const tag = document.querySelector(`#tagList input[id="${id}"][type="checkbox"]`)
+                console.log(tag)
+                tag.checked = item.checked
+                console.log(`end proxy ${item}`)
+                if (item.checked)
+                {
+                    item.parentNode.classList.add('tag-selected')
+                }
+                else
+                {
+                    item.parentNode.classList.remove('tag-selected')
+                }
+            })
+        })
+
+        // quit if none
+        if (pinsList.length === 0)
+        {
+            document.getElementById('tags-pins').classList.add('tags-pins-hide')
+        }
+    }
+
+    function updatePinButtonState(list, pinButton)
+    {
+        pinButton.classList.remove('vis-hide')
+        if (list.includes(pinButton.id))
+        {
+            pinButton.classList.add('tag-pin-on')
+        }
+        else
+        {
+            pinButton.classList.remove('tag-pin-on')
+        }
+    }
+
+    function clearPinsList()
+    {
+        pinsList = []
+        document.getElementById('tags-pins').classList.add('tags-pins-hide')
+        localStorage.setItem(PINS, JSON.stringify(pinsList))
+
+        document.querySelectorAll('.tag-pin').forEach(elem => { elem.classList.remove('tag-pin-on') })
+    }
+
+
 
     document.getElementById('tags-submit-add').addEventListener('click', submitAddTags)
     document.getElementById('tags-submit-del').addEventListener('click', submitRemoveTags)
     document.getElementById('tags-clear').addEventListener('click', clearTagsPopup)
+    document.getElementById('pins-clear').addEventListener('click', clearPinsList)
     document.getElementById('tags-close').addEventListener('click', closeTagsPopup)
     document.querySelector('.tags-popup-background').addEventListener('click', closeTagsPopup)
+
+    document.getElementById('tags-pins-submit-add').addEventListener('click', submitAddTags)
+    document.getElementById('tags-pins-submit-del').addEventListener('click', submitRemoveTags)
+    document.getElementById('tags-pins-clear').addEventListener('click', clearTagsPopup)
+
+    populatePinnedTags()
+
 
     document.querySelectorAll('.tag-edit input[type="checkbox"]').forEach(elem =>
     {
@@ -120,6 +307,10 @@
         if (e.code === 'KeyT' && !e.shiftKey)
         {
             toggleTagsPopupDisplay()
+        }
+        else if (e.code === 'KeyN' && !e.shiftKey)
+        {
+            toggleTagsPinsDisplay()
         }
     })
 </script>

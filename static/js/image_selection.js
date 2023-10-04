@@ -31,6 +31,7 @@ class ImageSelection
     classSelectable ='selectable'
     classSelected ='selected'
     classDisabled ='disabled'
+    classBodyModeOn = 'body-sel-mode-on'
 
     attrDataId = 'data-id'
 
@@ -58,6 +59,7 @@ class ImageSelection
         // Add or remove event listeners and update UI based on selection mode state
         if (this.selectionMode)
         {
+            document.querySelector('body').classList.add(this.classBodyModeOn)
             document.querySelector(this.classGallery).classList.add(this.classNoSelect)
             this.toggleBtn.classList.add(this.classModeBtn)
 
@@ -76,6 +78,7 @@ class ImageSelection
         {
             this.selectedIds = []
 
+            document.querySelector('body').classList.remove(this.classBodyModeOn)
             document.querySelector(this.classGallery).classList.remove(this.classNoSelect)
             this.toggleBtn.classList.remove(this.classModeBtn)
 

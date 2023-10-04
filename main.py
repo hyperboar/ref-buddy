@@ -20,6 +20,8 @@ class MainWindow(tk.Frame):
         self.master = master
         self.master.title("Drawing Gallery Tool")
         self.master.geometry("300x200")
+        self.master.iconbitmap('static/favicon.ico')
+
         self.pack()
 
         self.gallery_url = f"http://localhost:{Env.SERVER_PORT}"

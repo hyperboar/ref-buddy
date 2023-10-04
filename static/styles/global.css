@@ -3,6 +3,11 @@ body
     background-color: #7a7676;
 }
 
+.body-sel-mode-on
+{
+    background-color: #737771 !important;
+}
+
 button
 {
     border-radius: 3%;
@@ -190,6 +195,37 @@ button
 .tag-link:hover {
     background-color: #cccccc;
 }
+
+#tags-pins
+{
+    padding: 5px;
+    position:fixed;
+    bottom:100px;
+    right:10px;
+    transition: right 0.5s, opacity 0.2s;
+    opacity: 1;
+    background-color: #918d8d;
+}
+
+#tags-pins #controls {
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.tags-pins-hide {right: -200px !important; opacity: 0}
+
+.tag-pin
+{
+    width: 15px;
+    height: 15px;
+    background-size: cover;
+    border: none;
+    padding: 2px;
+    background-image: url("/static/pin_off.png");
+    background-color: transparent;
+}
+.tag-pin-on {background-image: url("/static/pin_on.png");}
+
 
 .tags-list {}
 
