@@ -1,5 +1,7 @@
+import math
 import os
 import subprocess
+from datetime import datetime, timedelta
 from utils import Utils
 
 class ExportVidGifs:
@@ -11,6 +13,9 @@ class ExportVidGifs:
 
     @staticmethod
     def export(folder_path, force=False):
+        """
+        Using couple shell calls to get video duration and actually convert video to gif.
+        """
 
         if not Utils.is_windows():
             print("Preview generation for videos works only for windows at the moment :(")
@@ -43,19 +48,35 @@ class ExportVidGifs:
 
                 print(f'  ({i}/{max_i}) Processing "{input_file}"...', end='')
 
-                # fps = 0.8#1./5
-                # rate = 1./5
+                # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
+                dur_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "{input_file}"'
+                dur_out = subprocess.run(dur_cmd, capture_output=True).stdout.decode("utf-8")
 
-                time = 10
-                rate = 1. / 5
-                fps = 1 - rate
+                # convert raw output to total_seconds
+                t = datetime.strptime(dur_out, '%H:%M:%S.%f\r\n')
+                total_dur = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second, microseconds=t.microsecond).total_seconds()
+
+                # short videos should generate short gif, long videos should be sped up so everything is shown under max_dur seconds
+                max_dur = 10.
+                min_dur = 4.
+                if total_dur < min_dur or math.isclose(total_dur, min_dur):
+                    rate = min_dur / total_dur
+                    total_dur = min_dur
+                elif total_dur < max_dur:
+                    rate = 1.
+                else:
+                    rate = max_dur/ total_dur
+
+                fps = 1.
+                dur = min(max_dur, total_dur)
+
                 command = ['ffmpeg',
                            '-hide_banner',
                            '-loglevel', 'quiet',
                            # '-stats',
                            '-y',
                            '-i', input_file,
-                           '-t', str(time),
+                           '-t', str(dur),
                            '-vf',
                            f'setpts={str(rate)}*PTS,scale=-1:200:flags=lanczos,fps={str(fps)},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
                            '-loop', '0',
@@ -72,3 +93,8 @@ class ExportVidGifs:
                 i += 1
 
         print('Searching for videos to generate gif preview... Done')
+
+if __name__ == '__main__':
+    from Env import Env
+    # ExportVidGifs.export(Env.IMAGES_PATH)
+    ExportVidGifs.export('E:\\Distr\\__new\\test')
