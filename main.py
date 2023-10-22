@@ -12,6 +12,7 @@ from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lo
     make_database_backup
 from Env import Env
 from rehash_dialog import RehashDialog
+from utils import Utils
 
 
 class MainWindow(tk.Frame):
@@ -99,7 +100,7 @@ class MainWindow(tk.Frame):
         self.ffmpeg = ExportFramesWindow(self.master)
 
     def launch_server(self):
-        if sys.platform == 'win32':
+        if Utils.is_windows():
             bin_fldr = "Scripts"
         else:
             bin_fldr = "bin"
