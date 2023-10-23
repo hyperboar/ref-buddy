@@ -480,7 +480,13 @@
         const pathElement = document.getElementById('image-path')
         const copyButton = document.getElementById('image-path-copy-btn')
 
-        copyButton.addEventListener('click', () => {
+        if (pathElement.textContent.endsWith('.mp4.gif'))
+        {
+            pathElement.textContent = pathElement.textContent.replace('.mp4.gif', '.mp4')
+        }
+
+        copyButton.addEventListener('click', () =>
+        {
             const path = pathElement.textContent
             document.copyToClipboard(path, () =>
             {
