@@ -27,8 +27,15 @@ class ExportVidGifs:
         vids = []
         print('Searching for videos to generate gif preview...', end='')
         for dir_path, dir_names, filenames in os.walk(folder_path):
-            # print(filenames)
-            vids += [(fn, dir_path) for fn in filenames if fn.endswith(video_ext) and not os.path.exists((os.path.join(dir_path, fn) + out_ext))]
+            new_vids = []
+            for fn in filenames:
+                if not fn.endswith(video_ext):
+                    continue
+
+                if force or not os.path.exists((os.path.join(dir_path, fn) + out_ext)):
+                    new_vids.append((fn, dir_path))
+
+            vids += new_vids
 
             # [print(os.path.join(dir_path, v)) for v in vids]
 
@@ -97,4 +104,6 @@ class ExportVidGifs:
 if __name__ == '__main__':
     from Env import Env
     # ExportVidGifs.export(Env.IMAGES_PATH)
-    ExportVidGifs.export('E:\\Distr\\__new\\test')
+    # ExportVidGifs.export(Env.IMAGES_PATH, True)
+    # ExportVidGifs.export('E:\\Distr\\__new\\test', True)
+    pass
