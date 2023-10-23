@@ -46,6 +46,7 @@
             <button id="tags-button" class="btn-bg-blend">T</button>
             <button id="board-button" class="btn-bg-blend">B</button>
             <button id="pallet-button" class="btn-bg-blend">plt</button>
+            <button id="open-vid-btn" class="btn-bg-blend">play</button>
         </div>
         <div class="row">
             <button class="fav btn-bg-blend" id="is-fav" value="{{ image.is_fav }}"></button>
@@ -480,13 +481,31 @@
         const pathElement = document.getElementById('image-path')
         const copyButton = document.getElementById('image-path-copy-btn')
 
-        copyButton.addEventListener('click', () => {
+        if (pathElement.textContent.endsWith('.mp4.gif'))
+        {
+            pathElement.textContent = pathElement.textContent.replace('.mp4.gif', '.mp4')
+        }
+
+        copyButton.addEventListener('click', () =>
+        {
             const path = pathElement.textContent
             document.copyToClipboard(path, () =>
             {
                 copyButton.textContent = 'Copied!'
             })
         })
+
+        // video
+        const openVidBtn = document.getElementById('open-vid-btn')
+        if (pathElement.textContent.endsWith('.mp4'))
+        {
+            openVidBtn.classList.remove('vis-hide')
+            openVidBtn.addEventListener('click', (e) =>
+            {
+                e.preventDefault()
+                fetch(`/open-video?path=${encodeURI(pathElement.textContent)}`)
+            })
+        }
     })
 </script>
 </body>

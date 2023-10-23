@@ -143,3 +143,22 @@ def save_image_color():
 
     # color = session.query(Color, )
     return render_template_string('ok')
+
+@routes_image.route('/open-video')
+def open_video():
+
+    if not os.path.exists(Env.VIDEO_PLAYER_PATH):
+        print('No video player set up yet.')
+        return
+
+    from urllib.parse import unquote
+    path = unquote(request.args.get('path', default=''))
+
+    if path == '':
+        print('No path given')
+        return
+
+    import subprocess
+    subprocess.Popen([Env.VIDEO_PLAYER_PATH, path], cwd=os.getcwd())
+
+    return 'ok'
