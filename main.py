@@ -6,12 +6,14 @@ import tkinter as tk
 from tkinter import messagebox
 
 from export_frames_window import ExportFramesWindow
+from export_vid_gifs import ExportVidGifs
 
 from image_metadata_importer import ImageMetadataImporter
 from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \
     make_database_backup
 from Env import Env
 from rehash_dialog import RehashDialog
+from utils import Utils
 
 
 class MainWindow(tk.Frame):
@@ -67,6 +69,7 @@ class MainWindow(tk.Frame):
 
         # create maintenance menu
         tools_menu = tk.Menu(self.menu_bar, tearoff=0)
+        tools_menu.add_command(label="Generate video previews", command=self.generate_video_gifs)
         tools_menu.add_command(label="Export frames from file", command=self.open_ffmpeg_window)
         tools_menu.add_separator()
         tools_menu.add_command(label="Generate thumbs", command=generate_thumbs)
@@ -98,8 +101,11 @@ class MainWindow(tk.Frame):
     def open_ffmpeg_window(self):
         self.ffmpeg = ExportFramesWindow(self.master)
 
+    def generate_video_gifs(self):
+        ExportVidGifs.export(Env.IMAGES_PATH)
+
     def launch_server(self):
-        if sys.platform == 'win32':
+        if Utils.is_windows():
             bin_fldr = "Scripts"
         else:
             bin_fldr = "bin"

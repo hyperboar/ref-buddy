@@ -245,13 +245,13 @@ def assign_animation_tags(session=None):
         session = Session()
 
     tag_anim = session.query(Tag).filter(Tag.tag == 'animated').first()
-    # tag_vid = session.query(Tag).filter(Tag.tag == 'video').first()
+    tag_vid = session.query(Tag).filter(Tag.tag == 'video').first()
 
 
     if tag_anim is None:
         raise ValueError('Tag "animated" not found')
-    # if tag_vid is None:
-    #     raise ValueError('Tag "video" not found')
+    if tag_vid is None:
+        raise ValueError('Tag "video" not found')
 
     q = session.query(ImageMetadata).filter(ImageMetadata.lost == 0)
 
@@ -264,17 +264,50 @@ def assign_animation_tags(session=None):
         session.merge(ImageTag(image_id=im.image_id, tag_id=tag_anim.id))
         session.flush()
 
-    # images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4')).all()
-    # for im in images:
-    #     st = ImageMetadata.source_type_by_path(im.path_abs)
-    #     if st == 1:
-    #         continue
-    #     session.merge(ImageTag(image_id=im.image_id, tag_id=tag_vid.id))
-    #     session.flush()
+    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4.gif')).all()
+    for im in images:
+        st = ImageMetadata.source_type_by_path(im.path_abs)
+        if st == 1:
+            continue
+        session.merge(ImageTag(image_id=im.image_id, tag_id=tag_vid.id))
+        session.flush()
 
     session.commit()
 
     print('\rAssigning tags to animations and videos... Done', end='')
+
+def remove_broken_video_gifs(session=None):
+    if session is None:
+        session = Session()
+
+    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4.gif')).all()
+
+    broken_files = []
+
+    for im in images:
+        if not os.path.exists(im.path_abs):
+            broken_files.append((im.path_abs, ''))
+            continue
+
+        try:
+            with Image.open(im.path_abs) as image:
+                image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
+
+                # Save thumbnail as JPEG file
+                image.convert('RGB')
+        except:
+            thumb_filename = os.path.join(Env.THUMB_PATH, f'{im.image_id}.jpg')
+            broken_files.append((im.path_abs, thumb_filename))
+
+    print(f'Found {len(broken_files)} broken files. Removing gif previews and thumbs...', end='')
+
+    for fn, th in broken_files:
+        if os.path.exists(fn):
+            os.remove(fn)
+        if os.path.exists(th):
+            os.remove(th)
+
+    print(f'\rFound {len(broken_files)} broken files. Removing gif previews and thumbs... Done')
 
 def mark_all_lost():
     make_database_backup(marker='mark_lost', force=True)
@@ -553,7 +586,9 @@ if __name__ == '__main__':
 
     # reassign_source_type_to_all()
     # collapse_import_times()
-    assign_folder_tags()
+    # assign_folder_tags()
+    # assign_animation_tags()
+    remove_broken_video_gifs()
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
