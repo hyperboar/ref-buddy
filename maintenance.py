@@ -286,7 +286,7 @@ def remove_broken_video_gifs(session=None):
 
     for im in images:
         if not os.path.exists(im.path_abs):
-            broken_files.append(im.path_abs)
+            broken_files.append((im.path_abs, ''))
             continue
 
         try:
