@@ -34,9 +34,9 @@ class ImageMetadataController:
             auto_commit = True
             session = Session()
 
-        path_row = session.query(Path).filter(Path.path == new_path).first()
+        path_row = session.query(Path).filter(Path.path_raw == new_path).first()
         if path_row is None:
-            path_ref = Path(path=new_path)
+            path_ref = Path(path_raw=new_path)
             session.add(path_ref)
             session.commit()
             path_id = path_ref.id
@@ -337,13 +337,13 @@ class ImageMetadataController:
             if not any([f.endswith(formats) for f in filenames]):
                 continue
 
-            path = os.path.relpath(dir_path, root_path)
+            path = Path.path_serialize(os.path.relpath(dir_path, root_path))
 
-            path_row = session.query(Path).filter(Path.path == path).first()
+            path_row = session.query(Path).filter(Path.path_raw == path).first()
             if path_row:
                 continue
 
-            path_ref = Path(path=path)
+            path_ref = Path(path_raw=path)
             session.add(path_ref)
             session.flush()
 

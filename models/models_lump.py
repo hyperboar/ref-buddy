@@ -29,13 +29,30 @@ class MyTIMESTAMP(TypeDecorator):
         return value
 
 class Path(Base):
+    """
+    Paths are serialized with forward (/) slashes as separators.
+    """
     __tablename__ = 'paths'
 
     id = Column(Integer, primary_key=True)
-    path = Column(Text, nullable=False, unique=True)
+    path_raw = Column(Text, nullable=False, name='path', unique=True)
     preview = Column(Integer, nullable=False, default=0)
     hidden = Column(Integer, nullable=False, default=0)
     ord = Column(Integer, nullable=False, default=0)
+
+    @property
+    def path(self) -> str:
+        """Returns OS specific path."""
+        return os.path.normpath(self.path_raw)
+
+    @path.setter
+    def path(self, value:str):
+        """Sets value of path_raw. Accepts path as an argument and replaces separators by forward (/) slashes."""
+        self.path_raw = Path.path_serialize(value)
+
+    @staticmethod
+    def path_serialize(value:str) -> str:
+        return value.replace(os.sep, '/')
 
 class StudyType(Base):
     __tablename__ = 'study_types'

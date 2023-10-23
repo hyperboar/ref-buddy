@@ -14,6 +14,7 @@ class ImageMetadataImporter:
         pass
 
     def import_metadata(self, folder_path):
+        folder_path = os.path.normpath(folder_path)
         formats = tuple(Env.IMPORT_FORMATS)
         sts = Ctrl.get_study_types()
 
@@ -34,8 +35,9 @@ class ImageMetadataImporter:
             msg_dir = f'Importing "{dir_path}"...'
             self.print_total(msg_dir, len(filenames))
 
-            rel_path = os.path.relpath(dir_path, folder_path)
-            path_obj = session.query(Path).filter(Path.path == rel_path).first()
+            dir_path = os.path.normpath(dir_path)
+            rel_path = Path.path_serialize(os.path.relpath(dir_path, folder_path))
+            path_obj = session.query(Path).filter(Path.path_raw == rel_path).first()
             if path_obj is not None:
                 existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
                 filenames = [f for f in filenames if f not in existing_files]
@@ -43,7 +45,7 @@ class ImageMetadataImporter:
             for file_name in filenames:
                 if not file_name.endswith(formats):
                     continue
-                file_path = os.path.join(rel_path, file_name)
+                file_path = Path.path_serialize(os.path.join(rel_path, file_name))
                 try:
                     existing_metadata = Ctrl.get_by_path(file_path, session=session)
                     if not existing_metadata:
