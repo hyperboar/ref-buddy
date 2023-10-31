@@ -503,7 +503,15 @@
             openVidBtn.addEventListener('click', (e) =>
             {
                 e.preventDefault()
-                fetch(`/open-video?path=${encodeURI(pathElement.textContent)}`)
+
+                if (e.shiftKey)
+                {
+                    fetch(`/open-video?path=${encodeURI(pathElement.textContent)}`)
+                }
+                else
+                {
+                    window.open('/study-video/{{ image.image_id }}')
+                }
             })
         }
     })
