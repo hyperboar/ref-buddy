@@ -238,6 +238,26 @@ def assign_folder_tags(session=None):
     conn.close()
 
     print(f'\rAssigning essential tags to new images... Done')
+    print(f'Assigning path tags...', end='')
+
+    if session is None:
+        session = Session()
+
+    paths_all = session.query(Path).all()
+    for p in paths_all:
+        if len(p.tags) == 0:
+            continue
+        tags = [t.tag.id for t in p.tags]
+
+        for im in p.images:
+            for t in tags:
+                session.merge(ImageTag(image_id=im.image_id, tag_id=t))
+
+        session.flush()
+
+    print(f'\rAssigning path tags... Done')
+
+    session.commit()
 
 def assign_animation_tags(session=None):
     print('Assigning tags to animations and videos...', end='')
@@ -586,9 +606,9 @@ if __name__ == '__main__':
 
     # reassign_source_type_to_all()
     # collapse_import_times()
-    # assign_folder_tags()
+    assign_folder_tags()
     # assign_animation_tags()
-    remove_broken_video_gifs()
+    # remove_broken_video_gifs()
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
