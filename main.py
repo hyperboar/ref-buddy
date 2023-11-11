@@ -10,7 +10,7 @@ from export_vid_gifs import ExportVidGifs
 
 from image_metadata_importer import ImageMetadataImporter
 from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \
-    make_database_backup
+    make_database_backup, cleanup_image_thumbs
 from Env import Env
 from rehash_dialog import RehashDialog
 from utils import Utils
@@ -78,7 +78,8 @@ class MainWindow(tk.Frame):
         tools_menu.add_command(label="Find lost images", command=mark_all_lost)
         tools_menu.add_command(label="Relink lost images", command=relink_lost_images)
         tools_menu.add_separator()
-        tools_menu.add_command(label="Cleanup thumbs", command=cleanup_lost_images)
+        tools_menu.add_command(label="Cleanup thumbs", command=cleanup_image_thumbs)
+        tools_menu.add_command(label="Cleanup lost images", command=cleanup_lost_images)
 
         self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
 

@@ -330,6 +330,7 @@ def remove_broken_video_gifs(session=None):
     print(f'\rFound {len(broken_files)} broken files. Removing gif previews and thumbs... Done')
 
 def mark_all_lost():
+    print(f'Marking lost images...')
     make_database_backup(marker='mark_lost', force=True)
 
     s = Session()
@@ -360,13 +361,15 @@ def mark_all_lost():
                 lost.append(image_path)
         print(f'\r{int(offset / rows_max * 100)}%... Searching for lost images. {len(lost)} lost, {len(found)} found so far', end='')
 
-    print(f'\n{len(lost)} lost images\n')
+    print(f'\n{len(lost)} lost images')
     [print(p) for p in lost]
-    print(f'\nUnlost {len(found)} lost images\n')
+    print(f'\nUnlost {len(found)} lost images')
     [print(p) for p in found]
 
     s.commit()
     s.close()
+
+    print(f'Marking lost images... Done')
 
 def cleanup_lost_images():
     cleanup_image_thumbs()
@@ -404,7 +407,8 @@ def cleanup_lost_images():
 
 def cleanup_image_thumbs():
     print(f'Cleaning up thumbs.')
-    print(f'Collecting thumbs info...', end='')
+    print(f'Collecting thumbs info...', end='', flush=True)
+
     ids = [int(os.path.splitext(f)[0]) for f in os.listdir(Env.THUMB_PATH) if os.path.isfile(os.path.join(Env.THUMB_PATH, f))]
     print(f'\rCollecting thumbs info... Done')
 
@@ -414,13 +418,13 @@ def cleanup_image_thumbs():
     count = 0
     for i in ids:
         count += 1
-        print(f'\r{int(count/count_max*100)}% Searching in database...', end='')
+        print(f'\r{int(count/count_max*100)}% Searching in database...', end='', flush=True)
         if s.query(exists().where(ImageMetadata.image_id == i)).scalar():
             continue
         ids_to_remove.append(i)
 
     print(f'\r{int(count / count_max * 100)}% Searching in database... Done')
-    print(f'Appending images marked as "lost"...', end='')
+    print(f'Appending images marked as "lost"...', end='', flush=True)
 
     lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
     ids_to_remove += [l.image_id for l in lost if l.image_id in ids and l.image_id]
