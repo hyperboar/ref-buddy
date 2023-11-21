@@ -32,7 +32,7 @@ class ImageMetadataImporter:
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
             max_count = len(filenames)
-            msg_dir = f'Importing "{dir_path}"...'
+            msg_dir = f'Importing "{os.path.relpath(dir_path, folder_path)}"...'
             self.print_total(msg_dir, len(filenames))
 
             dir_path = os.path.normpath(dir_path)

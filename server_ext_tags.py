@@ -1,7 +1,7 @@
 from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify, url_for
 
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Tag, Session, ImageMetadata, TagSet
+from models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag
 from server_args_helpers import get_current_paging, Args, get_arg
 from server_widget_helpers import get_paging_widget, get_tags_editor, get_tags_filter
 
@@ -183,3 +183,47 @@ def tag_set_edit(tag_set_id):
     return out
 
 # ---- END CRUD TAG SET ----
+
+# ---- CRUD PATH TAG ----
+
+@routes_tags.route('/path-tags')
+def list_path_tags():
+    session = Session()
+    paths = session.query(Path).order_by(Path.path_raw).all()
+
+    return render_template('crud/tpl_path_tags.html', paths=paths)
+
+@routes_tags.route('/path-tag/<int:path_id>/<tags_str>', methods=['GET'])
+def path_tag_edit(path_id, tags_str:str):
+    if not path_id:
+        return abort(404, 'Path id or tags list is not set')
+
+    remote_tags_str = [t.strip().lower() for t in tags_str.split(',')]
+
+    session = Session()
+
+    new_tags = session.query(Tag).filter(Tag.tag.in_(remote_tags_str)).all()
+
+    path = session.get(Path, path_id)
+    tags = [pt.tag for pt in path.tags]
+
+
+    tags_to_add    = [t.id for t in new_tags if t not in tags]
+    tags_to_remove = [t.id for t in tags     if t not in new_tags]
+
+    for t in tags_to_add:
+        session.merge(PathTag(path_id=path_id, tag_id=t))
+
+    remove_tags = session.query(PathTag).filter(PathTag.path_id == path_id, PathTag.tag_id.in_(tags_to_remove)).all()
+    for t in remove_tags:
+        session.delete(t)
+
+    session.commit()
+
+    updated_tags = [t.tag.tag for t in path.tags]
+    updated_tags.sort()
+    out = jsonify({'tags': updated_tags})
+    session.close()
+    return out
+
+# ---- END CRUD PATH TAG ----

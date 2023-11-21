@@ -238,6 +238,26 @@ def assign_folder_tags(session=None):
     conn.close()
 
     print(f'\rAssigning essential tags to new images... Done')
+    print(f'Assigning path tags...', end='')
+
+    if session is None:
+        session = Session()
+
+    paths_all = session.query(Path).all()
+    for p in paths_all:
+        if len(p.tags) == 0:
+            continue
+        tags = [t.tag.id for t in p.tags]
+
+        for im in p.images:
+            for t in tags:
+                session.merge(ImageTag(image_id=im.image_id, tag_id=t))
+
+        session.flush()
+
+    print(f'\rAssigning path tags... Done')
+
+    session.commit()
 
 def assign_animation_tags(session=None):
     print('Assigning tags to animations and videos...', end='')
@@ -310,6 +330,7 @@ def remove_broken_video_gifs(session=None):
     print(f'\rFound {len(broken_files)} broken files. Removing gif previews and thumbs... Done')
 
 def mark_all_lost():
+    print(f'Marking lost images...')
     make_database_backup(marker='mark_lost', force=True)
 
     s = Session()
@@ -340,13 +361,15 @@ def mark_all_lost():
                 lost.append(image_path)
         print(f'\r{int(offset / rows_max * 100)}%... Searching for lost images. {len(lost)} lost, {len(found)} found so far', end='')
 
-    print(f'\n{len(lost)} lost images\n')
+    print(f'\n{len(lost)} lost images')
     [print(p) for p in lost]
-    print(f'\nUnlost {len(found)} lost images\n')
+    print(f'\nUnlost {len(found)} lost images')
     [print(p) for p in found]
 
     s.commit()
     s.close()
+
+    print(f'Marking lost images... Done')
 
 def cleanup_lost_images():
     cleanup_image_thumbs()
@@ -384,7 +407,8 @@ def cleanup_lost_images():
 
 def cleanup_image_thumbs():
     print(f'Cleaning up thumbs.')
-    print(f'Collecting thumbs info...', end='')
+    print(f'Collecting thumbs info...', end='', flush=True)
+
     ids = [int(os.path.splitext(f)[0]) for f in os.listdir(Env.THUMB_PATH) if os.path.isfile(os.path.join(Env.THUMB_PATH, f))]
     print(f'\rCollecting thumbs info... Done')
 
@@ -394,13 +418,13 @@ def cleanup_image_thumbs():
     count = 0
     for i in ids:
         count += 1
-        print(f'\r{int(count/count_max*100)}% Searching in database...', end='')
+        print(f'\r{int(count/count_max*100)}% Searching in database...', end='', flush=True)
         if s.query(exists().where(ImageMetadata.image_id == i)).scalar():
             continue
         ids_to_remove.append(i)
 
     print(f'\r{int(count / count_max * 100)}% Searching in database... Done')
-    print(f'Appending images marked as "lost"...', end='')
+    print(f'Appending images marked as "lost"...', end='', flush=True)
 
     lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
     ids_to_remove += [l.image_id for l in lost if l.image_id in ids and l.image_id]
@@ -586,9 +610,9 @@ if __name__ == '__main__':
 
     # reassign_source_type_to_all()
     # collapse_import_times()
-    # assign_folder_tags()
+    assign_folder_tags()
     # assign_animation_tags()
-    remove_broken_video_gifs()
+    # remove_broken_video_gifs()
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()

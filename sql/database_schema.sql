@@ -54,6 +54,15 @@ CREATE TABLE  IF NOT EXISTS image_tags (
     PRIMARY KEY (image_id, tag_id)
 );
 
+CREATE TABLE IF NOT EXISTS path_tags (
+    path_id INTEGER,
+    tag_id INTEGER,
+
+    PRIMARY KEY (path_id, tag_id),
+    FOREIGN KEY (path_id) REFERENCES paths(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
+
 
 CREATE TABLE IF NOT EXISTS tag_sets (
     id INTEGER PRIMARY KEY,

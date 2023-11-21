@@ -4,10 +4,12 @@
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
     <div id="tagList" class="tag-container">
         {% for t in tags %}
-            <div class="tag-edit" data-id="{{ t.tag }}" data-color="{{ t.hex }}">
-                <button class="tag-pin vis-hide" id="{{ t.tag }}" value="{{ t.tag }}"></button>
-                <input type="checkbox" id="{{ t.tag }}" value="{{ t.tag }}"/>
-                <label style="color:{{ t.hex }}" for="{{ t.tag }}">{{ t.tag }}</label>
+            {% set tag = t.tag %}
+            {% set hex = t.hex %}
+            <div class="tag-item" data-id="{{ tag }}" data-color="{{ hex }}">
+                <button class="tag-pin" value="{{ tag }}"></button>
+                <input type="checkbox" id="{{ tag }}" value="{{ tag }}"/>
+                <label style="color:{{ hex }}" for="{{ tag }}">{{ tag }}</label>
             </div>
         {% endfor %}
     </div>
@@ -20,6 +22,7 @@
 
 
 <div id="tags-pins">
+    <div id="buttons-no-pin" style="border:2px solid"></div>
     <div id="buttons"></div>
     <div id="controls">
         <button id="tags-pins-submit-add">Add</button>
@@ -27,20 +30,123 @@
         <button id="tags-pins-clear">Clear</button>
     </div>
 </div>
-<template id="tag-pin-template" class="vis-hide">
-    <div class="tag-edit-pin" data-id="futanari">
-        <input type="checkbox" id="futanari" value="futanari"/>
-        <label style="" for="futanari">futanari</label>
-    </div>
-</template>
+<div id="tag-pin-template" class="tag-edit-pin vis-hide" data-id="futanari">
+    <input type="checkbox" id="futanari" value="futanari"/>
+    <label style="" for="futanari">futanari</label>
+</div>
 
 <script>
+
+    class TagItem
+    {
+        _evtTagClick = 'tag_click'
+        _evtPinClick = 'tag_pin_click'
+
+        _selCheckbox = 'input[type="checkbox"]'
+        _selLabel = 'label'
+        _selPin = 'button.tag-pin'
+
+        _container
+        _checkbox
+        _pin
+
+        _tagId
+
+        _pinned = false
+
+        constructor(containerNode)
+        {
+            this._container = containerNode
+            this._checkbox = this._container.querySelector(this._selCheckbox)
+            this._pin = this._container.querySelector(this._selPin)
+
+            this._tagId = this._container.getAttribute('data-id')
+
+            this._itemClickEvent = new CustomEvent(this._evtTagClick, { detail: { tagId: this._tagId }});
+            this._pinClickEvent = new CustomEvent(this._evtPinClick,  { detail: { tagId: this._tagId }});
+
+            this._container.querySelector(this._selCheckbox).addEventListener('click', e => { this.tagToggle(e) })
+            this._container.querySelector(this._selLabel).addEventListener('click', e => { this.tagToggle(e) })
+            this._container.querySelector(this._selPin).addEventListener('click', e => { this.pinToggle(e) })
+        }
+
+        tagToggle(e)
+        {
+            e.preventDefault()
+
+            console.log('TagItem method toggle tag ' + this._container.getAttribute('data-id'))
+            this.checked = !this.checked
+        }
+
+        pinToggle(e)
+        {
+            e.preventDefault()
+
+            console.log('TagItem method toggle pin ' + this._container.getAttribute('data-id'))
+            this.pinned = !this.pinned
+        }
+
+        get checked()
+        {
+            return this._checkbox.checked
+        }
+
+        set checked(value)
+        {
+            if (value === this._checkbox.checked) { return }
+
+            if (value) { this._container.classList.add('tag-selected') }
+            else { this._container.classList.remove('tag-selected') }
+
+            this._checkbox.checked = value
+
+            document.dispatchEvent(this._itemClickEvent)
+        }
+
+        get pinned()
+        {
+            return this._pinned
+        }
+
+        set pinned(value)
+        {
+            if (value === this._pinned) { return }
+
+            if (value) { this._pin.classList.add('tag-pin-on') }
+            else { this._pin.classList.remove('tag-pin-on') }
+
+            this._pinned = value
+
+            console.log('pinned ' + this._pinned)
+            document.dispatchEvent(this._pinClickEvent)
+        }
+
+        get color()
+        {
+            this._container.getAttribute('data-color')
+        }
+    }
+
 
     // init pins list
     const PINS = 'pins_list'
     let pinsList = [];
     const storedList = localStorage.getItem(PINS)
     if (storedList) { pinsList = JSON.parse(storedList) }
+
+    // list of all TAG buttons
+    const tagBtns = {}
+    // list of all TAG PROXY buttons
+    const tagProxyBtns = {}
+    const tmpTagProxyBtns = {}
+
+    document.querySelectorAll('.tag-item').forEach(item =>
+    {
+        const tagId = item.getAttribute('data-id')
+        tagBtns[tagId] = new TagItem(item)
+    })
+
+
 
     function toggleTagsPopupDisplay()
     {
@@ -78,8 +184,8 @@
     {
         Array.from(document.querySelectorAll('#tags-pins input[type="checkbox"]:checked'))
             .map((checkbox) => { checkbox.checked = false; checkbox.parentNode.classList.remove('tag-selected') })
-        Array.from(document.querySelectorAll('#tagList input[type="checkbox"]:checked'))
-            .map((checkbox) => { checkbox.checked = false; checkbox.parentNode.classList.remove('tag-selected') })
+
+        Array.from(Object.values(tagBtns)).forEach(t => t.checked = false)
     }
 
     function submitAddTags(evt)
@@ -142,6 +248,7 @@
             })
     }
 
+    // show tags in overlay
     function showNewTags(ids, ptags = [], ntags = [])
     {
         document.querySelectorAll('.thumbnail').forEach(elem =>
@@ -169,102 +276,142 @@
         })
     }
 
+    function addTagToPinList(tagId, container, isTmp = false)
+    {
+        if (tagId === '' || tagId === null) { return }
+
+        const tpl = document.getElementById('tag-pin-template')
+
+        let btn = tpl.cloneNode(true)
+        container.appendChild(btn)
+
+        const inpt = btn.querySelector('input')
+        const label = btn.querySelector('label')
+
+        btn.id = ''
+        btn.setAttribute('data-id', tagId)
+        inpt.id = 'pin-' + tagId
+        inpt.value = tagId
+        label.setAttribute('for', 'pin-' + tagId)
+        label.textContent = tagId
+        label.style.color = tagBtns[tagId].color
+
+        btn.addEventListener('click', evt =>
+        {
+            evt.preventDefault()
+
+            const proxyItem = evt.currentTarget.querySelector('input')
+            console.log(`proxy ${proxyItem}`)
+            console.log(proxyItem)
+            proxyItem.checked = !proxyItem.checked
+
+            const id = evt.currentTarget.getAttribute('data-id')
+            const tag = tagBtns[id]
+            tag.checked = proxyItem.checked
+            console.log(`end proxy ${proxyItem}`)
+            if (proxyItem.checked)
+            {
+                proxyItem.parentNode.classList.add('tag-selected')
+            }
+            else
+            {
+                proxyItem.parentNode.classList.remove('tag-selected')
+            }
+        })
+
+        if (!isTmp)
+        {
+            tagBtns[tagId].pinned = true
+            tagProxyBtns[tagId] = btn
+        }
+        else
+        {
+            tmpTagProxyBtns[tagId] = btn
+        }
+
+        btn.classList.remove('vis-hide')
+    }
+
+    function removeTagFromPinList(tagId)
+    {
+        if (tagId === '') { return }
+
+        if (!tagProxyBtns.hasOwnProperty(tagId)) { return }
+
+        tagProxyBtns[tagId].remove()
+        delete tagProxyBtns[tagId]
+    }
+
     function populatePinnedTags()
     {
-        // add buttons
-        const tpl = document.getElementById('tag-pin-template')
         const pins = document.querySelector('#tags-pins #buttons')
         for (const id of pinsList)
         {
-            const btn = document.importNode(tpl.content, true)
-
-            const inpt = btn.querySelector('input')
-            const label = btn.querySelector('label')
-
-            btn.querySelector('div').setAttribute('data-id', id)
-            inpt.id = 'pin-' + id
-            inpt.value = id
-            label.setAttribute('for', 'pin-' + id)
-            label.textContent = id
-            label.style.color = document.querySelector(`#tagList div[data-id="${id}"]`).getAttribute('data-color')
-
-            pins.appendChild(btn)
+            addTagToPinList(id, pins)
         }
 
-        // initialize MAIN tag panel "pin" buttons
-        document.querySelectorAll('#tagList .tag-pin').forEach(elem =>
+        document.addEventListener('tag_click', e =>
         {
-            elem.addEventListener('click', evt =>
+            const tagId = e.detail.tagId
+
+            // PINNED tags
+            if (tagProxyBtns.hasOwnProperty(tagId))
             {
-                evt.preventDefault()
-                evt.stopPropagation()
+                const proxy = tagProxyBtns[tagId]
+                const proxyInput = tagProxyBtns[tagId].querySelector('input')
+                proxyInput.checked = tagBtns[tagId].checked
 
-                const pin = evt.currentTarget
-                console.log(pin)
-                console.log(pinsList)
-                const index = pinsList.indexOf(pin.id)
-                if (index === -1) {pinsList.push(pin.id)}
-                else { pinsList.splice(index, 1) }
+                if (proxyInput.checked) {proxy.classList.add('tag-selected')}
+                else { proxy.classList.remove('tag-selected') }
 
-                pinsList.sort()
+                return
+            }
 
-                localStorage.setItem(PINS, JSON.stringify(pinsList))
-
-                console.log(pinsList)
-
-                updatePinButtonState(pinsList, pin)
-            })
-
-            updatePinButtonState(pinsList, elem)
-
-            elem.classList.remove('vis-hide')
+            if (tmpTagProxyBtns.hasOwnProperty(tagId))
+            {
+                
+            }
         })
 
-        // pin checkbox proxy
-        document.querySelectorAll('#tags-pins input[type="checkbox"]').forEach(elem =>
+        document.addEventListener('tag_pin_click', e =>
         {
-            elem.parentNode.addEventListener('click', evt =>
+            const pinId = e.detail.tagId
+            const pin = tagBtns[pinId]
+
+            console.log(pin)
+            console.log(pinsList)
+            const index = pinsList.indexOf(pinId)
+            if (index === -1)
             {
-                evt.preventDefault()
+                pinsList.push(pinId)
+                addTagToPinList(e.detail.tagId, pins)
+            }
+            else
+            {
+                pinsList.splice(index, 1)
+                removeTagFromPinList(e.detail.tagId, pins)
+            }
 
-                const item = evt.currentTarget.querySelector('input')
-                console.log(`proxy ${item}`)
-                console.log(item)
-                item.checked = !item.checked
+            pinsList.sort()
+            localStorage.setItem(PINS, JSON.stringify(pinsList))
 
-                const id = evt.currentTarget.getAttribute('data-id')
-                const tag = document.querySelector(`#tagList input[id="${id}"][type="checkbox"]`)
-                console.log(tag)
-                tag.checked = item.checked
-                console.log(`end proxy ${item}`)
-                if (item.checked)
-                {
-                    item.parentNode.classList.add('tag-selected')
-                }
-                else
-                {
-                    item.parentNode.classList.remove('tag-selected')
-                }
-            })
+            console.log(pinsList)
+
+            // quit if none
+            if (pinsList.length === 0)
+            {
+                document.getElementById('tags-pins').classList.add('tags-pins-hide')
+            }
+            else
+            {
+                document.getElementById('tags-pins').classList.remove('tags-pins-hide')
+            }
         })
 
         // quit if none
         if (pinsList.length === 0)
         {
             document.getElementById('tags-pins').classList.add('tags-pins-hide')
-        }
-    }
-
-    function updatePinButtonState(list, pinButton)
-    {
-        pinButton.classList.remove('vis-hide')
-        if (list.includes(pinButton.id))
-        {
-            pinButton.classList.add('tag-pin-on')
-        }
-        else
-        {
-            pinButton.classList.remove('tag-pin-on')
         }
     }
 
@@ -291,16 +438,6 @@
     document.getElementById('tags-pins-clear').addEventListener('click', clearTagsPopup)
 
     populatePinnedTags()
-
-
-    document.querySelectorAll('.tag-edit input[type="checkbox"]').forEach(elem =>
-    {
-        elem.addEventListener('click', (e) =>
-        {
-            if (e.currentTarget.checked) { e.currentTarget.parentNode.classList.add('tag-selected') }
-            else { e.currentTarget.parentNode.classList.remove('tag-selected') }
-        })
-    })
 
     document.addEventListener('keydown', function(e)
     {

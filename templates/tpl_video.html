@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+    <link rel="stylesheet" href="/static/styles/global.css">
+    <link rel="stylesheet" href="/static/styles/video.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
+	<title>Video ({{ image.image_id }})</title>
+</head>
+<body>
+<div style="display: none" id="image-id">{{ image.image_id }}</div>
+<div style="display: none">{{ image.path }}</div>
+<div class="modal">
+    <div class="modal-img-container">
+        <div class="video-container">
+            <video id="video" class="modal-img video-fix" tabindex="-1" controls>
+                <source src="/video/{{ image.image_id }}" type="video/mp4">
+            </video>
+            <video id="video-fwd" class="modal-img video-fix vis-hide" tabindex="-1">
+                <source src="/video/{{ image.image_id }}" type="video/mp4">
+            </video>
+            <table class="stats-overlay">
+                <tr><td>Frame </td><td id="cur-frame" class="table-value">0</td></tr>
+                <tr><td>Time </td><td id="cur-time" class="table-value">0</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="modal-controls">
+        <div class="row">
+            <label for="onion">Onion</label><input id="onion" type="checkbox"/>
+        </div>
+        <div class="row">
+            <label for="frame-step">Step (up/down)</label>
+            <input id="frame-step" type="text" size="5" placeholder="10" min="1" max="9999" pattern="[0-9]*" value="10"/>
+        </div>
+        <div class="row">
+            <label for="frame-rate">Frame rate</label>
+            <select id="frame-rate">
+                <option value="24">24</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+            </select>
+        </div>
+        <div class="row hspace">
+        </div>
+        <div class="row">
+            <span>Keys</span>
+            <button id="key-add">Add</button>
+            <button id="clear-save">Clear</button>
+        </div>
+
+        <div class="row">
+            <table id="keys-list">
+                <tr id="key-tpl" class="vis-hide" data-id="-1" data-time="0">
+                    <td>
+                        <a id="text" href="#" class="key-text"></a>
+                    </td>
+                    <td>
+                        <button id="delete">(x)</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="module" src="/static/js/video/video.js">
+</script>
+</body>
+</html>

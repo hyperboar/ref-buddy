@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+    <style>
+        #tpl-edit-form
+        {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        #edit-btn {margin: 3px;}
+        #submit {margin: 3px;}
+        #cancel {margin: 3px;}
+    </style>
+    <title>Paths</title>
+</head>
+<body>
+<div class="header">
+    <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a>
+    <h1>Paths</h1>
+</div>
+<ul>
+    {% for path in paths %}
+        <li data-id="{{ path.id }}">
+            <h2>{{ path.path }} [{{ path.id }}]</h2>
+            <div><span>Tags: </span><span id="path-tags">{{ path.tags_plain|join(', ') }}</span></div>
+            <button id="edit-btn">Edit</button>
+            <div id="form-container"></div>
+        </li>
+    {% endfor %}
+</ul>
+<div id="tpl-edit-form">
+    <div><label for="tags-list" id="tags-label">Tags</label><textarea id="tags-list" rows="2" cols="40" placeholder="Add some tags. Comma separated list."></textarea></div>
+    <div><button id="submit">Apply</button><button id="cancel">Cancel</button></div>
+</div>
+<script>
+    const form = document.getElementById('tpl-edit-form')
+
+    document.querySelectorAll('#edit-btn').forEach(btn =>
+    {
+        btn.addEventListener('click', e =>
+        {
+            const row = e.currentTarget.parentNode
+            const container = row.querySelector('#form-container')
+            const pathId = row.getAttribute('data-id')
+
+            container.appendChild(form)
+
+            row.querySelector('#edit-btn').classList.add('vis-hide')
+            form.classList.remove('vis-hide')
+            form.setAttribute('data-id', pathId)
+
+            form.querySelector('#tags-list').value = row.querySelector('#path-tags').textContent
+
+            console.log(`form for ${pathId}`)
+        })
+    })
+
+    document.querySelector('#submit').addEventListener('click', e =>
+    {
+        console.log('submitting form')
+
+        const pathId = form.getAttribute('data-id')
+        let tagStr = form.querySelector('#tags-list').value
+        tagStr = tagStr.replace(' ', '').replace('\n', '')
+
+        console.log('sending tags' + tagStr)
+
+        form.classList.remove('op-fail', 'op-success')
+        form.parentNode.parentNode.classList.remove('op-fail', 'op-success')
+
+        if (tagStr.length === 0)
+        {
+            tagStr = '___'
+        }
+        fetch(`/path-tag/${pathId}/${tagStr}`)
+            .then(r =>
+            {
+                if (!r.ok)
+                {
+                    form.classList.add('op-fail')
+                    throw new Error('Network response was not ok')
+                }
+
+                return r.json()
+            })
+            .then(data =>
+            {
+                const row = form.parentNode.parentNode
+                row.classList.add('op-success')
+                row.querySelector('#edit-btn').classList.remove('vis-hide')
+                form.classList.add('vis-hide')
+                row.querySelector('#path-tags').textContent = data['tags'].join(', ')
+            })
+    })
+
+    document.querySelector('#cancel').addEventListener('click', e =>
+    {
+        console.log('cancelling form form')
+
+        const row = form.parentNode.parentNode
+
+        form.classList.add('vis-hide')
+        row.querySelector('#edit-btn').classList.remove('vis-hide')
+    })
+</script>
+</body>
+</html>

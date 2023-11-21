@@ -144,6 +144,32 @@ def save_image_color():
     # color = session.query(Color, )
     return render_template_string('ok')
 
+
+@routes_image.route('/study-video/<int:item_id>')
+def study_video(item_id):
+    session = Session()
+    metadata = session.get(ImageMetadata, item_id)
+
+    if metadata is None:
+        abort(404, f'Error: No video found with id "{item_id}"')
+
+    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
+
+    out = render_template('tpl_video.html', image=metadata, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+    session.close()
+    return out
+
+@routes_image.route('/video/<int:item_id>')
+def send_video(item_id):
+    session = Session()
+    metadata = session.get(ImageMetadata, item_id)
+
+    fn = metadata.path_abs.replace('.mp4.gif', '.mp4')
+
+    out = send_file(fn, mimetype=f'video/mp4')
+    session.close()
+    return out
+
 @routes_image.route('/open-video')
 def open_video():
 

@@ -41,6 +41,10 @@ class Path(Base):
     ord = Column(Integer, nullable=False, default=0)
 
     @property
+    def tags_plain(self) -> [str]:
+        return [t.tag.tag for t in self.tags]
+
+    @property
     def path(self) -> str:
         """Returns OS specific path."""
         return os.path.normpath(self.path_raw)
@@ -78,7 +82,7 @@ class ImageMetadata(Base):
     image_hash = Column(Text, name='hash')
 
     study_type_ref = relationship('StudyType')
-    path_ref = relationship('Path')
+    path_ref = relationship('Path', backref='images')
 
     @property
     def is_fav(self):
@@ -169,6 +173,15 @@ class ImageTag(Base):
 
     image = relationship('ImageMetadata', backref='tags') # ?? tag. should it be images?
     tag = relationship('Tag', backref='image_tags')
+
+class PathTag(Base):
+    __tablename__ = 'path_tags'
+
+    path_id = Column(Integer, ForeignKey('paths.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+
+    path = relationship('Path', backref='tags') # ?? tag. should it be images?
+    tag = relationship('Tag', backref='paths')
 
 class TagSet(Base):
     __tablename__ = 'tag_sets'
