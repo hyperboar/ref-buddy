@@ -72,9 +72,19 @@
 
         tagToggle(e)
         {
-            e.preventDefault()
+            if (e.currentTarget !== this._checkbox)
+            {
+                e.preventDefault()
+            }
 
-            console.log('TagItem method toggle tag ' + this._container.getAttribute('data-id'))
+            // console.log('TagItem method toggle tag ' + this._container.getAttribute('data-id'))
+
+            // handle input checkbox so it can trigger callbacks too
+            if (e.currentTarget === this._checkbox)
+            {
+                this._checkbox.checked = !this._checkbox.checked
+            }
+
             this.checked = !this.checked
         }
 
