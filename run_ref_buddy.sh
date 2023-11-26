@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the virtual environment directory
-VENV_DIR=venv
+export VENV_DIR=venv
 
 # Check if Python is installed
 python3 --version >/dev/null 2>&1
