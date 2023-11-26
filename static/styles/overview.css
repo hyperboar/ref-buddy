@@ -1,8 +1,3 @@
-body
-{
-    background-color: #7a7676;
-}
-
 .header
 {
     display: flex;
@@ -33,7 +28,7 @@ body
 }
 
 .tile-hidden {
-    border: 2px dashed white;
+    border: 2px dashed var(--clr-tile-hedden-border);
 }
 
 .tile .bg-thumb {
@@ -49,8 +44,8 @@ body
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.2); /* Adjust the overlay background color and opacity as needed */
-    color: white;
+    background-color: var(--clr-tile-ov1-bg); /* Adjust the overlay background color and opacity as needed */
+    color: var(--clr-tile-ov1-text);
     padding: 20px;
     box-sizing: border-box;
     opacity: 0.3;
@@ -93,7 +88,7 @@ body
 .overlay a {
     display: inline-block;
     margin-right: 10px;
-    color: white;
+    color: var(--clr-tile-ov1-text);
     text-decoration: none;
 }
 

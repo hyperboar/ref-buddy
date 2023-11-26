@@ -3,7 +3,6 @@ body {
     padding: 0;
     height: 100%;
     overflow: hidden;
-    background-color: rgb(0.2,0.2,0.2);
 }
 
 .modal {
@@ -67,7 +66,7 @@ body {
 
 .modal-img-darken
 {
-    filter: brightness(50%); /* Adjust the percentage value for desired darkness */
+    filter: brightness(50%);
 }
 
 .modal-img-gray { filter: grayscale(100%); }
@@ -150,9 +149,9 @@ body {
 }
 .modal-controls .row {
     display: flex;
-    flex-direction: row; /* change to row */
+    flex-direction: row;
     align-items: center;
-    justify-content: center; /* add justify-content */
+    justify-content: center;
 }
 
 .modal-controls select,
@@ -167,7 +166,7 @@ body {
 
 .modal-controls:hover
 {
-    background-color: rgba(84, 81, 81, 60%);
+    background-color: var(--clr-img-ctrl-bg-hover);
 }
 
 @media only screen and (max-width: 768px) {
@@ -188,7 +187,7 @@ span #time-current {
     width: 25px;
     height: 25px;
     background-size: cover;
-    background-image: url("/static/timer.png");
+    background-image: var(--url-icon-timer);
 }
 
 .fav
@@ -196,12 +195,12 @@ span #time-current {
     width: 25px;
     height: 25px;
     background-size: cover;
-    background-image: url("/static/fav_off.png");
+    background-image: var(--url-icon-favoff);
 }
 
 .on
 {
-    background-image: url("/static/fav_on.png");
+    background-image: var(--url-icon-favon);
 }
 
 #copyButton {
@@ -226,13 +225,13 @@ span #time-current {
 {
     display: flex;
     font-family: "Courier New", monospace;
-    color: rgba(0,0,0,0.3);
+    color: var(--clr-plt-text2);
     width: 150px;
     height: 25px;
     text-align: right;
     justify-content: right;
     align-items: center;
-    border: 2px solid rgba(0,0,0,0.2);
+    border: 2px solid var(--clr-plt-border2);
 }
 
 
@@ -245,8 +244,8 @@ span #time-current {
     height: 25px;
     background-size: cover;
     /*border: 0;*/
-    background-color: rgba(1,1,1,0);
-    background-image: url("/static/edit.png");
+    background-color: var(--clr-plt-save-btn-bg);
+    background-image: var(--url-icon-edit);
 }
 
 #pallet-frame
@@ -254,7 +253,7 @@ span #time-current {
     width: 20px;
     height: 20px;
     position: absolute;
-    border: 4px solid rgba(0,0,0,0.5);
+    border: 4px solid var(--clr-plt-frame);
     box-sizing: border-box;
     pointer-events: none;
 }

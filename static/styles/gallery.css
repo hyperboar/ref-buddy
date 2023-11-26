@@ -20,7 +20,7 @@
 
 .gallery .thumb {
     opacity: 1;
-    transition: opacity 0.2s ease-in;
+    transition: opacity 0.2s ease-in, transform 0.1s;
 }
 .gallery .thumb-hidden {
     opacity: 0.1 !important;
@@ -31,22 +31,27 @@
 }
 
 .selected {
-    outline: 4px solid green;
+    outline: 4px solid var(--clr-sel);
 }
 
-.selected::before {
+.selected::after {
   position: absolute;
   top: 0;
   right: 0;
-  background-color: green;
-  color: white;
+  background-color: var(--clr-sel);
+  color: var(--clr-tile-ov1-text);
   padding: 4px;
   border-radius: 50%;
 }
 
+.thumb.selected
+{
+    transform: scale(0.8);
+}
+
 .select-mode-btn
 {
-    background-color: green;
+    background-color: var(--clr-sel);
 }
 
 .no-select {
@@ -66,14 +71,14 @@
     padding-left: 15px;
     font-size: 14px;
     /*word-wrap: break-word;*/
-    color: black;
-    background-color: rgba(122, 118, 118, 0.7);
+    color: var(--clr-tile-ov2-text);
+    background-color: var(--clr-tile-ov2-bg);
 }
 
 
 .pallet-cell
 {
-    color: rgba(0,0,0,0.4);
+    color: var(--clr-plt-text);
 }
 
 /* CSS grid for responsive layout */
