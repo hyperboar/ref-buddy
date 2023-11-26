@@ -136,14 +136,21 @@ button
     display: grid;
     max-width: calc(80vw);
     min-width: calc(10vw);
-    max-height: calc(60vh);
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    max-height: calc(70vh);
+    /*grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));*/
+    grid-template-columns: repeat(auto-fill, auto);
     grid-template-rows: repeat(auto-fill, minmax(20px, 1fr));
     grid-auto-flow: column;
     grid-gap: 5px;
     margin: 10px;
     padding-bottom: 10px;
     padding-right: 10px;
+}
+
+.tag-item
+{
+    white-space: nowrap;
+    padding-right: 5px;
 }
 
 .tag-panel {
