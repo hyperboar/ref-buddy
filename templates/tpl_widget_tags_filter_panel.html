@@ -227,5 +227,9 @@
         {
             toggleTagsFilterDisplay()
         }
+        else if (e.code === 'Escape' && !e.shiftKey)
+        {
+            closeTagsFilterPopup()
+        }
     })
 </script>
