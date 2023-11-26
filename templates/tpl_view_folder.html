@@ -92,6 +92,13 @@
                 container.querySelector('.popup').classList.remove('vis-hide')
             })
 
+        // tags background
+        document.querySelector('.tags-popup-background').addEventListener('click', e =>
+        {
+            e.preventDefault()
+            e.stopPropagation()
+        })
+
     }, false)
 
     // fetch tags button
