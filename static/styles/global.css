@@ -236,7 +236,7 @@ button
 }
 
 .tag-selected-neg, .tag-selected-neg:hover {
-    background-color: var(--clr-tag-sel-pos) !important;
+    background-color: var(--clr-tag-sel-neg) !important;
 }
 
 
