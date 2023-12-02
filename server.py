@@ -13,6 +13,7 @@ from server_ext_folder import routes_folder
 from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
+from server_ext_discover import routes_discover
 from server_widget_helpers import get_paging_widget, get_tags_editor, get_tags_filter
 
 app = Flask(__name__, static_url_path='/static')
@@ -24,6 +25,7 @@ app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
 app.register_blueprint(routes_dupes)
 app.register_blueprint(routes_board)
+app.register_blueprint(routes_discover)
 
 @app.before_request
 def before_request():

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+    <link rel="stylesheet" href="/static/styles/discover.css">
+    <script type="text/javascript" src="/static/js/main.js"></script>
+	<title>Feed</title>
+</head>
+<body>
+<div class="feed-container">
+    <div id="more-trigger"></div>
+    <div class="feed">
+    </div>
+</div>
+
+<div id="post-tpl" class="vis-hide post">
+    <div class="content">
+        <a href="" target="_blank">
+            <img src="" alt=""/>
+        </a>
+    </div>
+    <div class="post-details">
+        <div class="tags">
+        </div>
+        <div class="rate">
+            <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
+            <span id="image-rating">-</span>
+            <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
+        </div>
+    </div>
+</div>
+<script type="module" src="/static/js/discover/discover.js">
+</script>
+</body>
+</html>
