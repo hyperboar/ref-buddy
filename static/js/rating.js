@@ -12,10 +12,15 @@ class RateBase
 
     lastBtn
 
-    constructor(upId, downId, loadStyle, succStyle, failStyle)
+    root
+
+    constructor(selUp, selDown, loadStyle, succStyle, failStyle, root = null)
     {
-        this.up    = document.getElementById(upId)
-        this.down  = document.getElementById(downId)
+        if (root === null) this.root = document
+        else this.root = root
+
+        this.up    = this.root.querySelector(selUp)
+        this.down  = this.root.querySelector(selDown)
         this.loadStyle = loadStyle
         this.succStyle = succStyle
         this.failStyle = failStyle
@@ -68,12 +73,12 @@ class RateSingle extends RateBase
     imageId
     total
 
-    constructor(imageId, totalId, upId, downId, loadStyle, succStyle, failStyle)
+    constructor(imageId, selTotal, selUp, selDown, loadStyle, succStyle, failStyle, root = null)
     {
-        super(upId, downId, loadStyle, succStyle, failStyle);
+        super(selUp, selDown, loadStyle, succStyle, failStyle, root);
 
         this.imageId = imageId
-        this.total = document.getElementById(totalId)
+        this.total = this.root.querySelector(selTotal)
     }
 
     onRate(btn, rating)
@@ -103,19 +108,20 @@ class RateFolder extends RateBase
 
     /**
      * @param imageId db image id
-     * @param totalId label that shows operation result
-     * @param upId rate up button
-     * @param downId rate down button
+     * @param selTotal label that shows operation result
+     * @param selUp rate up button
+     * @param selDown rate down button
      * @param loadStyle
      * @param succStyle
      * @param failStyle
+     * @param root
      */
-    constructor(imageId, totalId, upId, downId, loadStyle, succStyle, failStyle)
+    constructor(imageId, selTotal, selUp, selDown, loadStyle, succStyle, failStyle, root = null)
     {
-        super(upId, downId, loadStyle, succStyle, failStyle);
+        super(selUp, selDown, loadStyle, succStyle, failStyle, root);
 
         this.imageId = imageId
-        this.total = document.getElementById(totalId)
+        this.total = this.root.querySelector(selTotal)
     }
 
     onRate(btn, rating)

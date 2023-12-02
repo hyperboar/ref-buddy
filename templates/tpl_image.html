@@ -171,8 +171,8 @@
                 })
         })
 
-        const rateImage = new RateSingle({{ image.image_id }}, 'image-rating', 'rate-up', 'rate-dn', 'loading', 'op-success', 'op-fail')
-        const rateFolder = new RateFolder({{ image.image_id }}, 'image-rating', 'rate-up-f', 'rate-dn-f', 'loading', 'op-success', 'op-fail')
+        const rateImage = new RateSingle({{ image.image_id }}, '#image-rating', '#rate-up', '#rate-dn', 'loading', 'op-success', 'op-fail')
+        const rateFolder = new RateFolder({{ image.image_id }}, '#image-rating', '#rate-up-f', '#rate-dn-f', 'loading', 'op-success', 'op-fail')
 
         // study timer
         const timer = new StudyTimer({{ timer }}, 'time-current', 'time-planned')
