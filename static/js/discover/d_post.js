@@ -29,6 +29,14 @@ class DiscoverPost
 
         this.rate = new RateSingle(this.data.image_id, '#image-rating', '#rate-up', '#rate-dn', 'loading', 'op-success', 'op-fail', this.node)
         this.node.querySelector('#image-rating').textContent = this.data.rating
+
+        this.node.querySelector('#rate-up').addEventListener('click', e => this.pingLastActive(e))
+        this.node.querySelector('#rate-dn').addEventListener('click', e => this.pingLastActive(e))
+    }
+
+    pingLastActive(e)
+    {
+        fetch(`/discover-last-active/${this.data.image_id}/`)
     }
 }
 

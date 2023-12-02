@@ -14,10 +14,10 @@ function getNodeInMiddle()
     const middleOfWindow = windowHeight / 2 + window.scrollY;
 
     // Get all the nodes on the page (you might want to narrow this down based on your specific needs)
-    const allNodes = document.querySelector('.feed').childNodes;
+    const allNodes = document.querySelectorAll('.feed .post');
 
     if (allNodes === null || allNodes.length === 0) {
-        return
+        return null
     }
 
     // Find the node intersecting the middle of the window
@@ -39,11 +39,11 @@ function getNodeInMiddle()
     return nodeInMiddle;
 }
 
-function loadMore(count)
+function loadMore(url, freezeScroll = true, isHead = true)
 {
     IS_LOADING_MORE = true
 
-    fetch(`/discover-get-content/${count}/`)
+    fetch(url)
     .then(r =>
     {
         if (!r.ok)
@@ -61,13 +61,15 @@ function loadMore(count)
     })
     .then(json =>
     {
-        console.log(json)
         json.forEach(item =>
         {
             const post = new DiscoverPost(postTpl, item)
-            feedContainer.prepend(post.node)
+            if (isHead)
+                feedContainer.prepend(post.node)
+            else
+                feedContainer.append(post.node)
 
-            if (centeredNode !== null)
+            if (centeredNode !== null && freezeScroll)
             {
                 window.scrollTo({
                     top: centeredNode.offsetTop,
@@ -86,7 +88,7 @@ function loadMore(count)
 
 function initializeFooterTrigger()
 {
-    new TriggerOnVisible('#more-trigger', (target) =>
+    new TriggerOnVisible('#upper-trigger', (target) =>
     {
         if (IS_LOADING_MORE) { return }
 
@@ -100,11 +102,21 @@ function initializeFooterTrigger()
         centeredNode = node
         centeredNode.classList.add('test-sel')
 
-        loadMore(5)
+        loadMore('/discover-get-content/5/')
+    })
+
+    new TriggerOnVisible('#lower-trigger', (target) =>
+    {
+        if (IS_LOADING_MORE) { return }
+
+        const oldCount = 10
+        const id = document.querySelector('.feed .post:last-child').id
+        loadMore(`/discover-get-old-content/${oldCount}/${id}/`, false, false)
     })
 }
 
-
-loadMore(5)
+const oldCount = 10
+// const timestamp = Date.now().toDateString('YYYY-MM-DDTHH:mm:ss')
+loadMore(`/discover-get-old-content/${oldCount}/${0}/`, false, false)
 
 setTimeout(initializeFooterTrigger, 500)

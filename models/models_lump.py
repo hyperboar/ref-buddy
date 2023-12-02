@@ -259,6 +259,16 @@ class ImageColor(Base):
     def position(self):
         return self.x, self.y
 
+
+class Discover(Base):
+    __tablename__ = 'discover'
+
+    image_id    = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    last_active = Column(MyTIMESTAMP, default=datetime.now)
+
+    image = relationship('ImageMetadata')
+
+
 class ImageDupe(Base):
     __tablename__ = 'dupes'
 

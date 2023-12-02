@@ -71,6 +71,13 @@ CREATE TABLE IF NOT EXISTS tag_sets (
     tag_list TEXT
 );
 
+CREATE TABLE  IF NOT EXISTS discover (
+    image_id INTEGER,
+    last_active TIMESTAMP DEFAULT (datetime('now')),
+    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    PRIMARY KEY (image_id)
+);
+
 CREATE TABLE IF NOT EXISTS dupes (
     image1 INTEGER,
     image2 INTEGER,

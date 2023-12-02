@@ -5,7 +5,7 @@
     --post-width: 400px;
     --post-mr-top: 20px;
 
-    --trigger-mr-bot: 40px;
+    --trigger-mr-bot: 60px;
 
     --clr-post-tags: white;
 }
@@ -24,7 +24,7 @@ body {
     width: var(--feed-width);
 }
 
-#more-trigger {
+#upper-trigger {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: var(--trigger-mr-bot);
@@ -32,6 +32,15 @@ body {
     height: var(--footer-heigth);
     background-color: var(--clr-gray3);
 }
+#lower-trigger {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: var(--trigger-mr-bot);
+    width: var(--feed-width);
+    height: var(--footer-heigth);
+    background-color: var(--clr-gray3);
+}
+
 
 .post {
     background-color: var(--clr-gray3);
