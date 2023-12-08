@@ -459,9 +459,9 @@
             '{{ url_for('routes_tags.embed_panel_tag_editor') }}',
             '#tags-button',
             '#tags-popup-container',
-            (container) =>
+            () =>
             {
-                container.querySelector('.tags-popup').style.display = ''
+                toggleTagsPopupDisplay()
             })
 
         // boards
@@ -469,9 +469,9 @@
             '{{ url_for('routes_board.widget_get_boards_all') }}',
             '#board-button',
             '#board-popup-container',
-            (container) =>
+            () =>
             {
-                container.querySelector('.popup').classList.remove('vis-hide')
+                document.querySelector('#board-popup-container .popup').classList.remove('vis-hide')
             })
 
         // palette

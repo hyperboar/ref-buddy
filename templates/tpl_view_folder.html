@@ -87,9 +87,9 @@
             '{{ url_for('routes_board.widget_get_boards_all') }}',
             '#board-show-btn',
             '#board-popup-container',
-            (container) =>
+            () =>
             {
-                container.querySelector('.popup').classList.remove('vis-hide')
+                document.querySelector('#board-popup-container .popup').classList.remove('vis-hide')
             })
 
         // tags background

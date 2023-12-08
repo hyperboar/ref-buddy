@@ -57,22 +57,28 @@ function fetchAndSimpleFeedback(url, target)
  * Fetch remote widget and show it on screen inside of given container.<br/>
  * Also reloads javascript tag, so interactions still work and XSS is possible >_<
  * @param url
- * @param triggerSelector
- * @param containerSelector
+ * @param selTrigger
+ * @param selContainer
  * @param onLoadSetup callback that receives container to do smth with it
  */
-function simpleShowLoadableWidget(url, triggerSelector, containerSelector, onLoadSetup = (container) => {})
+function simpleShowLoadableWidget(url, selTrigger, selContainer, triggerAction = (evt) => {})
 {
-    const trigger = document.querySelector(triggerSelector)
-    const container = document.querySelector(containerSelector)
+    const trigger = document.querySelector(selTrigger)
+    const container = document.querySelector(selContainer)
+
+    let IS_LOADING = false
+    let IS_LOADED  = false
 
     trigger.addEventListener('click', (e) =>
     {
         // loading
-        if (container.textContent === '')
+        if (!IS_LOADING && !IS_LOADED)
         {
+            IS_LOADING = true
+
             trigger.classList.add('loading')
             trigger.classList.remove('op-success', 'op-fail')
+
             fetch(url)
                 .then((r) =>
                 {
@@ -82,16 +88,16 @@ function simpleShowLoadableWidget(url, triggerSelector, containerSelector, onLoa
                 .then((html) =>
                 {
                     container.innerHTML = html
-                    onLoadSetup(container)
 
-                    const code = container.querySelector('script')
-                    const text = code.textContent
-                    code.remove()
+                    // load any script that was linked to original template
+                    const scripts = container.querySelectorAll('script')
+                    const urls = Array.from(scripts).map(s => { return {'type': s.type, 'src': s.src} })
+                    scripts.forEach(s => s.remove())
 
-                    const jsElem = document.createElement('script')
-                    container.appendChild(jsElem)
-                    jsElem.textContent = text
-
+                    return Promise.all(urls.map(url => loadScript(url)))
+                })
+                .then(() =>
+                {
                     trigger.classList.add('op-success')
                 })
                 .catch((err) =>
@@ -103,12 +109,40 @@ function simpleShowLoadableWidget(url, triggerSelector, containerSelector, onLoa
                 {
                     container.classList.remove('vis-hide')
                     trigger.classList.remove('loading')
+
+                    IS_LOADED = true
+                    IS_LOADING = false
+
+                    triggerAction(e)
                 })
 
             return
         }
 
-        container.firstChild.classList.toggle('vis-hide')
+        triggerAction(e)
+
+    }) // addListener click
+}
+
+/**
+ *
+ * @param scriptUrl
+ * @returns {Promise<string>}
+ */
+function loadScript(scriptUrl)
+{
+    return new Promise((resolve) =>
+    {
+        const script = document.createElement('script')
+
+        script.onload = () => { resolve(scriptUrl.src) }
+
+        script.type = scriptUrl.type
+
+        const cacheBuster = `?bust=${new Date().getTime()}`
+        script.src = scriptUrl.src + cacheBuster
+
+        document.querySelector('head').append(script)
     })
 }
 
