@@ -108,6 +108,7 @@
 
         selection = new ImageSelection('stub-select-btn', '.stub-gallery', '.stub-thumb')
         selection.selectedIds = [{{ image.image_id }}]
+        selection.selectionMode = true
 
         let imgParams = new ImgParams('image-id', 'same-folder', 'time-planned', 'is-fav', 'min-rating', 'tag-set')
 
