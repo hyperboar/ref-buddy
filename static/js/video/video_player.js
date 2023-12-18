@@ -1,14 +1,18 @@
 class VideoPlayer
 {
-    onTimeUpdate = (self) => {}
-    onSeekBefore = (self) => {}
-    onSeekAfter  = (self) => {}
-
+    _evtOnTimeUpdate = 'onupdate'
+    _evtOnSeekBefore = 'onseekbefore'
+    _evtOnSeekAfter  = 'onseekafter'
 
     video = null
 
     fRate
     fRateFloat
+
+    KeyNext = 'ArrowRight'
+    KeyPrev = 'ArrowLeft'
+    KeyNextJump = 'ArrowUp'
+    KeyPrevJump = 'ArrowDown'
 
 
     constructor(sel, frameRate = 24)
@@ -18,8 +22,15 @@ class VideoPlayer
 
         this._preventDefaultEvents()
 
-        this.video.ontimeupdate = () => { this.onTimeUpdate(this) }
-        this.video.onseeked = () => { this.onSeekAfter(this) }
+        this._onTimeUpdateEvent = new CustomEvent(this._evtOnTimeUpdate, { detail: { video: this }});
+        this._onSeekBeforeEvent = new CustomEvent(this._evtOnSeekBefore,  { detail: { video: this }});
+        this._onSeekAfterEvent  = new CustomEvent(this._evtOnSeekAfter,  { detail: { video: this }});
+
+        this.video.addEventListener('timeupdate', e => { this.video.dispatchEvent(this._onTimeUpdateEvent) })
+        this.video.addEventListener('seeked', e => { this.video.dispatchEvent(this._onSeekAfterEvent) })
+
+        this.video.muted = true
+        this.video.loop = true
     }
 
     _preventDefaultEvents()
@@ -32,22 +43,22 @@ class VideoPlayer
 
         this.video.addEventListener('keydown', e =>
         {
-            if (e.code === 'ArrowLeft')
+            if (e.code === this.KeyPrev)
             {
                 e.preventDefault()
                 e.stopPropagation()
             }
-            else if (e.code === 'ArrowRight')
+            else if (e.code === this.KeyNext)
             {
                 e.preventDefault()
                 e.stopPropagation()
             }
-            else if (e.code === 'ArrowUp')
+            else if (e.code === this.KeyPrevJump)
             {
                 e.preventDefault()
                 e.stopPropagation()
             }
-            else if (e.code === 'ArrowDown')
+            else if (e.code === this.KeyNextJump)
             {
                 e.preventDefault()
                 e.stopPropagation()
@@ -83,7 +94,17 @@ class VideoPlayer
         this.video.pause()
     }
 
+    addEventListener(eventType, callback)
+    {
+        this.video.addEventListener(eventType, callback)
+    }
+
     //#endregion Forwarding
+
+    get frameRate()
+    {
+        return this.fRate
+    }
 
     set frameRate(value)
     {
@@ -91,9 +112,14 @@ class VideoPlayer
         this.fRateFloat = 1. / value
     }
 
+    getFrameByTime(time)
+    {
+        return Math.round(time * this.fRate)
+    }
+
     get frame()
     {
-        return Math.round(this.video.currentTime * this.fRate)
+        return this.getFrameByTime(this.video.currentTime)
     }
 
     set frame(value)
@@ -103,7 +129,8 @@ class VideoPlayer
 
     seekTime(value)
     {
-        this.onSeekBefore(this)
+        // this.onSeekBefore(this)
+        this.video.dispatchEvent(this._onSeekBeforeEvent)
         this.video.currentTime = value
     }
 
@@ -112,5 +139,6 @@ class VideoPlayer
         this.seekTime(value * this.fRateFloat)
     }
 }
+
 
 export { VideoPlayer }

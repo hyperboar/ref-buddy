@@ -154,7 +154,8 @@ body {
     /*flex-wrap: wrap;*/
     /*align-self: flex-start;*/
     /*justify-content: space-between;*/
-    transition: background-color 0.15s;
+    transition: opacity 0.15s;
+    opacity: 0.2;
     background-color: #7a7676;
 }
 .modal-controls .row {
@@ -180,7 +181,7 @@ body {
 
 .modal-controls:hover
 {
-    background-color: rgba(84, 81, 81, 60%);
+    opacity: 1;
 }
 
 @media only screen and (max-width: 768px) {
@@ -285,10 +286,10 @@ body {
 
 .stats-overlay {
     position: absolute;
-    bottom: 80px;
+    bottom: 20px;
     right: 15px;
     z-index: 100;
-    font-size: 20px;
+    font-size: 12px;
     background-color: #7a7676;
     opacity: 0.2;
     transition: opacity 0.2s;
@@ -299,7 +300,7 @@ body {
 }
 
 .table-value {
-    width: 50px;
+    width: 30px;
     text-align: left;
 }
 
@@ -319,6 +320,53 @@ body {
 {
     margin-top: 0;
     padding-top: 0;
+    /*counter-increment: item;*/
+    counter-reset: item;
+}
+
+.key-row
+{
+    min-width: 100px;
+    font-size: 12px;
+    counter-increment: item;
+}
+
+.key-row:hover
+{
+    background-color: #918d8d;
+}
+.key-row #ord::before
+{
+    content: counter(item);
+
+}
+.key-row #delete
+{
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    opacity: 0.05;
+    transition: opacity 0.5s;
+}
+
+.key-row:hover #delete
+{
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    opacity: 1;
+}
+
+.key-row #sel
+{
+    width: 20px;
+    text-align: center;
+}
+.sel
+{
+    border:1px dashed;
 }
 
 .key-text,

@@ -1,68 +1,96 @@
 import { VideoPlayer } from "/static/js/video/video_player.js"
+import {VideoKeyProvider, VideoKey, VideoKeyPlayer} from "/static/js/video/video_keys.js"
 
-// const video = document.getElementById('video')
 const videoOnionFwd = document.getElementById('video-fwd')
+const onionSwitch = document.getElementById('onion')
 
-const vFrame = document.getElementById('cur-frame')
-const vTime  = document.getElementById('cur-time')
+const vFrame = document.getElementById('stat-frame')
+const vTime  = document.getElementById('stat-time')
+const vFps   = document.getElementById('stat-fps')
+const vDur   = document.getElementById('stat-dur')
+const vProg   = document.getElementById('stat-prog')
 
 let forwardStep = 1.
+let lastSelected = null
+let isFbfMode = false
 
 const video = new VideoPlayer('#video')
 
 const imageId = parseInt(document.getElementById('image-id').textContent)
 
-// KEYS
+const extra = JSON.parse(document.getElementById('image-id').getAttribute('data-extra'))
+video.frameRate = extra.fps[0] / extra.fps[1]
+
+vFps.textContent = video.frameRate
+vDur.textContent = extra.dur
+
+
+//#region KEYS ------------------------
 
 const keysAddBtn = document.getElementById('key-add')
 const keysList = document.getElementById('keys-list')
 const keyTpl = document.getElementById('key-tpl')
-console.log(keyTpl)
 
-function newKeyTemplate(value)
+const forwardKeys = []
+const videoKeyed = new VideoKeyPlayer(video, forwardKeys)
+
+function newKeyTemplate(time, save = true)
 {
-    const key = keyTpl.cloneNode(true)
-    keysList.append(key)
+    const frame = video.getFrameByTime(time)
 
-    key.id = 'key'
-    key.setAttribute('data-time', value)
+    const key = new VideoKey(keyTpl, time, frame)
 
-    key.querySelector('#text').textContent = value.toFixed(2)
-    key.querySelector('#text').addEventListener('click', seekKey)
-    key.querySelector('#delete').addEventListener('click', removeKey)
+    const dupes = forwardKeys.filter(k => k.frame === frame)
+    if (dupes.length > 0)
+    {
+        dupes[0].node.classList.remove('op-success')
+        setTimeout(() => dupes[0].node.classList.add('op-success'), 100)
+        return
+    }
 
-    key.classList.remove('vis-hide')
+    const laterKeys = forwardKeys.filter(k => k.time - time > 0.).sort((k1, k2) => k1.time - k2.time)
 
-    saveKeys()
+    key.node.classList.add('op-success')
+    if (laterKeys.length === 0)
+    {
+        keysList.append(key.node)
+    }
+    else
+    {
+        keysList.insertBefore(key.node, laterKeys[0].node)
+    }
+
+    forwardKeys.push(key)
+    forwardKeys.sort((k1, k2) => k1.time - k2.time)
+
+    key.addEventListener('delete_click', removeFwdKey)
+    key.addEventListener('time_click', seekKey)
+
+    if (save)
+    {
+        saveKeys()
+    }
 }
 
-function removeKey(e)
+function removeFwdKey(e)
 {
-    const btn = e.currentTarget
-    btn.parentNode.parentNode.parentNode.removeChild(btn.parentNode.parentNode)
-
+    const key = e.detail.key
+    forwardKeys.remove(key)
     saveKeys()
 }
 
 function seekKey(e)
 {
-    e.preventDefault()
-
-    const text = e.currentTarget
-    const value = parseFloat(text.parentNode.parentNode.getAttribute('data-time'))
-    console.log(value)
-    video.currentTime = value
+    video.currentTime = e.detail.key.time
 }
 
 function saveKeys()
 {
     let keys = []
 
-    Array.from(keysList.querySelectorAll('#keys-list #key')).forEach(item =>
+    forwardKeys.forEach(key =>
     {
-        console.log(item)
-        const value = parseFloat(item.getAttribute('data-time'))
-        keys.push({time: value})
+        keys.push({time: key.time})
     })
 
     let videoData = JSON.parse(localStorage.getItem('video-data'))
@@ -85,6 +113,44 @@ function getKeys()
     return videoData[id]['video_keys']
 }
 
+function fwdSeekNextKey()
+{
+    const curTime = video.currentTime
+
+    const keys = forwardKeys.filter(k => k.time - curTime > 0.)
+    if (keys.length === 0 && forwardKeys.length === 0)
+    {
+        video.seekTime(0)
+    }
+    else if (keys.length === 0)
+    {
+        video.seekTime(forwardKeys[0].time)
+    }
+    else
+    {
+        video.seekTime(keys[0].time)
+    }
+}
+
+function fwdSeekPrevKey()
+{
+    const curTime = video.currentTime
+
+    const keys = forwardKeys.filter(k => curTime - k.time > 0.)
+    if (keys.length === 0 && forwardKeys.length === 0)
+    {
+        video.seekTime(0)
+    }
+    else if (keys.length === 0)
+    {
+        video.seekTime(forwardKeys[forwardKeys.length - 1].time)
+    }
+    else
+    {
+        video.seekTime(keys[keys.length - 1].time)
+    }
+}
+
 
 
 function initializeKeys()
@@ -94,31 +160,51 @@ function initializeKeys()
 
     data.forEach(item =>
     {
-        console.log(item)
-        newKeyTemplate(item.time)
+        // console.log(item)
+        newKeyTemplate(item.time, false)
     })
+
+    selectClosestForwardKey(video)
 }
 
 
+document.addEventListener('keydown', e =>
+{
+    if (e.code === 'KeyK')
+    {
+        e.preventDefault()
+        e.stopPropagation()
+        newKeyTemplate(video.currentTime)
+    }
+})
+
+document.getElementById('key-fwd-play').addEventListener('click', e =>
+{
+    if (videoKeyed.paused) videoKeyed.play()
+    else videoKeyed.pause()
+})
 
 keysAddBtn.addEventListener('click', e =>
 {
     newKeyTemplate(video.currentTime)
 })
+
 document.getElementById('clear-save').addEventListener('click', e =>
 {
+    forwardKeys.forEach(k => k.remove())
+    forwardKeys.splice(0, forwardKeys.length)
     localStorage.removeItem('video-data')
 })
 
 
 initializeKeys()
 
-// KEYS -- end
+//#endregion KEYS -- end ------------------------
 
 
 // CONTROLS
 
-document.getElementById('onion').addEventListener('click', e =>
+onionSwitch.addEventListener('click', e =>
 {
     videoOnionFwd.classList.toggle('vis-hide')
 })
@@ -132,88 +218,145 @@ document.getElementById('frame-step').addEventListener('change', e =>
 // CONTROLS -- end
 
 
-function seek(vid, frames, fps)
+// update stats
+video.addEventListener('onupdate', e =>
 {
-    console.log(`before cur time: ${vid.currentTime}`)
-
-    const offset = frames * fps
-
-    const time = vid.currentTime
-    vid.currentTime += offset
-
-    if (offset > 0.)
-    {
-        videoOnionFwd.currentTime = time
-    } else
-    {
-        videoOnionFwd.currentTime = vid.currentTime + offset
-    }
-
-
-    console.log(`after cur time: ${vid.currentTime} :: 1 frame ${frames * fps} `)
-}
-
-video.onTimeUpdate = function(vid)
-{
+    const vid = e.detail.video
     vFrame.textContent = vid.frame.toString()
-    vTime.textContent  = `${vid.currentTime.toFixed(2)}`
-}
-
-video.onSeekBefore = function(vid)
-{
-    vid._beforeSeekTime = vid.currentTime
-}
-
-video.onSeekAfter = function(vid)
-{
-    const offset = vid.currentTime - vid._beforeSeekTime
-    videoOnionFwd.currentTime = vid.currentTime + (offset > 0. ? -offset : offset)
-}
-
-
-document.addEventListener('keydown', e =>
-{
-    // {#if (e.shiftKey) {return}#}
-    if (e.code === 'Space')
-    {
-        e.preventDefault()
-        e.stopPropagation()
-        if (video.paused) { video.play() }
-        else { video.pause() }
-    }
+    vTime.textContent  = vid.currentTime.toFixed(2)
+    vProg.textContent = (vid.currentTime / extra.dur * 100.).toFixed(2)
 })
+
+
+function selectClosestForwardKey(vid)
+{
+    if (forwardKeys.length === 0) return
+
+    let min = 999999999.
+    let idx = 0
+    for (let key in forwardKeys)
+    {
+        let diff = Math.abs(forwardKeys[key].time - vid.currentTime)
+        if (diff < min)
+        {
+            idx = key
+            min = diff
+        }
+    }
+
+    if (lastSelected !== null) lastSelected.selected(false)
+    lastSelected = forwardKeys[idx]
+    lastSelected.selected(true)
+}
+// update forward keys
+video.addEventListener('onupdate', e =>
+{
+    const vid = e.detail.video
+    selectClosestForwardKey(vid)
+})
+
+video.addEventListener('onseekbefore', e =>
+{
+    const vid = e.detail.video
+    vid._beforeSeekTime = vid.currentTime
+})
+
+video.addEventListener('onseekafter', e =>
+{
+    if (!onionSwitch.checked) { return }
+
+    const vid = e.detail.video
+    const offset = vid.currentTime - vid._beforeSeekTime
+    // console.log(offset)
+    // console.log(vid.currentTime + (offset > 0. ? -offset : offset))
+    videoOnionFwd.currentTime = vid.currentTime + (offset > 0. ? -offset : offset)
+})
+
+
+document.querySelector('#fbf-mode').addEventListener('click', e =>
+{
+    isFbfMode = e.currentTarget.checked
+})
+
+
+const keyMap =
+{
+    normal: function (e)
+    {
+        if (e.code === 'Space')
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (video.paused) { video.play() }
+            else { video.pause() }
+        }
+        else if (e.code === video.KeyPrev)
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!video.paused) { video.pause() }
+
+            if (e.shiftKey)
+            {
+                fwdSeekPrevKey()
+            }
+            else
+            {
+                video.seekFrame(video.frame - 1)
+            }
+        }
+        else if (e.code === video.KeyNext)
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!video.paused) { video.pause() }
+
+            if (e.shiftKey)
+            {
+                fwdSeekNextKey()
+            }
+            else
+            {
+                video.seekFrame(video.frame + 1)
+            }
+        }
+        else if (e.code === video.KeyNextJump)
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!video.paused) { video.pause() }
+            video.seekFrame(video.frame + forwardStep)
+        }
+        else if (e.code === video.KeyPrevJump)
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!video.paused) { video.pause() }
+            video.seekFrame(video.frame - forwardStep)
+        }
+    },
+    fbf: function(e)
+    {
+        if (e.code === video.KeyPrev)
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!video.paused) { video.pause() }
+            fwdSeekPrevKey()
+
+        }
+        else if (e.code === video.KeyNext)
+        {
+            e.preventDefault()
+            e.stopPropagation()
+            if (!video.paused) { video.pause() }
+            fwdSeekNextKey()
+        }
+    }
+}
 
 // Frame-by-frame scrubbing with left and right arrow keys
 document.addEventListener('keydown', e =>
 {
-    if (e.code === 'ArrowLeft')
-    {
-        e.preventDefault()
-        e.stopPropagation()
-        if (!video.paused) { video.pause() }
-        video.seekFrame(video.frame - 1)
-        // seek(video, -1, fps)
-    }
-    else if (e.code === 'ArrowRight')
-    {
-        e.preventDefault()
-        e.stopPropagation()
-        if (!video.paused) { video.pause() }
-        video.seekFrame(video.frame + 1)
-        // seek(video, 1, fps)
-    }
-    else if (e.code === 'ArrowUp')
-    {
-        e.preventDefault()
-        e.stopPropagation()
-        if (!video.paused) { video.pause() }
-        video.seekFrame(video.frame + forwardStep)
-    }
-    else if (e.code === 'ArrowDown')
-    {
-        e.preventDefault()
-        e.stopPropagation()
-        if (!video.paused) { video.pause() }
-        video.seekFrame(video.frame - forwardStep)
-    }
+    isFbfMode ? keyMap.fbf(e) : keyMap.normal(e)
 })

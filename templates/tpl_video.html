@@ -13,15 +13,18 @@
 <div class="modal">
     <div class="modal-img-container">
         <div class="video-container">
-            <video id="video" class="modal-img video-fix" tabindex="-1" controls>
+            <video id="video" class="modal-img video-fix" tabindex="-1">
                 <source src="/video/{{ image.image_id }}" type="video/mp4">
             </video>
             <video id="video-fwd" class="modal-img video-fix vis-hide" tabindex="-1">
                 <source src="/video/{{ image.image_id }}" type="video/mp4">
             </video>
             <table class="stats-overlay">
-                <tr><td>Frame </td><td id="cur-frame" class="table-value">0</td></tr>
-                <tr><td>Time </td><td id="cur-time" class="table-value">0</td></tr>
+                <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
+                <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>
+                <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>
+                <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>
+                <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
             </table>
         </div>
     </div>
@@ -36,10 +39,10 @@
         <div class="row">
             <label for="frame-rate">Frame rate</label>
             <select id="frame-rate">
-                <option value="24">24</option>
-                <option value="29">29</option>
-                <option value="30">30</option>
-                <option value="60">60</option>
+                <option value="0" selected>Every</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+                <option value="4">4th</option>
             </select>
         </div>
         <div class="row hspace">
@@ -48,22 +51,27 @@
             <span>Keys</span>
             <button id="key-add">Add</button>
             <button id="clear-save">Clear</button>
+            <button id="key-fwd-play">Play</button>
+            <span><input type="checkbox" id="fbf-mode" title="Frame by Frame mode"></span>
         </div>
 
         <div class="row">
             <table id="keys-list">
-                <tr id="key-tpl" class="vis-hide" data-id="-1" data-time="0">
-                    <td>
-                        <a id="text" href="#" class="key-text"></a>
-                    </td>
-                    <td>
-                        <button id="delete">(x)</button>
-                    </td>
-                </tr>
             </table>
         </div>
     </div>
 </div>
+<table class="vis-hide">
+    <tr id="key-tpl" data-id="-1" data-time="0" class="key-row" >
+        <td>
+            <span id="sel"></span><span id="frame" class="key-text"></span> (<span id="time" class="key-text"></span>)
+        </td>
+        <td>
+            <button id="delete">x</button>
+        </td>
+        <td id="ord"></td>
+    </tr>
+</table>
 <script type="module" src="/static/js/video/video.js">
 </script>
 </body>
