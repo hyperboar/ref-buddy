@@ -25,7 +25,7 @@ class ExportVidGifs:
         out_ext = '.gif'
 
         vids = []
-        print('Searching for videos to generate gif preview...', end='')
+        print('Searching for videos to generate gif preview...', end='', flush=True)
         for dir_path, dir_names, filenames in os.walk(folder_path):
             new_vids = []
             for fn in filenames:
@@ -42,7 +42,7 @@ class ExportVidGifs:
         if len(vids) == 0:
             print('')
         else:
-            print(f'\rSearching for videos to generate gif preview... Found {len(vids)} videos to process')
+            print(f'\rSearching for videos to generate gif preview... Found {len(vids)} videos to process', flush=True)
 
             i = 1
             max_i = len(vids)
@@ -53,7 +53,7 @@ class ExportVidGifs:
                 if not force and os.path.exists(output_file):
                     continue
 
-                print(f'  ({i}/{max_i}) Processing "{input_file}"...', end='')
+                print(f'  ({i}/{max_i}) Processing "{input_file}"...', end='', flush=True)
 
                 # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
                 dur_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "{input_file}"'
