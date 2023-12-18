@@ -101,6 +101,23 @@ class ExportVidGifs:
 
         print('Searching for videos to generate gif preview... Done')
 
+    @staticmethod
+    def get_video_fps(path: str) -> (float, [int]):
+        # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
+        dur_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "{path}"'
+        dur_out = subprocess.run(dur_cmd, capture_output=True).stdout.decode("utf-8")
+        # convert raw output to total_seconds
+        t = datetime.strptime(dur_out, '%H:%M:%S.%f\r\n')
+        total_dur = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second,
+                              microseconds=t.microsecond).total_seconds()
+
+        # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
+        fps_cmd = f'ffprobe -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate "{path}"'
+        fps_out = subprocess.run(fps_cmd, capture_output=True).stdout.decode("utf-8")
+        fps = [int(num) for num in fps_out.replace('\r\n', '').split('/')]
+
+        return total_dur, fps
+
 if __name__ == '__main__':
     from Env import Env
     # ExportVidGifs.export(Env.IMAGES_PATH)

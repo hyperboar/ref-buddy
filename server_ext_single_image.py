@@ -154,8 +154,9 @@ def study_video(item_id):
         abort(404, f'Error: No video found with id "{item_id}"')
 
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
+    extra = metadata.extras[0].data
 
-    out = render_template('tpl_video.html', image=metadata, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+    out = render_template('tpl_video.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
     session.close()
     return out
 

@@ -1,3 +1,4 @@
+import json
 import math
 from datetime import datetime, timedelta
 import hashlib
@@ -8,8 +9,9 @@ from PIL import Image
 from sqlalchemy import func, exists
 
 from Env import Env
+from export_vid_gifs import ExportVidGifs
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag
+from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag, ImageExtra
 
 
 def get_db_info():
@@ -604,15 +606,69 @@ def collapse_import_times():
 
     make_database_backup('after_collapse_import_times', True)
 
+def assign_video_extra_data(is_force=False):
+    s = Session()
+
+    limit = 100
+    offset = 0
+
+    q = s.query(ImageMetadata).filter(ImageMetadata.source_type_id == 3) # videos only
+
+    progress = ['/', '-', '\\', '|', ]
+    i = 0
+    step = 50
+
+    print(f'Assigning extra data for videos...', end='', flush=True)
+    while True:
+        images = q.offset(offset).limit(limit).all()
+
+        if len(images) == 0:
+            break
+
+        for image in images:
+            i += 1
+            if i % step == 0:
+                print(f'\rAssigning extra data for videos... {progress[int((i / step) % len(progress))]}', end='', flush=True)
+
+            if not is_force and len(image.extras) != 0:
+                continue
+
+            image_path = image.path_abs.replace('.mp4.gif', '.mp4')
+
+            if not os.path.exists(image_path):
+                image.mark_as_lost(s, auto_commit=False)
+                continue
+
+            dur, fps = ExportVidGifs.get_video_fps(image_path)
+            data = {'dur': dur, 'fps': fps}
+
+            if len(image.extras) == 0:
+                s.merge(ImageExtra(image_id=image.image_id, data=json.dumps(data)))
+            else:
+                tmp = json.loads(image.extras[0].data)
+                tmp['dur'] = data['dur']
+                tmp['fps'] = data['fps']
+                image.extras[0].data = json.dumps(tmp)
+
+            s.flush()
+
+            # print (f'{data} for {image.source_type_id}:{image.filename}')
+
+        offset += limit
+
+    s.commit()
+
+    print(f'\rAssigning extra data for videos... Done' + (' ' * 50), flush=True)
 
 if __name__ == '__main__':
     # cleanup_lost_images()
 
     # reassign_source_type_to_all()
     # collapse_import_times()
-    assign_folder_tags()
+    # assign_folder_tags()
     # assign_animation_tags()
     # remove_broken_video_gifs()
+    assign_video_extra_data(is_force=False)
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()

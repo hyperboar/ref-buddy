@@ -5,7 +5,8 @@ from datetime import datetime
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
-from maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags
+from maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags, \
+    assign_video_extra_data
 from models.models_lump import Session, Path, ImageMetadata
 
 
@@ -68,6 +69,7 @@ class ImageMetadataImporter:
             print(f'Images import completed! Found {new_count} new files.')
             assign_folder_tags(session)
             assign_animation_tags(session)
+            assign_video_extra_data()
             rehash_images(False)
             make_database_backup(marker='after_import', force=True)
             generate_thumbs()

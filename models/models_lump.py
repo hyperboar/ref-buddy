@@ -139,6 +139,19 @@ class ImageMetadata(Base):
     def __repr__(self):
         return str(self)
 
+class ImageExtra(Base):
+    __tablename__ = 'image_extra'
+
+    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    data = Column(Text, default='')
+
+    image = relationship('ImageMetadata', backref='extras')
+
+    # @property
+    # def as_json(self):
+    #     return self.data
+
+
 class Tag(Base):
     __tablename__ = 'tags'
 

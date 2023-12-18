@@ -103,6 +103,13 @@ CREATE TABLE IF NOT EXISTS image_colors (
     PRIMARY KEY (image_id, color_id)
 );
 
+CREATE TABLE  IF NOT EXISTS image_extra (
+    image_id INTEGER,
+    data TEXT DEFAULT '',
+    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    PRIMARY KEY (image_id)
+);
+
 CREATE TABLE IF NOT EXISTS boards (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
