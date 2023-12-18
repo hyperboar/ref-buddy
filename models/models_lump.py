@@ -121,12 +121,12 @@ class ImageMetadata(Base):
         2 - animation
         3 - video
         """
-        ext = os.path.splitext(path)[1][1:]
-        match ext:
-            case 'mp4', 'webm': return 3
-            case 'gif': return 2
+        if path.endswith('.mp4.gif') or path.endswith('.webm'):
+            return 3
+        elif path.endswith('.gif'):
+            return 2
 
-        if ext == 'webp':
+        if path.endswith('.webp'):
             with Image.open(path) as img:
                 if hasattr(img, 'is_animated') and img.is_animated:
                     return 2
