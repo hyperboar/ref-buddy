@@ -252,7 +252,7 @@ function showNewTags(ids, ptags = [], ntags = [])
 
 function addTagToPinList(tagId, container, isTmp = false)
 {
-    if (tagId === '' || tagId === null) { return }
+    if (tagId === '' || tagId === null || !tagBtns.hasOwnProperty(tagId)) { return }
 
     const tpl = document.getElementById('tag-pin-template')
 
