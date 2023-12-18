@@ -1,9 +1,8 @@
 .idea/
 venv/
 
-# ignoring all but default config
-config/**
-!config/default
+# ignoring user config
+config/.env-user
 
 db_backups/
 

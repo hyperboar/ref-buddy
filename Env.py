@@ -1,10 +1,14 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv('./config/default/.env')
-if os.path.exists('./config/.env'):
-    load_dotenv('./config/.env', override=True)
+ENV_DEFAULT = './config/.env-default'
+ENV_USER = './config/.env-user'
+
+# Load environment variables from default .env file
+load_dotenv(ENV_DEFAULT)
+# load environment overrides from user's .env file
+if os.path.exists(ENV_USER):
+    load_dotenv(ENV_USER, override=True)
 
 
 class Env:
