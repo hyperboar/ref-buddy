@@ -6,9 +6,22 @@
     align-items: center;
 }
 
-.header h1, a
+.header h1
 {
     margin-left: 10px;
+}
+
+.header a
+{
+    padding: 10px;
+    margin-left: 5px;
+}
+
+.header a:hover
+{
+    text-decoration: none;
+    color: rgba(230,230,230, 50%);
+    background-color: rgba(50,50,50, 50%);
 }
 
 .header h1 {
