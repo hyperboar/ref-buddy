@@ -3,7 +3,7 @@ from flask import Blueprint, request, abort, render_template_string, render_temp
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag
 from server_args_helpers import get_current_paging, Args, get_arg
-from server_widget_helpers import get_paging_widget, get_tags_editor, get_tags_filter
+from server_widget_helpers import get_paging_widget, get_tags_editor
 
 routes_tags = Blueprint('routes_tags', __name__)
 
@@ -27,11 +27,9 @@ def view_tags():
         overview["study_type"] += ' exclude:' + ', '.join(tags_neg_names)
     overview["path"] = ""
 
-    tags_available = Ctrl.get_all_tags(sort_by_name=True, session=session)
     paging = get_paging_widget(page)
-    tags_editor = get_tags_editor(tags_available, session=session)
 
-    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, paging=paging, tags_editor=tags_editor)
+    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, paging=paging)
     session.close()
     return out
 
