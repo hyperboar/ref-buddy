@@ -5,6 +5,8 @@ import {WidgetBoard}           from "image_tools/widget_board.js"
 import {ImageSelection}        from "image_tools/image_selection.js"
 import {RateMultImages}        from "image_tools/rating.js"
 import {fetchAndSimpleFeedback} from '/static/js/main.js'
+import {MutationAttributeObserver} from '/static/js/mut_attr_observer.js'
+import {ImageLazyLoad } from '/static/js/image_lazy_load.js'
 
 
 let tagsFilter = new WidgetImageTagsFilter('', '#tags-filter-btn', true)

@@ -1,5 +1,6 @@
 import { VideoPlayer } from "/static/js/video/video_player.js"
 import {VideoKeyProvider, VideoKey, VideoKeyPlayer} from "/static/js/video/video_keys.js"
+import {} from "/static/js/main.js"
 
 const videoOnionFwd = document.getElementById('video-fwd')
 const onionSwitch = document.getElementById('onion')
