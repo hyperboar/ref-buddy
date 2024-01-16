@@ -6,8 +6,8 @@ class ApiImage
     static GetPlainUrlStudyImage()
     {
         return {
-            'url_long': '/study-image2/{image_id}?time-planned={time}sf={sf}&tags={tags}&tag-set={tagset}',
-            'url_short': '/study-image2/{image_id}',
+            'url_long': '/study-image/{image_id}?time-planned={time}sf={sf}&tags={tags}&tag-set={tagset}',
+            'url_short': '/study-image/{image_id}',
             'keys': {
                 'image_id': '{image_id}',
                 'time': '{time}',
