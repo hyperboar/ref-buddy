@@ -18,7 +18,7 @@
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=">
             <img src="" class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
             <div class="overlay vis-hide">
-                <span class="tags-list"></span>
+                <span class="recent-tags"></span><span class="tags-list" data-recent=""></span>
             </div>
         </a>
 
@@ -46,7 +46,7 @@
     <a href="{#/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=#}">
         <img src="" class="thumb thumb-hidden" data-src="{#/thumb/{{ image.image_id }}.jpg#}" alt="{#{{ image.image_id }}#}">
         <div class="overlay vis-hide">
-            <span class="tags-list"></span>
+            <span class="recent-tags"></span><span class="tags-list" data-recent=""></span>
         </div>
     </a>
 </div>

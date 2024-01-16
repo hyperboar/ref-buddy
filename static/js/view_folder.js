@@ -40,7 +40,14 @@ function fetchTags()
                 const g = document.querySelector('.gallery')
                 g.querySelectorAll('.thumbnail').forEach((tile) => {
                     const id = tile.getAttribute('data-id')
-                    tile.querySelector('.tags-list').textContent = data[id].join(', ')
+                    const tl = tile.querySelector('.tags-list')
+                    const rt = tl.getAttribute('data-recent') ?? ''
+                    if (rt !== '')
+                    {
+                        const tmp = rt.split(', ')
+                        data[id] = Array.from(data[id]).filter(t => !tmp.includes(t))
+                    }
+                    tl.textContent = (rt === '' ? '' : ', ') + data[id].join(', ')
                     tile.querySelector('.overlay').classList.remove('vis-hide')
                 })
             })

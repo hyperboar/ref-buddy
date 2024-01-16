@@ -430,21 +430,23 @@ class WidgetImageTagsEditor
 
             elem.querySelector('.overlay').classList.remove('vis-hide')
 
-            const tl = elem.querySelector('.tags-list')
+            const tl = elem.querySelector('.recent-tags')
+            let recentTags = tl.textContent
             if (ptags.length > 0)
             {
-                let tmp = tl.textContent === '' ? [] : tl.textContent.split(', ')
+                let tmp = recentTags === '' ? [] : recentTags.split(', ')
                 tmp = Array.from(new Set([].concat(tmp, ptags)))
                 tmp.sort()
-                elem.querySelector('.tags-list').textContent = tmp.join(', ')
+                tl.textContent = tmp.join(', ')
             }
             if (ntags.length > 0)
             {
-                let tmp = tl.textContent === '' ? [] : tl.textContent.split(', ')
+                let tmp = recentTags === '' ? [] : recentTags.split(', ')
                 tmp = Array.from(tmp).filter(t => !ntags.includes(t))
                 tmp.sort()
-                elem.querySelector('.tags-list').textContent = tmp.join(', ')
+                tl.textContent = tmp.join(', ')
             }
+            elem.querySelector('.tags-list').setAttribute('data-recent', tl.textContent)
         })
     }
 

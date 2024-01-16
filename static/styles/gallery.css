@@ -75,6 +75,10 @@
     background-color: var(--clr-tile-ov2-bg);
 }
 
+.overlay .recent-tags
+{
+    color: var(--clr-tag-recent);
+}
 
 .pallet-cell
 {
