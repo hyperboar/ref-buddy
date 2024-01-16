@@ -72,9 +72,10 @@ class ImageNextPrev
                 const oldUrl = urlStudy.url_short.replace(urlStudy.keys.image_id, id)         + '?' + this._filterStr()
                 const newUrl = urlStudy.url_short.replace(urlStudy.keys.image_id, nextImg.id) + '?' + this._filterStr()
 
-                history.pushState(null, null, newUrl)
+                history.pushState(null, null, oldUrl)
+                history.replaceState(null, null, newUrl)
 
-                console.log(nextImg)
+                // console.log(nextImg)
                 return new Promise(resolve => resolve(nextImg))
             })
     }
