@@ -98,7 +98,7 @@ class TagItem
 
     get color()
     {
-        this._container.getAttribute('data-color')
+        return this._container.getAttribute('data-color')
     }
 }
 
