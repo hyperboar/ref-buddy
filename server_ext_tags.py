@@ -2,36 +2,9 @@ from flask import Blueprint, request, abort, render_template_string, render_temp
 
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag
-from server_args_helpers import get_current_paging, Args, get_arg
-from server_widget_helpers import get_paging_widget, get_tags_editor
+from server_args_helpers import Args, get_arg
 
 routes_tags = Blueprint('routes_tags', __name__)
-
-
-@routes_tags.route('/tagged')
-def view_tags():
-    page, offset, limit = get_current_paging(request.args)
-    tag_set_id = get_arg(request.args, Args.tag_set)
-    tags_pos, tags_neg = get_arg(request.args, Args.tags)
-
-    session = Session()
-    tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
-    tags_pos_names = Ctrl.get_tag_names(tags_pos, session=session)
-    tags_neg_names = Ctrl.get_tag_names(tags_neg, session=session)
-
-    response, images = Ctrl.get_all_by_tags(tags_pos, tags_neg, limit, offset, session=session)
-
-    overview = {}
-    overview["study_type"] = ', '.join(tags_pos_names)
-    if len(tags_neg) > 0:
-        overview["study_type"] += ' exclude:' + ', '.join(tags_neg_names)
-    overview["path"] = ""
-
-    paging = get_paging_widget(page)
-
-    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, paging=paging)
-    session.close()
-    return out
 
 
 @routes_tags.route('/embed-panel-tag-filter')
@@ -77,38 +50,6 @@ def add_folder_tag():
 def remove_folder_tag():
     pass
 
-@routes_tags.route('/get-image-tags')
-def get_image_tags():
-    image_ids = get_arg(request.args, Args.mult_image_ids)
-
-    session = Session()
-    data = {img.image_id: [t.tag.tag for t in img.tags] for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all()}
-
-    for key in data:
-        data[key].sort()
-
-    if not data:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return jsonify(data)
-
-@routes_tags.route('/tags/image/bulk', methods=['POST'])
-def get_image_tags_new2():
-    if request.method != 'POST':
-        return abort(404, 'Should be GET')
-
-    image_ids = request.get_json()['image_ids']
-    # image_ids = get_arg(request.args, Args.mult_image_ids)
-
-    session = Session()
-    data = {img.image_id: [t.tag.tag for t in img.tags] for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all()}
-
-    for key in data:
-        data[key].sort()
-
-    if not data:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return jsonify(data)
-
 #region ---- JSON API ----
 
 @routes_tags.route('/tags/all')
@@ -133,16 +74,18 @@ def image_tags_single(image_id):
 
 @routes_tags.route('/tags/image/bulk', methods=['POST'])
 def image_tags_bulk():
+    if request.method != 'POST':
+        return abort(404, 'Should be GET')
+
     json = request.get_json()
     image_ids = json['image_ids'] if 'image_ids' in json else []
+
     session = Session()
-    images = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids))
-    out = []
-    for im in images:
-        tags = [{'color': it.tag.color.hex, 'tag': it.tag.tag} for it in im.tags]
-        out.append({'id': im.image_id, 'tags': tags})
-    session.close()
-    return jsonify(out)
+    data = {}
+    for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all():
+        data[img.image_id] = [t.tag.tag for t in img.tags]
+
+    return jsonify(data)
 
 @routes_tags.route('/tags/set-list')
 def tag_set_list():
@@ -150,8 +93,6 @@ def tag_set_list():
     out = [{'alias': s.set_alias, 'name': s.set_name, 'tags': s.tag_list} for s in session.query(TagSet).order_by(TagSet.set_name).all()]
     session.close()
     return jsonify(out)
-
-
 
 #endregion ---- JSON API ----
 

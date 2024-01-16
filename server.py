@@ -14,7 +14,7 @@ from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
 from server_ext_discover import routes_discover
-from server_widget_helpers import get_paging_widget, get_tags_editor, get_tags_filter
+from server_widget_helpers import get_paging_widget
 
 app = Flask(__name__, static_url_path='/static')
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
@@ -37,7 +37,7 @@ def index():
     hidden = int(args.get('hidden', default='0')) != 0
 
     images = ImageMetadataOverview.get_overview(hidden)
-    return render_template('tpl_index.html', images=images)
+    return render_template('tpl_view_index.html', images=images)
 
 @app.route('/favs')
 def view_favs():
@@ -52,9 +52,8 @@ def view_favs():
     images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
 
     paging = get_paging_widget(page)
-    tags_editor = get_tags_editor()
 
-    return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None, tags_editor=tags_editor)
+    return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None)
 
 @app.route('/latest_study')
 def view_last():
@@ -69,40 +68,16 @@ def view_last():
     images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
 
     paging = get_paging_widget(page)
-    tags_editor = get_tags_editor()
 
-    return render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None, tags_editor=tags_editor)
+    return render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None)
 
-@app.route('/folder/<int:path_id>')
-def view_folder(path_id):
-    rating = get_arg(request.args, Args.min_rating)
-    tags_pos, tags_neg = get_arg(request.args, Args.tags)
-    tag_set_id = get_arg(request.args, Args.tag_set)
-
-    session = Session()
-    tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
-
-    study_type, path, images = ImageMetadataCtrl.get_all_by_path_id(path_id, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
-    if len(images) == 0:
-        overview = None
-    else:
-        overview = images[0]
-        overview.path_dir = os.path.dirname(overview.path_abs)
-
-    tags_filter = get_tags_filter(session=session)
-    tags_editor = get_tags_editor(session=session)
-
-    out = render_template('tpl_view_folder.html', title='Folder', images=images, panel=tags_filter, overview=overview, tags_editor=tags_editor)
-    session.close()
-    return out
-
-@app.route('/image-colors')
+@app.route('/palettes')
 def view_image_colors():
     session = Session()
 
     sub = session.query(ImageColor.image_id).group_by(ImageColor.image_id).subquery()
     images = session.query(ImageMetadata).join(sub, ImageMetadata.image_id == sub.c.image_id).all()
-    out = render_template('tpl_image_colors.html', images=images)
+    out = render_template('tpl_view_palettes.html', images=images)
     return out
 
 
