@@ -47,6 +47,7 @@ function fetchTags()
                         const tmp = rt.split(', ')
                         data[id] = Array.from(data[id]).filter(t => !tmp.includes(t))
                     }
+                    data[id].sort()
                     tl.textContent = (rt === '' ? '' : ', ') + data[id].join(', ')
                     tile.querySelector('.overlay').classList.remove('vis-hide')
                 })
