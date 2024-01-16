@@ -1,12 +1,14 @@
 import os
 from datetime import datetime
+from typing import Callable
 
 from PIL import Image
 from flask import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
-    current_app
+    current_app, jsonify, Request, Response
+
 from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
-from models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet
+from models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet, Tag
 from server_args_helpers import get_arg, Args
 
 routes_image = Blueprint('routes_image', __name__)
@@ -20,46 +22,46 @@ def send_static_image(image_id):
     session.close()
     return out
 
-@routes_image.route('/study-image/<int:image_id>')
-def study_image(image_id):
-    timer = get_arg(request.args, Args.study_timer)
+# @routes_image.route('/study-image/<int:image_id>')
+# def study_image(image_id):
+#     timer = get_arg(request.args, Args.study_timer)
+#
+#     session = Session()
+#     metadata = Ctrl.get_by_id(image_id, session=session)
+#     study_types = Ctrl.get_study_types()
+#     if metadata is None:
+#         abort(404, f'Error: No images found with id "{image_id}"')
+#
+#     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
+#
+#     out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+#     session.close()
+#     return out
 
-    session = Session()
-    metadata = Ctrl.get_by_id(image_id, session=session)
-    study_types = Ctrl.get_study_types()
-    if metadata is None:
-        abort(404, f'Error: No images found with id "{image_id}"')
-
-    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
-
-    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
-    session.close()
-    return out
-
-@routes_image.route('/study-random')
-def study_random():
-    # study_type    = int(request.args.get('study-type', default='1'))
-    same_folder   = get_arg(request.args, Args.is_same_folder)
-    prev_image_id = get_arg(request.args, Args.image_id)
-    rating        = get_arg(request.args, Args.min_rating)
-    timer         = get_arg(request.args, Args.study_timer)
-    tags_pos, tags_neg = get_arg(request.args, Args.tags)
-    tag_set_id = get_arg(request.args, Args.tag_set)
-
-    session = Session()
-    tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
-
-    study_types = Ctrl.get_study_types(session=session)
-    metadata = Ctrl.get_random_by_study_type(0, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg), session=session)
-    if metadata is None:
-        return f'Error: No images found"'
-
-    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
-
-    out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
-
-    session.close()
-    return out
+# @routes_image.route('/study-random')
+# def study_random():
+#     # study_type    = int(request.args.get('study-type', default='1'))
+#     same_folder   = get_arg(request.args, Args.is_same_folder)
+#     prev_image_id = get_arg(request.args, Args.image_id)
+#     rating        = get_arg(request.args, Args.min_rating)
+#     timer         = get_arg(request.args, Args.study_timer)
+#     tags_pos, tags_neg = get_arg(request.args, Args.tags)
+#     tag_set_id = get_arg(request.args, Args.tag_set)
+#
+#     session = Session()
+#     tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+#
+#     study_types = Ctrl.get_study_types(session=session)
+#     metadata = Ctrl.get_random_by_study_type(0, same_folder, prev_image_id, min_rating=rating, tags=(tags_pos, tags_neg), session=session)
+#     if metadata is None:
+#         return f'Error: No images found"'
+#
+#     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
+#
+#     out = render_template('tpl_image.html', image=metadata, timer=timer, study_types=study_types, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+#
+#     session.close()
+#     return out
 
 @routes_image.route('/set-image-fav')
 def set_image_fav():
@@ -67,6 +69,13 @@ def set_image_fav():
     is_fav = int(args.get('is-fav'))
     image_id = get_arg(request.args, Args.image_id)
 
+    r = Ctrl.set_image_fav(image_id, is_fav)
+    if not r:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return render_template_string('yep')
+
+@routes_image.route('/set-image-fav/<int:image_id>/<int:is_fav>')
+def set_image_fav_new2(image_id, is_fav):
     r = Ctrl.set_image_fav(image_id, is_fav)
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
@@ -83,9 +92,27 @@ def set_image_last_viewed():
         abort(404, 'Something went wrong, last viewed not updated, probably...')
     return render_template_string('yep')
 
+@routes_image.route('/set-image-last-viewed2/<int:image_id>')
+def set_image_last_viewed_new2(image_id):
+    now = datetime.now()
+
+    r = Ctrl.set_image_last_viewed(image_id, now)
+
+    if not r:
+        abort(404, 'Something went wrong, last viewed not updated, probably...')
+    return render_template_string('yep')
+
 @routes_image.route('/thumb/<path:path>')
 def send_static_image_thumb(path):
     return send_from_directory(current_app.config['THUMB_STATIC'], path)
+
+@routes_image.route('/color/palette/<int:image_id>')
+def get_color_palette(image_id):
+    session = Session()
+    im = session.get(ImageMetadata, image_id)
+    out = [{'id': ic.color.id, 'hex': ic.color.hex, 'x': ic.x, 'y': ic.y} for ic in im.colors]
+    session.close()
+    return jsonify({'id': image_id, 'palette': out})
 
 @routes_image.route('/color-at-coord')
 def get_color_at_coord():
@@ -114,7 +141,7 @@ def get_color_at_coord():
         # Convert the average color to hex
         hex_color = '#%02x%02x%02x' % avg_color
 
-    return render_template_string(hex_color)
+    return jsonify({'hex': hex_color})
 
 @routes_image.route('/save-image-color')
 def save_image_color():
@@ -142,7 +169,28 @@ def save_image_color():
     session.commit()
 
     # color = session.query(Color, )
-    return render_template_string('ok')
+    return jsonify({'id': color.id})
+
+@routes_image.route('/color/palette/remove/<int:image_id>/<int:color_id>')
+def remove_image_color(image_id, color_id):
+    session = Session()
+
+    im_color_usage = session.query(ImageColor).filter(ImageColor.color_id == color_id).all()
+    tag_color_usage = session.query(Tag).filter(Tag.color_id == color_id).count()
+    im_count = len(im_color_usage)
+    count = im_count + tag_color_usage
+
+    if count == 0:
+        return jsonify({})
+
+    if tag_color_usage == 0 or im_count == 1: # not used in tags, used in one image
+        session.delete(session.get(Color, color_id))
+
+    session.delete(session.get(ImageColor, (image_id, color_id)))
+
+    session.commit()
+
+    return jsonify({'color_id': color_id})
 
 
 @routes_image.route('/study-video/<int:item_id>')
@@ -189,3 +237,54 @@ def open_video():
     subprocess.Popen([Env.VIDEO_PLAYER_PATH, path], cwd=os.getcwd())
 
     return 'ok'
+
+
+@routes_image.route('/study-image/<int:image_id>')
+def study_image(image_id):
+    return render_template('tpl_view_image.html', content_id=image_id, content_url=f"/image/{image_id}")
+
+
+@routes_image.route('/image-info/<int:image_id>')
+def image_info(image_id):
+    session = Session()
+    image = session.get(ImageMetadata, image_id)
+    extra = image.extras[0].data if len(image.extras) > 0 else "{}"
+    is_video = 1 if image.source_type_id == 3 else 0
+    out = render_template('json/tpl_image_info.json.html', image=image, extra=extra, is_video=is_video)
+    session.close()
+
+    return Response(response=out, status=200, mimetype="application/json")
+
+@routes_image.route('/next-image/<pattern>/<int:image_id>')
+def next_image(pattern, image_id):
+    lookup = {}
+    lookup['_'] = lambda im_id: None
+    lookup['fwd_id']  = lambda im_id: im_id + 1
+    lookup['bck_id']  = lambda im_id: im_id - 1
+    lookup['fwd_rnd'] = lambda im_id: next_random_image_id(im_id, request)
+    lookup['fwd_name'] = lambda im_id: next_image_by_name(im_id, 1, request)
+    lookup['bck_name'] = lambda im_id: next_image_by_name(im_id, -1, request)
+
+    next_im: Callable[[int], int | None] = lookup[pattern] if pattern in lookup else lookup['_']
+
+    image_id = next_im(image_id)
+    return jsonify({'id': image_id, 'pattern': pattern}) if image_id else abort(404)
+
+def next_random_image_id(image_id: int, req: Request) -> int:
+    session = Session()
+    metadata = Ctrl.get_random_by_request(request=req, image_id=image_id, session=session)
+    if metadata is None:
+        raise Exception(f'No images found (id:{image_id})')
+    session.close()
+    return metadata.image_id
+
+def next_image_by_name(image_id: int, step: int,  req: Request) -> int:
+    session = Session()
+    metadata = Ctrl.get_next_name_by_request(image_id=image_id, step=step, request=req, session=session)
+    if metadata is None:
+        raise Exception(f'No images found (id:{image_id})')
+    session.close()
+    return metadata.image_id
+
+def next_image_by_date(image_id: int, step: int,  req: Request) -> int:
+    return 1

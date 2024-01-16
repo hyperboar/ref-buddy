@@ -77,10 +77,14 @@ def set_board_image_transform():
     session.close()
     return 'ok'
 
-@routes_board.route('/board/add-images')
+@routes_board.route('/board/add-images', methods=['POST'])
 def add_images_to_board():
-    image_ids = get_arg(request.args, Args.mult_image_ids)
-    b_id = int(request.args.get('b-id', default='-1'))
+    if request.method != 'POST':
+        return abort(404, 'Should be POST')
+
+    args = request.get_json()
+    image_ids = args['image_ids']
+    b_id = args['board_id']
 
     if len(image_ids) == 0 or b_id == -1:
         abort(404, "Something went wrong")

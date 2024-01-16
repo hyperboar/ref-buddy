@@ -1,5 +1,6 @@
 import { DiscoverPost } from "/static/js/discover/d_post.js"
 import {imageLoader, TriggerOnVisible, waitFor} from "/static/js/discover/utils.js"
+import {} from '/static/js/main.js'
 
 const postTpl = document.querySelector('#post-tpl')
 const feedContainer = document.querySelector('.feed')

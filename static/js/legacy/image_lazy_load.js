@@ -7,7 +7,7 @@ class ImageLazyLoad
 {
     constructor(className, isBgImage, rootMargin = '100px', threshold = 0.2)
     {
-        const lazyImages = document.querySelectorAll(className)
+        const lazyImages = document.querySelectorAll(className);
 
         const options = {
             threshold: threshold, // Adjust this value to control how close the image needs to be to the viewport to start loading
@@ -19,8 +19,8 @@ class ImageLazyLoad
             entries.forEach(entry =>
             {
                 if (!entry.isIntersecting) { return }
-                const image = entry.target
-                const src = image.getAttribute('data-src')
+                const image = entry.target;
+                const src = image.getAttribute('data-src');
 
                 if (!src) { return }
 
@@ -40,14 +40,12 @@ class ImageLazyLoad
 
                 proxyImg.src = src
 
-                observer.unobserve(image)
+                observer.unobserve(image);
             });
-        }, options)
+        }, options);
 
         lazyImages.forEach(image => {
-            imageObserver.observe(image)
+            imageObserver.observe(image);
         });
     }
 }
-
-export { ImageLazyLoad }

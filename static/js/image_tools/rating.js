@@ -1,3 +1,5 @@
+import {ApiImage} from 'api'
+
 // THIS IS COPY OF rating.js BUT EXPORTABLE
 
 /**
@@ -86,9 +88,7 @@ class RateSingle extends RateBase
     onRate(btn, rating)
     {
         super.onRate(btn, rating);
-
-        fetch(`/add-image-rating?image-id=${this.imageId}&rating=${rating}`)
-            .then(response => response.text())
+        ApiImage.UpdateRatingSingle(this.imageId, rating)
             .then(data =>
             {
                 this.onSuccess(data)
@@ -130,9 +130,7 @@ class RateFolder extends RateBase
     {
         super.onRate(btn, rating);
 
-        fetch(`/add-folder-rating?image-id=${this.imageId}&rating=${rating}`)
-            .then(response => fetch(`/get-image-rating?image-id=${this.imageId}`))
-            .then(response => response.text())
+        ApiImage.UpdateRatingFolder(this.imageId, rating)
             .then(data =>
             {
                 this.onSuccess(data)
@@ -179,11 +177,10 @@ class RateMultImages extends RateBase
     {
         this.updateImageIds()
         if (this.imageIds.length === 0) { return }
-        const idsStr = this.imageIds.join(',')
 
         super.onRate(btn, rating);
 
-        fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${rating}`)
+        ApiImage.UpdateRatingBulk(this.imageIds, rating)
             .then(response => this.onSuccess(response))
             .catch(error => this.onFail(error))
             .finally(() => this.onFinal())

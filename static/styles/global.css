@@ -28,6 +28,7 @@
     /*--clr-tile-sel: green;*/
 
     --clr-plt-text: #00000066;
+    --clr-plt-text-bright: #D3D3D366;
     --clr-plt-frame: #0000007F;
     --clr-plt-save-btn-bg: #00000000;
     --clr-plt-text2: rgba(0,0,0,0.3);
@@ -43,6 +44,7 @@
     --url-icon-favoff: url("/static/fav_off.png");
     --url-icon-timer: url("/static/timer.png");
     --url-icon-edit:  url("/static/edit.png");
+    --url-icon-cross:  url("/static/cross.png");
 }
 
 body
@@ -114,7 +116,7 @@ button
 /* Use instead of style="display: hidden" */
 .vis-hide
 {
-    display: none;
+    display: none !important;
 }
 
 /* Button semi transparent */
@@ -122,8 +124,15 @@ button
     opacity: 0.5;
     transition: opacity 0.2s;
 }
-
 .btn-bg-blend:hover {
+    opacity: 1;
+}
+
+.btn-bg-blend2 {
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+.btn-bg-blend2:hover {
     opacity: 1;
 }
 
@@ -164,6 +173,17 @@ button
 }
 
 .tags-popup-background {
+    position: absolute;
+    background-color: #8e05a2;
+    opacity: 0.5;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90100;
+}
+
+.bg-overlay {
     position: fixed;
     background-color: var(--clr-popup-backrop);
     opacity: 0.5;
@@ -171,6 +191,7 @@ button
     top: 0;
     right: 0;
     bottom: 0;
+    z-index: 90100;
 }
 
 .top-menu {

@@ -1,4 +1,4 @@
-import { RateSingle } from "../rate_image.js";
+import { RateSingle } from "image_tools/rating.js";
 
 class DiscoverPost
 {

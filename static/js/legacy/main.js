@@ -53,27 +53,6 @@ function fetchAndSimpleFeedback(url, target)
         });
 }
 
-function wrapButtonFeedbackPromise(promise, target)
-{
-    target.classList.remove('op-success', 'op-fail')
-    target.classList.add('loading')
-
-    return promise
-        .then(() =>
-        {
-            target.classList.add('op-success')
-        })
-        .catch(error =>
-        {
-            target.classList.add('op-fail')
-            console.error('There was a problem with the fetch operation:', error)
-        })
-        .finally(() =>
-        {
-            target.classList.remove('loading')
-        });
-}
-
 /**
  * Fetch remote widget and show it on screen inside of given container.<br/>
  * Also reloads javascript tag, so interactions still work and XSS is possible >_<
@@ -238,5 +217,3 @@ class Hotkeys
         return Object.keys(this.pressedKeys).length === 0
     }
 }
-
-export { simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, wrapButtonFeedbackPromise, Hotkeys }

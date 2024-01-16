@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+    <link rel="stylesheet" href="/static/styles/image.css">
+	<title>Image ({{ content_id }})</title>
+</head>
+<body>
+<div style="display: none" id="image-id">{{ content_id }}</div>
+<div class="modal">
+    <img class="modal-bg" src="{{ content_url }}" alt="{# setup #}">
+    <div class="modal-img-container">
+        <img class="modal-img" src="{{ content_url }}" alt="{# setup #}"
+             tabindex="0">
+        <div class="magnification"></div>
+        <button class="modal-button-prev"><</button>
+        <button class="modal-button-next">></button>
+    </div>
+    <div class="modal-controls btn-bg-blend">
+        <div class="row timer">
+            <span class="timer-icon"></span>&nbsp;&nbsp;
+            <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
+            <span class="space"/>
+            <button id="timer-start" class="btn-bg-blend" started="">Start</button>
+        </div>
+        <div class="row">
+            <span>Filter: </span>
+            <select id="tag-set" class="btn-bg-blend">
+                <option value="none">None</option>
+            </select>
+            <span class="space"/>
+            <button id="toggle-grayscale" class="btn-bg-blend" value="" >Gray</button>
+            <span class="space"/>
+            <button id="open-vid-btn" class="btn-bg-blend vis-hide">play</button>
+            <button id="info-button" class="btn-bg-blend">info</button>
+            <button id="tags-filter-button" class="btn-bg-blend" title="Tags Filter">TF</button>
+            <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>
+            <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>
+            <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>
+        </div>
+        <div class="row">
+            <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
+            <span class="space"/>
+            <label for="rate-up">Rating: <span id="image-rating">{# setup #}</span></label>
+            <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
+            <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
+            <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
+            <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
+            <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
+        </div>
+        <div class="row">
+            <label for="same-folder">Same folder:</label>
+            <input type="checkbox" id="same-folder" value="true">
+            <input type="hidden" id="min-rating" value="0">
+            <a id="img-folder-link" href="{# setup #}"><img class="dir-link" src="/static/link.png"></a>
+        </div>
+        <div class="row">
+            <button id="prev" class="btn-bg-blend">&lt;</button>
+            <select id="pick-next-type" class="btn-bg-blend">
+                <option value="rnd" selected="selected">At Random</option>
+                <option value="name">By File Name</option>
+                <option value="id">By Id</option>
+                <option value="history">By History Only</option>
+            </select>
+            <button id="next" class="btn-bg-blend">&gt;</button>
+        </div>
+        <div id="history-marker" class="row vis-hide">
+            History shows&nbsp;<span id="h-cur-pos"></span>&nbsp;/&nbsp;<span id="h-max-pos"></span>
+        </div>
+    </div>
+
+    <div class="pallet-container vis-hide">
+        {#  <div class="pallet-cell" style="background-color: {{ c.color.hex }};" data-hex="{{ c.color.hex }}" data-x="{{ c.x }}" data-y="{{ c.y }}">{{ c.color.hex }}</div>#}
+    </div>
+    <div id="pallet-frame" class="vis-hide"></div>
+</div>
+<div id="image-info-popup" class="popup vis-hide">
+    <div class="popup-row">
+    </div>
+    <div class="popup-row">
+        <a href="" id="info-image-id"></a>&nbsp;
+        <span id="image-path">{# setup #}</span>&nbsp;
+        <button id="image-path-copy-btn">Copy</button>
+    </div>
+    <div class="popup-row">
+        <ul id="tags">
+            {# <li><a href="/tagged?tags={{ tag.tag }}">{{ tag.tag }}</a></li> #}
+        </ul>
+    </div>
+</div>
+
+<!-- Stubs for some components -->
+<div style="display: none">
+    <button id="stub-select-btn"></button>
+    <div class="stub-gallery"><div class="stub-thumb" data-id="{# setup #}"></div></div>
+</div>
+<script type="importmap">
+    {
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
+<script type="module" src="/static/js/view_image.js">
+</script>
+</body>
+</html>

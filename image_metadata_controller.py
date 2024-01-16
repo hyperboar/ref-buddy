@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+from flask import Request
+
 from Env import Env
 from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet
 from sqlalchemy import func
@@ -178,6 +180,68 @@ class ImageMetadataController:
         return row
 
     @staticmethod
+    def get_random_by_request(image_id, request:Request, session=None) -> 'ImageMetadata':
+        if session is None:
+            raise Exception('No session')
+
+        same_folder = request.args.get('sf', default=0, type=int)
+        min_rating  = request.args.get('r', default=0, type=int)
+
+        tags_str = request.args.get('tags', default="")
+        tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
+
+        tags_pos = ImageMetadataController.get_tags_by_names(tags_pos, session=session)
+        tags_neg = ImageMetadataController.get_tags_by_names(tags_neg, session=session)
+
+        q = ImageMetadataController.get_query_imagemetadata(
+            same_folder=same_folder, tags=(tags_pos, tags_neg),
+            image_id=image_id, min_rating=min_rating, session=session)
+        q = q.order_by(func.random())
+        row = q.first()
+
+        return row
+
+    @staticmethod
+    def handle_tags(tag_str:str) -> ([str], [str]):
+        tags_all = tag_str.split(',')
+        tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
+        tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
+
+        return tags_pos, tags_neg
+
+    @staticmethod
+    def get_next_name_by_request(image_id:int, step:int, request:Request, session=None) -> 'ImageMetadata':
+        if session is None:
+            raise Exception('No session')
+
+        same_folder = 1
+        min_rating  = request.args.get('r', default=0, type=int)
+
+        im = session.get(ImageMetadata, image_id)
+
+        tags_str = request.args.get('tags', default="")
+        tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
+
+        tags_pos = ImageMetadataController.get_tags_by_names(tags_pos, session=session)
+        tags_neg = ImageMetadataController.get_tags_by_names(tags_neg, session=session)
+
+        q = ImageMetadataController.get_query_imagemetadata(
+            same_folder=same_folder, tags=(tags_pos, tags_neg),
+            image_id=image_id, min_rating=min_rating, session=session)
+        if step > 0:
+            q = q.filter(ImageMetadata.filename > im.filename)
+            q = q.order_by(ImageMetadata.filename)
+        else:
+            q = q.filter(ImageMetadata.filename < im.filename)
+            q = q.order_by(ImageMetadata.filename.desc())
+        row = q.first()
+
+        if row is None:
+            return im
+
+        return row
+
+    @staticmethod
     def get_query_imagemetadata(study_type:int=-1, same_folder:int=0, image_id:int=-1,
                                 min_rating:int=0, tags:([int],[int])=([],[]),
                                 path_id:int=-1, session=None):
@@ -199,8 +263,8 @@ class ImageMetadataController:
             q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags[1])))
 
         # filter by study_type
-        if study_type > 0:
-            q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+        # if study_type > 0:
+        #     q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
 
         # when same_folder get path_id by image_id
         if same_folder > 0 and image_id > 0:

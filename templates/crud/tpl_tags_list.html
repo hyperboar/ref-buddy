@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     {% include 'tpl_part_header.html' %}
+    <link rel="stylesheet" href="/static/styles/crud.css">
     <title>Tags list</title>
 </head>
 <body>
@@ -11,20 +12,22 @@
 </div>
 
 <a href="/tags/add">Add Tag</a>
-<table>
+<table class="list">
     <tr>
         <th>ID</th>
         <th>Tag</th>
+        <th>Color</th>
         <th>Actions</th>
     </tr>
     {% for tag in tags %}
         <tr>
-            <td style="color: {{ tag.hex }}">{{ tag.id }}</td>
-            <td style="color: {{ tag.hex }}">[{{ tag.color_id }}] {{ tag.tag }}</td>
+            <td class="dimmed" style="color: {{ tag.hex }}">{{ tag.id }}</td>
+            <td style="color: {{ tag.hex }}">{{ tag.tag }}</td>
+            <td class="dimmed" style="color: {{ tag.hex }}">{{ tag.color_id }}</td>
             <td>
-                <a href="/tags/edit/{{ tag.id }}">Edit</a>
+                <a class="edit" href="/tags/edit/{{ tag.id }}">Edit</a>
                 <form method="POST" action="/tags/delete/{{ tag.id }}" style="display: inline;">
-                    <input type="submit" value="Delete" onclick="return confirmDelete('{{ tag.tag }}');">
+                    <input class="del" type="submit" value="x" onclick="return confirmDelete('{{ tag.tag }}');">
                 </form>
             </td>
         </tr>
@@ -34,7 +37,7 @@
 
 <script>
     function confirmDelete(tag) {
-        return confirm(`Delete tag <b>${tag}</b>?`);
+        return confirm(`Delete tag '${tag}'?`);
     }
 </script>
 </body>

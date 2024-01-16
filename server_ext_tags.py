@@ -28,21 +28,21 @@ def view_tags():
     overview["path"] = ""
 
     tags_available = Ctrl.get_all_tags(sort_by_name=True, session=session)
-    tags_filter = get_tags_filter(tags_available, session=session)
     paging = get_paging_widget(page)
     tags_editor = get_tags_editor(tags_available, session=session)
 
-    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, panel=tags_filter, paging=paging, tags_editor=tags_editor)
+    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, paging=paging, tags_editor=tags_editor)
     session.close()
     return out
+
+
+@routes_tags.route('/embed-panel-tag-filter')
+def embed_panel_tag_filter():
+    return render_template('tpl_widget_tags_filter_panel.html')
 
 @routes_tags.route('/embed-panel-tag-editor')
 def embed_panel_tag_editor():
-    session = Session()
-    out = get_tags_editor(session=session)
-    session.close()
-    return out
-
+    return render_template('tpl_widget_tags_editor_panel.html')
 
 @routes_tags.route('/add-image-tags')
 def add_image_tag():
@@ -93,7 +93,72 @@ def get_image_tags():
         abort(404, 'Something went wrong, fav not set, probably...')
     return jsonify(data)
 
-# ---- CRUD TAG ----
+@routes_tags.route('/tags/image/bulk', methods=['POST'])
+def get_image_tags_new2():
+    if request.method != 'POST':
+        return abort(404, 'Should be GET')
+
+    image_ids = request.get_json()['image_ids']
+    # image_ids = get_arg(request.args, Args.mult_image_ids)
+
+    session = Session()
+    data = {img.image_id: [t.tag.tag for t in img.tags] for img in session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).all()}
+
+    for key in data:
+        data[key].sort()
+
+    if not data:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return jsonify(data)
+
+#region ---- JSON API ----
+
+@routes_tags.route('/tags/all')
+def get_all_tags():
+    session = Session()
+    tags = session.query(Tag).all()
+    out = {'colors': {}, 'tags': []}
+    for tag in tags:
+        out['tags'].append({'id': tag.id, 'name': tag.tag, 'c': tag.color_id})
+        out['colors'][tag.color_id] = tag.color.hex
+    session.close()
+    return jsonify(out)
+
+@routes_tags.route('/tags/image/single/<int:image_id>')
+def image_tags_single(image_id):
+    session = Session()
+    im = session.get(ImageMetadata, image_id)
+    tags = [{'color': it.tag.color.hex, 'name': it.tag.tag} for it in im.tags]
+    out = [{'image_id': image_id, 'tags': tags}]
+    session.close()
+    return jsonify(out)
+
+@routes_tags.route('/tags/image/bulk', methods=['POST'])
+def image_tags_bulk():
+    json = request.get_json()
+    image_ids = json['image_ids'] if 'image_ids' in json else []
+    session = Session()
+    images = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids))
+    out = []
+    for im in images:
+        tags = [{'color': it.tag.color.hex, 'tag': it.tag.tag} for it in im.tags]
+        out.append({'id': im.image_id, 'tags': tags})
+    session.close()
+    return jsonify(out)
+
+@routes_tags.route('/tags/set-list')
+def tag_set_list():
+    session = Session()
+    out = [{'alias': s.set_alias, 'name': s.set_name, 'tags': s.tag_list} for s in session.query(TagSet).order_by(TagSet.set_name).all()]
+    session.close()
+    return jsonify(out)
+
+
+
+#endregion ---- JSON API ----
+
+
+#region ---- CRUD TAG ----
 
 @routes_tags.route('/tags')
 def show_tags():
@@ -132,9 +197,9 @@ def delete_tag(tag_id):
     session.commit()
     return redirect('/tags')
 
-# ---- END CRUD TAG ----
+#endregion ---- CRUD TAG ----
 
-# ---- CRUD TAG SET ----
+#region ---- CRUD TAG SET ----
 
 @routes_tags.route('/tag-sets')
 def list_tag_sets():
@@ -182,9 +247,9 @@ def tag_set_edit(tag_set_id):
     out = render_template('crud/tpl_tagset_edit.html', tag_set=tag_set, tags=tags)
     return out
 
-# ---- END CRUD TAG SET ----
+#endregion ---- CRUD TAG SET ----
 
-# ---- CRUD PATH TAG ----
+#region ---- CRUD PATH TAG ----
 
 @routes_tags.route('/path-tags')
 def list_path_tags():
@@ -226,4 +291,4 @@ def path_tag_edit(path_id, tags_str:str):
     session.close()
     return out
 
-# ---- END CRUD PATH TAG ----
+#endregion ---- CRUD PATH TAG ----

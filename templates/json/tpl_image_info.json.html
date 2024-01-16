@@ -1,0 +1,13 @@
+{
+    "id": {{ image.image_id }},
+    "thumb": "/thumbs/{{ image.image_id }}.jpg",
+    "url_image": "/image/{{ image.image_id }}",
+    "url_folder": "/folder/{{ image.path_id }}",
+    "path": "{{ image.path_abs|e|replace('\\', '/') }}",
+    "path_id": {{ image.path_id }},
+    "content_type": {{ image.source_type_id }},
+    "video": {{ is_video }},
+    "fav": {{ image.is_fav }},
+    "rating": {{ image.rating }},
+    "extra": {{ extra|safe }}
+}

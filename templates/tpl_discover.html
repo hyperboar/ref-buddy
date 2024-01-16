@@ -3,7 +3,6 @@
 <head>
     {% include 'tpl_part_header.html' %}
     <link rel="stylesheet" href="/static/styles/discover.css">
-    <script type="text/javascript" src="/static/js/main.js"></script>
 	<title>Feed</title>
 </head>
 <body>
@@ -28,6 +27,15 @@
         </div>
     </div>
 </div>
+<script type="importmap">
+    {
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
 <script type="module" src="/static/js/discover/discover.js">
 </script>
 </body>

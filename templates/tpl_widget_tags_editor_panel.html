@@ -1,17 +1,7 @@
-{# This widget requires js varialbe "selection" to exist. #}
-
-<div id="tags-popup" class="tags-popup vis-hide">
+<div id="tags-editor-popup" class="tags-popup vis-hide">
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
     <div id="tagList" class="tag-container">
-        {% for t in tags %}
-            {% set tag = t.tag %}
-            {% set hex = t.hex %}
-            <div class="tag-item" data-id="{{ tag }}" data-color="{{ hex }}">
-                <button class="tag-pin" value="{{ tag }}"></button>
-                <input type="checkbox" id="{{ tag }}" value="{{ tag }}"/>
-                <label style="color:{{ hex }}" for="{{ tag }}">{{ tag }}</label>
-            </div>
-        {% endfor %}
+        {# tpl-tag-items here #}
     </div>
     <button id="tags-submit-add">Add</button>
     <button id="tags-submit-del">Del</button>
@@ -19,20 +9,24 @@
     <button id="pins-clear">Clear Pins</button>
     <button id="tags-close">Close</button>
 </div>
-
+<div id="tpl-tag-item" class="tag-item vis-hide" data-id="{#{{ tag }}#}" data-color="{#{{ hex }}#}">
+    <button class="tag-pin" value="{#{{ tag }}#}"></button>
+    <input type="checkbox" id="{#{{ tag }}#}" value="{#{{ tag }}#}"/>
+    <label style="color:{#{{ hex }}#}#000" for="{#{{ tag }}#}">{#{{ tag }}#}</label>
+</div>
 
 <div id="tags-pins">
     <div id="buttons-no-pin" style="border:2px solid"></div>
-    <div id="buttons"></div>
+    <div id="buttons">
+        {# tag-pin-template here #}
+    </div>
     <div id="controls">
         <button id="tags-pins-submit-add">Add</button>
         <button id="tags-pins-submit-del">Del</button>
         <button id="tags-pins-clear">Clear</button>
     </div>
 </div>
-<div id="tag-pin-template" class="tag-edit-pin vis-hide" data-id="futanari">
-    <input type="checkbox" id="futanari" value="futanari"/>
-    <label style="" for="futanari">futanari</label>
+<div id="tag-pin-template" class="tag-edit-pin vis-hide" data-id="{#{{ hex }}#}">
+    <input type="checkbox" id="{#{{ hex }}#}" value="{#{{ hex }}#}"/>
+    <label style="{#{{ hex }}#}" for="{#{{ hex }}#}">{#{{ hex }}#}</label>
 </div>
-
-<script type="text/javascript" src="/static/js/tags_editor.js"></script>

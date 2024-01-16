@@ -3,11 +3,8 @@
 <head>
     {% include 'tpl_part_header.html' %}
     <link rel="stylesheet" href="/static/styles/gallery.css">
-    <script type="text/javascript" src="/static/js/main.js"></script>
     <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
     <script type="text/javascript" src="/static/js/mut_attr_observer.js"></script>
-    <script type="text/javascript" src="/static/js/rating.js"></script>
-    <script type="text/javascript" src="/static/js/image_selection.js"></script>
     <title>{{ title }}</title>
 </head>
 <body>
@@ -15,11 +12,11 @@
     <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>{{ title }}</h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path_dir|default('') }}</p>
 </div>
-{{ panel|default('') }}
+{#{{ panel|default('') }}#}
 {{ paging|default('') }}
 <div class="gallery">
     {% for image in images %}
-    <div class="thumbnail" data-id="{{ image.image_id }}">
+    <div class="thumbnail" data-id="{{ image.image_id }}" data-fn="{{ image.filename }}" data-rt="{{ image.rating }}">
         <a href="/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=">
             <img src="" class="thumb thumb-hidden" data-src="/thumb/{{ image.image_id }}.jpg" alt="{{ image.image_id }}">
             <div class="overlay vis-hide">
@@ -43,145 +40,31 @@
     <button id="board-show-btn" class="btn-bg-blend">Board</button>
     <button id="tags-show-btn" class="btn-bg-blend">Show tags</button>
     <button id="tags-filter-btn" class="btn-bg-blend">Filter tags</button>
-    <button id="tags-open-btn" class="btn-bg-blend">Edit tags</button>
+    <button id="tags-editor-btn" class="btn-bg-blend">Edit tags</button>
     <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
 </div>
 
-<div class="tags-popup-background" style="display: none;"></div>
-{{ tags_editor|default('') }}
-<div id="board-popup-container" class="vis-hide"></div>
+<div id="tpl-thumbnail" class="thumbnail vis-hide" data-id="{#{{ image.image_id }}#}" data-fn="{#{{ image.filename }}#}" data-rt="{#{{ image.rating }}#}">
+    <a href="{#/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=#}">
+        <img src="" class="thumb thumb-hidden" data-src="{#/thumb/{{ image.image_id }}.jpg#}" alt="{#{{ image.image_id }}#}">
+        <div class="overlay vis-hide">
+            <span class="tags-list"></span>
+        </div>
+    </a>
+</div>
 
-<script>
-    let rating = null
-    let selection = null
 
-    // 0 - not showing
-    // 1 - showing
-    let showTagsMode = 0
 
-    document.addEventListener('DOMContentLoaded', () =>
+<script type="importmap">
     {
-        // reveal on load
-        const thumbs = document.querySelectorAll('.thumb')
-        thumbs.forEach((elem) =>
+        "imports":
         {
-            new MutationAttributeObserver(elem, 'src', (target) =>
-            {
-                target.classList.remove('thumb-hidden')
-            })
-        })
-
-        new ImageLazyLoad('.thumb', false, '300px')
-
-        rating = new RateMultImages('#rate-up', '#rate-dn', 'loading', 'op-success', 'op-fail')
-        rating.updateImageIds = function ()
-        {
-            this.setImageIds(selection.selectedIds)
-        }
-
-        selection = new ImageSelection('toggle-selection-mode-btn', '.gallery', '.thumbnail')
-
-
-        // boards
-        simpleShowLoadableWidget(
-            '{{ url_for('routes_board.widget_get_boards_all') }}',
-            '#board-show-btn',
-            '#board-popup-container',
-            () =>
-            {
-                document.querySelector('#board-popup-container .popup').classList.remove('vis-hide')
-            })
-
-        // tags background
-        document.querySelector('.tags-popup-background').addEventListener('click', e =>
-        {
-            e.preventDefault()
-            e.stopPropagation()
-        })
-
-    }, false)
-
-    // fetch tags button
-    function fetchTags()
-    {
-        showTagsMode = (showTagsMode + 1) % 2
-
-        // hide shown tags
-        if (showTagsMode === 0)
-        {
-            document.querySelectorAll('.tags-list').forEach(elem => elem.textContent = '')
-            document.querySelectorAll('.overlay').forEach(elem => elem.classList.remove('vis-hide'))
-        }
-        // fetch tags
-        else if (showTagsMode === 1) {
-            const idsStr = Array.from(document.querySelectorAll('.thumbnail')).map((tile) => tile.getAttribute('data-id')).join(',')
-            fetch(`/get-image-tags?image-id=${idsStr}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data) throw new Error('Network response was not ok')
-                    document.querySelectorAll('.thumbnail').forEach((tile) => {
-                        const id = tile.getAttribute('data-id')
-                        tile.querySelector('.tags-list').textContent = data[id].join(', ')
-                        tile.querySelector('.overlay').classList.remove('vis-hide')
-                    })
-                })
-                .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error)
-                });
+            "image_tools/": "/static/js/image_tools/",
+            "api": "/static/js/api.js"
         }
     }
-
-    function setFolderCover(e)
-    {
-        if (selection.selectedIds.length !== 1) { return }
-        fetchAndSimpleFeedback(`/set-folder-cover?image-id=${selection.selectedIds[0]}`, e.currentTarget)
-    }
-
-    function hideFolder(e)
-    {
-        if (selection.selectedIds.length !== 1) { return }
-        fetchAndSimpleFeedback(`/toggle-folder-hide?image-id=${selection.selectedIds[0]}`, e.currentTarget)
-    }
-
-    function folderOrdUp(e)
-    {
-        if (selection.selectedIds.length !== 1) { return }
-        fetchAndSimpleFeedback(`/folder-ord-add?image-id=${selection.selectedIds[0]}&rating=1`, e.currentTarget)
-    }
-
-    function folderOrdDown(e)
-    {
-        if (selection.selectedIds.length !== 1) { return }
-        fetchAndSimpleFeedback(`/folder-ord-add?image-id=${selection.selectedIds[0]}&rating=-1`, e.currentTarget)
-    }
-
-    document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
-    document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
-    document.getElementById('tags-filter-btn').addEventListener('click', toggleTagsFilterDisplay)
-
-    document.getElementById('fld-cover').addEventListener('click', setFolderCover)
-    document.getElementById('fld_hide').addEventListener('click', hideFolder)
-    document.getElementById('fld_ord_up').addEventListener('click', folderOrdUp)
-    document.getElementById('fld_ord_dn').addEventListener('click', folderOrdDown)
-
-    document.addEventListener('keydown', function(e)
-    {
-        // select all
-        if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
-        {
-            selection.selectAll()
-        }
-        // show/hide tags
-        else if (e.code === 'KeyW')
-        {
-            fetchTags()
-        }
-        // toggle selection mode
-        else if (e.code === 'KeyS' && !e.shiftKey)
-        {
-            selection.toggleSelectionMode()
-        }
-    });
+</script>
+<script type="module" src="/static/js/view_folder.js">
 </script>
 </body>
 </html>

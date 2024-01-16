@@ -28,6 +28,32 @@ function waitFor(seconds)
     }
 }
 
+function waitForCondition(callback, checkIntervalMs = 100, attempts = 500)
+{
+    return function(arg)
+    {
+        return new Promise(function(resolve, reject)
+        {
+            let count = 0
+            const id = setInterval(() =>
+            {
+                if (callback() === true)
+                {
+                    clearInterval(id)
+                    resolve(arg)
+                }
+
+                count++
+                if (count > attempts)
+                {
+                    clearInterval(id)
+                    reject(arg)
+                }
+            }, checkIntervalMs)
+        })
+    }
+}
+
 // Triggers becomeVisible(target) callback when selNode becomes framed by viewport.
 class TriggerOnVisible
 {
@@ -56,4 +82,4 @@ class TriggerOnVisible
     }
 }
 
-export { imageLoader, waitFor, TriggerOnVisible }
+export { imageLoader, waitFor, waitForCondition, TriggerOnVisible }
