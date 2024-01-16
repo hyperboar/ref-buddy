@@ -92,7 +92,7 @@ class TagItem
 
         this._pinned = value
 
-        console.log('pinned ' + this._pinned)
+        // console.log('pinned ' + this._pinned)
         document.dispatchEvent(this._pinClickEvent)
     }
 
@@ -475,14 +475,14 @@ class WidgetImageTagsEditor
             evt.preventDefault()
 
             const proxyItem = evt.currentTarget.querySelector('input')
-            console.log(`proxy ${proxyItem}`)
-            console.log(proxyItem)
+            // console.log(`proxy ${proxyItem}`)
+            // console.log(proxyItem)
             proxyItem.checked = !proxyItem.checked
 
             const id = evt.currentTarget.getAttribute('data-id')
             const tag = this.tagBtns[id]
             tag.checked = proxyItem.checked
-            console.log(`end proxy ${proxyItem}`)
+            // console.log(`end proxy ${proxyItem}`)
             if (proxyItem.checked)
             {
                 proxyItem.parentNode.classList.add('tag-selected')

@@ -11,7 +11,7 @@ class MutationAttributeObserver
             for (const mutation of mutationsList)
             {
                 if (mutation.type !== 'attributes' || mutation.attributeName !== name) { return }
-                console.log(`Image src changed: ${mutation.target}`)
+                // console.log(`Image src changed: ${mutation.target}`)
                 callback(mutation.target, mutation.oldValue)
             }
         })
