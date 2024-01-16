@@ -260,7 +260,7 @@ function injectImageData(data)
                 const li = document.createElement('li')
                 li.style.color = t.color
                 const a = document.createElement('a')
-                a.href = '/tagged?tags=' + t.name
+                a.href = '/all?tags=' + t.name
                 a.textContent = t.name
                 li.appendChild(a)
                 infoTags.appendChild(li)

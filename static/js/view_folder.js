@@ -37,8 +37,8 @@ function fetchTags()
         ApiTags.GetBulk(allIds)
             .then(data =>
             {
-                if (!data) throw new Error('Network response was not ok')
-                document.querySelectorAll('.thumbnail').forEach((tile) => {
+                const g = document.querySelector('.gallery')
+                g.querySelectorAll('.thumbnail').forEach((tile) => {
                     const id = tile.getAttribute('data-id')
                     tile.querySelector('.tags-list').textContent = data[id].join(', ')
                     tile.querySelector('.overlay').classList.remove('vis-hide')
