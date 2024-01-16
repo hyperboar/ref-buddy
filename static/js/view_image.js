@@ -303,7 +303,7 @@ function getUrlFilterParameters()
     const tags = `${tagName}=${tagsValues}`
 
     // tag set
-    const tagSetValue = document.getElementById(tagSetName).value || params.get(tagSetName)
+    const tagSetValue = params.get(tagSetName)
     const tagset = `${tagSetName}=${tagSetValue}`
 
     // same folder

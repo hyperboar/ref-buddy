@@ -190,8 +190,8 @@ class ImageMetadataController:
         tags_str = request.args.get('tags', default="")
         tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
 
-        tags_pos = ImageMetadataController.get_tags_by_names(tags_pos, session=session)
-        tags_neg = ImageMetadataController.get_tags_by_names(tags_neg, session=session)
+        tag_set_id = request.args.get('tag-set', default='all')
+        tags_pos, tags_neg = ImageMetadataController.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
         q = ImageMetadataController.get_query_imagemetadata(
             same_folder=same_folder, tags=(tags_pos, tags_neg),
