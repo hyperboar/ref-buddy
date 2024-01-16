@@ -306,7 +306,7 @@ class WidgetImageTagsFilter
     setTagSet(e)
     {
         const ts = e.currentTarget
-        const curSet = ts.value
+        const curSet = ts.options[ts.selectedIndex].value
 
         let full_url = window.location.href
         const pageString = full_url.split('?')[0]
