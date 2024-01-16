@@ -3,8 +3,6 @@
 <head>
     {% include 'tpl_part_header.html' %}
     <link rel="stylesheet" href="/static/styles/overview.css">
-    <script type="text/javascript" src="/js/legacy/main.js"></script>
-    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
     <title>Overview</title>
 </head>
 <body>
@@ -32,11 +30,17 @@
     </div>
 {% endfor %}
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function()
+
+<script type="importmap">
     {
-        new ImageLazyLoad('.bg-thumb', true, '300px')
-    }, false)
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
+<script type="module" src="/static/js/view_index.js">
 </script>
 </body>
 </html>
