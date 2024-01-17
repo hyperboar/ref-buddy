@@ -10,9 +10,11 @@
     <button id="tags-close">Close</button>
 </div>
 <div id="tpl-tag-item" class="tag-item vis-hide" data-id="{#{{ tag }}#}" data-color="{#{{ hex }}#}">
-    <button class="tag-pin" value="{#{{ tag }}#}"></button>
-    <input type="checkbox" id="{#{{ tag }}#}" value="{#{{ tag }}#}"/>
-    <label style="color:{#{{ hex }}#}#000" for="{#{{ tag }}#}">{#{{ tag }}#}</label>
+    <div id="highlight">
+        <button class="tag-pin" value="{#{{ tag }}#}"></button>
+        <input type="checkbox" id="{#{{ tag }}#}" value="{#{{ tag }}#}"/>
+        <label style="color:{#{{ hex }}#}#000" for="{#{{ tag }}#}">{#{{ tag }}#}</label>
+    </div>
 </div>
 
 <div id="tags-pins">

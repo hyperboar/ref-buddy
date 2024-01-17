@@ -13,6 +13,7 @@ class TagItem
 
     _container
     _checkbox
+    _highlight
     _pin
 
     _tagId
@@ -33,6 +34,8 @@ class TagItem
         this._container.querySelector(this._selCheckbox).addEventListener('click', e => { this.tagToggle(e) })
         this._container.querySelector(this._selLabel).addEventListener('click', e => { this.tagToggle(e) })
         this._container.querySelector(this._selPin).addEventListener('click', e => { this.pinToggle(e) })
+
+        this._highlight = this._container.querySelector('#highlight')
     }
 
     tagToggle(e)
@@ -100,6 +103,14 @@ class TagItem
     {
         return this._container.getAttribute('data-color')
     }
+
+    setHighlight(isOn)
+    {
+        if (isOn)
+            this._highlight.classList.add('highlight')
+        else
+            this._highlight.classList.remove('highlight')
+    }
 }
 
 
@@ -115,6 +126,8 @@ class WidgetImageTagsEditor
     _pMain
 
     _bgOverlay
+
+    _tagsToHighlight = []
 
     // init pins list
     PINS = 'pins_list'
@@ -284,6 +297,8 @@ class WidgetImageTagsEditor
         this._pMain.classList.remove('vis-hide')
         this._bgOverlay.show()
         this._pMain.querySelector('#images-count').textContent = '' + this._getSelector().selectedIds.length
+
+        Array.from(Object.values(this.tagBtns)).forEach(btn => btn.setHighlight(this._tagsToHighlight.includes(btn._tagId)))
     }
 
     hideWidget()
@@ -552,8 +567,8 @@ class WidgetImageTagsEditor
             const pinId = e.detail.tagId
             const pin = this.tagBtns[pinId]
 
-            console.log(pin)
-            console.log(this.pinsList)
+            // console.log(pin)
+            // console.log(this.pinsList)
             const index = this.pinsList.indexOf(pinId)
             if (index === -1)
             {
@@ -569,7 +584,7 @@ class WidgetImageTagsEditor
             this.pinsList.sort()
             localStorage.setItem(this.PINS, JSON.stringify(this.pinsList))
 
-            console.log(this.pinsList)
+            // console.log(this.pinsList)
 
             // quit if none
             if (this.pinsList.length === 0)
@@ -596,6 +611,11 @@ class WidgetImageTagsEditor
         localStorage.setItem(this.PINS, JSON.stringify(this.pinsList))
 
         this._pPins.querySelectorAll('.tag-pin').forEach(elem => { elem.classList.remove('tag-pin-on') })
+    }
+
+    highlightTags(tags)
+    {
+        this._tagsToHighlight = tags
     }
 }
 

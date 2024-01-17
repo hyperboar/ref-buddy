@@ -265,6 +265,8 @@ function injectImageData(data)
                 li.appendChild(a)
                 infoTags.appendChild(li)
             })
+
+            imageTagEditor.highlightTags(Array.from(data[0].tags).map(t => t.name))
         })
 
     // misc
