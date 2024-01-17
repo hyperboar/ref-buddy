@@ -15,32 +15,42 @@ def embed_panel_tag_filter():
 def embed_panel_tag_editor():
     return render_template('tpl_widget_tags_editor_panel.html')
 
-@routes_tags.route('/add-image-tags')
+@routes_tags.route('/add-image-tags', methods=['POST'])
 def add_image_tag():
-    tags, _ = get_arg(request.args, Args.tags)
-    image_ids = get_arg(request.args, Args.mult_image_ids)
+    if request.method != 'POST':
+        return abort(404, 'Should be POST')
+
+    json = request.get_json()
+    image_ids = json['image_ids']
+    tags = json['tags']
 
     if tags is [] or image_ids is []:
         abort(404, 'Empty tags or image ids')
+    session = Session()
+    r = Ctrl.add_image_tags(image_ids, tags, session)
+    session.close()
+    if r is None:
+        abort(404, 'Something went wrong...')
+    return jsonify({'count': r})
 
-    r = Ctrl.add_image_tags(image_ids, tags)
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return render_template_string(str(r))
-
-@routes_tags.route('/remove-image-tags')
+@routes_tags.route('/remove-image-tags', methods=['POST'])
 def remove_image_tag():
-    _ , tags = get_arg(request.args, Args.tags)
-    image_ids = get_arg(request.args, Args.mult_image_ids)
+    if request.method != 'POST':
+        return abort(404, 'Should be POST')
+
+    json = request.get_json()
+    image_ids = json['image_ids']
+    tags = json['tags']
 
     if tags is [] or image_ids is []:
         abort(404, 'Empty tags or image ids')
 
-    r = Ctrl.remove_image_tags(image_ids, tags)
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return render_template_string(str(r))
-    pass
+    session = Session()
+    r = Ctrl.remove_image_tags(image_ids, tags, session)
+    session.close()
+    if r is None:
+        abort(404, 'Something went wrong...')
+    return jsonify({'count': r})
 
 @routes_tags.route('/add-folder-tags')
 def add_folder_tag():

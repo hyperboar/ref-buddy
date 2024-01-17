@@ -321,20 +321,23 @@ class ImageMetadataController:
         return im.rating
 
     @staticmethod
-    def add_image_tags(image_ids: [int], tags_str: [str]) -> int:
+    def add_image_tags(image_ids: [int], tags_str: [str], session=None) -> int:
+        if session is None:
+            raise ValueError('No sql session')
         tags = ImageMetadataController.get_tags_by_names(tags_str)
-        s = Session()
+
         for i in image_ids:
-            [s.merge(ImageTag(image_id=i, tag_id=t)) for t in tags]
-            s.flush()
-        s.commit()
-        return 1
+            [session.merge(ImageTag(image_id=i, tag_id=t)) for t in tags]
+            session.flush()
+        session.commit()
+        return len(image_ids) * len(tags)
 
     @staticmethod
-    def remove_image_tags(image_ids: [int], tags_str: [str]) -> int:
+    def remove_image_tags(image_ids: [int], tags_str: [str], session=None) -> int:
+        if session is None:
+            raise ValueError('No sql session')
         tags = ImageMetadataController.get_tags_by_names(tags_str)
-        s = Session()
-        q = s.query(ImageTag)\
+        q = session.query(ImageTag)\
             .filter(ImageTag.image_id.in_(image_ids))\
             .filter(ImageTag.tag_id.in_(tags))
 
@@ -343,7 +346,7 @@ class ImageMetadataController:
         if len(rows_to_delete) == 0:
             return 0
         q.delete()
-        s.commit()
+        session.commit()
         return len(rows_to_delete)
 
 

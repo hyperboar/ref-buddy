@@ -1,6 +1,7 @@
 import {ApiTags} from 'api'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from "/static/js/bg_overlay.js";
+import {wrapButtonFeedbackPromise} from '/static/js/main.js'
 
 class TagItem
 {
@@ -379,28 +380,13 @@ class WidgetImageTagsEditor
         const selectedTags = Array.from(this._pMain.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value)
 
-        const idsStr = this._getSelector().selectedIds.join(',')
-        const tagsStr = selectedTags.join(',')
-
-        elem.classList.add('loading')
-        elem.classList.remove('op-success', 'op-fail')
-
-        fetch(`/add-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
-            .then(r =>
-            {
-                if (!r.ok) throw new Error('Network response was not ok')
-                elem.classList.add('op-success')
-                this.showNewTags(this._getSelector().selectedIds, selectedTags, [])
-            })
-            .catch(error =>
-            {
-                console.error('There was a problem with the fetch operation:', error)
-                elem.classList.add('op-fail')
-            })
-            .finally(() =>
-            {
-                elem.classList.remove('loading')
-            })
+        wrapButtonFeedbackPromise(
+            ApiTags.AddTags(this._getSelector().selectedIds, selectedTags)
+                .then(() =>
+                {
+                    this.showNewTags(this._getSelector().selectedIds, selectedTags, [])
+                })
+            , elem)
     }
 
     submitRemoveTags(evt)
@@ -411,28 +397,13 @@ class WidgetImageTagsEditor
         const selectedTags = Array.from(this._pMain.querySelectorAll('#tagList input[type="checkbox"]:checked'))
             .map((checkbox) => checkbox.value)
 
-        const idsStr = this._getSelector().selectedIds.join(',')
-        const tagsStr = selectedTags.map(t => '-' + t).join(',')
-
-        elem.classList.add('loading')
-        elem.classList.remove('op-success', 'op-fail')
-
-        fetch(`/remove-image-tags?image-id=${idsStr}&tags=${tagsStr}`)
-            .then(r =>
-            {
-                if (!r.ok) throw new Error('Network response was not ok')
-                elem.classList.add('op-success')
-                this.showNewTags(this._getSelector().selectedIds, [], selectedTags)
-            })
-            .catch(error =>
-            {
-                console.error('There was a problem with the fetch operation:', error)
-                elem.classList.add('op-fail')
-            })
-            .finally(() =>
-            {
-                elem.classList.remove('loading')
-            })
+        wrapButtonFeedbackPromise(
+            ApiTags.RemoveTags(this._getSelector().selectedIds, selectedTags)
+                .then(() =>
+                {
+                    this.showNewTags(this._getSelector().selectedIds, [], selectedTags)
+                })
+            , elem)
     }
 
     // show tags in overlay

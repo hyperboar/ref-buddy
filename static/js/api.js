@@ -255,6 +255,26 @@ class ApiTags
                 return r.json()
             })
     }
+
+    static AddTags(imageIds, tags)
+    {
+        return fetch('/add-image-tags', ApiInternal.getPostRequest({'image_ids': imageIds, 'tags': tags}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static RemoveTags(imageIds, tags)
+    {
+        return fetch('/remove-image-tags', ApiInternal.getPostRequest({'image_ids': imageIds, 'tags': tags}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
 }
 
 //#endregion Tags
