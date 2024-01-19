@@ -50,6 +50,7 @@ def view_favs():
     tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
+    images = json_for_folder_view(images)
 
     paging = get_paging_widget(page)
 
@@ -66,6 +67,7 @@ def view_last():
     tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
+    images = json_for_folder_view(images)
 
     paging = get_paging_widget(page)
 

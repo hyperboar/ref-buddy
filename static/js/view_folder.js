@@ -1,4 +1,4 @@
-import {ApiTags} from "api";
+import {ApiImage, ApiTags} from "api";
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetBoard}           from "image_tools/widget_board.js"
@@ -117,6 +117,40 @@ let showTagsMode = 0
 
 document.addEventListener('DOMContentLoaded', () =>
 {
+    const tplThumbRaw = document.querySelector('#tpl-thumbnail')
+    const tplThumb = tplThumbRaw.cloneNode(true)
+    tplThumb.id = ''
+    tplThumb.classList.remove('vis-hide')
+    const container = document.querySelector('.gallery')
+
+    const thumbUrl = ApiImage.GetPlainUrlThumbImage()
+    const studyUrl = ApiImage.GetPlainUrlStudyImage()
+    const tplStudyUrl = studyUrl.urlLongWithDefaults()
+    const tplThumbUrl = thumbUrl.urlLongWithDefaults()
+
+    const imageData = JSON.parse(document.querySelector('#images-data').textContent)
+    const dSort = JSON.parse(document.querySelector('#images-default-sort').textContent)
+
+    if (dSort === 'imported_at') imageData['images'].sort((a, b) =>
+    {
+        if (Math.abs(a.i_at - b.i_at) < 0.01) return 0
+        return a.i_at < b.i_at ? -1 : 1
+    })
+    if (dSort === 'filename') imageData['images'].sort((a, b) => a.fn.localeCompare(b.fn))
+
+    imageData['images'].forEach(im =>
+    {
+        const node = tplThumb.cloneNode(true)
+        node.setAttribute('data-id', im.id)
+        node.setAttribute('data-fn', im.fn)
+        node.setAttribute('data-rt', im.r)
+        node.setAttribute('data-tstamp', im.i_at)
+        node.querySelector('a').href  = tplStudyUrl.replace(studyUrl['keys']['image_id'], im.id)
+        node.querySelector('img').alt = im.id
+        node.querySelector('img').setAttribute('data-src', tplThumbUrl.replace(thumbUrl['keys']['image_id'], im.id))
+        container.appendChild(node)
+    })
+
     // reveal on load
     const thumbs = document.querySelectorAll('.thumb')
     thumbs.forEach((elem) =>

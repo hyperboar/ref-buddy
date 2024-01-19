@@ -1,4 +1,6 @@
+import json
 import os
+from datetime import datetime
 
 from flask import Blueprint, request, abort, render_template_string, render_template
 from models.models_lump import Session, ImageMetadata, Path
@@ -29,7 +31,7 @@ def view_tags():
 
     paging = get_paging_widget(page)
 
-    out = render_template('tpl_view_folder.html', title='Tags', images=images, overview=overview, paging=paging)
+    out = render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images, session), overview=overview, paging=paging)
     session.close()
     return out
 
@@ -49,7 +51,7 @@ def view_folder(path_id):
         overview = images[0]
         overview.path_dir = os.path.dirname(overview.path_abs)
 
-    out = render_template('tpl_view_folder.html', title='Folder', images=images, overview=overview)
+    out = render_template('tpl_view_folder.html', title='Folder', d_sort='filename', images=json_for_folder_view(images, session), overview=overview)
     session.close()
     return out
 
@@ -91,3 +93,16 @@ def toggle_folder_hide():
     s.commit()
 
     return render_template_string(str('ok'))
+
+def json_for_folder_view(images, session=None) -> str:
+    data = {'images': []}
+    for im in images:
+        print(im.imported_at)
+        data['images'].append({
+            'id': im.image_id,
+            'r': im.rating,
+            'fn': im.filename,
+            'i_at': datetime.timestamp(im.imported_at)*1000
+        })
+
+    return json.dumps(data)
