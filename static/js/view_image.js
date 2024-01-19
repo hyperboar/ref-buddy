@@ -121,6 +121,10 @@ function initializeComponents()
 
     // tags editor
     imageTagEditor = new WidgetImageTagsEditor('', '#tags-edit-button', () => selection)
+    document.addEventListener(imageTagEditor.evtTagsUpdated, (e) =>
+    {
+        updateImageTags()
+    })
 
     // tags filter
     imageTagFilter = new WidgetImageTagsFilter('', '#tags-filter-button', false)
@@ -249,9 +253,24 @@ function injectImageData(data)
     const infoId = document.querySelector('#info-image-id')
     infoId.href = '/study-image/' + data.id
     infoId.textContent = data.id
+
+    updateImageTags()
+
+    // misc
+    const stubThumb = document.querySelector('.stub-thumb')
+    stubThumb.setAttribute('data-id', data.id)
+
+    const openVidBtn = document.getElementById('open-vid-btn')
+    if (data.video) {openVidBtn.classList.remove('vis-hide')}
+    else openVidBtn.classList.add('vis-hide')
+}
+
+function updateImageTags()
+{
     const infoTags = document.querySelector('#image-info-popup #tags')
     infoTags.childNodes.forEach(t => t.remove())
-    ApiTags.GetSingle(data.id)
+
+    ApiTags.GetSingle(currentImageData.id)
         .then(data =>
         {
             data[0].tags.sort((a, b) => a.name.localeCompare(b.name))
@@ -268,15 +287,6 @@ function injectImageData(data)
 
             imageTagEditor.highlightTags(Array.from(data[0].tags).map(t => t.name))
         })
-
-    // misc
-    const stubThumb = document.querySelector('.stub-thumb')
-    stubThumb.setAttribute('data-id', data.id)
-
-    const openVidBtn = document.getElementById('open-vid-btn')
-    if (data.video) {openVidBtn.classList.remove('vis-hide')}
-    else openVidBtn.classList.add('vis-hide')
-
 }
 
 function toggleSameFolder()
