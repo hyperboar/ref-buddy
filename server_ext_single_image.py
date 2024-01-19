@@ -22,48 +22,26 @@ def send_static_image(image_id):
     session.close()
     return out
 
-@routes_image.route('/set-image-fav')
-def set_image_fav():
-    args = request.args
-    is_fav = int(args.get('is-fav'))
-    image_id = get_arg(request.args, Args.image_id)
-
-    r = Ctrl.set_image_fav(image_id, is_fav)
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return render_template_string('yep')
-
-@routes_image.route('/set-image-fav/<int:image_id>/<int:is_fav>')
-def set_image_fav_new2(image_id, is_fav):
-    r = Ctrl.set_image_fav(image_id, is_fav)
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
-    return render_template_string('yep')
-
-@routes_image.route('/set-image-last-viewed')
-def set_image_last_viewed():
-    image_id = get_arg(request.args, Args.image_id)
-    now = datetime.now()
-
-    r = Ctrl.set_image_last_viewed(image_id, now)
-
-    if not r:
-        abort(404, 'Something went wrong, last viewed not updated, probably...')
-    return render_template_string('yep')
-
-@routes_image.route('/set-image-last-viewed2/<int:image_id>')
-def set_image_last_viewed_new2(image_id):
-    now = datetime.now()
-
-    r = Ctrl.set_image_last_viewed(image_id, now)
-
-    if not r:
-        abort(404, 'Something went wrong, last viewed not updated, probably...')
-    return render_template_string('yep')
-
-@routes_image.route('/thumb/<path:path>')
+@routes_image.route('/thumb/<path>')
 def send_static_image_thumb(path):
     return send_from_directory(current_app.config['THUMB_STATIC'], path)
+
+@routes_image.route('/set-image-fav/<int:image_id>/<int:is_fav>')
+def set_image_fav(image_id, is_fav):
+    r = Ctrl.set_image_fav(image_id, is_fav)
+    if not r:
+        abort(404, 'Something went wrong, fav not set, probably...')
+    return render_template_string('yep')
+
+@routes_image.route('/set-image-last-viewed/<int:image_id>')
+def set_image_last_viewed(image_id):
+    now = datetime.now()
+
+    r = Ctrl.set_image_last_viewed(image_id, now)
+
+    if not r:
+        abort(404, 'Something went wrong, last viewed not updated, probably...')
+    return render_template_string('yep')
 
 @routes_image.route('/color/palette/<int:image_id>')
 def get_color_palette(image_id):
