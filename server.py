@@ -1,23 +1,32 @@
-import os
-
 from flask import Flask, request, render_template
+from flask_caching import Cache
+
+from Env import Env
 from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from image_metadata_overview import ImageMetadataOverview
-from Env import Env
 from maintenance import make_database_backup
 from models.models_lump import Session, ImageColor, ImageMetadata
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_board import routes_board
+from server_ext_discover import routes_discover
 from server_ext_dupes import routes_dupes
-from server_ext_folder import routes_folder
+from server_ext_folder import routes_folder, json_for_folder_view
 from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
-from server_ext_discover import routes_discover
 from server_widget_helpers import get_paging_widget
 
+config = {
+    # "DEBUG": True,          # some Flask specific configs
+    "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
+
 app = Flask(__name__, static_url_path='/static')
+app.config.from_mapping(config)
 app.config['THUMB_STATIC'] = Env.THUMB_PATH
+
+cache = Cache(app)
 
 app.register_blueprint(routes_image)
 app.register_blueprint(routes_folder)
