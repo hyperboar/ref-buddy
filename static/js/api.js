@@ -5,17 +5,38 @@ class ApiImage
 {
     static GetPlainUrlStudyImage()
     {
-        return {
-            'url_long': '/study-image/{image_id}?time-planned={time}sf={sf}&tags={tags}&tag-set={tagset}',
-            'url_short': '/study-image/{image_id}',
-            'keys': {
-                'image_id': '{image_id}',
-                'time': '{time}',
-                'sf': '{sf}',
-                'tags': '{tags}',
-                'tagset': '{tagset}'
-            }
-        }
+        return ApiInternal.expandWithDefaults(
+            {
+                'url_long': '/study-image/{image_id}?time-planned={time}&sf={sf}&tags={tags}&tag-set={tagset}',
+                'url_short': '/study-image/{image_id}',
+                'keys': {
+                    'image_id': '{image_id}',
+                    'time': '{time}',
+                    'sf': '{sf}',
+                    'tags': '{tags}',
+                    'tagset': '{tagset}'
+                }
+            },
+            {
+                'time': '120',
+                'sf': '1',
+                'tags': '',
+                'tagset': 'all'
+            })
+    }
+
+    static GetPlainUrlThumbImage()
+    {
+        return ApiInternal.expandWithDefaults(
+            {
+                'url_long': '/thumb/{image_id}.jpg',
+                'url_short': '/thumb/{image_id}.jpg',
+                'keys': {
+                    'image_id': '{image_id}',
+                }
+            },
+            {})
+
     }
 
     /**
@@ -328,6 +349,31 @@ class ApiInternal
                 "Content-type": "application/json; charset=UTF-8"
             }
         }
+    }
+
+    static expandWithDefaults(obj, objDefaults)
+    {
+        obj.urlLongWithDefaults = () =>
+        {
+            let url = obj.url_long
+            Object.keys(objDefaults).forEach(key =>
+            {
+                url = url.replace(obj['keys'][key], objDefaults[key])
+            })
+
+            return url
+        }
+        obj.urlShortWithDefaults = () =>
+        {
+            let url = obj.url_long
+            Object.keys(objDefaults).forEach(key =>
+            {
+                url = url.replace(obj['keys'][key], objDefaults[key])
+            })
+
+            return url
+        }
+        return obj
     }
 }
 
