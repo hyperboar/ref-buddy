@@ -71,7 +71,7 @@ function wrapButtonFeedbackPromise(promise, target)
         .finally(() =>
         {
             target.classList.remove('loading')
-        });
+        })
 }
 
 /**
