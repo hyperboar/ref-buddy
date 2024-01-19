@@ -29,8 +29,8 @@ class TagItem
 
         this._tagId = this._container.getAttribute('data-id')
 
-        this._itemClickEvent = new CustomEvent(this._evtTagClick, { detail: { tagId: this._tagId }});
-        this._pinClickEvent = new CustomEvent(this._evtPinClick,  { detail: { tagId: this._tagId }});
+        this._itemClickEvent = new CustomEvent(this._evtTagClick, { detail: { tagId: this._tagId }})
+        this._pinClickEvent = new CustomEvent(this._evtPinClick,  { detail: { tagId: this._tagId }})
 
         this._container.querySelector(this._selCheckbox).addEventListener('click', e => { this.tagToggle(e) })
         this._container.querySelector(this._selLabel).addEventListener('click', e => { this.tagToggle(e) })
@@ -117,6 +117,8 @@ class TagItem
 
 class WidgetImageTagsEditor
 {
+    evtTagsUpdated = 'tags_updated'
+
     _getSelector
 
     _containerSel
@@ -145,6 +147,8 @@ class WidgetImageTagsEditor
 
     constructor(selContainer, selShowBtn, getterSelector)
     {
+        this._tagsUpdatedEvent = new CustomEvent(this.evtTagsUpdated)
+
         this._getSelector = getterSelector
 
         if (selContainer === '')
@@ -385,6 +389,7 @@ class WidgetImageTagsEditor
                 .then(() =>
                 {
                     this.showNewTags(this._getSelector().selectedIds, selectedTags, [])
+                    document.dispatchEvent(this._tagsUpdatedEvent)
                 })
             , elem)
     }
@@ -402,6 +407,7 @@ class WidgetImageTagsEditor
                 .then(() =>
                 {
                     this.showNewTags(this._getSelector().selectedIds, [], selectedTags)
+                    document.dispatchEvent(this._tagsUpdatedEvent)
                 })
             , elem)
     }
