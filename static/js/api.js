@@ -140,7 +140,7 @@ class ApiImage
 
     static UpdateLastViewed(id)
     {
-        return fetch(`/set-image-last-viewed2/${id}`)
+        return fetch(`/set-image-last-viewed/${id}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
