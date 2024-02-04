@@ -1,3 +1,4 @@
+import urllib
 from enum import Enum, auto
 from flask import abort
 from Env import Env
@@ -31,13 +32,7 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
             return int(args.get(Args.limit.name, default=Env.DEFAULT_PER_PAGE_LIMIT))
 
         case Args.tags:
-            tags_all = args.get(Args.tags.name, default="").split(',')
-            tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
-            tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
-
-            # tags_pos = Ctrl.get_tags_by_names(tags_pos)
-            # tags_neg = Ctrl.get_tags_by_names(tags_neg)
-            return tags_pos, tags_neg
+            return get_tag_names(args)
 
         case Args.tag_set:
             set_id = args.get('tag-set', default='1')
@@ -61,6 +56,15 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
         
         case _:
             abort(404, f'Error: Unknown argument "{arg_name}"')
+
+def get_tag_names(args):
+    tags_all = urllib.parse.unquote(args.get(Args.tags.name, default=""), encoding='utf-8', errors='replace').split(',')
+    tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
+    tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
+
+    # tags_pos = Ctrl.get_tags_by_names(tags_pos)
+    # tags_neg = Ctrl.get_tags_by_names(tags_neg)
+    return tags_pos, tags_neg
 
 def get_offset_by_page(page:int, limit:int) -> int:
     return limit * page
