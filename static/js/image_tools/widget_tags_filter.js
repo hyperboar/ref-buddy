@@ -1,7 +1,7 @@
 import {ApiTags} from 'api'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from '/static/js/bg_overlay.js'
-import {} from '/static/js/main.js' // Array.prototype.remove
+import {UrlWrapper} from '/static/js/main.js' // + Array.prototype.remove
 
 class WidgetImageTagsFilter
 {
@@ -192,9 +192,13 @@ class WidgetImageTagsFilter
 
     fixUrl()
     {
-        let url = window.location.href.replace(/#$/, "")
-        if (url.indexOf('?') === -1) { url = `${url}?page=1&tags=` }
-        window.history.replaceState({}, '', url)
+        const url = new UrlWrapper(window.location.href)
+        const changed =
+            url.probeSearch('page', '1') ||
+            url.probeSearch('tags', '')
+
+        if (changed)
+            url.updateLocationHref()
     }
 
     initTags()
@@ -287,11 +291,10 @@ class WidgetImageTagsFilter
         console.log(`${ids}`)
 
         const newTagsList = ids.join(',').replace(/^,/, "")
-        let queryString = full_url.split('?')[1]
-        let params = new URLSearchParams(queryString)
-        params.set('tags', encodeURIComponent(newTagsList))
-        let newUrl = pageString + '?' + decodeURIComponent(params.toString())
-        window.history.replaceState({}, '', newUrl)
+
+        const url = new UrlWrapper(window.location.href)
+        url.setSearch('tags', encodeURIComponent(newTagsList))
+        url.updateLocationHref()
 
         this.updateTagState(tagElem, state)
     }
@@ -308,14 +311,9 @@ class WidgetImageTagsFilter
         const ts = e.currentTarget
         const curSet = ts.options[ts.selectedIndex].value
 
-        let full_url = window.location.href
-        const pageString = full_url.split('?')[0]
-
-        let queryString = full_url.split('?')[1]
-        let params = new URLSearchParams(queryString)
-        params.set('tag-set', encodeURIComponent(curSet))
-        let newUrl = pageString + '?' + decodeURIComponent(params.toString())
-        window.history.replaceState({}, '', newUrl)
+        const url = new UrlWrapper(window.location.href)
+        url.setSearch('tag-set', encodeURIComponent(curSet))
+        url.updateLocationHref()
 
         this.updateTagSetTags(ts)
     }

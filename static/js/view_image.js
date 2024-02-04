@@ -14,6 +14,7 @@ import {ColorPicker}    from "image_tools/color_picker.js"
 import {WidgetBoard}    from "image_tools/widget_board.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
+import {UrlWrapper}     from '/static/js/main.js'
 
 let selection = null
 let rateImage = null
@@ -44,6 +45,9 @@ let currentImageData = null
 
 function initializeComponents()
 {
+    // yay!
+    doubleCheckWeHaveAllWeNeedInUrl()
+
     // history
     history = new ImageHistory()
     history.pushToTail(document.getElementById('image-id').textContent)
@@ -289,6 +293,20 @@ function updateImageTags()
         })
 }
 
+function doubleCheckWeHaveAllWeNeedInUrl()
+{
+    const url = new UrlWrapper(window.location.href)
+
+    const changed =
+        url.probeSearch('tags') ||
+        url.probeSearch('tag-set', 'all') ||
+        url.probeSearch('sf', '1') ||
+        url.probeSearch('time-planned', '120')
+
+    if (changed)
+        url.updateLocationHref()
+}
+
 function toggleSameFolder()
 {
     const sf = document.getElementById('same-folder')
@@ -303,25 +321,9 @@ function toggleInfoPopup()
 
 function getUrlFilterParameters()
 {
-    const tagName = 'tags'
-    const tagSetName = 'tag-set'
-    const sfName = 'sf'
+    const url = new UrlWrapper(window.location.href)
 
-    // tags
-    let queryString = window.location.href.split('?')[1]
-    let params = new URLSearchParams(queryString)
-
-    const tagsValues = params.get('tags') || ''
-    const tags = `${tagName}=${tagsValues}`
-
-    // tag set
-    const tagSetValue = params.get(tagSetName)
-    const tagset = `${tagSetName}=${tagSetValue}`
-
-    // same folder
-    const sf = `${sfName}=${document.getElementById('same-folder').checked ? 1 : 0}`
-
-    return `${sf}&${tags}&${tagset}`
+    return url.getSearchStr()
 }
 
 /*

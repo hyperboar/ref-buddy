@@ -239,4 +239,56 @@ class Hotkeys
     }
 }
 
-export { simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, wrapButtonFeedbackPromise, Hotkeys }
+class UrlWrapper
+{
+    _url
+
+    constructor(urlStr)
+    {
+        this.setUrl(urlStr)
+    }
+
+    setUrl(urlStr)
+    {
+        this._url = new URL(urlStr);
+    }
+
+    updateLocationHref()
+    {
+        window.history.replaceState({}, '', this._url.toString())
+    }
+
+    getFullStr()
+    {
+        return this._url.toString()
+    }
+
+    getSearchStr()
+    {
+        return this._url.searchParams.toString()
+    }
+
+    /**
+     * Adds search param to the url, if there was none.
+     * @returns true if parameter was added, false otherwise
+     */
+    probeSearch(name, defaultValue = '')
+    {
+        if (this._url.searchParams.has(name)) return false
+
+        this._url.searchParams.set(name, defaultValue)
+        return true
+    }
+
+    getSearch(name, defaultValue = null)
+    {
+        return this._url.searchParams.get(name) || defaultValue
+    }
+
+    setSearch(name, value)
+    {
+        this._url.searchParams.set(name, value)
+    }
+}
+
+export { simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, wrapButtonFeedbackPromise, UrlWrapper, Hotkeys }
