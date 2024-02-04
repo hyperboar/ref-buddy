@@ -184,6 +184,9 @@ function initializeComponents()
     // hotkeys
     document.addEventListener('keydown', function(e)
     {
+        if (e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
+        if (e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
+
         if (e.altKey || e.ctrlKey || e.metaKey) { return }
         if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
         { cursor.toggle(e.code); e.preventDefault(); return } // cursors
@@ -192,8 +195,6 @@ function initializeComponents()
         if (e.shiftKey) { return }
         if (e.code.includes('Numpad') || e.code.includes('Digit'))
         { imageGrayScale.toggleContrastKeycode(e.code); e.preventDefault(); } // g
-        if (e.code === 'ArrowLeft')  { imageMove.clickPrev(); e.preventDefault(); } // <-
-        if (e.code === 'ArrowRight') { imageMove.clickNext(); e.preventDefault(); } // ->
         if (e.code.includes('Enter')){ timer.start(); e.preventDefault(); } // enter
         if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
         if (e.code === 'KeyG')       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g

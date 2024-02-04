@@ -24,8 +24,8 @@ class ImageNextPrev
         this._prev = document.querySelector(selPrev)
         this._nextSelector = document.querySelector(selSelector)
 
-        this._next.addEventListener('click', () => this.clickNext())
-        this._prev.addEventListener('click', () => this.clickPrev())
+        this._next.addEventListener('click', (e) => this.clickNext(e))
+        this._prev.addEventListener('click', (e) => this.clickPrev(e))
     }
 
     get history()
@@ -33,22 +33,22 @@ class ImageNextPrev
         return this._history
     }
 
-    clickNext()
+    clickNext(e)
     {
-        return this.pickNext('fwd', this._nextSelector.value, this._imgId.textContent)
+        return this.pickNext('fwd', this._nextSelector.value, this._imgId.textContent, e)
     }
 
-    clickPrev()
+    clickPrev(e)
     {
-        return this.pickNext('bck', this._nextSelector.value, this._imgId.textContent)
+        return this.pickNext('bck', this._nextSelector.value, this._imgId.textContent, e)
     }
 
-    pickNext(dir, method, id, notify = true)
+    pickNext(dir, method, id, evt, notify = true)
     {
         let fetcher = null
         if (method === 'rnd')
         {
-            fetcher = this.handleNextRandom(dir, method, id)
+            fetcher = this.handleNextRandom(dir, method, id, this.isJumpToTail(evt))
         }
         else
         {
@@ -80,9 +80,9 @@ class ImageNextPrev
             })
     }
 
-    handleNextRandom(dir, method, id)
+    handleNextRandom(dir, method, id, jumpToTail = false)
     {
-        if (dir === 'fwd' && this._history.isAtTail)
+        if (dir === 'fwd' && (this._history.isAtTail || jumpToTail))
         {
             return ApiImage.GetNextId(id, method, dir, this._filterStr())
                 .then(nextImg =>
@@ -107,6 +107,11 @@ class ImageNextPrev
                 return resolve({'id': this._history.moveBack()})
             })
         }
+    }
+
+    isJumpToTail(e)
+    {
+        return e.ctrlKey
     }
 }
 
