@@ -85,6 +85,9 @@ function initializeComponents()
     document.getElementById('pallet-button').addEventListener('click', (e) =>
         document.querySelector('.pallet-container').classList.toggle('vis-hide'))
 
+    // same folder
+    InitializeSameFolder()
+
     // moving to next and prev image
     imageMove = new ImageNextPrev(history, '#image-id', '#next', '#prev', '#pick-next-type', getUrlFilterParameters)
     hMarker    = document.getElementById('history-marker')
@@ -196,7 +199,7 @@ function initializeComponents()
         if (e.code.includes('Numpad') || e.code.includes('Digit'))
         { imageGrayScale.toggleContrastKeycode(e.code); e.preventDefault(); } // g
         if (e.code.includes('Enter')){ timer.start(); e.preventDefault(); } // enter
-        if (e.code === 'Space')      { toggleSameFolder(); e.preventDefault(); } // space
+        if (e.code === 'Space')      { toggleSameFolder(e); e.preventDefault(); } // space
         if (e.code === 'KeyG')       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g
         if (e.code === 'KeyI')       { toggleInfoPopup(); e.preventDefault(); } // g
     })
@@ -308,10 +311,31 @@ function doubleCheckWeHaveAllWeNeedInUrl()
         url.updateLocationHref()
 }
 
-function toggleSameFolder()
+function InitializeSameFolder()
 {
     const sf = document.getElementById('same-folder')
-    sf.checked = !sf.checked
+    const url = new UrlWrapper(window.location.href)
+    sf.checked = url.getSearch('sf', '1') === '1'
+
+    sf.addEventListener('click', e => toggleSameFolder(e))
+}
+
+function toggleSameFolder(e)
+{
+    let sf = null
+    if (e.type === 'click')
+    {
+        sf = e.target
+    }
+    else
+    {
+        sf = document.getElementById('same-folder')
+        sf.checked = !sf.checked
+    }
+
+    const url = new UrlWrapper(window.location.href)
+    url.setSearch('sf', sf.checked ? '1' : '0')
+    url.updateLocationHref()
 }
 
 function toggleInfoPopup()
