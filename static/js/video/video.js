@@ -1,6 +1,6 @@
 import { VideoPlayer } from "/static/js/video/video_player.js"
 import {VideoKeyProvider, VideoKey, VideoKeyPlayer} from "/static/js/video/video_keys.js"
-import {} from "/static/js/main.js"
+import {isActiveTextInput} from "/static/js/main.js"
 
 const videoOnionFwd = document.getElementById('video-fwd')
 const onionSwitch = document.getElementById('onion')
@@ -171,6 +171,8 @@ function initializeKeys()
 
 document.addEventListener('keydown', e =>
 {
+    if (isActiveTextInput()) return
+
     if (e.code === 'KeyK')
     {
         e.preventDefault()
@@ -359,5 +361,7 @@ const keyMap =
 // Frame-by-frame scrubbing with left and right arrow keys
 document.addEventListener('keydown', e =>
 {
+    if (isActiveTextInput()) return
+
     isFbfMode ? keyMap.fbf(e) : keyMap.normal(e)
 })

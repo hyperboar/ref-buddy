@@ -4,7 +4,7 @@ import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetBoard}           from "image_tools/widget_board.js"
 import {ImageSelection}        from "image_tools/image_selection.js"
 import {RateMultImages}        from "image_tools/rating.js"
-import {fetchAndSimpleFeedback} from '/static/js/main.js'
+import {fetchAndSimpleFeedback, isActiveTextInput} from '/static/js/main.js'
 import {MutationAttributeObserver} from '/static/js/mut_attr_observer.js'
 import {ImageLazyLoad } from '/static/js/image_lazy_load.js'
 
@@ -92,8 +92,10 @@ document.getElementById('fld_hide').addEventListener('click', hideFolder)
 document.getElementById('fld_ord_up').addEventListener('click', folderOrdUp)
 document.getElementById('fld_ord_dn').addEventListener('click', folderOrdDown)
 
-document.addEventListener('keydown', function(e)
+document.addEventListener('keydown', (e) =>
 {
+    if (isActiveTextInput()) return
+
     // select all
     if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
     {

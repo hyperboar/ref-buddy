@@ -4,6 +4,7 @@ import {ApiTags} from "api";
 // import {WidgetBoard}           from "image_tools/widget_board.js"
 import {ImageSelection}        from "image_tools/image_selection.js"
 import {RateMultImages}        from "image_tools/rating.js"
+import {isActiveTextInput} from '/static/js/main.js'
 
 
 // let tagsFilter = new WidgetImageTagsFilter('', '#tags-filter-btn', true)
@@ -77,8 +78,10 @@ function fetchTags()
 // {#document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)#}
 // {#document.getElementById('tags-filter-btn').addEventListener('click', toggleTagsFilterDisplay)#}
 
-document.addEventListener('keydown', function(e)
+document.addEventListener('keydown', (e) =>
 {
+    if (isActiveTextInput()) return
+
     // select all
     if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
     {

@@ -1,7 +1,7 @@
 import {ApiTags} from 'api'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from "/static/js/bg_overlay.js";
-import {wrapButtonFeedbackPromise} from '/static/js/main.js'
+import {isActiveTextInput, wrapButtonFeedbackPromise} from '/static/js/main.js'
 
 class TagItem
 {
@@ -178,6 +178,8 @@ class WidgetImageTagsEditor
 
         document.addEventListener('keydown', (e) =>
         {
+            if (isActiveTextInput()) return
+
             if (e.code === 'KeyT' && !e.shiftKey)
             {
                 this.toggleTagsPopupDisplay(e)
@@ -271,6 +273,8 @@ class WidgetImageTagsEditor
 
         document.addEventListener('keydown', (e) =>
         {
+            if (isActiveTextInput()) return
+
             if (e.code === 'KeyN' && !e.shiftKey)
             {
                 this.toggleTagsPinsDisplay(e)

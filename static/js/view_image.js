@@ -14,7 +14,7 @@ import {ColorPicker}    from "image_tools/color_picker.js"
 import {WidgetBoard}    from "image_tools/widget_board.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
-import {UrlWrapper}     from '/static/js/main.js'
+import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 
 let selection = null
 let rateImage = null
@@ -185,8 +185,10 @@ function initializeComponents()
     })
 
     // hotkeys
-    document.addEventListener('keydown', function(e)
+    document.addEventListener('keydown', (e) =>
     {
+        if (isActiveTextInput()) return
+
         if (e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
         if (e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
 

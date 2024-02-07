@@ -250,8 +250,10 @@
 
     document.querySelectorAll('#inline-resolve').forEach(btn => btn.addEventListener('click', markResolvedInline))
 
-    document.addEventListener('keydown', function(e)
+    document.addEventListener('keydown', (e) =>
     {
+        //if (isActiveTextInput()) return
+
         // select all
         if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
         {

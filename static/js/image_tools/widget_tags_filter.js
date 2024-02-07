@@ -1,7 +1,7 @@
 import {ApiTags} from 'api'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from '/static/js/bg_overlay.js'
-import {UrlWrapper} from '/static/js/main.js' // + Array.prototype.remove
+import {UrlWrapper, isActiveTextInput} from '/static/js/main.js' // + Array.prototype.remove
 
 class WidgetImageTagsFilter
 {
@@ -43,7 +43,10 @@ class WidgetImageTagsFilter
 
         document.addEventListener('keydown', (e) =>
         {
-            if (e.code === 'KeyF' && !e.shiftKey) {
+            if (isActiveTextInput()) return
+
+            if (e.code === 'KeyF' && !e.shiftKey)
+            {
                 this.toggleTagsFilterDisplay()
             }
         })

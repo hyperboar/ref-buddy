@@ -1,4 +1,5 @@
 import {ApiImage} from 'api'
+import {isActiveTextInput} from '/static/js/main.js'
 
 class ColorPicker
 {
@@ -59,6 +60,8 @@ class ColorPicker
         // grayscale
         document.addEventListener('keydown', e =>
         {
+            if (isActiveTextInput()) return
+
             if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) { return }
 
             if (e.code !== 'KeyG' || !this.isAltPressed) { return }

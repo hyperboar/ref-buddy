@@ -206,6 +206,8 @@ class Hotkeys
 
         document.addEventListener('keydown', (e) =>
         {
+            if (isActiveTextInput()) return
+
             if (e.code === 'Space') { e.preventDefault() }
 
             this.pressedKeys[e.code] = true
