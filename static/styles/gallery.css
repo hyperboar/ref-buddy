@@ -58,7 +58,23 @@
     user-select: none;
 }
 
-
+.play
+{
+    position: absolute;
+    translate: 20% -110%;
+    content: var(--url-icon-play);
+    align-content: center;
+    width:50px;
+    height:50px;
+    top: 100%;
+    left: 0;
+    opacity: 0.5;
+    transition: opacity 0.5s ease;
+}
+.thumbnail:hover > a .play
+{
+    opacity: 0.9;
+}
 
 .overlay {
     position: absolute;

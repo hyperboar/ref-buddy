@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () =>
         node.querySelector('a').href  = tplStudyUrl.replace(studyUrl['keys']['image_id'], im.id)
         node.querySelector('img').alt = im.id
         node.querySelector('img').setAttribute('data-src', tplThumbUrl.replace(thumbUrl['keys']['image_id'], im.id))
+        if (im.video) node.querySelector('.play').classList.remove('vis-hide')
         container.appendChild(node)
     })
 
