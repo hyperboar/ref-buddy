@@ -186,7 +186,7 @@ def image_info(image_id):
     session = Session()
     image = session.get(ImageMetadata, image_id)
     extra = image.extras[0].data if len(image.extras) > 0 else "{}"
-    is_video = 1 if image.source_type_id == 3 else 0
+    is_video = 1 if image.source_type_id == 2 or image.source_type_id == 3 else 0
     out = render_template('json/tpl_image_info.json.html', image=image, extra=extra, is_video=is_video)
     session.close()
 
