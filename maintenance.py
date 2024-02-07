@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import hashlib
 import os
 import shutil
-import sqlite3
 from PIL import Image
 from sqlalchemy import func, exists
 
@@ -203,55 +202,29 @@ def assign_folder_tags(start_at=None, session=None):
     if start_at is None:
         start_at = datetime.min
 
-    conn = sqlite3.connect(Env.DB_FILE)
+    sub_paths = [
+        ('academic', [2]), # tag academic
+        ('pron', [3]), # tag pron
+        ('the_bits', [3, 5]), # tag pron, the-bits
+        ('artists', [4]), # tag 2d
+        ('video', [6]), # tag frames
+        ('doujin', [51]), # tag manga
+    ]
 
-    c = conn.cursor()
-    c.execute("""
-        -- academic
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 2
-        FROM image_metadata
-        WHERE study_type = 1;
-    """)
-    c.execute(f"""
-        -- pron and the-bits
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 3
-        FROM image_metadata
-        WHERE study_type in (2, 4);
-    """)
-    c.execute(f"""
-        -- the_bits
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 5
-        FROM image_metadata
-        WHERE study_type = 4;
-    """)
-    c.execute(f"""
-        -- artists
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 4
-        FROM image_metadata
-        WHERE study_type = 3;
-    """)
-    c.execute(f"""
-        -- frames
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 6
-        FROM image_metadata
-        WHERE study_type = 5;
-    """)
+    for sub_path, tags in sub_paths:
+        paths = session.query(Path).filter(Path.path_raw.ilike(f'{sub_path}%')).all()
+        p_ids = [p.id for p in paths]
+        images = (session.query(ImageMetadata)
+                  .filter(ImageMetadata.path_id.in_(p_ids))
+                  .filter(ImageMetadata.imported_at > start_at)
+                  .all())
+        for im in images:
+            for t in tags:
+                session.merge(ImageTag(image_id=im.image_id, tag_id=t))
 
-    c.execute(f"""
-        -- manga tag for doujin folder
-        INSERT OR IGNORE INTO image_tags (image_id, tag_id)
-        SELECT id, 51
-        FROM image_metadata
-        WHERE study_type = 6;
-    """)
+        session.flush()
 
-    conn.commit()
-    conn.close()
+    session.commit()
 
     print(f'\rAssigning essential tags to new images... Done')
     print(f'Assigning path tags...', end='')
