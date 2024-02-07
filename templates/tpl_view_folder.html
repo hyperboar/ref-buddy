@@ -30,7 +30,7 @@
     <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select</button>
 </div>
 
-<div id="tpl-thumbnail" class="thumbnail vis-hide" data-id="{#{{ image.image_id }}#}" data-fn="{#{{ image.filename }}#}" data-rt="{#{{ image.rating }}#}">
+<div id="tpl-thumbnail" class="thumbnail vis-hide" title="{#{{ image.filename }}#}" data-id="{#{{ image.image_id }}#}" data-fn="{#{{ image.filename }}#}" data-rt="{#{{ image.rating }}#}">
     <a href="{#/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=#}">
         <img src="" class="thumb thumb-hidden" data-src="{#/thumb/{{ image.image_id }}.jpg#}" alt="{#{{ image.image_id }}#}">
         <div class="overlay vis-hide">

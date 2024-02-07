@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () =>
         node.setAttribute('data-fn', im.fn)
         node.setAttribute('data-rt', im.r)
         node.setAttribute('data-tstamp', im.i_at)
+        node.title = im.fn
         node.querySelector('a').href  = tplStudyUrl.replace(studyUrl['keys']['image_id'], im.id)
         node.querySelector('img').alt = im.id
         node.querySelector('img').setAttribute('data-src', tplThumbUrl.replace(thumbUrl['keys']['image_id'], im.id))
