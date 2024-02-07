@@ -97,6 +97,19 @@ class WidgetImageTagsFilter
         this.widget.querySelector('#tags-filter-close').addEventListener('click', () => this.hideWidget())
         this._bgOverlay.node.addEventListener('click', () => this.hideWidget())
 
+        // only when gallery is present
+        const g = document.querySelector('.gallery')
+        if (g !== null)
+        {
+            this.widget.querySelector('#tags-filter-gallery-apply').addEventListener('click', () => this.applyGalleryFilter())
+            this.widget.querySelector('#tags-filter-gallery-unapply').addEventListener('click', () => this.unapplyGalleryFilter())
+            this.widget.querySelector('#apply-search').addEventListener('click', () => this.filterByFilename())
+
+            this.widget.querySelector('#tags-filter-gallery-apply').classList.remove('vis-hide')
+            this.widget.querySelector('#tags-filter-gallery-unapply').classList.remove('vis-hide')
+            this.widget.querySelector('#filter-by-name').classList.remove('vis-hide')
+        }
+
         let container = this.widget.querySelector('#tagList')
         let tplItem = this._container.querySelector('#tpl-tag-item').cloneNode(true)
         tplItem.id = ''
@@ -159,6 +172,8 @@ class WidgetImageTagsFilter
 
     hideWidget()
     {
+        this.widget.focus()
+
         this.widget.classList.add('vis-hide')
 
         this._bgOverlay.hide()
@@ -333,6 +348,63 @@ class WidgetImageTagsFilter
             else if (tags.includes('-' + id))
             {
                 tagElem.classList.add('tag-set-neg')
+            }
+        })
+    }
+
+    applyGalleryFilter()
+    {
+        const g = document.querySelector('.gallery')
+        if (g === null) return
+
+        const tagPos = this.filteredTags.filter(t => !t.startsWith('-'))
+        const tagNeg = this.filteredTags.filter(t => t.startsWith('-')).map(t => t.substring(1, t.length))
+
+        Array.from(g.children).forEach(ov =>
+        {
+            ov.classList.remove('vis-hide')
+
+            const tags = [] +
+                ov.querySelector('.recent-tags').textContent.split(',') +
+                ov.querySelector('.tags-list').textContent.split(',')
+
+            for(let i in tagNeg)
+            {
+                if (tags.includes(tagNeg[i]))
+                {
+                    ov.classList.add('vis-hide')
+                    break
+                }
+            }
+        })
+    }
+
+    unapplyGalleryFilter()
+    {
+        const g = document.querySelector('.gallery')
+        if (g === null) return
+
+        Array.from(g.children).forEach(ov =>
+        {
+            ov.classList.remove('vis-hide')
+        })
+    }
+
+    filterByFilename()
+    {
+        const g = document.querySelector('.gallery')
+        if (g === null) return
+
+        const text = this.widget.querySelector('#search-text').value.toLowerCase()
+        Array.from(g.children).forEach(ov =>
+        {
+            if (ov.title.toLowerCase().includes(text))
+            {
+                ov.classList.remove('vis-hide')
+            }
+            else
+            {
+                ov.classList.add('vis-hide')
             }
         })
     }

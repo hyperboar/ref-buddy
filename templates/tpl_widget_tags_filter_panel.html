@@ -7,7 +7,13 @@
     </div>
     <div id="tagList" class="tag-container">
     </div>
-    <button id="tags-filter-apply">Apply</button>
+    <div id="filter-by-name" class="vis-hide">
+        <input id="search-text" type="text" width="200"/>
+        <button id="apply-search">Filter by file name</button>
+    </div>
+    <button id="tags-filter-apply" title="When in gallery view, reload the page.">Apply</button>
+    <button id="tags-filter-gallery-apply" class="vis-hide" title="Hide all images that have negative tag assigned.">Filter local </button>
+    <button id="tags-filter-gallery-unapply" class="vis-hide" title="Show all hidden images.">Cancel filter</button>
     <button id="tags-filter-close">Close</button>
 </div>
 <div id="tpl-tag-item" class="tag-filter vis-hide" data-tag="{#{{ t.tag }}#}" data-tag-id="{#{{ t.id }}#}" data-state="0" style="{#color:{{ t.hex }}#}">{#{{ t.tag }}#}</div>
