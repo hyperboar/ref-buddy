@@ -103,27 +103,6 @@ body {
     cursor: crosshair !important;
 }
 
-.modal-button-prev, .modal-button-next
-{
-    position: relative;
-    bottom: 4%;
-    opacity: 0.1;
-    width: calc(3vh);
-    height: calc(3vh);
-    transition: opacity 0.2s;
-}
-.modal-button-prev:hover, .modal-button-next:hover
-{
-    opacity: 0.7;
-}
-.modal-button-next
-{
-    right: -43%;
-}
-.modal-button-prev
-{
-    left: -43%;
-}
 
 .dir-link
 {
