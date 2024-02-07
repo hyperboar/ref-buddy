@@ -44,7 +44,7 @@ class ImageSelection
 
         this.toggleBtn = document.getElementById(toggleBtnId)
 
-        this.toggleBtn.addEventListener('click', () => this.toggleSelectionMode());
+        this.toggleBtn.addEventListener('click', () => this.toggleSelectionMode())
     }
 
     /**
@@ -52,7 +52,7 @@ class ImageSelection
      */
     toggleSelectionMode()
     {
-        this.selectionMode = !this.selectionMode;
+        this.selectionMode = !this.selectionMode
 
         console.log(`${this.selectionMode}`)
 
@@ -72,7 +72,7 @@ class ImageSelection
                 const img = tile.querySelector('img')
                 img.classList.remove(this.classSelected)
                 img.classList.add(this.classSelectable)
-            });
+            })
         }
         else
         {
@@ -86,12 +86,12 @@ class ImageSelection
             document.querySelectorAll(this.classTile).forEach((tile) =>
             {
                 tile.querySelector('a').classList.remove(this.classDisabled)
-                tile.removeEventListener('click', this.tileClickAction);
+                tile.removeEventListener('click', this.tileClickAction)
 
                 const img = tile.querySelector('img')
                 img.classList.remove(this.classSelectable)
                 img.classList.remove(this.classSelected)
-            });
+            })
         }
     }
 
@@ -120,26 +120,26 @@ class ImageSelection
         const tileId = tile.getAttribute(this.attrDataId)
 
         // add, batch select, this tile NOT included
-        if (isBatch && !this.selectedIds.includes(tileId))
+        if (isBatch && !this.selectedIds.includes(tileId) && !tile.classList.contains('vis-hide'))
         {
             this.selectedIds.push(tileId)
             const img = tile.querySelector('img')
-            img.classList.add(this.classSelected);
+            img.classList.add(this.classSelected)
         }
         // add, single select, this tile NOT included
-        else if (!isBatch && !this.selectedIds.includes(tileId))
+        else if (!isBatch && !this.selectedIds.includes(tileId) && !tile.classList.contains('vis-hide'))
         {
             this.selectedIds.push(tileId)
             const img = tile.querySelector('img')
-            img.classList.add(this.classSelected);
+            img.classList.add(this.classSelected)
         }
         // remove, single select, this tile IS included
         else if (!isBatch && this.selectedIds.includes(tileId))
         {
-            const idx = this.selectedIds.indexOf(tileId);
-            if (idx !== -1) this.selectedIds.splice(idx, 1);
+            const idx = this.selectedIds.indexOf(tileId)
+            if (idx !== -1) this.selectedIds.splice(idx, 1)
             const img = tile.querySelector('img')
-            img.classList.remove(this.classSelected);
+            img.classList.remove(this.classSelected)
         }
 
 
