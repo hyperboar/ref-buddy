@@ -71,14 +71,21 @@ def create_new_db():
     # conn.close()
     pass
 
-def generate_thumbs():
+def generate_thumbs(start_at=None, session=None):
     # Create thumbnail folder if it doesn't exist
     if not os.path.exists(Env.THUMB_PATH):
         os.makedirs(Env.THUMB_PATH)
 
-    s = Session()
+    if session is None:
+        session = Session()
 
-    max_i = s.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.lost == 0).scalar()
+    if start_at is None:
+        start_at = datetime.min
+
+    max_i = (session.query(func.count()).select_from(ImageMetadata)
+             .filter(ImageMetadata.lost == 0)
+             .filter(ImageMetadata.imported_at > start_at)
+             .scalar())
     limit = 500
     offset = 0
 
@@ -88,7 +95,10 @@ def generate_thumbs():
 
     broken_files = []
 
-    q = s.query(ImageMetadata).filter(ImageMetadata.lost == 0)
+    q = (session.query(ImageMetadata)
+         .filter(ImageMetadata.lost == 0)
+         .filter(ImageMetadata.imported_at > start_at))
+
 
     print(f'0% Generating thumbs. {new_count} new', end='')
     while True:
@@ -181,13 +191,17 @@ def rehash_images(rehash_all:bool):
     # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
-def assign_folder_tags(session=None):
+def assign_folder_tags(start_at=None, session=None):
     """Go over all imag_metadata rows and add tags academic, pron, the_bits, artists and frames(video)"""
 
     print(f'Assigning essential tags to new images...', end='')
 
     if session is None:
         session = Session()
+
+    # start_at currently does nothing here
+    if start_at is None:
+        start_at = datetime.min
 
     conn = sqlite3.connect(Env.DB_FILE)
 
@@ -251,7 +265,11 @@ def assign_folder_tags(session=None):
             continue
         tags = [t.tag.id for t in p.tags]
 
-        for im in p.images:
+        images = (session.query(ImageMetadata)
+                  .filter(ImageMetadata.path_id == p.id).all()
+                  .filter(ImageMetadata.imported_at > start_at).all())
+
+        for im in images:
             for t in tags:
                 session.merge(ImageTag(image_id=im.image_id, tag_id=t))
 
@@ -261,10 +279,13 @@ def assign_folder_tags(session=None):
 
     session.commit()
 
-def assign_animation_tags(session=None):
+def assign_animation_tags(start_at=None, session=None):
     print('Assigning tags to animations and videos...', end='')
     if session is None:
         session = Session()
+
+    if start_at is None:
+        start_at = datetime.min
 
     tag_anim = session.query(Tag).filter(Tag.tag == 'animated').first()
     tag_vid = session.query(Tag).filter(Tag.tag == 'video').first()
@@ -275,7 +296,9 @@ def assign_animation_tags(session=None):
     if tag_vid is None:
         raise ValueError('Tag "video" not found')
 
-    q = session.query(ImageMetadata).filter(ImageMetadata.lost == 0)
+    q = (session.query(ImageMetadata)
+         .filter(ImageMetadata.lost == 0)
+         .filter(ImageMetadata.imported_at > start_at))
 
     images = q.filter(ImageMetadata.filename.like('%.webp')).all() + \
              q.filter(ImageMetadata.filename.like('%.gif')).all()
@@ -286,7 +309,10 @@ def assign_animation_tags(session=None):
         session.merge(ImageTag(image_id=im.image_id, tag_id=tag_anim.id))
         session.flush()
 
-    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4.gif')).all()
+    images = (session.query(ImageMetadata)
+              .filter(ImageMetadata.filename.like('%.mp4.gif'))
+              .filter(ImageMetadata.imported_at > start_at)
+              .all())
     for im in images:
         st = ImageMetadata.source_type_by_path(im.path_abs)
         if st == 1:
@@ -606,13 +632,21 @@ def collapse_import_times():
 
     make_database_backup('after_collapse_import_times', True)
 
-def assign_video_extra_data(is_force=False):
-    s = Session()
+def assign_video_extra_data(start_at=None, is_force=False, session=None):
+    if session is None:
+        session = Session()
+
+    if start_at is None:
+        start_at = datetime.min
 
     limit = 100
     offset = 0
 
-    q = s.query(ImageMetadata).filter(ImageMetadata.source_type_id == 3) # videos only
+    # videos only
+    q = ((session.query(ImageMetadata)
+         .filter(ImageMetadata.source_type_id == 3))
+         .filter(ImageMetadata.imported_at > start_at))
+
 
     progress = ['/', '-', '\\', '|', ]
     i = 0
@@ -636,27 +670,27 @@ def assign_video_extra_data(is_force=False):
             image_path = image.path_abs.replace('.mp4.gif', '.mp4')
 
             if not os.path.exists(image_path):
-                image.mark_as_lost(s, auto_commit=False)
+                image.mark_as_lost(session, auto_commit=False)
                 continue
 
             dur, fps = ExportVidGifs.get_video_fps(image_path)
             data = {'dur': dur, 'fps': fps}
 
             if len(image.extras) == 0:
-                s.merge(ImageExtra(image_id=image.image_id, data=json.dumps(data)))
+                session.merge(ImageExtra(image_id=image.image_id, data=json.dumps(data)))
             else:
                 tmp = json.loads(image.extras[0].data)
                 tmp['dur'] = data['dur']
                 tmp['fps'] = data['fps']
                 image.extras[0].data = json.dumps(tmp)
 
-            s.flush()
+            session.flush()
 
             # print (f'{data} for {image.source_type_id}:{image.filename}')
 
         offset += limit
 
-    s.commit()
+    session.commit()
 
     print(f'\rAssigning extra data for videos... Done' + (' ' * 50), flush=True)
 

@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
@@ -29,6 +29,8 @@ class ImageMetadataImporter:
         session = Session()
 
         time_of_import = datetime.now()
+        # -1 just to make sure we're in the past
+        update_time = time_of_import - timedelta(seconds=1)
 
         for dir_path, dir_names, filenames in os.walk(folder_path):
             count = 0
@@ -67,12 +69,12 @@ class ImageMetadataImporter:
         else:
             session.commit()
             print(f'Images import completed! Found {new_count} new files.')
-            assign_folder_tags(session)
-            assign_animation_tags(session)
-            assign_video_extra_data()
+            assign_folder_tags(start_at=update_time, session=session)
+            assign_animation_tags(start_at=update_time, session=session)
+            assign_video_extra_data(start_at=update_time, session=session)
             rehash_images(False)
             make_database_backup(marker='after_import', force=True)
-            generate_thumbs()
+            generate_thumbs(start_at=update_time)
 
         print(f'Import completed ({int(time.time() - start_time)} sec).')
 
