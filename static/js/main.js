@@ -167,6 +167,13 @@ function loadScript(scriptUrl)
     })
 }
 
+function isActiveTextInput()
+{
+    const elem = document.activeElement
+    return (elem.tagName === 'INPUT' && elem.type === 'text') ||
+        (elem.tagName === 'textarea')
+}
+
 /**
  * Help handle hotkeys in a more generalized ways.
  */
@@ -291,4 +298,4 @@ class UrlWrapper
     }
 }
 
-export { simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, wrapButtonFeedbackPromise, UrlWrapper, Hotkeys }
+export { simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, isActiveTextInput, wrapButtonFeedbackPromise, UrlWrapper, Hotkeys }
