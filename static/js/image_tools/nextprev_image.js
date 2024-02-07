@@ -1,4 +1,5 @@
 import {ApiImage} from 'api'
+import {wrapButtonFeedbackPromise} from '/static/js/main.js'
 
 class ImageNextPrev
 {
@@ -35,12 +36,16 @@ class ImageNextPrev
 
     clickNext(e)
     {
-        return this.pickNext('fwd', this._nextSelector.value, this._imgId.textContent, e)
+        return wrapButtonFeedbackPromise(
+            this.pickNext('fwd', this._nextSelector.value, this._imgId.textContent, e),
+            this._next)
     }
 
     clickPrev(e)
     {
-        return this.pickNext('bck', this._nextSelector.value, this._imgId.textContent, e)
+        return wrapButtonFeedbackPromise(
+            this.pickNext('bck', this._nextSelector.value, this._imgId.textContent, e),
+            this._prev)
     }
 
     pickNext(dir, method, id, evt, notify = true)
