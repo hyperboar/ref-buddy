@@ -266,7 +266,7 @@ def assign_folder_tags(start_at=None, session=None):
         tags = [t.tag.id for t in p.tags]
 
         images = (session.query(ImageMetadata)
-                  .filter(ImageMetadata.path_id == p.id).all()
+                  .filter(ImageMetadata.path_id == p.id)
                   .filter(ImageMetadata.imported_at > start_at).all())
 
         for im in images:
