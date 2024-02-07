@@ -49,6 +49,7 @@
     --url-icon-timer: url("/static/timer.png");
     --url-icon-edit:  url("/static/edit.png");
     --url-icon-cross:  url("/static/cross.png");
+    --url-icon-play:  url("/static/play.png");
 }
 
 body
