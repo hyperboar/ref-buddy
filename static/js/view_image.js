@@ -304,12 +304,12 @@ function doubleCheckWeHaveAllWeNeedInUrl()
     const url = new UrlWrapper(window.location.href)
 
     const changed =
-        url.probeSearch('tags') ||
-        url.probeSearch('tag-set', 'all') ||
-        url.probeSearch('sf', '1') ||
+        url.probeSearch('tags') +
+        url.probeSearch('tag-set', 'all') +
+        url.probeSearch('sf', '1') +
         url.probeSearch('time-planned', '120')
 
-    if (changed)
+    if (changed > 0)
         url.updateLocationHref()
 }
 

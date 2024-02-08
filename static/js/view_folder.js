@@ -107,13 +107,13 @@ function doubleCheckWeHaveAllWeNeedInUrl()
     const url = new UrlWrapper(window.location.href)
 
     const changed =
-        url.probeSearch('page', '1') ||
-        url.probeSearch('tags') ||
-        url.probeSearch('tag-set', 'all') ||
-        url.probeSearch('limit', '100') ||
+        url.probeSearch('page', '1') +
+        url.probeSearch('tags')  +
+        url.probeSearch('tag-set', 'all') +
+        url.probeSearch('limit', '100') +
         url.probeSearch('conts', '1') // clear on tag submit
 
-    if (changed)
+    if (changed > 0)
         url.updateLocationHref()
 }
 

@@ -211,10 +211,10 @@ class WidgetImageTagsFilter
     {
         const url = new UrlWrapper(window.location.href)
         const changed =
-            url.probeSearch('page', '1') ||
+            url.probeSearch('page', '1') +
             url.probeSearch('tags', '')
 
-        if (changed)
+        if (changed > 0)
             url.updateLocationHref()
     }
 
