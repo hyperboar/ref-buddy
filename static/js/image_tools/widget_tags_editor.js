@@ -105,7 +105,7 @@ class TagItem
         return this._container.getAttribute('data-color')
     }
 
-    setHighlight(isOn, hClass = 'highlight')
+    setHighlight(isOn, hClass = 'highlight-use')
     {
         if (isOn)
             this._highlight.classList.add(hClass)
