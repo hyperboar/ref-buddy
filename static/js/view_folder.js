@@ -4,7 +4,7 @@ import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetBoard}           from "image_tools/widget_board.js"
 import {ImageSelection}        from "image_tools/image_selection.js"
 import {RateMultImages}        from "image_tools/rating.js"
-import {fetchAndSimpleFeedback, isActiveTextInput} from '/static/js/main.js'
+import {fetchAndSimpleFeedback, isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import {MutationAttributeObserver} from '/static/js/mut_attr_observer.js'
 import {ImageLazyLoad } from '/static/js/image_lazy_load.js'
 
@@ -83,6 +83,23 @@ function folderOrdDown(e)
     fetchAndSimpleFeedback(`/folder-ord-add?image-id=${selection.selectedIds[0]}&rating=-1`, e.currentTarget)
 }
 
+/**
+ * Add tags and tag-set to clicked link (relies on event bubbling up from img to thumbnail div tags).
+ * This should be triggered on mouseup event, not click, due to the user ability to open link by MMB
+ */
+function updateLinkOnImgClick(e)
+{
+    const a = e.target.closest('a')
+
+    const pageUrl = new UrlWrapper(window.location.href)
+    const linkUrl = new UrlWrapper(a.href)
+
+    linkUrl.setSearch('tags', pageUrl.getSearch('tags', ''))
+    linkUrl.setSearch('tag-set', pageUrl.getSearch('tag-set', ''))
+
+    a.href = linkUrl.toString()
+}
+
 document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
 // document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
 // document.getElementById('tags-filter-btn').addEventListener('click', toggleTagsFilterDisplay)
@@ -148,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () =>
         node.setAttribute('data-rt', im.r)
         node.setAttribute('data-tstamp', im.i_at)
         node.title = im.fn
+        node.addEventListener('mouseup', updateLinkOnImgClick) // expand a.href
         node.querySelector('a').href  = tplStudyUrl.replace(studyUrl['keys']['image_id'], im.id)
         node.querySelector('img').alt = im.id
         node.querySelector('img').setAttribute('data-src', tplThumbUrl.replace(thumbUrl['keys']['image_id'], im.id))
