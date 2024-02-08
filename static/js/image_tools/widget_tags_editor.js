@@ -1,7 +1,7 @@
 import {ApiTags} from 'api'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from "/static/js/bg_overlay.js";
-import {isActiveTextInput, wrapButtonFeedbackPromise} from '/static/js/main.js'
+import {isActiveTextInput, UrlWrapper, wrapButtonFeedbackPromise} from '/static/js/main.js'
 
 class TagItem
 {
@@ -105,12 +105,12 @@ class TagItem
         return this._container.getAttribute('data-color')
     }
 
-    setHighlight(isOn)
+    setHighlight(isOn, hClass = 'highlight')
     {
         if (isOn)
-            this._highlight.classList.add('highlight')
+            this._highlight.classList.add(hClass)
         else
-            this._highlight.classList.remove('highlight')
+            this._highlight.classList.remove(hClass)
     }
 }
 
@@ -396,6 +396,10 @@ class WidgetImageTagsEditor
                     document.dispatchEvent(this._tagsUpdatedEvent)
                 })
             , elem)
+            .then(() =>
+            {
+                this.handleClearTagsOnSubmit(selectedTags, [])
+            })
     }
 
     submitRemoveTags(evt)
@@ -414,6 +418,10 @@ class WidgetImageTagsEditor
                     document.dispatchEvent(this._tagsUpdatedEvent)
                 })
             , elem)
+            .then(() =>
+            {
+                this.handleClearTagsOnSubmit([], selectedTags)
+            })
     }
 
     // show tags in overlay
@@ -583,6 +591,24 @@ class WidgetImageTagsEditor
         {
             this._pPins.classList.add('tags-pins-hide')
         }
+    }
+
+    handleClearTagsOnSubmit(tagPos, tagNeg)
+    {
+        const url = new UrlWrapper(window.location.href)
+        const shouldClear = parseInt(url.getSearch('conts', '0')) > 0
+        if (!shouldClear) return
+
+        Object.values(this.tagBtns).forEach(btn =>
+        {
+            btn.setHighlight(false, 'highlight-add')
+            btn.setHighlight(false, 'highlight-remove')
+        })
+
+        tagPos.forEach(t => this.tagBtns[t].setHighlight(true, 'highlight-add'))
+        tagNeg.forEach(t => this.tagBtns[t].setHighlight(true, 'highlight-remove'))
+
+        this.clearTagsPopup()
     }
 
     clearPinsList()

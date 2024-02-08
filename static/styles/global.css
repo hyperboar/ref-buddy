@@ -14,7 +14,9 @@
     --clr-tag-sel-neg: #a85c4d;
     --clr-tagpin-bg: #918d8d;
 
-    --clr-tag-heighlight: rgba(206, 177, 61, 0.42);
+    --clr-tag-heighlight-use: rgba(206, 177, 61, 0.42);
+    --clr-tag-heighlight-add: rgba(126, 168, 126, 0.62);
+    --clr-tag-heighlight-remove: rgba(168, 92, 77, 0.62);
 
     --clr-tag-recent: #234123;
 
@@ -240,9 +242,19 @@ button
     min-width: 150px;
 }
 
-.tag-item .highlight
+.tag-item .highlight-use
 {
-    border: 2px solid var(--clr-tag-heighlight);
+    border: 2px solid var(--clr-tag-heighlight-use);
+}
+
+.tag-item .highlight-add
+{
+    border: 2px solid var(--clr-tag-heighlight-add);
+}
+
+.tag-item .highlight-remove
+{
+    border: 2px solid var(--clr-tag-heighlight-remove);
 }
 
 /*.tag-link {*/
