@@ -89,6 +89,8 @@ function folderOrdDown(e)
  */
 function updateLinkOnImgClick(e)
 {
+    if (selection.selectionMode) return
+
     const a = e.target.closest('a')
 
     const pageUrl = new UrlWrapper(window.location.href)
