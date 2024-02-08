@@ -102,6 +102,21 @@ function updateLinkOnImgClick(e)
     a.href = linkUrl.toString()
 }
 
+function doubleCheckWeHaveAllWeNeedInUrl()
+{
+    const url = new UrlWrapper(window.location.href)
+
+    const changed =
+        url.probeSearch('page', '1') ||
+        url.probeSearch('tags') ||
+        url.probeSearch('tag-set', 'all') ||
+        url.probeSearch('limit', '100') ||
+        url.probeSearch('conts', '1') // clear on tag submit
+
+    if (changed)
+        url.updateLocationHref()
+}
+
 document.getElementById('tags-show-btn').addEventListener('click', fetchTags)
 // document.getElementById('tags-open-btn').addEventListener('click', toggleTagsPopupDisplay)
 // document.getElementById('tags-filter-btn').addEventListener('click', toggleTagsFilterDisplay)
@@ -138,6 +153,8 @@ let showTagsMode = 0
 
 document.addEventListener('DOMContentLoaded', () =>
 {
+    doubleCheckWeHaveAllWeNeedInUrl()
+
     const tplThumbRaw = document.querySelector('#tpl-thumbnail')
     const tplThumb = tplThumbRaw.cloneNode(true)
     tplThumb.id = ''
