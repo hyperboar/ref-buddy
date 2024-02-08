@@ -106,7 +106,6 @@ class WidgetImageTagsFilter
         {
             this.widget.querySelector('#tags-filter-gallery-apply').addEventListener('click', () => this.applyGalleryFilter())
             this.widget.querySelector('#tags-filter-gallery-unapply').addEventListener('click', () => this.unapplyGalleryFilter())
-            this.widget.querySelector('#apply-search').addEventListener('click', () => this.filterByFilename())
 
             this.widget.querySelector('#tags-filter-gallery-apply').classList.remove('vis-hide')
             this.widget.querySelector('#tags-filter-gallery-unapply').classList.remove('vis-hide')
@@ -363,9 +362,17 @@ class WidgetImageTagsFilter
         const tagPos = this.filteredTags.filter(t => !t.startsWith('-'))
         const tagNeg = this.filteredTags.filter(t => t.startsWith('-')).map(t => t.substring(1, t.length))
 
+        const text = this.widget.querySelector('#search-text').value.toLowerCase()
+
         Array.from(g.children).forEach(ov =>
         {
             ov.classList.remove('vis-hide')
+
+            if (text.length > 0 && !ov.title.toLowerCase().includes(text))
+            {
+                ov.classList.add('vis-hide')
+                return
+            }
 
             const tags = [] +
                 ov.querySelector('.recent-tags').textContent.split(',') +
@@ -390,25 +397,6 @@ class WidgetImageTagsFilter
         Array.from(g.children).forEach(ov =>
         {
             ov.classList.remove('vis-hide')
-        })
-    }
-
-    filterByFilename()
-    {
-        const g = document.querySelector('.gallery')
-        if (g === null) return
-
-        const text = this.widget.querySelector('#search-text').value.toLowerCase()
-        Array.from(g.children).forEach(ov =>
-        {
-            if (ov.title.toLowerCase().includes(text))
-            {
-                ov.classList.remove('vis-hide')
-            }
-            else
-            {
-                ov.classList.add('vis-hide')
-            }
         })
     }
 
