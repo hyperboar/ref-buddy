@@ -267,7 +267,7 @@ class UrlWrapper
         window.history.replaceState({}, '', this._url.toString())
     }
 
-    getFullStr()
+    toString()
     {
         return this._url.toString()
     }
