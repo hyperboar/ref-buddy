@@ -1,4 +1,5 @@
 import os
+import urllib
 from datetime import datetime
 
 from flask import Request
@@ -6,6 +7,9 @@ from flask import Request
 from Env import Env
 from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet
 from sqlalchemy import func
+
+from server_args_helpers import get_arg
+
 
 class ImageMetadataController:
     @staticmethod
@@ -187,7 +191,7 @@ class ImageMetadataController:
         same_folder = request.args.get('sf', default=0, type=int)
         min_rating  = request.args.get('r', default=0, type=int)
 
-        tags_str = request.args.get('tags', default="")
+        tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
         tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
 
         tag_set_id = request.args.get('tag-set', default='all')
@@ -220,7 +224,7 @@ class ImageMetadataController:
 
         im = session.get(ImageMetadata, image_id)
 
-        tags_str = request.args.get('tags', default="")
+        tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
         tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
 
         tags_pos = ImageMetadataController.get_tags_by_names(tags_pos, session=session)
