@@ -77,6 +77,7 @@ class ImageMetadata(Base):
     count = Column(Integer, default=0)
     rating = Column(Integer, default=0)
     lost = Column(Integer, default=0)
+    removed = Column(Integer, default=0, nullable=False)
     last_viewed = Column(MyTIMESTAMP, default='1999-01-01 00:00:00')
     imported_at = Column(MyTIMESTAMP, default=datetime.now)
     image_hash = Column(Text, name='hash')
@@ -87,6 +88,9 @@ class ImageMetadata(Base):
     @property
     def is_fav(self):
         return self.fav
+
+    def is_removed(self):
+        return self.removed
 
     @property
     def study_type(self):
