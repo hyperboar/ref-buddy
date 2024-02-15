@@ -5,7 +5,7 @@ import hashlib
 import os
 import shutil
 from PIL import Image
-from sqlalchemy import func, exists
+from sqlalchemy import func, exists, text
 
 from Env import Env
 from export_vid_gifs import ExportVidGifs
@@ -666,6 +666,36 @@ def assign_video_extra_data(start_at=None, is_force=False, session=None):
     session.commit()
 
     print(f'\rAssigning extra data for videos... Done' + (' ' * 50), flush=True)
+
+def cleanup_paths(session=None):
+    print(f'Cleanup paths...', end='', flush=True)
+    if session is None:
+        session = Session()
+
+    paths = session.query(Path).all()
+    for p in paths:
+        im = session.get(ImageMetadata, p.preview)
+        if im is not None: continue
+        p.preview = 0
+    session.flush()
+
+    empty_paths = [p for p in paths if 0 == session.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.path_id == p.id).scalar()]
+
+    for p in empty_paths:
+        [session.delete(tag) for tag in p.tags]
+        session.delete(p)
+        session.flush()
+
+    session.commit()
+    print(f'\rCleanup paths... Done', flush=True)
+
+def cleanup_vacuum(session=None):
+    print(f'Vacuuming database...', end='', flush=True)
+    if session is None:
+        session = Session()
+
+    session.execute(text("VACUUM"))
+    print(f'\rVacuuming database... Done', flush=True)
 
 if __name__ == '__main__':
     # cleanup_lost_images()
