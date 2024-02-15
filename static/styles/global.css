@@ -391,6 +391,39 @@ button
 /* END TAGS */
 
 
+/* OTHER */
+
+#yesno
+{
+    position: fixed;
+    width: 400px;
+    height: 200px;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    background-color: var(--clr-popup-bg);
+    padding: 10px;
+    text-align: center;
+    z-index: 99999;
+}
+
+#yesno .title
+{
+    font-size: 20px;
+}
+
+#yesno .text
+{
+    font-size: 16px;
+}
+
+#yesno #yes, #yesno #no
+{
+    margin: 10px;
+}
+
+/* END OTHER */
+
 
 /* Animations */
 

@@ -1,4 +1,4 @@
-import {ApiImage, ApiTags} from "api";
+import {ApiImage, ApiTags} from "api"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetBoard}           from "image_tools/widget_board.js"
@@ -7,6 +7,7 @@ import {RateMultImages}        from "image_tools/rating.js"
 import {fetchAndSimpleFeedback, isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import {MutationAttributeObserver} from '/static/js/mut_attr_observer.js'
 import {ImageLazyLoad } from '/static/js/image_lazy_load.js'
+import {YesNoPopup} from 'image_tools/widget_popup_yesno.js'
 
 
 let tagsFilter = new WidgetImageTagsFilter('', '#tags-filter-btn', true)
@@ -15,6 +16,7 @@ let boardAdd = new WidgetBoard('', '#board-show-btn', () => selection.selectedId
 
 let rating = null
 let selection = null
+let yesno = null
 
 
 
@@ -145,7 +147,55 @@ document.addEventListener('keydown', (e) =>
     {
         selection.toggleSelectionMode()
     }
+    else if (selection.selectionMode && e.code === 'KeyD' && !e.shiftKey)
+    {
+        removeImages()
+    }
 })
+
+function getExtraValue()
+{
+    return document.querySelector('#page-extra')?.getAttribute('data-extra') ?? null
+}
+
+function removeImages()
+{
+    if (selection.selectedIds.length < 1) { return }
+
+    yesno.show('Delete', `About to delete some ${selection.selectedIds.length} `,
+        () =>
+        {
+            let removeProm = null
+            const extra = getExtraValue()
+
+            if (extra === 'page-remove')
+            {
+                removeProm = ApiImage.RemoveImagesPermanently(selection.selectedIds)
+            }
+            else
+            {
+                removeProm = ApiImage.RemoveImages(selection.selectedIds)
+            }
+
+            removeProm
+                .then(json =>
+                {
+                    console.log(json)
+                    const g = document.querySelector('.gallery')
+                    const thumbs = []
+                    selection.selectedIds.forEach(id =>
+                    {
+                        g.querySelector(`.thumbnail[data-id="${id}"]`).remove()
+                    })
+
+                    selection.selectedIds = []
+                    selection.toggleSelectionMode()
+                })
+
+            // selection.
+        },
+        () => {})
+}
 
 // 0 - not showing
 // 1 - showing
@@ -213,5 +263,7 @@ document.addEventListener('DOMContentLoaded', () =>
     selection = new ImageSelection('toggle-selection-mode-btn', '.gallery', '.thumbnail')
 
     tagsEditor.showPins()
+
+    yesno = new YesNoPopup()
 
 }, false)
