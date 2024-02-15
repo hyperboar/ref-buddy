@@ -117,6 +117,32 @@ class ImageMetadata(Base):
 
         session.flush()
 
+    def mark_removed(self, session=None, auto_commit=True):
+        self.removed = 1
+        if session is None:
+            session = object_session(self)
+            session.commit()
+            return
+
+        if auto_commit:
+            session.commit()
+            return
+
+        session.flush()
+
+    def mark_restored(self, session=None, auto_commit=True):
+        self.removed = 0
+        if session is None:
+            session = object_session(self)
+            session.commit()
+            return
+
+        if auto_commit:
+            session.commit()
+            return
+
+        session.flush()
+
     @staticmethod
     def source_type_by_path(path:str) -> int:
         """
