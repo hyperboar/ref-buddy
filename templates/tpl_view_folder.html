@@ -6,6 +6,7 @@
     <title>{{ title }}</title>
 </head>
 <body>
+<div id="page-extra" style="display:none;" data-extra="{{ extra|default('') }}"></div>
 <div class="header">
     <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a><h1>{{ title }}</h1>
     <p>[{{ overview.study_type|default('') }}]</p><p>{{ overview.path_dir|default('') }}</p>

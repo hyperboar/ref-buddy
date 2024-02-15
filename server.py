@@ -11,6 +11,8 @@ from server_ext_board import routes_board
 from server_ext_discover import routes_discover
 from server_ext_dupes import routes_dupes
 from server_ext_folder import routes_folder, json_for_folder_view
+from server_ext_image_remove import routes_image_remove
+from server_ext_misc import routes_misc
 from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
@@ -29,12 +31,14 @@ app.config['THUMB_STATIC'] = Env.THUMB_PATH
 cache = Cache(app)
 
 app.register_blueprint(routes_image)
+app.register_blueprint(routes_image_remove)
 app.register_blueprint(routes_folder)
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
 app.register_blueprint(routes_dupes)
 app.register_blueprint(routes_board)
 app.register_blueprint(routes_discover)
+app.register_blueprint(routes_misc)
 
 @app.before_request
 def before_request():

@@ -197,6 +197,37 @@ class ApiImage
                     return r.json()
                 })
     }
+
+    static RemoveImages(ids)
+    {
+        return fetch('/remove/images', ApiInternal.getPostRequest({'image_ids': ids}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static RestoreRemovedImages(ids)
+    {
+        return fetch('/remove/restore', ApiInternal.getPostRequest({'image_ids': ids}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static RemoveImagesPermanently(ids)
+    {
+        return fetch('/remove/permanent', ApiInternal.getPostRequest({'image_ids': ids}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
 }
 
 //#endregion Image
@@ -338,6 +369,24 @@ class ApiBoards
 
 //#endregion Boards
 
+
+//#region Misc
+
+class ApiMisc
+{
+    static getPopupYesNo()
+    {
+        return fetch('/misc/yesno')
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.text()
+            })
+    }
+}
+
+//#endregion Misc
+
 class ApiInternal
 {
     static getPostRequest(payload)
@@ -377,4 +426,4 @@ class ApiInternal
     }
 }
 
-export { ApiImage, ApiTags, ApiBoards }
+export { ApiImage, ApiTags, ApiBoards, ApiMisc }
