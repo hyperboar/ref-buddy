@@ -10,7 +10,8 @@ from sqlalchemy import func, exists, text
 from Env import Env
 from export_vid_gifs import ExportVidGifs
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag, ImageExtra
+from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag, ImageExtra, BoardImage, Discover, \
+    ImageColor
 
 
 def get_db_info():
@@ -373,38 +374,29 @@ def mark_all_lost():
     print(f'Marking lost images... Done')
 
 def cleanup_lost_images():
-    cleanup_image_thumbs()
-
     make_database_backup(marker='cleanup_lost', force=True)
 
-    print(f'Starting database cleanup.')
+    print(f'Removing records about images that are lost...')
 
-    s = Session()
-    delete = lambda row: s.delete(row)
-    subquery = s.query(ImageMetadata.image_id).filter(ImageMetadata.lost == 1).subquery()
-    rows = s.query(ImageTag).join(subquery, ImageTag.image_id == subquery.c.image_id).all()
-    print(f'Removing unused "tag" entries ({len(rows)})...', end='')
-    list(map(delete, rows))
-    s.flush()
-    print(f'\rRemoving unused "tag" entries ({len(rows)})... Done')
+    session = Session()
 
-    rows = s.query(ImageDupe).join(subquery, ImageDupe.image1 == subquery.c.image_id).all() +\
-           s.query(ImageDupe).join(subquery, ImageDupe.image2 == subquery.c.image_id).all()
-    print(f'Removing unused "duplicate" entries ({len(rows)})...', end='')
-    list(map(delete, rows))
-    s.flush()
-    print(f'\rRemoving unused "duplicate" entries ({len(rows)})... Done')
+    print(f'Marking lost for removal...', end='', flush=True)
 
-    rows = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
-    print(f'Removing "lost images" entries ({len(rows)})...', end='')
-    list(map(delete, rows))
-    s.flush()
-    print(f'\rRemoving "lost images" entries ({len(rows)})... Done')
+    images = session.query(ImageMetadata).filter(ImageMetadata.lost == 1)
+    ids = []
+    for image in images:
+        image.mark_removed(session=session, auto_commit=False)
+        ids.append(image.image_id)
 
-    s.commit()
-    s.close()
+    session.commit()
 
-    print(f'Database cleanup is done.')
+    print(f'\rMarking lost for removal... Done', flush=True)
+
+    print(f'Removing records about images that are lost... {len(ids)} images to remove)... ', end='', flush=True)
+    count = remove_permanent(ids, session=session)
+    session.close()
+
+    print(f'\rRemoving records about images that are lost... Done. ({count} records removed)', flush=True)
 
 def cleanup_image_thumbs():
     print(f'Cleaning up thumbs.')
@@ -503,6 +495,54 @@ def relink_lost_images():
 
     s.commit()
     s.close()
+
+def remove_permanent(image_ids, session=None):
+    auto_close = False
+    if session is None:
+        session = Session()
+        auto_close = True
+
+    images = (session.query(ImageMetadata)
+              .filter(ImageMetadata.image_id.in_(image_ids))
+              .filter(ImageMetadata.removed == 1)
+              .all())
+
+    if len(images) > 0:
+        make_database_backup('before_perm_remove')
+
+    count = 0
+    for im in images:
+        try:
+            paths = [im.path_abs, os.path.join(Env.THUMB_PATH, str(im.image_id) + '.jpg')]
+            if im.source_type_id == 3:  # video
+                paths.append(im.path_abs[:-4])
+            [os.remove(p) for p in paths if os.path.exists(p)]
+
+            count += len(
+                [session.delete(item) for item in session.query(BoardImage).filter(BoardImage.image_id == im.image_id)])
+            count += len(
+                [session.delete(item) for item in session.query(Discover).filter(Discover.image_id == im.image_id)])
+            count += len(
+                [session.delete(item) for item in session.query(ImageColor).filter(ImageColor.image_id == im.image_id)])
+            count += len(
+                [session.delete(item) for item in session.query(ImageExtra).filter(ImageExtra.image_id == im.image_id)])
+            count += len(
+                [session.delete(item) for item in session.query(ImageTag).filter(ImageTag.image_id == im.image_id)])
+            session.delete(im)
+            count += 1
+            session.flush()
+        except Exception as e:
+            print(e)
+            raise e
+
+    session.commit()
+
+    cleanup_paths(session)
+
+    if auto_close:
+        session.close()
+
+    return count
 
 def make_database_backup(marker:str='',force:bool=False):
     db_file = os.path.splitext(Env.DB_NAME)
