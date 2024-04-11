@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl
 from maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags, \
-    assign_video_extra_data
+    assign_video_extra_data, gif_split
 from models.models_lump import Session, Path, ImageMetadata
 
 
@@ -75,6 +75,7 @@ class ImageMetadataImporter:
             rehash_images(False)
             make_database_backup(marker='after_import', force=True)
             generate_thumbs(start_at=update_time)
+            gif_split(force_all=False)
 
         print(f'Import completed ({int(time.time() - start_time)} sec).')
 

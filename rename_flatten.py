@@ -1,6 +1,6 @@
 import os
 
-PATH = 'E:\\Distr\\__new\\__new\\The_Pose_Archives_NSFW'
+PATH = 'E:\\Distr\\__new\\Tessa Fowler OnlyFans Pics'
 
 files_mv = []
 

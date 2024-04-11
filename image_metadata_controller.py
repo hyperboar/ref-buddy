@@ -70,6 +70,23 @@ class ImageMetadataController:
     # region Convenience
 
     @staticmethod
+    def get_default_query_params():
+        return {
+            'image_ids': [],
+            'tags_pos': [],
+            'tags_neg': [],
+            'tag_set': 'all',
+            'min_rating': 0,
+            'max_rating': 9999,
+            'same_folder': 0,
+            'lost': 0,
+            'removed': 0,
+            'path_id': None,
+            'limit': None,
+            'offset': None,
+        }
+
+    @staticmethod
     def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
         if session is None:
             session = Session()
@@ -137,6 +154,19 @@ class ImageMetadataController:
         q = q.order_by(ImageMetadata.imported_at.desc())
 
         result = q.offset(offset).limit(limit).all()
+
+        return "", result
+
+    @staticmethod
+    # def get_all_by_tags_new2(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
+    def get_all_by_tags_new2(params, session=None) -> '[ImageMetadata]':
+        if session is None:
+            session = Session()
+
+        q = ImageMetadataController.get_query_imagemetadata_new2(params, session=session)
+        q = q.order_by(ImageMetadata.imported_at.desc())
+
+        result = q.offset(params['offset']).limit(params['limit']).all()
 
         return "", result
 
@@ -248,7 +278,7 @@ class ImageMetadataController:
 
     @staticmethod
     def get_query_imagemetadata(study_type:int=-1, same_folder:int=0, image_id:int=-1,
-                                min_rating:int=0, tags:([int],[int])=([],[]),
+                                min_rating:int=0, max_rating=9999, tags:([int],[int])=([],[]),
                                 path_id:int=-1, session=None):
         l = len(tags[0])
 
@@ -281,7 +311,46 @@ class ImageMetadataController:
             q = q.filter(ImageMetadata.path_id == path_id)
 
         # unconditional min_rating
-        q = q.filter(ImageMetadata.rating >= min_rating)
+        q = q.filter(min_rating <= ImageMetadata.rating, ImageMetadata.rating <= max_rating)
+        q = q.filter(ImageMetadata.lost == 0)
+        q = q.filter(ImageMetadata.removed == 0)
+
+        return q
+
+    @staticmethod
+    def get_query_imagemetadata_new2(params, session=None):
+        l = len(params['tags_pos'])
+
+        # limit by tags_pos
+        if l > 0:
+            subquery = session.query(ImageTag.image_id)\
+                .filter(ImageTag.tag_id.in_(params['tags_pos']))\
+                .group_by(ImageTag.image_id)\
+                .having(func.count(ImageTag.tag_id) == l)\
+                .subquery()
+            q = session.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
+        else:
+            q = session.query(ImageMetadata)
+
+        # remove tags_neg
+        if len(params['tags_neg']) > 0:
+            q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(params['tags_neg'])))
+
+        # filter by study_type
+        # if study_type > 0:
+        #     q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+
+        # when same_folder get path_id by image_id
+        if params['same_folder'] > 0 and len(params['image_ids']) > 0:
+            im = session.get(ImageMetadata, params['image_ids'][0])
+            q = q.filter(ImageMetadata.path_id == im.path_id)
+
+        # filter by path specifically
+        if params['path_id'] is not None:
+            q = q.filter(ImageMetadata.path_id == params['path_id'])
+
+        # unconditional min_rating
+        q = q.filter(params['min_rating'] <= ImageMetadata.rating, ImageMetadata.rating <= params['max_rating'])
         q = q.filter(ImageMetadata.lost == 0)
         q = q.filter(ImageMetadata.removed == 0)
 

@@ -141,6 +141,7 @@ class WidgetImageTagsFilter
 
         this.fixUrl()
         this.initTags()
+        this.initSort()
 
         this._container.classList.remove('vis-hide')
 
@@ -352,6 +353,72 @@ class WidgetImageTagsFilter
                 tagElem.classList.add('tag-set-neg')
             }
         })
+    }
+
+    initSort()
+    {
+        const byFn = document.querySelector('#tags-filter #sort-name')
+        byFn.addEventListener('click', e =>
+        {
+            const btn = e.target
+            let isAsc = parseInt(btn.getAttribute('data-dir'))
+            this.resetSortBtns()
+            btn.setAttribute('data-dir', isAsc * -1)
+
+            this.sortBy((a, b) => isAsc * a.getAttribute('data-fn').localeCompare(b.getAttribute('data-fn')))
+        })
+
+        const byImport = document.querySelector('#tags-filter #sort-import')
+        byImport.addEventListener('click', e =>
+        {
+            const btn = e.target
+            let isAsc = parseInt(btn.getAttribute('data-dir'))
+            this.resetSortBtns()
+            btn.setAttribute('data-dir', isAsc * -1)
+
+            this.sortBy((a, b) =>
+            {
+                const aa = parseFloat(a.getAttribute('data-tstamp'))
+                const bb = parseFloat(b.getAttribute('data-tstamp'))
+                if (Math.abs(aa - bb) < 0.001) return 0
+                return isAsc * (aa < bb ? 1 : -1)
+            })
+
+        })
+
+        const byRate = document.querySelector('#tags-filter #sort-rating')
+        byRate.addEventListener('click', e =>
+        {
+            const btn = e.target
+            let isAsc = parseInt(btn.getAttribute('data-dir'))
+            this.resetSortBtns()
+            btn.setAttribute('data-dir', isAsc * -1)
+
+            this.sortBy((a, b) =>
+            {
+                const aa = parseInt(a.getAttribute('data-rt'))
+                const bb = parseInt(b.getAttribute('data-rt'))
+                if (aa === bb)return 0
+                return isAsc * (aa < bb ? 1 : -1)
+            })
+        })
+    }
+
+    sortBy(funcSort)
+    {
+        const g = document.querySelector('.gallery')
+        Array.from(g.children).sort(funcSort).forEach(ch => g.appendChild(ch))
+    }
+
+    resetSortBtns()
+    {
+        const byFn = document.querySelector('#tags-filter #sort-name')
+        const byImport = document.querySelector('#tags-filter #sort-import')
+        const byRate = document.querySelector('#tags-filter #sort-rating')
+
+        byFn.setAttribute('data-dir', 1)
+        byImport.setAttribute('data-dir', 1)
+        byRate.setAttribute('data-dir', 1)
     }
 
     applyGalleryFilter()

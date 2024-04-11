@@ -9,6 +9,7 @@ from sqlalchemy import func, exists, text
 
 from Env import Env
 from export_vid_gifs import ExportVidGifs
+from gifextract import process_animation
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag, ImageExtra, BoardImage, Discover, \
     ImageColor
@@ -737,6 +738,38 @@ def cleanup_vacuum(session=None):
     session.execute(text("VACUUM"))
     print(f'\rVacuuming database... Done', flush=True)
 
+def gif_split(force_all=True, session=None):
+    if session is None:
+        session = Session()
+
+    if not os.path.exists(Env.TMP_PATH_GIF):
+        os.makedirs(Env.TMP_PATH_GIF)
+
+    print(f'Shredding gifs...', flush=True)
+
+    gifs_q = (session.query(ImageMetadata)
+            .filter(ImageMetadata.source_type_id == 2) # animated, not video
+            .filter(ImageMetadata.filename.notlike('%.mp4.gif'))) # strictly speaking this one is not necessary
+
+    if force_all:
+        new_gifs = gifs_q
+        max_count = gifs_q.count()
+    else:
+        new_gifs = []
+        for gf in gifs_q:
+            if os.path.exists(os.path.join(Env.TMP_PATH_GIF, gf.filename + '.json')): continue
+            new_gifs.append(gf)
+
+        max_count = len(new_gifs)
+
+    count = 0
+    for gf in new_gifs:
+        count += 1
+        print(f'\r({count}/{max_count}) Processing {gf.path_abs}{" " * 50}', end='', flush=True)
+        process_animation(gf.path_abs, Env.TMP_PATH_GIF, {'image_id': gf.image_id})
+
+    print(f'\nShredding gifs... Done ({count})', flush=True)
+
 if __name__ == '__main__':
     # cleanup_lost_images()
 
@@ -745,6 +778,7 @@ if __name__ == '__main__':
     # assign_folder_tags()
     # assign_animation_tags()
     # remove_broken_video_gifs()
+
     assign_video_extra_data(is_force=False)
     pass
     # print(f'\rAssigning essential tags to new images...', end='')

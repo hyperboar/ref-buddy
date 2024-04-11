@@ -1,6 +1,9 @@
+import io
+import json
 import os
 from datetime import datetime
 from typing import Callable
+from zipfile import ZipFile
 
 from PIL import Image
 from flask import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
@@ -141,7 +144,7 @@ def study_video(item_id):
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
     extra = metadata.extras[0].data
 
-    out = render_template('tpl_video.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+    out = render_template('tpl_view_video.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
     session.close()
     return out
 
@@ -175,6 +178,41 @@ def open_video():
 
     return 'ok'
 
+@routes_image.route('/study-anim/<int:item_id>')
+def study_animation(item_id):
+    session = Session()
+    metadata = session.get(ImageMetadata, item_id)
+
+    if metadata is None:
+        abort(404, f'Error: No animation found with id "{item_id}"')
+
+    tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
+    extra = '{}' #metadata.extras[0].data
+
+    out = render_template('tpl_view_anim.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+    session.close()
+    return out
+
+@routes_image.route('/anim-info/<int:item_id>')
+def animation_info(item_id):
+    session = Session()
+
+    im = session.get(ImageMetadata, item_id)
+    path = os.path.join(Env.TMP_PATH_GIF, im.filename + '.json')
+    if not os.path.exists(path):
+        abort(404, f'Error: No animation info found with id "{item_id}"')
+
+    return open(path, 'r').read() #json.load(open(path, 'r'))
+
+@routes_image.route('/anim-frames-zip/<int:image_id>')
+def send_static_anim_frame_zip(image_id):
+    session = Session()
+    metadata = session.get(ImageMetadata, image_id)
+    fn = metadata.filename
+    path = os.path.join(Env.TMP_PATH_GIF, fn + '.zip')
+    out = send_file(open(path, "rb"), mimetype=f'application/zip')
+    session.close()
+    return out
 
 @routes_image.route('/study-image/<int:image_id>')
 def study_image(image_id):

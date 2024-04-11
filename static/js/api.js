@@ -228,6 +228,30 @@ class ApiImage
             })
     }
 
+        /**
+     * @param id single int id
+     * @param tryPreload
+     * @returns Promise<{image_data}>
+     */
+    static GetAnimInfo(id)
+    {
+        return fetch("/anim-info/" + id)
+            .then(r =>
+            {
+                if (!r.ok) throw new Error("Not Ok")
+                return r.json()
+            })
+    }
+
+    static GetAnimFrames(id)
+    {
+        return fetch("/anim-frames-zip/" + id)
+            .then(r =>
+            {
+                if (!r.ok) throw new Error("Not Ok")
+                return r.blob()
+            })
+    }
 }
 
 //#endregion Image

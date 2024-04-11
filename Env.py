@@ -25,6 +25,7 @@ class Env:
     IMAGES_PATH = os.getenv('IMAGES_PATH')
     THUMB_PATH = os.getenv('THUMB_PATH')
     TMP_PATH = os.getenv('TMP_PATH')
+    TMP_PATH_GIF = os.getenv('TMP_PATH_GIF')
     THUMB_MAX_SIZE = int(os.getenv('THUMB_MAX_SIZE'))
     IMPORT_FORMATS = list(map(lambda f: '.' + f.strip(), os.getenv('IMPORT_FORMATS').split(',')))
 

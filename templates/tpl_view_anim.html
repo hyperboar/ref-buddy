@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+    <link rel="stylesheet" href="/static/styles/video.css">
+	<title>Video ({{ image.image_id }})</title>
+</head>
+<body>
+<div style="display: none" id="image-id" data-extra="{{ extra }}">{{ image.image_id }}</div>
+<div style="display: none">{{ image.path }}</div>
+<div class="modal">
+    <div class="modal-img-container">
+        <div class="video-container">
+{#            <video id="video" class="modal-img video-fix" tabindex="-1">#}
+{#                <source src="/video/{{ image.image_id }}" type="video/mp4">#}
+{#            </video>#}
+{#            <video id="video-fwd" class="modal-img video-fix vis-hide" tabindex="-1">#}
+{#                <source src="/video/{{ image.image_id }}" type="video/mp4">#}
+{#            </video>#}
+            <img id="animation" src=""/>
+            <table class="stats-overlay">
+                <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
+                <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>
+                <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>
+                <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>
+                <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="modal-controls">
+        <div class="row">
+            <label for="onion">Onion</label><input id="onion" type="checkbox"/>
+        </div>
+        <div class="row">
+            <label for="frame-step">Step (up/down)</label>
+            <input id="frame-step" type="text" size="5" placeholder="10" min="1" max="9999" pattern="[0-9]*" value="10"/>
+        </div>
+        <div class="row">
+            <label for="frame-rate">Frame rate</label>
+            <select id="frame-rate">
+                <option value="0" selected>Every</option>
+                <option value="2">2nd</option>
+                <option value="3">3rd</option>
+                <option value="4">4th</option>
+            </select>
+        </div>
+        <div class="row hspace">
+        </div>
+        <div class="row">
+            <span>Keys</span>
+            <button id="key-add">Add</button>
+            <button id="clear-save">Clear</button>
+            <button id="key-fwd-play">Play</button>
+            <span><input type="checkbox" id="fbf-mode" title="Frame by Frame mode"></span>
+        </div>
+
+        <div class="row">
+            <table id="keys-list">
+            </table>
+        </div>
+    </div>
+</div>
+<table class="vis-hide">
+    <tr id="key-tpl" data-id="-1" data-time="0" class="key-row" >
+        <td>
+            <span id="sel"></span><span id="frame" class="key-text"></span> (<span id="time" class="key-text"></span>)
+        </td>
+        <td>
+            <button id="delete">x</button>
+        </td>
+        <td id="ord"></td>
+    </tr>
+</table>
+<canvas id="canvas-renderer" style="display: none;"></canvas>
+<script type="importmap">
+    {
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "vendors/": "/static/js/vendors/",
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
+<script type="module" src="/static/js/video/anim.js">
+</script>
+</body>
+</html>

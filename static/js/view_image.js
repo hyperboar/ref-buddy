@@ -12,6 +12,7 @@ import {TagSetList}     from 'image_tools/tag-set-list.js'
 import {ImageCursor}    from "image_tools/cursor.js"
 import {ColorPicker}    from "image_tools/color_picker.js"
 import {WidgetBoard}    from "image_tools/widget_board.js"
+import {FracturedColors}    from "image_tools/fractured_colors.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
@@ -41,6 +42,11 @@ let hMarkerPos = null
 let hMarkerMax = null
 
 let currentImageData = null
+
+let dragged = null
+let dragInAction = false
+
+// let fracColors = null
 
 
 function initializeComponents()
@@ -148,9 +154,15 @@ function initializeComponents()
         }
         else
         {
-            window.open(`/study-video/${currentImageData.id}`)
+            if (currentImageData.content_type === 2)
+                window.open(`/study-anim/${currentImageData.id}`)
+            else
+                window.open(`/study-video/${currentImageData.id}`)
         }
     })
+
+
+    // fracColors = new FracturedColors()
 
 
     // popups
@@ -184,6 +196,73 @@ function initializeComponents()
         })
     })
 
+
+    const dropTarget = document.querySelector('#drop-target')
+    const body = document.querySelector('body')
+    body.addEventListener('dragover', e =>
+    {
+        if (dropTarget.classList.contains('vis-hide')) { dropTarget.classList.remove('vis-hide') }
+
+        e.preventDefault()
+    })
+        body.addEventListener('mouseup', e =>
+    {
+        if (!dropTarget.classList.contains('vis-hide')) { dropTarget.classList.add('vis-hide') }
+    })
+    // body.addEventListener('dragleave', e =>
+    // {
+    //     e.preventDefault()
+    //
+    //     if (!dropTarget.classList.contains('vis-hide')) { dropTarget.classList.add('vis-hide') }
+    // })
+
+    dropTarget.addEventListener('dragover', e=>
+    {
+        console.log('target')
+        // console.log(e)
+        e.preventDefault()
+    })
+
+    dropTarget.addEventListener('drop', e=>
+    {
+        e.preventDefault()
+
+        console.log('target')
+        // console.log(e)
+
+        if (!dropTarget.classList.contains('vis-hide')) { dropTarget.classList.add('vis-hide') }
+
+        const files = e.dataTransfer.items ?
+            [...e.dataTransfer.items].filter(item => item.kind === "file").map(item => item.getAsFile()) :
+            [...e.dataTransfer.files]
+
+        files.forEach((file, i) =>
+        {
+            // console.log(`… file[${i}].name = ${file.name}`)
+            let reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onloadend = function()
+            {
+                const data = {
+                    "id": -666,
+                    "thumb": reader.result,
+                    "url_image": reader.result,
+                    "url_folder": "/folder/-1",
+                    "path": file,
+                    "path_id": -1,
+                    "content_type": 1,
+                    "video": 0,
+                    "fav": 0,
+                    "rating": 0,
+                    "extra": {}
+                }
+                console.log(data)
+                injectImageData(data)
+                updateComponents(data)
+            }
+        })
+    })
+
     // hotkeys
     document.addEventListener('keydown', (e) =>
     {
@@ -204,6 +283,7 @@ function initializeComponents()
         if (e.code === 'Space')      { toggleSameFolder(e); e.preventDefault(); } // space
         if (e.code === 'KeyG')       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g
         if (e.code === 'KeyI')       { toggleInfoPopup(); e.preventDefault(); } // g
+        // if (e.code === 'KeyV')       { fracColors.render('.modal-img'); e.preventDefault(); } // g
     })
 }
 

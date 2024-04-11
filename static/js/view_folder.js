@@ -151,6 +151,10 @@ document.addEventListener('keydown', (e) =>
     {
         removeImages()
     }
+    else if (selection.selectionMode && e.code === 'KeyR' && !e.shiftKey)
+    {
+        restoreImages()
+    }
 })
 
 function getExtraValue()
@@ -178,6 +182,45 @@ function removeImages()
             }
 
             removeProm
+                .then(json =>
+                {
+                    console.log(json)
+                    const g = document.querySelector('.gallery')
+                    const thumbs = []
+                    selection.selectedIds.forEach(id =>
+                    {
+                        g.querySelector(`.thumbnail[data-id="${id}"]`).remove()
+                    })
+
+                    selection.selectedIds = []
+                    selection.toggleSelectionMode()
+                })
+
+            // selection.
+        },
+        () => {})
+}
+
+function restoreImages()
+{
+    if (selection.selectedIds.length < 1) { return }
+
+    yesno.show('Restore', `About to restore some ${selection.selectedIds.length} `,
+        () =>
+        {
+            let restoreProm = null
+            const extra = getExtraValue()
+
+            if (extra === 'page-remove')
+            {
+                restoreProm = ApiImage.RestoreRemovedImages(selection.selectedIds)
+            }
+            else
+            {
+                return
+            }
+
+            restoreProm
                 .then(json =>
                 {
                     console.log(json)

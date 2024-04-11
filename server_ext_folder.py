@@ -12,16 +12,27 @@ routes_folder = Blueprint('routes_folder', __name__)
 
 @routes_folder.route('/all')
 def view_tags():
+    params = Ctrl.get_default_query_params()
+
     page, offset, limit = get_current_paging(request.args)
-    tag_set_id = get_arg(request.args, Args.tag_set)
+    params['page'] = page
+    params['offset'] = offset
+    params['limit'] = limit
+    params['min_rating'] = get_arg(request.args, Args.min_rating)
+    params['max_rating'] = get_arg(request.args, Args.max_rating)
+    params['tag_set'] = get_arg(request.args, Args.tag_set)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
 
     session = Session()
-    tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+    tags_pos, tags_neg = Ctrl.get_tags_by_set(params['tag_set'], tags_pos, tags_neg, session=session)
     tags_pos_names = Ctrl.get_tag_names(tags_pos, session=session)
     tags_neg_names = Ctrl.get_tag_names(tags_neg, session=session)
+    params['tags_pos'] = tags_pos
+    params['tags_neg'] = tags_neg
+    params['tags_pos_names'] = tags_pos_names
+    params['tags_neg_names'] = tags_neg_names
 
-    response, images = Ctrl.get_all_by_tags(tags_pos, tags_neg, limit, offset, session=session)
+    response, images = Ctrl.get_all_by_tags_new2(params, session=session)
 
     overview = {}
     overview["study_type"] = ', '.join(tags_pos_names)
