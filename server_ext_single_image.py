@@ -13,6 +13,7 @@ from image_metadata_controller import ImageMetadataController as Ctrl
 from Env import Env
 from models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet, Tag
 from server_args_helpers import get_arg, Args
+from utils import Utils
 
 routes_image = Blueprint('routes_image', __name__)
 
@@ -174,9 +175,22 @@ def open_video():
         return
 
     import subprocess
-    subprocess.Popen([Env.VIDEO_PLAYER_PATH, path], cwd=os.getcwd())
+    # subprocess.Popen([Env.VIDEO_PLAYER_PATH, path], cwd=os.getcwd())
+    subprocess.call(select_file_cmd_os_specific(path))
 
     return 'ok'
+
+def get_path_os_specific(path:str) -> str:
+    if Utils.is_windows():
+        return path.replace('/', '\\')
+    return path
+
+
+def select_file_cmd_os_specific(path:str) -> str:
+    if Utils.is_windows():
+        return f'C:\\Windows\\explorer.exe /root, "{get_path_os_specific(path)}", /select'
+    return f'open -R "{path}"'
+
 
 @routes_image.route('/study-anim/<int:item_id>')
 def study_animation(item_id):
