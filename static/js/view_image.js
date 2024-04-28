@@ -320,7 +320,7 @@ function injectImageData(data)
     const imgId = document.getElementById('image-id')
     imgId.textContent = data.id
 
-    const modalBg = document.querySelector('.modal-bg')
+    const modalBg = document.querySelector('.modal-bg img')
     const modalImg = document.querySelector('.modal-img')
 
     Array.from([modalBg, modalImg]).forEach(im =>
