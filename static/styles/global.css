@@ -1,5 +1,17 @@
 :root
 {
+    --z-main-bg: -1;
+    --z-ref-container: 9999;
+    --z-ref-img: 0;
+    --z-ref-img-bg: 0;
+    --z-ref-img-magnifier: 0;
+    --z-ref-img-onion: 0;
+    --z-popup: 99999;
+    --z-popup-bg: 90100;
+    --z-yesno: 99999;
+    --z-drop-target: 199999;
+    --z-fract: 299999; /* in development */
+
     --clr-gray3: #545151;
     --clr-main-bg: #7a7676;
     --clr-popup-bg: #918d8d;
@@ -170,7 +182,7 @@ button
     border: 1px var(--clr-popup-bg-border);
     padding: 15px;
     overflow: auto;
-    z-index: 99999;
+    z-index: var(--z-popup);
 }
 
 .popup-row {
@@ -187,7 +199,7 @@ button
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 90100;
+    z-index: var(--z-popup-bg);
 }
 
 .bg-overlay {
@@ -198,7 +210,7 @@ button
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 90100;
+    z-index: var(--z-popup-bg);
 }
 
 .top-menu {
@@ -404,7 +416,7 @@ button
     background-color: var(--clr-popup-bg);
     padding: 10px;
     text-align: center;
-    z-index: 99999;
+    z-index: var(--z-yesno);
 }
 
 #yesno .title

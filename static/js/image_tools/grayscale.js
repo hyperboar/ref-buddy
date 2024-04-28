@@ -4,15 +4,17 @@ class ImageGrayscale
     contrast = false
     level = 0
 
-    image
-    mImage // magnified
-    bg
+    targets
+    // image
+    // mImage // magnified
+    // bg
 
-    constructor(selImg, selMag, selBg)
+    constructor(selectors)
     {
-        this.image = document.querySelector(selImg)
-        this.mImage = document.querySelector(selMag)
-        this.bg = document.querySelector(selBg)
+        this.targets = Array.from(selectors).map(sel => document.querySelector(sel))
+        // this.image = document.querySelector(selImg)
+        // // this.mImage = document.querySelector(selMag)
+        // this.bg = document.querySelector(selBg)
     }
 
     get isContrast()
@@ -52,41 +54,32 @@ class ImageGrayscale
             'modal-img-gray-contrast-200',
             'modal-img-gray-contrast-300',
             'modal-img-gray-contrast-1000']
-        const contrastGrayBg = [
-            'modal-bg-gray']
 
-        this.disableAllBut(this.image, '', contrastGray)
-        this.disableAllBut(this.mImage, '', contrastGray)
-        this.disableAllBut(this.bg, '', contrastGrayBg)
+        this.targets.forEach(t => this.disableAllBut(t, '', contrastGray))
+        let idx = -1
         switch (level) {
 
             case 0:
                 break
             case 5:
-                this.toggleCssClass(this.image, contrastGray[0])
-                this.toggleCssClass(this.mImage, contrastGray[0])
-                this.toggleCssClass(this.bg, contrastGrayBg[0])
+                idx = 0
                 break
             case 4:
-                this.toggleCssClass(this.image, contrastGray[1])
-                this.toggleCssClass(this.mImage, contrastGray[1])
-                this.toggleCssClass(this.bg, contrastGrayBg[0])
+                idx = 1
                 break
             case 3:
-                this.toggleCssClass(this.image, contrastGray[2])
-                this.toggleCssClass(this.mImage, contrastGray[2])
-                this.toggleCssClass(this.bg, contrastGrayBg[0])
+                idx = 2
                 break
             case 2:
-                this.toggleCssClass(this.image, contrastGray[3])
-                this.toggleCssClass(this.mImage, contrastGray[3])
-                this.toggleCssClass(this.bg, contrastGrayBg[0])
+                idx = 3
                 break
             case 1:
-                this.toggleCssClass(this.image, contrastGray[4])
-                this.toggleCssClass(this.mImage, contrastGray[4])
-                this.toggleCssClass(this.bg, contrastGrayBg[0])
+                idx = 4
                 break
+        }
+        if (idx !== -1)
+        {
+            this.targets.forEach(t => this.toggleCssClass(t, contrastGray[idx]))
         }
     }
 

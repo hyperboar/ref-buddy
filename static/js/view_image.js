@@ -73,13 +73,13 @@ function initializeComponents()
     document.addEventListener('fav', (e) => { console.log(e.detail.fav.isFav); currentImageData.fav = e.detail.fav.isFav })
 
     // flip
-    imageFlip = new ImageFlip(['.modal-img', '.magnification'])
+    imageFlip = new ImageFlip(['.modal-img-container'])
 
     // magnification
     magnifier = new Magnification('.modal-img', '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
-    imageGrayScale = new ImageGrayscale('.modal-img', '.magnification', '.modal-bg')
+    imageGrayScale = new ImageGrayscale(['.modal',  '.modal-bg img'])
     const gsButton = document.getElementById('toggle-grayscale')
     gsButton.addEventListener('click', () => imageGrayScale.toggleGrayscale())
 

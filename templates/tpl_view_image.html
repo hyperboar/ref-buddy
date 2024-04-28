@@ -7,13 +7,17 @@
 </head>
 <body>
 <div style="display: none" id="image-id">{{ content_id }}</div>
+
+<div class="modal-bg">
+    <img src="{{ content_url }}" alt="{# setup #}">
+</div>
+
 <div class="modal">
-    <img class="modal-bg" src="{{ content_url }}" alt="{# setup #}">
     <div class="modal-img-container">
-        <img class="modal-img" src="{{ content_url }}" alt="{# setup #}"
-             tabindex="0">
+        <img class="modal-img" src="{{ content_url }}" alt="{# setup #}" tabindex="0">
         <div class="magnification"></div>
     </div>
+
     <div class="modal-controls btn-bg-blend">
         <div class="row timer">
             <span class="timer-icon"></span>&nbsp;&nbsp;
@@ -28,20 +32,22 @@
             </select>
             <span class="space"/>
             <button id="toggle-grayscale" class="btn-bg-blend" value="" >Gray</button>
-            <span class="space"/>
+        </div>
+        <div class="row">
             <button id="open-vid-btn" class="btn-bg-blend vis-hide">play</button>
             <button id="info-button" class="btn-bg-blend">info</button>
             <button id="tags-filter-button" class="btn-bg-blend" title="Tags Filter">TF</button>
             <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>
             <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>
             <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>
+            <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
         </div>
         <div class="row">
-            <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
-            <span class="space"/>
             <label for="rate-up">Rating: <span id="image-rating">{# setup #}</span></label>
             <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
             <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
+        </div>
+        <div class="row">
             <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
             <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
             <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
