@@ -16,6 +16,7 @@ import {FracturedColors}    from "image_tools/fractured_colors.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
+import { AnimPlayer } from "/static/js/video/anim_player.js"
 
 let selection = null
 let rateImage = null
@@ -45,6 +46,8 @@ let currentImageData = null
 
 let dragged = null
 let dragInAction = false
+
+let animPlayer = null
 
 // let fracColors = null
 
@@ -76,7 +79,7 @@ function initializeComponents()
     imageFlip = new ImageFlip(['.modal-img-container'])
 
     // magnification
-    magnifier = new Magnification('.modal-img', '.magnification', () => imageFlip.isFlipped)
+    magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
     imageGrayScale = new ImageGrayscale(['.modal',  '.modal-bg img'])
@@ -127,6 +130,22 @@ function initializeComponents()
             {
                 console.log('Last Viewed time updated!')
             })
+    })
+
+    animPlayer = new AnimPlayer(
+        '.anim-container',
+        '.anim-container #animation',
+        '.anim-container #stat-frame',
+        '.anim-container #stat-time',
+        '.anim-container #stat-dur',
+        '.anim-container #stat-prog')
+    animPlayer.node.addEventListener('onupdate', (e) =>
+    {
+        const anim = e.detail.video
+        const modalBg = document.querySelector('.modal-bg img')
+        modalBg.src = anim.currentFrameUrl
+
+        magnifier.setImage(anim.currentFrameUrl)
     })
 
     // board
@@ -268,8 +287,19 @@ function initializeComponents()
     {
         if (isActiveTextInput()) return
 
-        if (e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
-        if (e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
+        if (currentImageData.content_type === 2) //
+        {
+            if (e.code === 'ArrowRight') { animPlayer.move(1); e.preventDefault(); } // ->
+            if (e.code === 'ArrowLeft')  { animPlayer.move(-1); e.preventDefault(); } // <-
+            if (e.shiftKey && e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
+            if (e.shiftKey && e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
+        }
+        else
+        {
+            if (e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
+            if (e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
+        }
+
 
         if (e.altKey || e.ctrlKey || e.metaKey) { return }
         if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
@@ -280,7 +310,16 @@ function initializeComponents()
         if (e.code.includes('Numpad') || e.code.includes('Digit'))
         { imageGrayScale.toggleContrastKeycode(e.code); e.preventDefault(); } // g
         if (e.code.includes('Enter')){ timer.start(); e.preventDefault(); } // enter
-        if (e.code === 'Space')      { toggleSameFolder(e); e.preventDefault(); } // space
+
+        if (currentImageData.content_type === 2) //
+        {
+            if (e.code === 'Space')      { animPlayer.togglePlay(); e.preventDefault(); } // space
+        }
+        else
+        {
+            if (e.code === 'Space')      { toggleSameFolder(e); e.preventDefault(); } // space
+        }
+
         if (e.code === 'KeyG')       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g
         if (e.code === 'KeyI')       { toggleInfoPopup(); e.preventDefault(); } // g
         // if (e.code === 'KeyV')       { fracColors.render('.modal-img'); e.preventDefault(); } // g
@@ -323,11 +362,28 @@ function injectImageData(data)
     const modalBg = document.querySelector('.modal-bg img')
     const modalImg = document.querySelector('.modal-img')
 
-    Array.from([modalBg, modalImg]).forEach(im =>
+    magnifier.reset()
+    if (data.content_type === 2) // animated something
     {
-        im.src = data.url_image
-        im.alt = `${data.id}:${data.path}`
-    })
+        modalImg.classList.add('vis-hide')
+        animPlayer.node.classList.remove('vis-hide')
+        animPlayer.pause()
+        animPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
+    }
+    else
+    {
+        modalImg.classList.remove('vis-hide')
+        animPlayer.node.classList.add('vis-hide')
+        animPlayer.pause()
+
+        magnifier.setImage(data.url_image)
+
+        Array.from([modalBg, modalImg]).forEach(im =>
+        {
+            im.src = data.url_image
+            im.alt = `${data.id}:${data.path}`
+        })
+    }
 
     const rating = document.querySelector('#image-rating')
     rating.textContent = data.rating

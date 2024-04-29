@@ -3,6 +3,7 @@
 <head>
     {% include 'tpl_part_header.html' %}
     <link rel="stylesheet" href="/static/styles/image.css">
+    <link rel="stylesheet" href="/static/styles/anim-partial.css">
 	<title>Image ({{ content_id }})</title>
 </head>
 <body>
@@ -14,6 +15,16 @@
 
 <div class="modal">
     <div class="modal-img-container">
+        <div class="anim-container vis-hide">
+            <img id="animation" src=""/>
+            <table class="stats-overlay">
+                <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
+                <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>
+                <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>
+                <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>
+                <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
+            </table>
+        </div>
         <img class="modal-img" src="{{ content_url }}" alt="{# setup #}" tabindex="0">
         <div class="magnification"></div>
     </div>
@@ -108,6 +119,7 @@
         "imports":
         {
             "image_tools/": "/static/js/image_tools/",
+            "vendors/": "/static/js/vendors/",
             "api": "/static/js/api.js"
         }
     }

@@ -116,7 +116,7 @@ body {
 
 .modal-img, .magnification
 {
-    cursor: url("/static/cursor-transp.png") , auto;
+    cursor: var(--cursor-transp);
 }
 
 .cursor-stop-m2 {cursor: url("/static/cursor-solid-4.5.png") , auto !important;}

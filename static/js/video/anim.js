@@ -1,136 +1,42 @@
-// import { VideoPlayer } from "/static/js/video/video_player.js"
-// import {VideoKeyProvider, VideoKey, VideoKeyPlayer} from "/static/js/video/video_keys.js"
+import { AnimPlayer } from "/static/js/video/anim_player.js"
 import {isActiveTextInput} from "/static/js/main.js"
-import {waitForCondition} from "/static/js/discover/utils.js"
-import * as zipjs from "vendors/zip.js"
-import {ApiImage, ApiTags} from "api"
 
 const videoOnionFwd = document.getElementById('video-fwd')
 const onionSwitch = document.getElementById('onion')
 
-const vFrame = document.getElementById('stat-frame')
-const vTime  = document.getElementById('stat-time')
-const vFps   = document.getElementById('stat-fps')
-const vDur   = document.getElementById('stat-dur')
-const vProg   = document.getElementById('stat-prog')
 
 let forwardStep = 1.
 let lastSelected = null
 let isFbfMode = false
 
-const targetImage = document.querySelector('#animation')
-
-// const video = new VideoPlayer('#video')
-
 const imageId = parseInt(document.getElementById('image-id').textContent)
 
 const extra = JSON.parse(document.getElementById('image-id').getAttribute('data-extra'))
-// video.frameRate = extra.fps[0] / extra.fps[1]
-//
-// vFps.textContent = video.frameRate
-// vDur.textContent = extra.dur
 
-let framesData = null
+const animPlayer = new AnimPlayer(
+    '.video-container',
+    '.video-container #animation',
+    '.video-container #stat-frame',
+    '.video-container #stat-time',
+    '.video-container #stat-dur',
+    '.video-container #stat-prog')
 
-
-ApiImage.GetAnimInfo(imageId)
-    .then(data =>
-    {
-        framesData = data
-        vDur.textContent = framesData.dur
-
-        return ApiImage.GetAnimFrames(imageId)
-    })
-    .then(blob =>
-    {
-        return new zipjs.ZipReader(new zipjs.BlobReader(blob)).getEntries()
-    })
-    .then(imgFiles =>
-    {
-        let loaded = 0
-        imgFiles.forEach(async (img, idx) =>
-        {
-            const blob = await img.getData(new zipjs.BlobWriter())
-            framesData.frames[idx]['url'] = URL.createObjectURL(blob)
-            loaded++
-        })
-
-        return waitForCondition(() => loaded >= framesData.frames.length)()
-    })
-    .then(() =>
-    {
-        targetImage.src = framesData.frames[0]['url']
-    })
-
-let curFrame = 0
-let curTimeout = null
-let isPlaying = false
-
-function cycleAnimation()
-{
-    targetImage.src = framesData.frames[curFrame]['url']
-
-    updateStats()
-
-    curTimeout = setTimeout(() =>
-    {
-        curFrame = (curFrame + 1) % framesData.frames.length
-        cycleAnimation()
-    }, framesData.frames[curFrame].dur)
-}
-
-function stop()
-{
-    if (!isPlaying) return
-
-    clearTimeout(curTimeout)
-    isPlaying = false
-}
-
-function play()
-{
-    if (isPlaying) return
-    isPlaying = true
-    cycleAnimation()
-}
-
-function togglePlay()
-{
-    if (isPlaying) stop()
-    else play()
-}
-
-function move(dir)
-{
-    stop()
-
-    curFrame = (framesData.frames.length + curFrame + dir) % framesData.frames.length
-    targetImage.src = framesData.frames[curFrame]['url']
-
-    updateStats()
-}
-
-function updateStats()
-{
-    vFrame.textContent = `${curFrame}`
-    vTime.textContent = `${framesData.frames[curFrame].dur}`
-    vProg.textContent = `${Math.floor(curFrame/framesData.frames.length * 100)}`
-}
+animPlayer.loadFrames(imageId).then(() => {  })
 
 document.addEventListener('keydown', (e) =>
 {
     if (e.code === 'Space')
     {
-        togglePlay()
+        animPlayer.togglePlay()
     }
     // toggle selection mode
     else if (e.code === 'ArrowRight')
     {
-        move(1)
+        animPlayer.move(1)
     }
     else if (e.code === 'ArrowLeft')
     {
-        move(-1)
+        animPlayer.move(-1)
     }
 })
 

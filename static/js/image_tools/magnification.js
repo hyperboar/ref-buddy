@@ -1,6 +1,5 @@
 class Magnification
 {
-
     /**
      * selSourceImg is '.modal-img'
      * selTargetImg is '.magnification'
@@ -11,98 +10,119 @@ class Magnification
     constructor(selSourceImg, selTargetImg, getterIsFlipped)
     {
         // magnification
-        const modalImage = document.querySelector('.modal-img')
-        const magnification = document.querySelector('.magnification')
-        let mhalf = {x:0, y:0}
-        let msize = {x:0, y:0}
-        let msizeScaled = {x:0, y:0}
-        let mpos = {x:0, y:0}
-        let scale = 1
-        let scaleStep = 0
-        const scaleAdd = 0.3
-        const maxScale = 25
+        this.modalImages = Array.from(selSourceImg).map(sel => document.querySelector(sel))
+        this.lastModalImage = null
+        this.magnification = document.querySelector(selTargetImg)
+        this.mhalf = {x:0, y:0}
+        this.msize = {x:0, y:0}
+        this.msizeScaled = {x:0, y:0}
+        this.mpos = {x:0, y:0}
+        this.scale = 1
+        this.scaleStep = 0
+        this.scaleAdd = 0.3
+        this.maxScale = 25
 
-        let isZoomed = false
+        this.isZoomed = false
 
-        modalImage.addEventListener('wheel', (event) =>
-        {
-            // Prevent the default scrolling behavior
-            event.preventDefault()
+        this.getterIsFlipped = getterIsFlipped
 
-            // Determine the direction of the scroll
-            const delta = Math.sign(event.deltaY) // -1 for scrolling up, 1 for scrolling down
+        this.modalImages.forEach(mi=> mi.addEventListener('wheel', (evt) => this.onwheel(evt)))
 
-            // Scrolling up
-            if (delta === 1) { scaleStep-- }
-            // Scrolling down
-            else if (delta === -1) { scaleStep++ }
+        this.modalImages.forEach(mi => mi.addEventListener('mouseup', (evt) => this.onmouseup(evt)))
 
-            scaleStep = Math.min(Math.max(scaleStep, 1), maxScale)
+        this.modalImages.forEach(mi => mi.addEventListener('mousemove', (evt) => this.onmousemove(evt)))
+    }
 
-            scale = 1 + scaleAdd * scaleStep
+    setImage(url)
+    {
+        this.magnification.style.backgroundImage = `url('${url}')`
+    }
 
-            isZoomed = true
+    reset()
+    {
+        this.onmouseup({})
+    }
 
-            mpos.x = modalImage.getBoundingClientRect().left
-            mpos.y = modalImage.getBoundingClientRect().top
-            msize.x = modalImage.offsetWidth
-            msize.y = modalImage.offsetHeight
-            msizeScaled.x = msize.x * scale
-            msizeScaled.y = msize.y * scale
-            mhalf.x = msize.x * 0.5
-            mhalf.y = msize.y * 0.5
+    onwheel(evt)
+    {
+        // Prevent the default scrolling behavior
+        evt.preventDefault()
 
-            modalImage.classList.add('modal-img-darken')
-            magnification.style.display = 'block'
-            magnification.style.width  = `${msize.x}px`
-            magnification.style.height = `${msize.y}px`
+        this.lastModalImage = evt.target
 
-            magnification.style.backgroundImage = `url('${modalImage.src}')`
-            magnification.style.backgroundSize = `${100 * scale}% auto`
+        // Determine the direction of the scroll
+        const delta = Math.sign(evt.deltaY) // -1 for scrolling up, 1 for scrolling down
 
-            // Set the magnification container position
-            magnification.style.left = `${mpos.x}px`
-            magnification.style.top = `${mpos.y}px`
+        // Scrolling up
+        if (delta === 1) { this.scaleStep-- }
+        // Scrolling down
+        else if (delta === -1) { this.scaleStep++ }
 
-            updateMagnifiedOffset(event.clientX, event.clientY)
-        })
+        this.scaleStep = Math.min(Math.max(this.scaleStep, 1), this.maxScale)
 
-        modalImage.addEventListener('mouseup', () =>
-        {
-            if (!isZoomed) { return }
+        this.scale = 1 + this.scaleAdd * this.scaleStep
 
-            isZoomed = false
-            modalImage.classList.remove('modal-img-darken')
-            magnification.style.display = 'none'
+        this.isZoomed = true
 
-            scaleStep = 1
-            scale = 1 + scaleAdd * scaleStep
-        })
+        this.mpos.x = this.lastModalImage .getBoundingClientRect().left
+        this.mpos.y = this.lastModalImage .getBoundingClientRect().top
+        this.msize.x = this.lastModalImage .offsetWidth
+        this.msize.y = this.lastModalImage .offsetHeight
+        this.msizeScaled.x = this.msize.x * this.scale
+        this.msizeScaled.y = this.msize.y * this.scale
+        this.mhalf.x = this.msize.x * 0.5
+        this.mhalf.y = this.msize.y * 0.5
 
-        modalImage.addEventListener('mousemove', (event) =>
-        {
-            if (!isZoomed) { return }
+        this.lastModalImage .classList.add('modal-img-darken')
+        this.magnification.style.display = 'block'
+        this.magnification.style.width  = `${this.msize.x}px`
+        this.magnification.style.height = `${this.msize.y}px`
 
-            updateMagnifiedOffset(event.clientX, event.clientY)
-        })
+        // this.magnification.style.backgroundImage = `url('${this.lastModalImage .src}')`
+        this.magnification.style.backgroundSize = `${100 * this.scale}% auto`
 
-        function updateMagnifiedOffset(cx, cy)
-        {
-            // Calculate the position within the image
-            let x = cx - mpos.x
-            let y = cy - mpos.y
-            // clamp 0 to msize
-            x = Math.min(Math.max(x, 0), msize.x) - mhalf.x
-            y = Math.min(Math.max(y, 0), msize.y) - mhalf.y
-            x /= msize.x * (getterIsFlipped() ? -1 : 1); y /= msize.y
+        // Set the magnification container position
+        this.magnification.style.left = `${this.mpos.x}px`
+        this.magnification.style.top = `${this.mpos.y}px`
 
-            x *= -msizeScaled.x; y *= -msizeScaled.y
+        this.updateMagnifiedOffset(evt.clientX, evt.clientY)
+    }
 
-            x -= (msizeScaled.x - msize.x) * 0.5
-            y -= (msizeScaled.y - msize.y) * 0.5
+    onmousemove(evt)
+    {
+        if (!this.isZoomed) { return }
 
-            magnification.style.backgroundPosition = `${x}px ${y}px`
-        }
+        this.updateMagnifiedOffset(evt.clientX, evt.clientY)
+    }
+
+    onmouseup(evt)
+    {
+        if (!this.isZoomed) { return }
+
+        this.isZoomed = false
+        this.lastModalImage .classList.remove('modal-img-darken')
+        this.magnification.style.display = 'none'
+
+        this.scaleStep = 1
+        this.scale = 1 + this.scaleAdd * this.scaleStep
+    }
+
+    updateMagnifiedOffset(cx, cy)
+    {
+        // Calculate the position within the image
+        let x = cx - this.mpos.x
+        let y = cy - this.mpos.y
+        // clamp 0 to msize
+        x = Math.min(Math.max(x, 0), this.msize.x) - this.mhalf.x
+        y = Math.min(Math.max(y, 0), this.msize.y) - this.mhalf.y
+        x /= this.msize.x * (this.getterIsFlipped() ? -1 : 1); y /= this.msize.y
+
+        x *= -this.msizeScaled.x; y *= -this.msizeScaled.y
+
+        x -= (this.msizeScaled.x - this.msize.x) * 0.5
+        y -= (this.msizeScaled.y - this.msize.y) * 0.5
+
+        this.magnification.style.backgroundPosition = `${x}px ${y}px`
     }
 }
 

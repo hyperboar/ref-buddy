@@ -64,6 +64,8 @@
     --url-icon-edit:  url("/static/edit.png");
     --url-icon-cross:  url("/static/cross.png");
     --url-icon-play:  url("/static/play.png");
+
+    --cursor-transp:  url("/static/cursor-transp.png") , auto;
 }
 
 body
