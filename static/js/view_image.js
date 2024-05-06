@@ -79,7 +79,7 @@ function initializeComponents()
     imageFlip = new ImageFlip(['.modal-img-container'])
 
     // magnification
-    magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification', () => imageFlip.isFlipped)
+    magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
     imageGrayScale = new ImageGrayscale(['.modal',  '.modal-bg img'])
