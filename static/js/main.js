@@ -1,4 +1,26 @@
 
+class OSInfo
+{
+    static platforms = { 'None': 'None', 'Mac': 'Mac', 'iPhone': 'iPhone', 'Win': 'Win', 'Android': 'Android' }
+
+    static get platform()
+    {
+        switch (navigator.platform)
+        {
+            case 'MacIntel':
+                return this.platforms.Mac
+            case 'Win32':
+            case 'Win64':
+                return this.platforms.Win
+            case 'Android':
+                return this.platforms.Android
+            case 'iPhone':
+                return this.platforms.iPhone
+            default:
+                return this.platforms.None
+        }
+    }
+}
 
 Array.prototype.remove = function(elem)
 {
@@ -212,7 +234,7 @@ class Hotkeys
 
             this.pressedKeys[e.code] = true
 
-            if (e.ctrlKey)
+            if (this._isCtrl(e))
             {
                 this.pressedKeys['KeyCtrl'] = true
             }
@@ -223,7 +245,7 @@ class Hotkeys
         {
             delete this.pressedKeys[e.code]
 
-            if (!e.ctrlKey)
+            if (!this._isCtrl(e))
             {
                 delete this.pressedKeys['KeyCtrl']
             }
@@ -245,6 +267,20 @@ class Hotkeys
     isPressedNothing()
     {
         return Object.keys(this.pressedKeys).length === 0
+    }
+
+    cancelKey(code)
+    {
+        if (this.pressedKeys[code] === true)
+            this.pressedKeys[code] = false
+    }
+
+    _isCtrl(e)
+    {
+        if (OSInfo.platform === OSInfo.platforms.Mac)
+            return e.metaKey
+
+        return e.ctrlKey
     }
 }
 
@@ -300,4 +336,4 @@ class UrlWrapper
     }
 }
 
-export { simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, isActiveTextInput, wrapButtonFeedbackPromise, UrlWrapper, Hotkeys }
+export { OSInfo, simpleShowLoadableWidget, loadScript, fetchAndSimpleFeedback, isActiveTextInput, wrapButtonFeedbackPromise, UrlWrapper, Hotkeys }
