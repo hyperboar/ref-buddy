@@ -1,9 +1,9 @@
 :root {
-    --cursor-stop-m2: url("/static/cursor-solid-4.5.png");
-    --cursor-stop-m1: url("/static/cursor-solid-9.png");
-    --cursor-stop-0:  url("/static/cursor-solid-18.png");
-    --cursor-stop-p1: url("/static/cursor-solid-36.png");
-    --cursor-stop-p2: url("/static/cursor-solid-72.png");
+    --cursor-stop-m2: url("/static/images/cursor-solid-4.5.png");
+    --cursor-stop-m1: url("/static/images/cursor-solid-9.png");
+    --cursor-stop-0:  url("/static/images/cursor-solid-18.png");
+    --cursor-stop-p1: url("/static/images/cursor-solid-36.png");
+    --cursor-stop-p2: url("/static/images/cursor-solid-72.png");
 }
 
 body {

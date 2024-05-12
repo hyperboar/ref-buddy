@@ -54,18 +54,18 @@
 
     --clr-tile-hedden-border: white;
 
-    --url-icon-up:   url("/static/arrow_up.png");
-    --url-icon-down: url("/static/arrow_down.png");
-    --url-icon-pinon:  url("/static/pin_on.png");
-    --url-icon-pinoff: url("/static/pin_off.png");
-    --url-icon-favon:  url("/static/fav_on.png");
-    --url-icon-favoff: url("/static/fav_off.png");
-    --url-icon-timer: url("/static/timer.png");
-    --url-icon-edit:  url("/static/edit.png");
-    --url-icon-cross:  url("/static/cross.png");
-    --url-icon-play:  url("/static/play.png");
+    --url-icon-up:   url("/static/images/arrow_up.png");
+    --url-icon-down: url("/static/images/arrow_down.png");
+    --url-icon-pinon:  url("/static/images/pin_on.png");
+    --url-icon-pinoff: url("/static/images/pin_off.png");
+    --url-icon-favon:  url("/static/images/fav_on.png");
+    --url-icon-favoff: url("/static/images/fav_off.png");
+    --url-icon-timer: url("/static/images/timer.png");
+    --url-icon-edit:  url("/static/images/edit.png");
+    --url-icon-cross:  url("/static/images/cross.png");
+    --url-icon-play:  url("/static/images/play.png");
 
-    --cursor-transp:  url("/static/cursor-transp.png") , auto;
+    --cursor-transp:  url("/static/images/cursor-transp.png") , auto;
 }
 
 body
