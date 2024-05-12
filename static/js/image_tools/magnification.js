@@ -105,8 +105,9 @@ class Magnification
         this.mhalf.x = this.msize.x * 0.5
         this.mhalf.y = this.msize.y * 0.5
 
-        this.magnification.style.scale = `${this.scale}`
-        this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1)}, 1)`
+        this.magnification.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1)}, 1)`
+        // this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale})`
+        this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale})`
 
         this._lastRawPos[0] = evt.clientX; this._lastRawPos[1] = evt.clientY;
         this.updateMagnifiedOffset(evt.clientX, evt.clientY)
@@ -147,7 +148,7 @@ class Magnification
         x *= -this.scale //* (this.getterIsFlipped() ? -1 : 1)
         y *= -this.scale * this.ratio
 
-        this.magnification.style.transform = `translate(${x}px, ${y}px)`
+        this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale}) translate(${x}px, ${y}px)`
     }
 }
 
