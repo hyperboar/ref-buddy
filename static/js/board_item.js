@@ -318,6 +318,7 @@ const GoToImageStudyMixin =
 {
     // "virtual methods"
     isStudyAllowed: function () { throw new Error('Not implemented') },
+    onGoToStudyCompleted: function () { throw new Error('Not implemented') },
 
     initStudy: function(image)
     {
@@ -327,8 +328,10 @@ const GoToImageStudyMixin =
 
             const url = image.getAttribute('data-study')
             window.open(url, '_blank')
+
+            this.onGoToStudyCompleted()
         })
-    }
+    },
 }
 
 /**
@@ -377,6 +380,13 @@ class BoardImage
 
     data
 
+    _getIsDragAllowed = () => { throw new Error('Not implemented') }
+    _onSaveTransform  = () => { throw new Error('Not implemented') }
+    _getIsScaleAllowed   = () => { throw new Error('Not implemented') }
+    _getIsRemoveAllowed  = () => { throw new Error('Not implemented') }
+    _getIsStudyAllowed   = () => { throw new Error('Not implemented') }
+
+
     /**
      * @param image_data object {image_id, thumb_path, path, tr, study_url}
      */
@@ -402,6 +412,29 @@ class BoardImage
 
         this.isRenderHigh = true
         this.renderFullImage()
+    }
+
+    setOnSaveTransform(callback)
+    {
+        this._onSaveTransform = callback
+    }
+
+    setGetIsDragAllowed(callback)
+    {
+        this._getIsDragAllowed = callback
+    }
+
+    setGetIsScaleAllowed(callback)
+    {
+        this._getIsScaleAllowed = callback
+    }
+        setGetIsRemoveAllowed(callback)
+    {
+        this._getIsRemoveAllowed = callback
+    }
+        setGetIsStudyAllowed(callback)
+    {
+        this._getIsStudyAllowed = callback
     }
 }
 Object.assign(BoardImage.prototype, ImageRenderMixin)
@@ -430,46 +463,45 @@ BoardImage.prototype.onRenderCompleted = function(image)
     document.getElementById("board").appendChild(image)
 
     this.checkFullRes()
+
+    this.node = image
 }
 
 BoardImage.prototype.onMoveCompleted = function(left, top)
 {
-    const imageId =  parseInt(this.data.image_id)
-    const data = boardImages[imageId]
-    data.tr.tx = left
-    data.tr.ty = top
-    saveImageTransform(data)
+    this.data.tr.tx = left
+    this.data.tr.ty = top
+    this._onSaveTransform(this.data)
 
     this.setVisDirty()
     this.checkFullRes()
 }
 BoardImage.prototype.isDragAllowed = function()
 {
-    return hotkeys.isPressed('KeyCtrl')
+    return this._getIsDragAllowed()
 }
 
 BoardImage.prototype.onScaleCompleted = function(scale)
 {
-    const imageId =  parseInt(this.data.image_id)
-    const data = boardImages[imageId]
-    data.tr.s = scale
-    saveImageTransform(data)
+
+    this.data.tr.s = scale
+    this._onSaveTransform(this.data)
 
     this.setVisDirty()
     this.checkFullRes()
 }
 BoardImage.prototype.isScaleAllowed = function()
 {
-    return hotkeys.isPressed('KeyCtrl')
+    return this._getIsScaleAllowed()
 }
 
 BoardImage.prototype.isRemoveAllowed = function()
 {
-    return hotkeys.isPressed('KeyX')
+    return this._getIsRemoveAllowed()
 }
 BoardImage.prototype.isStudyAllowed = function()
 {
-    return hotkeys.isPressed('KeyS')
+    return this._getIsStudyAllowed()
 }
 
 
@@ -477,6 +509,11 @@ class BoardBoard
 {
     transform = {tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}
     board = null
+
+    items = {}
+
+    _getIsScaleAllowed = () => { throw new Error('Not implemented') }
+    _getIsDragAllowed  = () => { throw new Error('Not implemented') }
 
     constructor()
     {
@@ -488,6 +525,34 @@ class BoardBoard
         this.initScalable(this.board, this.boardInteract)
         this.setScale(1)
     }
+
+    setGetIsScaleAllowed(callback)
+    {
+        this._getIsScaleAllowed = callback
+    }
+    setGetIsDragAllowed(callback)
+    {
+        this._getIsDragAllowed = callback
+    }
+
+    addItem(key, item)
+    {
+        if (key in Object.keys(this.items))
+        {
+            console.error(`Item with key ${key} already added to the board! oh well...`)
+        }
+
+        this.items[key] = item
+        return item
+    }
+
+    removeItem(key)
+    {
+        if (!(key in Object.keys(this.items)))
+            return
+
+        delete this.items[key]
+    }
 }
 Object.assign(BoardBoard.prototype, DraggableMixin)
 Object.assign(BoardBoard.prototype, ScalableMixin)
@@ -497,22 +562,24 @@ BoardBoard.prototype.onMoveCompleted = function(left, top)
     this.transform.tx = left
     this.transform.ty = top
 
-    const items = Object.values(boardItems);
+    const items = Object.values(this.items);
     items.forEach(item => { item.setVisDirty(); item.checkFullRes() })
 }
 BoardBoard.prototype.isDragAllowed = function()
 {
-    return hotkeys.isPressed('Space')
+    return this._getIsDragAllowed()
 }
 
 BoardBoard.prototype.onScaleCompleted = function(scale)
 {
     this.transform.s = scale
 
-    const items = Object.values(boardItems);
+    const items = Object.values(this.items);
     items.forEach(item => { item.setVisDirty(); item.checkFullRes() })
 }
 BoardBoard.prototype.isScaleAllowed = function()
 {
-    return hotkeys.isPressed('Space')
+    return this._getIsScaleAllowed()
 }
+
+export { BoardImage, BoardBoard }

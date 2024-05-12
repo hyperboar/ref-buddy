@@ -3,107 +3,30 @@
 <head>
     {% include 'tpl_part_header.html' %}
     <link rel="stylesheet" href="/static/styles/board.css">
-    <script type="text/javascript" src="/js/legacy/main.js"></script>
-    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>
-    <script type="text/javascript" src="/static/js/board_item.js"></script>
+{#    <script type="text/javascript" src="/js/legacy/main.js"></script>#}
+{#    <script type="text/javascript" src="/static/js/image_lazy_load.js"></script>#}
+{#    <script type="text/javascript" src="/static/js/board_item.js"></script>#}
     <title>{{ board.title }}</title>
 </head>
 <body>
+<div class="vis-hide" id="board-id">{{ board.id }}</div>
 <div class="header">
     <a class="back-btn no-decor btn-bg-blend" href="{{ url_for('routes_board.view_board_all') }}">&lt;</a><h1>{{ board.title }}</h1>
 </div>
 <div class="board-interact-bg"></div>
 <div id="board" class="board">
 </div>
-<script>
-
-    let boardImages = {}
-    let boardItems = {}
-    let board = null
-    let hotkeys = null
-
-    function fetchImageData()
+<script type="importmap">
     {
-        return fetch('{{ url_for('routes_board.get_board_images', b_id=board.id) }}').then(r =>
-            {
-                if (!r.ok) { throw new Error('Something went wrong, ' + r.statusText) }
-                return r.json()
-            })
-            .catch(err =>
-            {
-                console.log(err)
-            })
-    }
-
-    // Save image position to the database
-    function saveImageTransform(imageData)
-    {
-        const image = document.querySelector(`.image[data-id="${imageData.image_id}"]`)
-        const strTr = JSON.stringify(imageData.tr)
-
-        image.classList.remove('op-success', 'op-fail')
-        return fetch(`{{ url_for('routes_board.set_board_image_transform') }}?b-id={{ board.id }}&image-id=${imageData.image_id}&tr=${strTr}`)
-            .then(r =>
-            {
-                if (!r.ok) { throw new Error('Transform not saved') }
-            })
-            .catch(err =>
-            {
-                image.classList.add('op-fail')
-                console.log(err)
-            })
-    }
-
-
-    // Initialize the board
-    function initializeBoard()
-    {
-        hotkeys = new Hotkeys()
-        board = new BoardBoard()
-
-        // Fetch image data from the database
-        fetchImageData().then(imageData =>
+        "imports":
         {
-            // Render images on the board
-            imageData.images.forEach(data =>
-            {
-                boardImages[data.image_id] = data
-                boardItems[data.image_id] = new BoardImage(data)
-            })
-        })
-    }
-
-    // Initialize the board when the page loads
-    document.addEventListener('DOMContentLoaded', initializeBoard)
-
-    document.addEventListener('hotkeyDown', (e) =>
-    {
-        if (e.detail.isPressedMult(['Space', 'KeyR']))
-        {
-            board.setPosition(0,0)
-            board.setScale(1)
+            "image_tools/": "/static/js/image_tools/",
+            "vendors/": "/static/js/vendors/",
+            "api": "/static/js/api.js"
         }
-
-        if (e.detail.isPressed(['Space']))
-        {
-            Object.values(boardItems).forEach(item =>
-            {
-                item.setMovableEnabled(false)
-                item.setScalableEnabled(false)
-            })
-        }
-    })
-    document.addEventListener('hotkeyUp', (e) =>
-    {
-        if (!e.detail.isPressed(['Space']))
-        {
-            Object.values(boardItems).forEach(item =>
-            {
-                item.setMovableEnabled(true)
-                item.setScalableEnabled(true)
-            })
-        }
-    })
+    }
+</script>
+<script type="module" src="/static/js/view_board.js">
 </script>
 </body>
 </html>
