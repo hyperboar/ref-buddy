@@ -1,3 +1,11 @@
+:root {
+    --cursor-stop-m2: url("/static/cursor-solid-4.5.png");
+    --cursor-stop-m1: url("/static/cursor-solid-9.png");
+    --cursor-stop-0:  url("/static/cursor-solid-18.png");
+    --cursor-stop-p1: url("/static/cursor-solid-36.png");
+    --cursor-stop-p2: url("/static/cursor-solid-72.png");
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -135,11 +143,11 @@ body {
     cursor: var(--cursor-transp);
 }
 
-.cursor-stop-m2 {cursor: url("/static/cursor-solid-4.5.png") , auto !important;}
-.cursor-stop-m1 {cursor: url("/static/cursor-solid-9.png") , auto !important;}
-.cursor-stop-0 {cursor: url("/static/cursor-solid-18.png") , auto !important;}
-.cursor-stop-p1 {cursor: url("/static/cursor-solid-36.png") , auto !important;}
-.cursor-stop-p2 {cursor: url("/static/cursor-solid-72.png") , auto !important;}
+.cursor-stop-m2 {cursor: var(--cursor-stop-m2) , auto !important;}
+.cursor-stop-m1 {cursor: var(--cursor-stop-m1) , auto !important;}
+.cursor-stop-0 {cursor: var(--cursor-stop-0) , auto !important;}
+.cursor-stop-p1 {cursor: var(--cursor-stop-p1) , auto !important;}
+.cursor-stop-p2 {cursor: var(--cursor-stop-p2) , auto !important;}
 
 .modal-img-color-picker
 {
