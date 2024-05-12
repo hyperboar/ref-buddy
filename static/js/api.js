@@ -360,6 +360,27 @@ class ApiTags
 
 class ApiBoards
 {
+    static GetBoardImages(id)
+    {
+        return fetch(`/board-images/${id}`)
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static SaveBoardImageTransform(boardId, data)
+    {
+        const strTr = JSON.stringify(data.tr)
+        return fetch(`/set-board-image-transform?b-id=${boardId}&image-id=${data.image_id}&tr=${strTr}`)
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.text()
+            })
+    }
+
     static GetWidgetHtml()
     {
         return fetch('/widget/get-boards-all')
