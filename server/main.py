@@ -3,6 +3,9 @@ import os.path
 from flask import Flask, request, render_template
 from flask_caching import Cache
 
+import sys
+sys.path.append(os.getcwd())
+
 from Env import Env
 from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from image_metadata_overview import ImageMetadataOverview
