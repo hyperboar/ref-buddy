@@ -3,6 +3,7 @@ import os.path
 from flask import Flask, request, render_template
 from flask_caching import Cache
 
+# Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
 import sys
 sys.path.append(os.getcwd())
 
