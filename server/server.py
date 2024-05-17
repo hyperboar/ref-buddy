@@ -1,3 +1,5 @@
+import os.path
+
 from flask import Flask, request, render_template
 from flask_caching import Cache
 
@@ -21,12 +23,15 @@ from server_widget_helpers import get_paging_widget
 config = {
     # "DEBUG": True,          # some Flask specific configs
     "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-    "CACHE_DEFAULT_TIMEOUT": 300
+    "CACHE_DEFAULT_TIMEOUT": 300,
+    'THUMB_STATIC': Env.THUMB_PATH
 }
 
-app = Flask(__name__, static_url_path='/static')
+template_dir = os.path.join('..', 'templates')
+static_dir = os.path.join('..', 'static')
+
+app = Flask(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
 app.config.from_mapping(config)
-app.config['THUMB_STATIC'] = Env.THUMB_PATH
 
 cache = Cache(app)
 
