@@ -5,6 +5,8 @@ import webbrowser
 import tkinter as tk
 from tkinter import messagebox
 
+from PIL import Image, ImageTk
+
 from export_frames_window import ExportFramesWindow
 from export_vid_gifs import ExportVidGifs
 
@@ -22,7 +24,10 @@ class MainWindow(tk.Frame):
         self.master = master
         self.master.title("Drawing Gallery Tool")
         self.master.geometry("300x200")
-        self.master.iconbitmap('static/favicon.ico')
+
+        ico = Image.open('static/images/favicon.ico')
+        photo = ImageTk.PhotoImage(ico)
+        root.wm_iconphoto(False, photo)
 
         self.pack()
 
