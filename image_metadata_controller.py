@@ -8,8 +8,6 @@ from Env import Env
 from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet
 from sqlalchemy import func
 
-from server_args_helpers import get_arg
-
 
 class ImageMetadataController:
     @staticmethod
