@@ -121,7 +121,7 @@ class MainWindow(tk.Frame):
 
         py_path = os.path.join(sys.prefix, bin_fldr, 'python')
         py = py_path if os.path.exists(py_path) else py_path + '3'
-        server_path = os.path.join('server', 'server.py')
+        server_path = os.path.join('server', 'main.py')
 
         self.web_process = subprocess.Popen([py, server_path], cwd=os.getcwd())
         self.link["state"] = "normal"
