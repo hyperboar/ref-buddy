@@ -82,7 +82,7 @@ function initializeComponents()
     magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
-    imageGrayScale = new ImageGrayscale(['.modal',  '.modal-bg img'])
+    imageGrayScale = new ImageGrayscale(['.modal',  '.modal-bg img', '.magnification'])
     const gsButton = document.getElementById('toggle-grayscale')
     gsButton.addEventListener('click', () => imageGrayScale.toggleGrayscale())
 
