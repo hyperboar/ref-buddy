@@ -45,19 +45,20 @@ class MainWindow(tk.Frame):
         if not os.path.isfile(Env.DB_FILE):
             messagebox.showerror("Error", "Database file not found. Please run the import first.")
             self.server_button["state"] = "disabled"
+            self.server_button.update_idletasks()
             # self.quit()
 
     def create_widgets(self):
-        self.server_button = tk.Button(self)
-        self.server_button["text"] = "Launch Server"
+        self.server_button = tk.Button(self, text="Launch Server")
         self.server_button["command"] = self.launch_server
+        self.server_button.config(font=("Arial", 14), disabledforeground="#575961")
         self.server_button.pack(side="top", pady=20)
 
         self.link = tk.Label(self, text="Go to gallery")
-        self.link["state"] = "disabled"
+        self.link.config(state="disabled", fg="#4555ba", cursor="hand2", font=("Arial", 14, "underline"))
         self.link.pack(pady=10)
         self.link.bind("<Button-1>", self.go_to_gallery)
-        self.link.config(fg="blue", cursor="hand2", font=("Arial", 12, "underline"))
+        self.link.update_idletasks()
 
         # quit_button = tk.Button(self, text="QUIT", fg="red", command=self.master.destroy)
         # quit_button.pack(side="bottom")
@@ -127,8 +128,9 @@ class MainWindow(tk.Frame):
         self.link["state"] = "normal"
         self.server_button["state"] = "disabled"
 
-    def go_to_gallery(self, test):
-        print(test)
+    def go_to_gallery(self, evt: tk.Event):
+        if evt.widget["state"] == "disabled":
+            return "break"
         webbrowser.open(self.gallery_url)
 
     def rehash_options(self):
