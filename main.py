@@ -115,12 +115,10 @@ class MainWindow(tk.Frame):
         ExportVidGifs.export(Env.IMAGES_PATH)
 
     def launch_server(self):
-        if Utils.is_windows():
-            bin_fldr = "Scripts"
-        else:
-            bin_fldr = "bin"
+        bin_fldr = "Scripts" if Utils.is_windows() else "bin"
+        executable = "python.exe" if Utils.is_windows() else "python"
 
-        py_path = os.path.join(sys.prefix, bin_fldr, 'python')
+        py_path = os.path.join(sys.prefix, bin_fldr, executable)
         py = py_path if os.path.exists(py_path) else py_path + '3'
         server_path = os.path.join('server', 'main.py')
 
