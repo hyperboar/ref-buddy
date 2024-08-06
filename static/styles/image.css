@@ -154,6 +154,12 @@ body {
     cursor: crosshair !important;
 }
 
+#compose-overlay
+{
+    /*position: absolute;*/
+    z-index: var(--z-ref-compose);
+}
+
 
 .dir-link
 {

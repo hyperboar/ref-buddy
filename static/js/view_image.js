@@ -17,6 +17,29 @@ import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import { AnimPlayer } from "/static/js/video/anim_player.js"
+// import * as fabric from "/static/js/vendors/fabric.min.js"
+
+// const canvas = new fabric.Canvas('compose-overlay', {
+//     isDrawingMode: true
+//   });
+// // canvas.isDrawingMode = true;
+// canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
+// canvas.freeDrawingBrush.width = 30
+// canvas.freeDrawingBrush.color = "#ff000033"
+// // const rect = new fabric.Rect({
+// //     top: 100,
+// //     left: 100,
+// //     width: 60,
+// //     height: 70,
+// //     fill: 'red',
+// //     strokeWidth: 10,
+// //     strokeStyle: 'rgba(0,0,0,0.5)',
+// //
+// //   });
+// // canvas.add(rect);
+// console.log(canvas);
+
+document.getElementById("compose-overlay").addEventListener('click', evt => console.log(evt))
 
 let selection = null
 let rateImage = null
@@ -300,11 +323,14 @@ function initializeComponents()
             if (e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
         }
 
+        if (e.code === 'KeyF' && e.shiftKey && e.ctrlKey) { togglePanelsOrder(); e.preventDefault(); }
 
         if (e.altKey || e.ctrlKey || e.metaKey) { return }
         if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
         { cursor.toggle(e.code); e.preventDefault(); return } // cursors
         if (e.code === 'KeyF' && e.shiftKey) { imageFlip.toggleFlip(); e.preventDefault(); } // g
+
+
 
         if (e.shiftKey) { return }
         if (e.code.includes('Numpad') || e.code.includes('Digit'))
@@ -324,6 +350,22 @@ function initializeComponents()
         if (e.code === 'KeyI')       { toggleInfoPopup(); e.preventDefault(); } // g
         // if (e.code === 'KeyV')       { fracColors.render('.modal-img'); e.preventDefault(); } // g
     })
+}
+
+function togglePanelsOrder()
+{
+    const container = document.querySelector('.modal')
+    const image = container.querySelector('.modal-img-container')
+    const controls = container.querySelector('.modal-controls')
+
+    if (container.firstElementChild === image)
+    {
+        container.insertBefore(controls, image)
+    }
+    else
+    {
+        container.insertBefore(image, controls)
+    }
 }
 
 function updateComponents(data)
