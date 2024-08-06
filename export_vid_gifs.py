@@ -53,7 +53,25 @@ class ExportVidGifs:
 
                 # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
                 dur_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "{input_file}"'
-                dur_out = subprocess.run([dur_cmd], shell=True, capture_output=True).stdout.decode("utf-8")
+                # try:
+                dur_out = subprocess.run(dur_cmd, shell=True, capture_output=True).stdout.decode("utf-8")
+                # except subprocess.CalledProcessError as e:
+                #     exit_code = e.returncode
+                #     stderror = e.stderr
+                #     print(exit_code, stderror)
+                # dur_args = [
+                #     'ffprobe',
+                #     '-v',
+                #     'error',
+                #     '-show_entries',
+                #     'format=duration',
+                #     '-of',
+                #     'default=noprint_wrappers=1:nokey=1',
+                #     f'-sexagesimal',
+                #     f'"{input_file}"'
+                # ]
+                # dur_cmd_out = subprocess.run([dur_args], shell=True, capture_output=True)
+                # dur_out = dur_cmd_out.decode("utf-8")
 
                 # convert raw output to total_seconds
                 t = datetime.strptime(dur_out, '%H:%M:%S.%f\r\n')
@@ -101,7 +119,12 @@ class ExportVidGifs:
     def get_video_fps(path: str) -> (float, [int]):
         # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
         dur_cmd = f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 -sexagesimal "{path}"'
-        dur_out = subprocess.run([dur_cmd], shell=True, capture_output=True).stdout.decode("utf-8")
+        try:
+            dur_out = subprocess.run(dur_cmd, shell=True, capture_output=True).stdout.decode("utf-8")
+        except subprocess.CalledProcessError as e:
+            exit_code = e.returncode
+            stderror = e.stderr
+            print(exit_code, stderror)
         # convert raw output to total_seconds
         t = datetime.strptime(dur_out, '%H:%M:%S.%f\r\n')
         total_dur = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second,
@@ -109,7 +132,7 @@ class ExportVidGifs:
 
         # getting video's duration in format "0:00:00.0000" by executing shell command and grabbing raw output
         fps_cmd = f'ffprobe -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate "{path}"'
-        fps_out = subprocess.run([fps_cmd], shell=True, capture_output=True).stdout.decode("utf-8")
+        fps_out = subprocess.run(fps_cmd, shell=True, capture_output=True).stdout.decode("utf-8")
         fps = [int(num) for num in fps_out.replace('\r\n', '').split('/')]
 
         return total_dur, fps
