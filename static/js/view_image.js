@@ -12,6 +12,7 @@ import {TagSetList}     from 'image_tools/tag-set-list.js'
 import {ImageCursor}    from "image_tools/cursor.js"
 import {ColorPicker}    from "image_tools/color_picker.js"
 import {WidgetBoard}    from "image_tools/widget_board.js"
+import {DrawCanvas}    from "image_tools/draw_canvas.js"
 import {FracturedColors}    from "image_tools/fractured_colors.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
@@ -39,7 +40,7 @@ import { AnimPlayer } from "/static/js/video/anim_player.js"
 // // canvas.add(rect);
 // console.log(canvas);
 
-document.getElementById("compose-overlay").addEventListener('click', evt => console.log(evt))
+// document.getElementById("compose-overlay").addEventListener('click', evt => console.log(evt))
 
 let selection = null
 let rateImage = null
@@ -51,6 +52,7 @@ let magnifier = null
 let imageFlip = null
 let imageGrayScale = null
 let cursor = null
+let drawCanvas = null
 let colorPicker = null
 
 let tagSets = null
@@ -80,9 +82,11 @@ function initializeComponents()
     // yay!
     doubleCheckWeHaveAllWeNeedInUrl()
 
+    const imageId = document.getElementById('image-id').textContent
+
     // history
     history = new ImageHistory()
-    history.pushToTail(document.getElementById('image-id').textContent)
+    history.pushToTail(imageId)
     history.moveToTail()
 
     // selection
@@ -111,6 +115,11 @@ function initializeComponents()
 
     // cursor
     cursor = new ImageCursor('.modal-img', '.magnification')
+
+    // draw canvas
+    drawCanvas = new DrawCanvas('#draw-overlay', '.modal-img', '#draw-canvas-controls', imageId)
+    const dcButton = document.getElementById('draw-button')
+    dcButton.addEventListener('click', () => drawCanvas.toggle())
 
     colorPicker = new ColorPicker(-1, '.modal-img', '.pallet-container', '.modal-img-color-picker', '#pallet-frame')
     // palette
@@ -324,6 +333,7 @@ function initializeComponents()
         }
 
         if (e.code === 'KeyF' && e.shiftKey && e.ctrlKey) { togglePanelsOrder(); e.preventDefault(); }
+        if (e.code === 'KeyZ' && e.ctrlKey && drawCanvas.isDrawingMode) { drawCanvas.undo(); e.preventDefault(); }
 
         if (e.altKey || e.ctrlKey || e.metaKey) { return }
         if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)

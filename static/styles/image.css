@@ -154,10 +154,16 @@ body {
     cursor: crosshair !important;
 }
 
-#compose-overlay
+#draw-overlay
 {
-    /*position: absolute;*/
+    position: absolute;
+    display: flex;
     z-index: var(--z-ref-compose);
+    opacity: 0.5;
+}
+.draw-selected
+{
+    border: 2px solid;
 }
 
 

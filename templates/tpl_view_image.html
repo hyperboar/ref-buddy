@@ -28,7 +28,7 @@
                 <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
             </table>
         </div>
-{#        <canvas id="compose-overlay" width="400" height="400"></canvas>#}
+        <canvas id="draw-overlay" width="0" height="0" class="vis-hide" draggable="false"></canvas>
         <img class="modal-img" src="{{ content_url }}" alt="{# setup #}" tabindex="0">
     </div>
 
@@ -54,7 +54,18 @@
             <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>
             <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>
             <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>
+            <button id="draw-button" class="btn-bg-blend" title="Drawing Canvas">cnv</button>
             <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
+        </div>
+        <div class="row vis-hide" id="draw-canvas-controls">
+            <span class="space"></span>
+            <label for="draw-cnv">Drawing:</label>
+            <button class="btn-bg-blend vis-hide" id="tlp-draw-clr" value="#000000ff">С1</button>
+            <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>
+            <button class="btn-bg-blend" id="draw-clear">Clr</button>
+            <label for="draw-weight">Thick:</label>
+            <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>
+            <span class="space"></span>
         </div>
         <div class="row">
             <label for="rate-up">Rating: <span id="image-rating">{# setup #}</span></label>
