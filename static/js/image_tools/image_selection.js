@@ -18,6 +18,7 @@
 class ImageSelection
 {
     toggleBtn
+    counterSpan
 
     classGallery
     classTile
@@ -32,6 +33,7 @@ class ImageSelection
     classSelected ='selected'
     classDisabled ='disabled'
     classBodyModeOn = 'body-sel-mode-on'
+    classBodyCounter = '#sel-count'
 
     attrDataId = 'data-id'
 
@@ -45,6 +47,8 @@ class ImageSelection
         this.toggleBtn = document.getElementById(toggleBtnId)
 
         this.toggleBtn.addEventListener('click', () => this.toggleSelectionMode())
+
+        this.counterSpan = this.toggleBtn.querySelector(this.classBodyCounter)
     }
 
     /**
@@ -93,6 +97,8 @@ class ImageSelection
                 img.classList.remove(this.classSelected)
             })
         }
+
+        this.updateCounter()
     }
 
     selectAll()
@@ -102,11 +108,15 @@ class ImageSelection
             this.handleTileClick(tile)
             this.lastClickedTile = null
         })
+
+        this.updateCounter()
     }
 
     onTileSelectionClick(event)
     {
         this.handleTileClick(event.currentTarget, false, event.shiftKey)
+
+        this.updateCounter()
     }
 
     /**
@@ -142,7 +152,6 @@ class ImageSelection
             img.classList.remove(this.classSelected)
         }
 
-
         // stop when BATCH select, recursion stop
         if (isBatch) { return }
 
@@ -173,6 +182,14 @@ class ImageSelection
         }
 
         return -1
+    }
+
+    updateCounter()
+    {
+        if (this.selectionMode)
+            this.counterSpan.textContent = `(${this.selectedIds.length})`
+        else
+            this.counterSpan.textContent = ""
     }
 }
 
