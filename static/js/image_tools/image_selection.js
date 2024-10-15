@@ -34,8 +34,11 @@ class ImageSelection
     classDisabled ='disabled'
     classBodyModeOn = 'body-sel-mode-on'
     classBodyCounter = '#sel-count'
+    classHighlight = 'op-success'
 
     attrDataId = 'data-id'
+
+    lastHighlightIdx // index in selectedIds
 
     tileClickAction = (e) => this.onTileSelectionClick(e)
 
@@ -49,6 +52,8 @@ class ImageSelection
         this.toggleBtn.addEventListener('click', () => this.toggleSelectionMode())
 
         this.counterSpan = this.toggleBtn.querySelector(this.classBodyCounter)
+
+        this.resetHighlight()
     }
 
     /**
@@ -96,6 +101,8 @@ class ImageSelection
                 img.classList.remove(this.classSelectable)
                 img.classList.remove(this.classSelected)
             })
+
+            this.resetHighlight()
         }
 
         this.updateCounter()
@@ -109,6 +116,7 @@ class ImageSelection
             this.lastClickedTile = null
         })
 
+        this.resetHighlight()
         this.updateCounter()
     }
 
@@ -116,6 +124,7 @@ class ImageSelection
     {
         this.handleTileClick(event.currentTarget, false, event.shiftKey)
 
+        this.resetHighlight()
         this.updateCounter()
     }
 
@@ -190,6 +199,45 @@ class ImageSelection
             this.counterSpan.textContent = `(${this.selectedIds.length})`
         else
             this.counterSpan.textContent = ""
+    }
+
+    // highlight is chaotic, it selects tiles in the order which they have been selected by user.
+    highlightNextSelected(dir)
+    {
+        if (!this.selectionMode) return
+
+        const prevHighlight = this.lastHighlightIdx
+
+        if (this.lastHighlightIdx === -1)
+            this.lastHighlightIdx = this.selectedIds.length - 1
+        else if (dir > 0)
+            this.lastHighlightIdx = (this.lastHighlightIdx + 1) % this.selectedIds.length
+        else if (dir < 0)
+            this.lastHighlightIdx = (this.lastHighlightIdx - 1) % this.selectedIds.length
+
+        let tile = document.querySelector(`${this.classTile}[${this.attrDataId}="${this.selectedIds[this.lastHighlightIdx]}"]`)
+
+        if (tile !== null)
+        {
+            // scrolling
+            tile.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+            // highlight
+            tile.classList.add(this.classHighlight)
+        }
+
+        // remove highlight
+        if (prevHighlight !== -1 && prevHighlight !== this.lastHighlightIdx)
+        {
+            tile = document.querySelector(`${this.classTile}[${this.attrDataId}="${this.selectedIds[prevHighlight]}"]`)
+            if (tile !== null)
+                tile.classList.remove(this.classHighlight)
+        }
+    }
+
+    resetHighlight()
+    {
+        this.lastHighlightIdx = -1
     }
 }
 

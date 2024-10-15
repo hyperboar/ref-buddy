@@ -155,6 +155,14 @@ document.addEventListener('keydown', (e) =>
     {
         restoreImages()
     }
+    else if (selection.selectionMode && e.code === 'ArrowLeft' && e.shiftKey)
+    {
+        selection.highlightNextSelected(-1)
+    }
+    else if (selection.selectionMode && e.code === 'ArrowRight' && e.shiftKey)
+    {
+        selection.highlightNextSelected(1)
+    }
 })
 
 function getExtraValue()
