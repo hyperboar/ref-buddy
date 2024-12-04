@@ -37,4 +37,5 @@ class Env:
 
     VIDEO_PLAYER_PATH = os.getenv('VIDEO_PLAYER_PATH')
 
-
+# some additional setup
+os.environ['SQLITE_TMPDIR'] = Env.TMP_PATH
