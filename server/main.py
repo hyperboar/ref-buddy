@@ -5,6 +5,9 @@ from flask_caching import Cache
 
 # Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
 import sys
+
+from server.server_ext_tags_ai import routes_tags_ai
+
 sys.path.append(os.getcwd())
 
 from Env import Env
@@ -44,6 +47,7 @@ app.register_blueprint(routes_image_remove)
 app.register_blueprint(routes_folder)
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
+app.register_blueprint(routes_tags_ai)
 app.register_blueprint(routes_dupes)
 app.register_blueprint(routes_board)
 app.register_blueprint(routes_discover)

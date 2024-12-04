@@ -480,6 +480,10 @@ function updateImageTags()
                 a.href = '/all?tags=' + t.name
                 a.textContent = t.name
                 li.appendChild(a)
+                if (t.ai !== 0)
+                {
+                    li.classList.add('ai-tag')
+                }
                 infoTags.appendChild(li)
             })
 

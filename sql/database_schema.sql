@@ -72,6 +72,27 @@ CREATE TABLE IF NOT EXISTS tag_sets (
     tag_list TEXT
 );
 
+CREATE TABLE IF NOT EXISTS tags_ai (
+    id INTEGER PRIMARY KEY,
+    tag TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE  IF NOT EXISTS image_tags_ai (
+    image_id INTEGER,
+    tag_id INTEGER,
+    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (tag_id) REFERENCES tags_ai(id),
+    PRIMARY KEY (image_id, tag_id)
+);
+
+CREATE TABLE  IF NOT EXISTS tags_ai_to_tags (
+    real_id INTEGER,
+    ai_id INTEGER,
+    FOREIGN KEY (real_id) REFERENCES tags(id),
+    FOREIGN KEY (ai_id) REFERENCES tags_ai(id),
+    PRIMARY KEY (real_id, ai_id)
+);
+
 CREATE TABLE  IF NOT EXISTS discover (
     image_id INTEGER,
     last_active TIMESTAMP DEFAULT (datetime('now')),

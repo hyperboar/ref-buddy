@@ -254,6 +254,10 @@ span #time-current {
   margin-left: 10px;
 }
 
+li.ai-tag {
+    list-style: "🤖 ";
+}
+
 .pallet-container
 {
     position: fixed;

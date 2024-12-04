@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Request
 
 from Env import Env
-from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet
+from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi
 from sqlalchemy import func
 
 
@@ -329,6 +329,14 @@ class ImageMetadataController:
             q = session.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
         else:
             q = session.query(ImageMetadata)
+
+        if 'no_ai_tags' in params and params['no_ai_tags'] == 1:
+            # subquery = session.query(ImageTagAi.image_id)\
+            #     .group_by(ImageTagAi.image_id)\
+            #     .subquery()
+            # q = q.join(subquery, ImageMetadata.image_id != subquery.c.image_id)
+            q = q.outerjoin(ImageTagAi, ImageMetadata.image_id == ImageTagAi.image_id)\
+                 .filter(ImageTagAi.image_id == None)
 
         # remove tags_neg
         if len(params['tags_neg']) > 0:

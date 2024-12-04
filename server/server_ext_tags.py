@@ -77,7 +77,7 @@ def get_all_tags():
 def image_tags_single(image_id):
     session = Session()
     im = session.get(ImageMetadata, image_id)
-    tags = [{'color': it.tag.color.hex, 'name': it.tag.tag} for it in im.tags]
+    tags = [{'color': it.tag.color.hex, 'name': it.tag.tag, 'ai': it.by_ai} for it in im.tags]
     out = [{'image_id': image_id, 'tags': tags}]
     session.close()
     return jsonify(out)

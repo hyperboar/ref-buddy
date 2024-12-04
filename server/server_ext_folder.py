@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from flask import Blueprint, request, abort, render_template_string, render_template
+from flask import Blueprint, request, abort, render_template_string, render_template, jsonify
 from models.models_lump import Session, ImageMetadata, Path
 from server_args_helpers import get_current_paging, get_arg, Args
 from image_metadata_controller import ImageMetadataController as Ctrl
@@ -118,3 +118,33 @@ def json_for_folder_view(images, session=None) -> str:
         })
 
     return json.dumps(data)
+
+@routes_folder.route('/export-urls/')
+def export_urls():
+    params = Ctrl.get_default_query_params()
+
+    page, offset, limit = get_current_paging(request.args)
+    params['page'] = page
+    params['offset'] = offset
+    params['limit'] = limit
+    params['no_ai_tags'] = int(request.args.get('no_ai_tags', default='1'))
+    params['min_rating'] = get_arg(request.args, Args.min_rating)
+    params['max_rating'] = get_arg(request.args, Args.max_rating)
+    params['tag_set'] = get_arg(request.args, Args.tag_set)
+    tags_pos, tags_neg = get_arg(request.args, Args.tags)
+
+    session = Session()
+    tags_pos, tags_neg = Ctrl.get_tags_by_set(params['tag_set'], tags_pos, tags_neg, session=session)
+    tags_pos_names = Ctrl.get_tag_names(tags_pos, session=session)
+    tags_neg_names = Ctrl.get_tag_names(tags_neg, session=session)
+    params['tags_pos'] = tags_pos
+    params['tags_neg'] = tags_neg
+    params['tags_pos_names'] = tags_pos_names
+    params['tags_neg_names'] = tags_neg_names
+
+    response, images = Ctrl.get_all_by_tags_new2(params, session=session)
+
+    out = [{"id": img.image_id, "url": f"/image/{ img.image_id }"} for img in images]
+
+    session.close()
+    return jsonify(out)

@@ -213,9 +213,50 @@ class ImageTag(Base):
 
     image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+    by_ai = Column(Integer, name='ai', default=0, nullable=False)
 
     image = relationship('ImageMetadata', backref='tags') # ?? tag. should it be images?
     tag = relationship('Tag', backref='image_tags')
+
+class TagAi(Base):
+    __tablename__ = 'tags_ai'
+
+    id = Column(Integer, primary_key=True)
+    tag = Column(Text, unique=True, nullable=False)
+
+    def __lt__(self, other):
+        return self.tag < other.tag
+
+    def __gt__(self, other):
+        return self.tag > other.tag
+
+    def __eq__(self, other):
+        return self.tag == other.tag
+
+    def __str__(self):
+        return f"({self.id}:{self.tag})"
+
+    def __repr__(self):
+        return str(self)
+
+class ImageTagAi(Base):
+    __tablename__ = 'image_tags_ai'
+
+    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tags_ai.id'), primary_key=True)
+    rating = Column(Integer, name='rating', default=0, nullable=False)
+    imported_at = Column(MyTIMESTAMP, name='imported_at', default=0, nullable=False)
+
+    images = relationship('ImageMetadata')
+
+class TagAiToTag(Base):
+    __tablename__ = 'tags_ai_to_tags'
+
+    real_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
+    ai_id = Column(Integer, ForeignKey('tags_ai.id'), primary_key=True)
+
+    real_tag = relationship('Tag')
+    ai_tag = relationship('TagAi')
 
 class PathTag(Base):
     __tablename__ = 'path_tags'
