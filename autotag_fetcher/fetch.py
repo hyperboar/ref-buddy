@@ -8,7 +8,9 @@ import io
 
 from PIL import ImageFile
 
-FILENAME_EXPORT = "export_pron_and_3d.json"
+# docker run --rm -p 5000:5000 ghcr.io/danbooru/autotagger
+
+FILENAME_EXPORT = "export_15_17-02.json"
 IMAGE_URL = "http://localhost:7071"
 TAGGING_URL = "http://localhost:5000/evaluate"
 # TAGGING_URL = "https://autotagger.donmai.us/evaluate"
