@@ -6,8 +6,6 @@ from flask_caching import Cache
 # Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
 import sys
 
-from server.server_ext_tags_ai import routes_tags_ai
-
 sys.path.append(os.getcwd())
 
 from Env import Env
@@ -26,6 +24,7 @@ from server_ext_rating import routes_rating
 from server_ext_single_image import routes_image
 from server_ext_tags import routes_tags
 from server_widget_helpers import get_paging_widget
+from server_ext_tags_ai import routes_tags_ai
 
 config = {
     # "DEBUG": True,          # some Flask specific configs
