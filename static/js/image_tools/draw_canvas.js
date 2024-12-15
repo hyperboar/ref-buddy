@@ -17,6 +17,7 @@ class DrawCanvas
 
     isDrawingMode
     _isDrawing
+    _isErasing
 
     _brushColors = [
         "#ffffffff",
@@ -25,10 +26,17 @@ class DrawCanvas
         "#80e81b",
     ]
 
+    _brushSizes = [
+        1,
+        1, 2, 3, 4,
+        8, 16, 32, 64, 128, 256
+    ]
+
     _brushes = [] // buttons
 
     _selectedColor = 1
     _lineWeight = 4
+    _eraseWeight = 6
 
     _history = []
     _totalHistoryWrites = 0
@@ -84,6 +92,7 @@ class DrawCanvas
         let elem = this._ctrls.querySelector('#draw-eraser')
         elem.addEventListener("click", (evt) =>
         {
+            this._isErasing = true
             this.setColor(0)
             this.updateBrushesUI(evt.target)
         })
@@ -96,6 +105,10 @@ class DrawCanvas
         elem.value = this._lineWeight
         elem.addEventListener("change", (evt) => { this.setLineWeight(parseInt(evt.target.value)) })
 
+        elem = this._ctrls.querySelector('#erase-weight')
+        elem.value = this._eraseWeight
+        elem.addEventListener("change", (evt) => { this.setEraseWeight(parseInt(evt.target.value)) })
+
         // color buttons
         elem = this._ctrls.querySelector('#tlp-draw-clr')
         for (let i = 1; i < this._brushColors.length; i++)
@@ -107,6 +120,7 @@ class DrawCanvas
             clr.style.backgroundColor = this._brushColors[i]
             clr.addEventListener("click", (evt) =>
             {
+                this._isErasing = false
                 this.updateBrushesUI(evt.target)
                 this.setColor(evt.target.value)
             })
@@ -155,6 +169,15 @@ class DrawCanvas
     setLineWeight(w)
     {
         this._lineWeight = w
+
+        this._ctrls.querySelector('label[for="draw-weight"] .size').textContent = this._brushSizes[w]
+    }
+
+    setEraseWeight(w)
+    {
+        this._eraseWeight = w
+
+        this._ctrls.querySelector('label[for="erase-weight"] .size').textContent = this._brushSizes[w]
     }
 
     fillMark()
@@ -222,10 +245,11 @@ class DrawCanvas
     realDraw()
     {
         this._ctx.beginPath();
+        this._ctx.lineCap = "round";
         this._ctx.moveTo(this.prevX, this.prevY);
         this._ctx.lineTo(this.currX, this.currY);
         this._ctx.strokeStyle = this._brushColors[this._selectedColor];
-        this._ctx.lineWidth = this._lineWeight;
+        this._ctx.lineWidth = this._brushSizes[this._isErasing ? this._eraseWeight : this._lineWeight];
         this._ctx.stroke();
 
         this._lastStrokeCount++
