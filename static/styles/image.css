@@ -393,13 +393,19 @@ li.ai-tag {
 /* CANVAS CONTROLS */
 .canvas-controls {
     position: absolute;
-    left: 0;
     top: 50%;
-    transform: translateY(-50%);
+    transform:  translateY(-50%);
     z-index: calc(var(--z-ref-compose) + 100);
 
     gap:10px;
     padding: 10px;
+}
+
+.canvas-controls-left {
+    left: 0;
+}
+.canvas-controls-right {
+    right: 0;
 }
 
 .canvas-controls-flex
