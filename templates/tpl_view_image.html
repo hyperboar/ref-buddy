@@ -57,16 +57,6 @@
             <button id="draw-button" class="btn-bg-blend" title="Drawing Canvas">cnv</button>
             <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
         </div>
-        <div class="row vis-hide" id="draw-canvas-controls">
-            <span class="space"></span>
-            <label for="draw-cnv">Drawing:</label>
-            <button class="btn-bg-blend vis-hide" id="tlp-draw-clr" value="#000000ff">С1</button>
-            <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>
-            <button class="btn-bg-blend" id="draw-clear">Clr</button>
-            <label for="draw-weight">Thick:</label>
-            <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>
-            <span class="space"></span>
-        </div>
         <div class="row">
             <label for="rate-up">Rating: <span id="image-rating">{# setup #}</span></label>
             <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
@@ -120,6 +110,22 @@
 <div id="drop-target" class="vis-hide">
     <div id="container">
     <span>Drop here</span>
+    </div>
+</div>
+
+<div class="vis-hide canvas-controls canvas-controls-flex" id="draw-canvas-controls">
+{#    <label for="draw-cnv">Drawing:</label>#}
+    <button class="btn-bg-blend vis-hide" id="tlp-draw-clr" value="#000000ff">С1</button>
+    <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>
+    <button class="btn-bg-blend" id="draw-clear">Clr</button>
+{#    <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>#}
+    <div class="slider-container">
+        <label for="draw-weight">br <span class="size"></span></label>
+        <input type="range" min="1" max="10" value="2" step="1" id="draw-weight"/>
+    </div>
+    <div class="slider-container">
+        <label for="erase-weight">er <span class="size"></span></label>
+        <input type="range" min="1" max="10" value="2" step="1" id="erase-weight"/>
     </div>
 </div>
 
