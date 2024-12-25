@@ -1,6 +1,6 @@
 import os.path
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from flask_caching import Cache
 
 # Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
@@ -57,12 +57,33 @@ def before_request():
     make_database_backup()
 
 @app.route('/')
-def index():
+def overview():
     args = request.args
     hidden = int(args.get('hidden', default='0')) != 0
 
     images = ImageMetadataOverview.get_overview(hidden)
     return render_template('tpl_view_index.html', images=images)
+
+@app.route('/json/overview')
+def json_overview():
+    args = request.args
+    hidden = int(args.get('hidden', default='0')) != 0
+
+    images = ImageMetadataOverview.get_overview(hidden)
+
+    result = []
+    for im in images:
+        result.append({
+            'id': im.image_id,
+            'thumb': f'/thumb/{ im.image_id }.jpg',
+            'path_link': f'/folder/{im.path_id}',
+            'path_dir': im.path_dir,
+            'type':im.study_type,
+            'is_hidden': im.hidden,
+            'study_first_link': f'/study-image/{ im.image_id }?same-folder=true&time-planned=120'
+        })
+
+    return jsonify(result)
 
 @app.route('/favs')
 def view_favs():

@@ -1,110 +1,222 @@
-.header
+
+:root {
+    --z-tile: 0;
+    --z-tile-bg: 1;
+    --z-tile-link: 11;
+    --z-tile-overlay: 10;
+    --z-anchors: 1000;
+
+    --anim-tile-hover: 0.2s ease;
+}
+
+/*#region Header*/
+
+.ov-header
 {
+    min-height: 3.2rem;
     display: flex;
-    flex-direction: row;
-    height: 80px;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 20px 10px;
+}
+
+.ov-header h1
+{
+    font-size: 3rem;
+}
+
+.main-menu-flex ul {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
 }
 
-.header h1
-{
-    margin-left: 10px;
+.main-menu li {
+    cursor: pointer;
 }
 
-.header a
+.main-menu a
 {
     padding: 10px;
     margin-left: 5px;
+    border-radius: 5px;
 }
-
-.header a:hover
+.main-menu a:hover
 {
     text-decoration: none;
     color: rgba(230,230,230, 50%);
     background-color: rgba(50,50,50, 50%);
 }
 
-.header h1 {
+.secondary-menu {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 20px;
+    background-color: var(--clr-tile-ov1-bg);
+    z-index: var(--z-anchors);
+}
+
+.secondary-menu-flex {
+    display: flex;
+    align-items: center;
+}
+
+.secondary-menu li {
+    font-size: 0.8rem;
     margin-right: 20px;
+}
+
+.secondary-menu a,
+.secondary-menu a:hover,
+.secondary-menu a:visited,
+.secondary-menu a:visited:hover {
+    color: var(--clr-text)
+}
+
+/*#endregion Header*/
+
+
+/*#region Main*/
+
+main.container {
+    margin: 0 auto;
+    max-width: 1100px;
+    padding: 0 20px;
 }
 
 .tiles-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px; /* Adjust the gap between tiles as needed */
+    justify-content: start;
+    align-items: start;
+    gap: 15px;
 }
+
+main h2 {
+    font-size: 2rem;
+    margin: 20px 0 10px;
+}
+
+main h2:nth-of-type(1) {
+    margin-top: 0;
+}
+
+/*#endregion Main*/
+
+
+/*#region Tile*/
 
 .tile {
     position: relative;
-    width: 200px; /* Adjust the tile width as needed */
-    height: 300px; /* Adjust the tile width as needed */
+    border-radius: 5px;
+    overflow: clip;
+    width: 200px;
+    height: 300px;
+    padding: 20px;
+    z-index: var(--z-tile);
+    border: 2px solid;
+    border-color: rgba(0,0,0,0.0);
+    transition: border-color var(--anim-tile-hover)
+}
+.tile:hover {
+    border-color: rgba(0,0,0,0.5);
 }
 
 .tile-hidden {
     border: 2px dashed var(--clr-tile-hedden-border);
 }
 
-.tile .bg-thumb {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background-size: cover;
-}
-
-.overlay {
+.tile .thumb-bg {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--clr-tile-ov1-bg); /* Adjust the overlay background color and opacity as needed */
-    color: var(--clr-tile-ov1-text);
-    padding: 20px;
-    box-sizing: border-box;
-    opacity: 0.3;
-    transition: opacity 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50% 50%;
+
+    z-index: var(--z-tile-bg);
+
+    filter: blur(0);
+    transition: filter var(--anim-tile-hover);
+}
+.tile:hover .thumb-bg {
+    filter: blur(2px);
 }
 
+.tile .overlay {
+    opacity: 0.3;
+    transition: opacity var(--anim-tile-hover);
+}
 .tile:hover .overlay {
     opacity: 1;
 }
 
-.overlay h2, .overlay p, .overlay a {
-    margin: 0;
+
+.tile .thumb-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0); /* Adjust the overlay background color and opacity as needed */
+    transition: background-color var(--anim-tile-hover);
+}
+.tile:hover .thumb-bg::after {
+    content: '';
+    background-color: rgba(0,0,0,0.5);
 }
 
-.overlay h2 {
-    font-size: 18px;
+.tile a {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+    z-index: var(--z-tile-link);
+}
+
+.overlay {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: var(--clr-tile-ov1-text);
+    z-index: var(--z-tile-overlay);
+}
+
+.overlay-flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: start;
+}
+
+.overlay h3 {
+    font-size: 1.1rem;
     font-weight: bold;
     margin-bottom: 10px;
+    width: 100%;
 }
 
-.overlay p {
-    font-size: 20px;
-    margin-bottom: 10px;
+.long-text-break {
+    text-wrap: wrap;
     overflow-wrap: break-word;
     word-wrap: break-word;
 }
 
-.overlay .a-hidden:hover
-{
-    text-decoration: none;
-}
-.overlay .a-hidden:visited
-{
-    text-decoration: none;
-}
 
 .overlay a {
-    display: inline-block;
-    margin-right: 10px;
+    display: block;
+    max-width: 100%;
     color: var(--clr-tile-ov1-text);
-    text-decoration: none;
 }
 
 .overlay a:hover {
     text-decoration: underline;
 }
+
+/*#endregion Tile*/

@@ -449,6 +449,12 @@ li.ai-tag {
     writing-mode: vertical-lr;
 }
 
+.canvas-controls input[type="range"]::-webkit-slider-thumb,
+.canvas-controls input[type="range"]::-moz-range-thumb {
+    width: 2rem;
+    height: 2rem;
+}
+
 .inline-block
 {
 

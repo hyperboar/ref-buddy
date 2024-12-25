@@ -2,34 +2,52 @@
 <html lang="en">
 <head>
     {% include 'tpl_part_header.html' %}
+    <link rel="stylesheet" href="/static/styles/reset.css">
     <link rel="stylesheet" href="/static/styles/overview.css">
-    <title>Overview</title>
+    <title>Ref Buddy</title>
 </head>
 <body>
-<div class="header">
-    <h1>Overview</h1>
-    <a href="/all?page=1&tags=&tag-set=all" class="no-decor but-decor-hover">All</a>
-    <a href="/favs?page=1" class="no-decor but-decor-hover">Favourites</a>
-    <a href="/latest_study?page=1" class="no-decor but-decor-hover">Last study</a>
-    <a href="/tags" class="no-decor but-decor-hover">Tags</a>
-    <a href="/tag-sets" class="no-decor but-decor-hover">Sets</a>
-    <a href="/path-tags" class="no-decor but-decor-hover">Paths</a>
-    <a href="/palettes" class="no-decor but-decor-hover">Pallets</a>
-    <a href="/boards" class="no-decor but-decor-hover">Boards</a>
-</div>
-<div class="tiles-container">
-{% for img in images %}
-    <div class="tile {{ '' if img.hidden == 0 else 'tile-hidden' }}">
-        <div class="bg-thumb" data-src="/thumb/{{ img.image_id }}.jpg"></div>
-        <div class="overlay">
-            <a class="a-hidden" href="/folder/{{ img.path_id }}" target="_blank"><h2>[{{ img.study_type }}]</h2></a>
-            <a class="a-hidden" href="/folder/{{ img.path_id }}" target="_blank"><p>{{ img.path_dir }}</p></a>
-            <a href="/folder/{{ img.path_id }}" target="_blank">Folder <img class="dir-link" src="/static/images/link.png"></a>
-            <a href="/study-image/{{ img.image_id }}?same-folder=true&time-planned=120" target="_blank">First id:{{ img.image_id }}</a>
+<header class="ov-header">
+    <h1>Ref Buddy</h1>
+    <nav class="main-menu main-menu-flex">
+        <ul>
+            <li><a href="/all?page=1&tags=&tag-set=all" class="no-decor but-decor-hover">All</a></li>
+            <li><a href="/favs?page=1" class="no-decor but-decor-hover">Favourites</a></li>
+            <li><a href="/latest_study?page=1" class="no-decor but-decor-hover">Last study</a></li>
+            <li><a href="/tags" class="no-decor but-decor-hover">Tags</a></li>
+            <li><a href="/tag-sets" class="no-decor but-decor-hover">Sets</a></li>
+            <li><a href="/path-tags" class="no-decor but-decor-hover">Paths</a></li>
+            <li><a href="/palettes" class="no-decor but-decor-hover">Pallets</a></li>
+            <li><a href="/boards" class="no-decor but-decor-hover">Boards</a></li>
+        </ul>
+    </nav>
+</header>
+<ul class="secondary-menu secondary-menu-flex">
+</ul>
+
+<main class="container">
+</main>
+
+<template id="tile-header">
+    <h2>{{ 'academic' }}</h2>
+    <div class="sep"></div>
+</template>
+<template id="menu-anchor">
+    <li><a href=""></a></li>
+</template>
+<template id="tile-section">
+    <section class="tiles-container">
+    </section>
+</template>
+<template id="tile">
+    <div class="tile">
+        <div class="thumb-bg" data-src="/thumb/{{ 1 }}.jpg"></div>
+        <a href="/folder/{{ 1 }}" target="_blank"></a>
+        <div class="overlay overlay-flex">
+            <h3 class="long-text-break"></h3>
         </div>
     </div>
-{% endfor %}
-</div>
+</template>
 
 <script type="importmap">
     {

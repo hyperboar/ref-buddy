@@ -75,6 +75,10 @@ body
     font-family: 'Arial', sans-serif;
 }
 
+html, body {
+    scroll-behavior: smooth;
+}
+
 .body-sel-mode-on
 {
     background-color: var(--clr-sel-bg) !important;
@@ -140,6 +144,16 @@ button
 .vis-hide
 {
     display: none !important;
+}
+
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
 }
 
 /* Button semi transparent */
