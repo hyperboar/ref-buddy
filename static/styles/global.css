@@ -1,3 +1,5 @@
+/*#region GLOBAL*/
+
 :root
 {
     --z-main-bg: -1;
@@ -13,8 +15,9 @@
     --z-drop-target: 199999;
     --z-fract: 299999; /* in development */
 
-    --clr-gray3: #545151;
     --clr-main-bg: #7a7676;
+    --clr-text: #181818;
+    --clr-gray3: #545151;
     --clr-popup-bg: #918d8d;
     --clr-popup-bg-border: black;
     --clr-popup-backrop: black;
@@ -68,6 +71,63 @@
 
     --cursor-transp:  url("/static/images/cursor-transp.png") , auto;
 }
+
+/*#endregion GLOBAL*/
+
+/*#region RESET*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a, a:visited {text-decoration: none; color: var(--clr-text);}
+img {max-width: 100%;}
+ul {list-style: none;}
+
+/*#endregion RESET*/
+
+
+/*#region UTILS*/
+
+/* Use instead of style="display: hidden" */
+.vis-hide
+{
+    display: none !important;
+}
+
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+/* Button semi transparent */
+.btn-bg-blend {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+.btn-bg-blend:hover {
+    opacity: 1;
+}
+
+.btn-bg-blend2 {
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+.btn-bg-blend2:hover {
+    opacity: 1;
+}
+
+/*#endregion UTILS*/
+
+
+/*#region MAIN*/
 
 body
 {
@@ -140,39 +200,6 @@ button
 .rate-up {background-image: var(--url-icon-up);}
 .rate-dn {background-image: var(--url-icon-down);}
 
-/* Use instead of style="display: hidden" */
-.vis-hide
-{
-    display: none !important;
-}
-
-.visually-hidden {
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    height: 1px;
-    overflow: hidden;
-    position: absolute;
-    white-space: nowrap;
-    width: 1px;
-}
-
-/* Button semi transparent */
-.btn-bg-blend {
-    opacity: 0.5;
-    transition: opacity 0.2s;
-}
-.btn-bg-blend:hover {
-    opacity: 1;
-}
-
-.btn-bg-blend2 {
-    opacity: 0.2;
-    transition: opacity 0.2s;
-}
-.btn-bg-blend2:hover {
-    opacity: 1;
-}
-
 /* Paging */
 .paging
 {
@@ -189,7 +216,9 @@ button
     margin: 5px;
 }
 
-/* TAGS */
+/*#endregion MAIN*/
+
+/*#region TAGS*/
 
 .popup, .tags-popup {
     position: fixed;
@@ -418,10 +447,10 @@ button
 {
     text-decoration: underline;
 }
-/* END TAGS */
+/*#endregion TAGS*/
 
 
-/* OTHER */
+/*#region OTHER*/
 
 #yesno
 {
@@ -452,10 +481,10 @@ button
     margin: 10px;
 }
 
-/* END OTHER */
+/*#endregion OTHER*/
 
 
-/* Animations */
+/*#region Animations*/
 
 /* Loading */
 @keyframes animLoading {
@@ -515,4 +544,4 @@ button
     animation: animFail 1s ease-out;
 }
 
-/* END Animations */
+/*#endregion Animations */
