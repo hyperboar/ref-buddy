@@ -20,6 +20,10 @@ class OSInfo
                 return this.platforms.None
         }
     }
+
+    static get isMultitouch() {
+        return navigator.maxTouchPoints > 1
+    }
 }
 
 Array.prototype.remove = function(elem)

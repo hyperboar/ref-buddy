@@ -1,5 +1,5 @@
 import {ApiBoards} from 'api'
-import {Hotkeys} from '/static/js/main.js'
+import {Hotkeys, OSInfo} from '/static/js/main.js'
 import {BoardImage, BoardBoard} from '/static/js/board_item.js'
 
 
@@ -46,7 +46,7 @@ function initializeBoard()
                 item.setGetIsDragAllowed(() => hotkeys.isPressed('KeyCtrl'))
                 item.setGetIsScaleAllowed(() => hotkeys.isPressed('KeyCtrl'))
                 item.setGetIsRemoveAllowed(() => hotkeys.isPressed('KeyX'))
-                item.setGetIsStudyAllowed(() => hotkeys.isPressed('KeyS'))
+                item.setGetIsStudyAllowed(() => hotkeys.isPressed('KeyS') || OSInfo.isMultitouch)
 
                 item.onGoToStudyCompleted = () => { hotkeys.cancelKey('KeyS') }
             })
