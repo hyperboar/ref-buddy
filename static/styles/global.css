@@ -70,6 +70,8 @@
     --url-icon-play:  url("/static/images/play.png");
 
     --cursor-transp:  url("/static/images/cursor-transp.png") , auto;
+
+    --vh: 100vh;
 }
 
 /*#endregion GLOBAL*/
@@ -124,6 +126,23 @@ ul {list-style: none;}
     opacity: 1;
 }
 
+.bg-blend-1 {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+.bg-blend-1:hover {
+    opacity: 1;
+}
+
+.bg-blend-2 {
+    opacity: 0.2;
+    transition: opacity 0.2s;
+}
+.bg-blend-2:hover {
+    opacity: 1;
+}
+
+
 /*#endregion UTILS*/
 
 
@@ -132,7 +151,7 @@ ul {list-style: none;}
 body
 {
     background-color: var(--clr-main-bg);
-    font-family: 'Arial', sans-serif;
+    font-family: 'Verdana', sans-serif;
 }
 
 html, body {

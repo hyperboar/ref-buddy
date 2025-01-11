@@ -56,20 +56,23 @@ class DrawCanvas
         this._ctrls = document.querySelector(selControls)
         this._ctx = this._canvas.getContext("2d")
 
+        this.initCanvas()
+        this.initControls()
+        // this.restoreFromSave()
+
+        this._lastStrokeCount = 1
+        this.recordHistory()
+    }
+
+    updateCanvas(selImg)
+    {
         const img = document.querySelector(selImg)
 
-        waitForCondition(() => img.width > 0 && img.height > 0)(img).then(initImg =>
-        {
-            this._canvas.width  = initImg.width
+        waitForCondition(() => img.width > 0 && img.height > 0)(img).then(initImg => {
+            this._canvas.width = initImg.width
             this._canvas.height = initImg.height
 
-            this.initCanvas()
-            this.initControls()
-
-            // this.restoreFromSave()
-
-            this._lastStrokeCount = 1
-            this.recordHistory()
+            this.fillMark()
         })
     }
 
@@ -84,7 +87,6 @@ class DrawCanvas
 
         this.setColor(this._selectedColor)
         this.setLineWeight(this._lineWeight)
-        this.fillMark()
     }
 
     initControls()

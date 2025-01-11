@@ -7,133 +7,315 @@
 	<title>Image ({{ content_id }})</title>
 </head>
 <body>
-<div style="display: none" id="image-id">{{ content_id }}</div>
-
-<div class="modal-bg">
-    <img src="{{ content_url }}" alt="{# setup #}">
+<div class="media-bg">
+    <!-- INSERT .media-bg --> 
 </div>
+<main class="content content-grid">
 
-<div class="magnification-container vis-hide">
-    <div class="magnification"><img class="magn-img" src =""/></div>
-</div>
-<div class="modal">
-    <div class="modal-img-container">
-        <div class="anim-container vis-hide">
-            <img id="animation" src=""/>
-            <table class="stats-overlay">
-                <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
-                <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>
-                <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>
-                <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>
-                <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
-            </table>
-        </div>
-        <canvas id="draw-overlay" width="0" height="0" class="vis-hide" draggable="false"></canvas>
-        <img class="modal-img" src="{{ content_url }}" alt="{# setup #}" tabindex="0">
-    </div>
+    <section id="media">
+        <div class="media">
+            <!-- INSERT .media -->
 
-    <div class="modal-controls btn-bg-blend">
-        <div class="row timer">
-            <span class="timer-icon"></span>&nbsp;&nbsp;
-            <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>
-            <span class="space"/>
-            <button id="timer-start" class="btn-bg-blend" started="">Start</button>
-        </div>
-        <div class="row">
-            <span>Filter: </span>
-            <select id="tag-set" class="btn-bg-blend">
-                <option value="none">None</option>
-            </select>
-            <span class="space"/>
-            <button id="toggle-grayscale" class="btn-bg-blend" value="" >Gray</button>
-        </div>
-        <div class="row">
-            <button id="open-vid-btn" class="btn-bg-blend vis-hide">play</button>
-            <button id="info-button" class="btn-bg-blend">info</button>
-            <button id="tags-filter-button" class="btn-bg-blend" title="Tags Filter">TF</button>
-            <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>
-            <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>
-            <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>
-            <button id="draw-button" class="btn-bg-blend" title="Drawing Canvas">cnv</button>
-            <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
-        </div>
-        <div class="row">
-            <label for="rate-up">Rating: <span id="image-rating">{# setup #}</span></label>
-            <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
-            <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
-        </div>
-        <div class="row">
-            <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
-            <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
-            <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
-        </div>
-        <div class="row">
-            <label for="same-folder">Same folder:</label>
-            <input type="checkbox" id="same-folder" value="true">
-            <input type="hidden" id="min-rating" value="0">
-            <a id="img-folder-link" href="{# setup #}"><img class="dir-link" src="/static/images/link.png"></a>
-        </div>
-        <div class="row">
-            <button id="prev" class="btn-bg-blend">&lt;</button>
-            <select id="pick-next-type" class="btn-bg-blend">
-                <option value="rnd" selected="selected">At Random</option>
-                <option value="name">By File Name</option>
-                <option value="id">By Id</option>
-                <option value="history">By History Only</option>
-            </select>
-            <button id="next" class="btn-bg-blend">&gt;</button>
-        </div>
-        <div id="history-marker" class="row vis-hide">
-            History shows&nbsp;<span id="h-cur-pos"></span>&nbsp;/&nbsp;<span id="h-max-pos"></span>
-        </div>
-    </div>
+            <div id="magnification" class="magnification-container hidden">
+                <div class="magnification"><img class="magn-img" src="" alt=""/></div>
+            </div>
 
-    <div class="pallet-container vis-hide">
+            <div id="drawing">
+                <canvas id="draw-overlay" width="0" height="0" class="hidden" draggable="false"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <aside id="controls">
+        <div class="media-controls bg-blend-1">
+            <div class="controls-toggle"><button class="controls-toggle-btn" data-state="1" data-on="&gt;" data-off="&lt;">&gt;</button></div>
+            <div class="row timer">
+                <span class="timer-icon"></span>
+                <span id="time-current">0</span> / <span id="time-planned" value="120">0</span>
+                <div class="space"></div>
+                <button id="timer-start" class="btn-bg-blend" started="">Start</button>
+            </div>
+            <div class="row">
+                <label for="tag-set">Filter: </label>
+                <select id="tag-set" class="btn-bg-blend">
+                    <option value="none">None</option>
+                </select>
+                <div class="space"></div>
+                <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>
+            </div>
+            <div class="row">
+                <button id="open-vid-btn" class="btn-bg-blend hidden">play</button>
+                <button id="info-button" class="btn-bg-blend">info</button>
+                <button id="tags-filter-button" class="btn-bg-blend" title="Tags Filter">TF</button>
+                <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>
+                <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>
+                <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>
+                <button id="draw-button" class="btn-bg-blend" title="Drawing Canvas">cnv</button>
+                <button class="fav btn-bg-blend" id="is-fav" value="{# setup #}"></button>
+            </div>
+            <div class="row">
+                <label for="rate-up">Rating: <span id="image-rating">{# setup #}</span></label>
+                <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>
+                <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>
+            </div>
+            <div class="row">
+                <label for="rate-up">Folder rating <span id="rate-fld"></span></label>
+                <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>
+                <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>
+            </div>
+            <div class="row">
+                <label for="same-folder">Same folder:</label>
+                <input type="checkbox" id="same-folder" value="true">
+                <input type="hidden" id="min-rating" value="0">
+                <a id="img-folder-link" href="{# setup #}"><img class="dir-link" src="/static/images/link.png"></a>
+            </div>
+            <div class="row">
+                <button id="prev" class="btn-bg-blend">&lt;</button>
+                <select id="pick-next-type" class="btn-bg-blend">
+                    <option value="rnd" selected="selected">At Random</option>
+                    <option value="name">By File Name</option>
+                    <option value="id">By Id</option>
+                    <option value="history">By History Only</option>
+                </select>
+                <button id="next" class="btn-bg-blend">&gt;</button>
+            </div>
+            <div id="history-marker" class="row hidden">
+                History shows&nbsp;<span id="h-cur-pos"></span>&nbsp;/&nbsp;<span id="h-max-pos"></span>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<section class="overlay-container">
+    <!-- palette -->
+    <div class="pallet-container hidden">
         {#  <div class="pallet-cell" style="background-color: {{ c.color.hex }};" data-hex="{{ c.color.hex }}" data-x="{{ c.x }}" data-y="{{ c.y }}">{{ c.color.hex }}</div>#}
     </div>
-    <div id="pallet-frame" class="vis-hide"></div>
-</div>
-<div id="image-info-popup" class="popup vis-hide">
-    <div class="popup-row">
+    <div id="pallet-frame" class="hidden"></div>
+    
+    <!-- info -->
+    <div id="image-info-popup" class="popup hidden">
+        <div class="popup-row">
+        </div>
+        <div class="popup-row">
+            <a href="" id="info-image-id"></a>&nbsp;
+            <span id="image-path">{# setup #}</span>&nbsp;
+            <button id="image-path-copy-btn">Copy</button>
+        </div>
+        <div class="popup-row">
+            <ul id="tags">
+                {# <li><a href="/all?tags={{ tag.tag }}">{{ tag.tag }}</a></li> #}
+            </ul>
+        </div>
     </div>
-    <div class="popup-row">
-        <a href="" id="info-image-id"></a>&nbsp;
-        <span id="image-path">{# setup #}</span>&nbsp;
-        <button id="image-path-copy-btn">Copy</button>
-    </div>
-    <div class="popup-row">
-        <ul id="tags">
-            {# <li><a href="/all?tags={{ tag.tag }}">{{ tag.tag }}</a></li> #}
-        </ul>
-    </div>
-</div>
-<div id="drop-target" class="vis-hide">
-    <div id="container">
-    <span>Drop here</span>
-    </div>
-</div>
 
-<div class="vis-hide canvas-controls canvas-controls-flex canvas-controls-right" id="draw-canvas-controls">
-{#    <label for="draw-cnv">Drawing:</label>#}
-    <button class="btn-bg-blend vis-hide" id="tlp-draw-clr" value="#000000ff">С1</button>
-    <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>
-    <button class="btn-bg-blend" id="draw-clear">Clr</button>
-{#    <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>#}
-    <div class="slider-container">
-        <label for="draw-weight">br <span class="size"></span></label>
-        <input type="range" min="1" max="10" value="2" step="1" id="draw-weight"/>
+    <!-- drop target -->
+    <div id="drop-target" class="hidden">
+        <div id="container">
+            <span>Drop here</span>
+        </div>
     </div>
-    <div class="slider-container">
-        <label for="erase-weight">er <span class="size"></span></label>
-        <input type="range" min="1" max="10" value="2" step="1" id="erase-weight"/>
-    </div>
-</div>
 
-<!-- Stubs for some components -->
-<div style="display: none">
+    <!-- canvas controls -->
+    <div class="hidden canvas-controls canvas-controls-flex canvas-controls-right" id="draw-canvas-controls">
+        {#    <label for="draw-cnv">Drawing:</label>#}
+        <button class="btn-bg-blend hidden" id="tlp-draw-clr" value="#000000ff">С1</button>
+        <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>
+        <button class="btn-bg-blend" id="draw-clear">Clr</button>
+        {#    <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>#}
+        <div class="slider-container">
+            <label for="draw-weight">br <span class="size"></span></label>
+            <input type="range" min="1" max="10" value="2" step="1" id="draw-weight"/>
+        </div>
+        <div class="slider-container">
+            <label for="erase-weight">er <span class="size"></span></label>
+            <input type="range" min="1" max="10" value="2" step="1" id="erase-weight"/>
+        </div>
+    </div>
+</section>
+
+<section hidden>
+    <div id="image-id">{{ content_id }}</div>
+    <!-- for selection feature -->
     <button id="stub-select-btn"></button>
     <div class="stub-gallery"><div class="stub-thumb" data-id="{# setup #}"></div></div>
-</div>
+</section>
+
+<!-- TEMPLATES -->
+
+<!-- background -->
+<template id="tpl-media-bg-image">
+    <img src="" alt="">
+</template>
+<template id="tpl-media-bg-video">
+    <video src=""></video>
+</template>
+
+<!-- media -->
+<template id="tpl-media-image">
+     <img class="media-img" src="{{ content_url }}" alt="{# setup #}" tabindex="-1">
+</template>
+
+<template id="tpl-media-frames">
+    <div class="anim-container hidden">
+        <img id="animation" src="{# setup #}" alt="" tabindex="-1"/>
+        <table class="stats-overlay">
+            <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
+            <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>
+            <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>
+            <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>
+            <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
+        </table>
+    </div>
+</template>
+
+<template id="tpl-media-video">
+    <div class="video-container">
+        <video id="video" class="modal-img video-fix" tabindex="-1">
+            <source src="{# setup #}" type="video/mp4">
+        </video>
+        <video id="video-fwd" class="modal-img video-fix hidden" tabindex="-1">
+            <source src="{# setup #}" type="video/mp4">
+        </video>
+        <table class="stats-overlay">
+            <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
+            <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>
+            <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>
+            <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>
+            <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>
+        </table>
+    </div>
+</template>
+
+<!-- END TEMPLATES -->
+
+
+
+
+
+{#<div class="modal-bg">#}
+{#    <img src="{{ content_url }}" alt="">#}
+{#</div>#}
+
+{#<div class="magnification-container hidden">#}
+{#    <div class="magnification"><img class="magn-img" src =""/></div>#}
+{#</div>#}
+{#<div class="modal">#}
+{#    <div class="modal-img-container">#}
+{#        <div class="anim-container hidden">#}
+{#            <img id="animation" src=""/>#}
+{#            <table class="stats-overlay">#}
+{#                <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>#}
+{#                <tr><td>FPS </td><td id="stat-fps" class="table-value">0</td></tr>#}
+{#                <tr><td>Pers </td><td id="stat-prog" class="table-value">0</td></tr>#}
+{#                <tr><td>Time </td><td id="stat-time" class="table-value">0</td></tr>#}
+{#                <tr><td>Frame </td><td id="stat-frame" class="table-value">0</td></tr>#}
+{#            </table>#}
+{#        </div>#}
+{#        <canvas id="draw-overlay" width="0" height="0" class="hidden" draggable="false"></canvas>#}
+{#        <img class="modal-img" src="{{ content_url }}" alt="{# setup #" tabindex="0">#}
+{#    </div>#}
+
+{#    <div class="modal-controls btn-bg-blend">#}
+{#        <div class="row timer">#}
+{#            <span class="timer-icon"></span>&nbsp;&nbsp;#}
+{#            <span id="time-current">0</span>&nbsp;/&nbsp;<span id="time-planned" value="120">0</span>#}
+{#            <span class="space"/>#}
+{#            <button id="timer-start" class="btn-bg-blend" started="">Start</button>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <span>Filter: </span>#}
+{#            <select id="tag-set" class="btn-bg-blend">#}
+{#                <option value="none">None</option>#}
+{#            </select>#}
+{#            <span class="space"/>#}
+{#            <button id="toggle-grayscale" class="btn-bg-blend" value="" >Gray</button>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <button id="open-vid-btn" class="btn-bg-blend hidden">play</button>#}
+{#            <button id="info-button" class="btn-bg-blend">info</button>#}
+{#            <button id="tags-filter-button" class="btn-bg-blend" title="Tags Filter">TF</button>#}
+{#            <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>#}
+{#            <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>#}
+{#            <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>#}
+{#            <button id="draw-button" class="btn-bg-blend" title="Drawing Canvas">cnv</button>#}
+{#            <button class="fav btn-bg-blend" id="is-fav" value="{# setup #"></button>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <label for="rate-up">Rating: <span id="image-rating">{# setup #</span></label>#}
+{#            <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>#}
+{#            <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <label for="rate-up">Folder rating <span id="rate-fld"></span></label>#}
+{#            <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>#}
+{#            <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <label for="same-folder">Same folder:</label>#}
+{#            <input type="checkbox" id="same-folder" value="true">#}
+{#            <input type="hidden" id="min-rating" value="0">#}
+{#            <a id="img-folder-link" href="{# setup #"><img class="dir-link" src="/static/images/link.png"></a>#}
+{#        </div>#}
+{#        <div class="row">#}
+{#            <button id="prev" class="btn-bg-blend">&lt;</button>#}
+{#            <select id="pick-next-type" class="btn-bg-blend">#}
+{#                <option value="rnd" selected="selected">At Random</option>#}
+{#                <option value="name">By File Name</option>#}
+{#                <option value="id">By Id</option>#}
+{#                <option value="history">By History Only</option>#}
+{#            </select>#}
+{#            <button id="next" class="btn-bg-blend">&gt;</button>#}
+{#        </div>#}
+{#        <div id="history-marker" class="row hidden">#}
+{#            History shows&nbsp;<span id="h-cur-pos"></span>&nbsp;/&nbsp;<span id="h-max-pos"></span>#}
+{#        </div>#}
+{#    </div>#}
+
+{#    <div class="pallet-container hidden">#}
+        {#  <div class="pallet-cell" style="background-color: {{ c.color.hex }};" data-hex="{{ c.color.hex }}" data-x="{{ c.x }}" data-y="{{ c.y }}">{{ c.color.hex }}</div>#}
+{#    </div>#}
+{#    <div id="pallet-frame" class="hidden"></div>#}
+{#</div>#}
+{#<div id="image-info-popup" class="popup hidden">#}
+{#    <div class="popup-row">#}
+{#    </div>#}
+{#    <div class="popup-row">#}
+{#        <a href="" id="info-image-id"></a>&nbsp;#}
+{#        <span id="image-path">{# setup #</span>&nbsp;#}
+{#        <button id="image-path-copy-btn">Copy</button>#}
+{#    </div>#}
+{#    <div class="popup-row">#}
+{#        <ul id="tags">#}
+            {# <li><a href="/all?tags={{ tag.tag }}">{{ tag.tag }}</a></li> #}
+{#        </ul>#}
+{#    </div>#}
+{#</div>#}
+{#<div id="drop-target" class="hidden">#}
+{#    <div id="container">#}
+{#    <span>Drop here</span>#}
+{#    </div>#}
+{#</div>#}
+
+{#<div class="hidden canvas-controls canvas-controls-flex canvas-controls-right" id="draw-canvas-controls">#}
+{#    <label for="draw-cnv">Drawing:</label>#}
+{#    <button class="btn-bg-blend hidden" id="tlp-draw-clr" value="#000000ff">С1</button>#}
+{#    <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>#}
+{#    <button class="btn-bg-blend" id="draw-clear">Clr</button>#}
+{#    <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>#}
+{#    <div class="slider-container">#}
+{#        <label for="draw-weight">br <span class="size"></span></label>#}
+{#        <input type="range" min="1" max="10" value="2" step="1" id="draw-weight"/>#}
+{#    </div>#}
+{#    <div class="slider-container">#}
+{#        <label for="erase-weight">er <span class="size"></span></label>#}
+{#        <input type="range" min="1" max="10" value="2" step="1" id="erase-weight"/>#}
+{#    </div>#}
+{#</div>#}
+
+
+
+
 <script type="importmap">
     {
         "imports":

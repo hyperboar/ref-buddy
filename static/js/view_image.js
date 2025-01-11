@@ -18,29 +18,7 @@ import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import { AnimPlayer } from "/static/js/video/anim_player.js"
-// import * as fabric from "/static/js/vendors/fabric.min.js"
 
-// const canvas = new fabric.Canvas('compose-overlay', {
-//     isDrawingMode: true
-//   });
-// // canvas.isDrawingMode = true;
-// canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
-// canvas.freeDrawingBrush.width = 30
-// canvas.freeDrawingBrush.color = "#ff000033"
-// // const rect = new fabric.Rect({
-// //     top: 100,
-// //     left: 100,
-// //     width: 60,
-// //     height: 70,
-// //     fill: 'red',
-// //     strokeWidth: 10,
-// //     strokeStyle: 'rgba(0,0,0,0.5)',
-// //
-// //   });
-// // canvas.add(rect);
-// console.log(canvas);
-
-// document.getElementById("compose-overlay").addEventListener('click', evt => console.log(evt))
 
 let selection = null
 let rateImage = null
@@ -82,7 +60,44 @@ function initializeComponents()
     // yay!
     doubleCheckWeHaveAllWeNeedInUrl()
 
+    function updateViewportHeight() {
+        const vh = window.visualViewport.height;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    window.addEventListener('resize', updateViewportHeight);
+    window.addEventListener('scroll', updateViewportHeight); // Handle dynamic UI changes
+    window.addEventListener('load', updateViewportHeight); // Ensure it runs on page load
+
+     // Call it once at the beginning
+    updateViewportHeight();
+
     const imageId = document.getElementById('image-id').textContent
+
+    // controls
+    const ctrlBtn = document.querySelector('.controls-toggle-btn')
+    function updateCtrlBtn(evt) {
+        const btn = evt.target
+        let state = parseInt(btn.getAttribute('data-state')) === 1
+        btn.textContent = state ?
+            btn.getAttribute('data-on') :
+            btn.getAttribute('data-off')
+
+        const panel = btn.closest('.media-controls')
+        if (state)
+            panel.classList.remove('media-controls-collapsed')
+        else
+            panel.classList.add('media-controls-collapsed')
+    }
+    updateCtrlBtn({'target': ctrlBtn})
+    ctrlBtn.addEventListener('click', (evt) => {
+        const btn = evt.target
+        // toggle
+        let state = parseInt(btn.getAttribute('data-state'))
+        state = (state + 1) % 2
+        btn.setAttribute('data-state', state)
+        updateCtrlBtn(evt)
+    })
 
     // history
     history = new ImageHistory()
@@ -103,28 +118,29 @@ function initializeComponents()
     document.addEventListener('fav', (e) => { console.log(e.detail.fav.isFav); currentImageData.fav = e.detail.fav.isFav })
 
     // flip
-    imageFlip = new ImageFlip(['.modal-img-container'])
+    imageFlip = new ImageFlip(['.media', '.magnification'])
 
-    // magnification
-    magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
+    // // TODO distinguish between img, gif, video
+    // // magnification
+    // magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
-    imageGrayScale = new ImageGrayscale(['.modal',  '.modal-bg img', '.magnification'])
+    imageGrayScale = new ImageGrayscale(['.media',  '.media-bg', '.magnification'])
     const gsButton = document.getElementById('toggle-grayscale')
     gsButton.addEventListener('click', () => imageGrayScale.toggleGrayscale())
 
     // cursor
-    cursor = new ImageCursor('.modal-img', '.magnification')
+    cursor = new ImageCursor('.media', '.magnification')
 
     // draw canvas
-    drawCanvas = new DrawCanvas('#draw-overlay', '.modal-img', '#draw-canvas-controls', imageId)
+    drawCanvas = new DrawCanvas('#draw-overlay', 'stub!', '#draw-canvas-controls', imageId)
     const dcButton = document.getElementById('draw-button')
     dcButton.addEventListener('click', () => drawCanvas.toggle())
 
-    colorPicker = new ColorPicker(-1, '.modal-img', '.pallet-container', '.modal-img-color-picker', '#pallet-frame')
+    colorPicker = new ColorPicker(-1, '.media', '.pallet-container', '.modal-img-color-picker', '#pallet-frame')
     // palette
     document.getElementById('pallet-button').addEventListener('click', (e) =>
-        document.querySelector('.pallet-container').classList.toggle('vis-hide'))
+        document.querySelector('.pallet-container').classList.toggle('hidden'))
 
     // same folder
     InitializeSameFolder()
@@ -138,8 +154,8 @@ function initializeComponents()
     {
         document.getElementById('image-id').textContent = e.detail.nextId
 
-        if (imageMove.history.isAtTail) {hMarker.classList.add('vis-hide')}
-        else hMarker.classList.remove('vis-hide')
+        if (imageMove.history.isAtTail) {hMarker.classList.add('hidden')}
+        else hMarker.classList.remove('hidden')
 
         console.log(`${imageMove.pos} ${imageMove.length}`)
 
@@ -164,21 +180,22 @@ function initializeComponents()
             })
     })
 
-    animPlayer = new AnimPlayer(
-        '.anim-container',
-        '.anim-container #animation',
-        '.anim-container #stat-frame',
-        '.anim-container #stat-time',
-        '.anim-container #stat-dur',
-        '.anim-container #stat-prog')
-    animPlayer.node.addEventListener('onupdate', (e) =>
-    {
-        const anim = e.detail.video
-        const modalBg = document.querySelector('.modal-bg img')
-        modalBg.src = anim.currentFrameUrl
-
-        magnifier.setImage(anim.currentFrameUrl)
-    })
+    // // animation
+    // animPlayer = new AnimPlayer(
+    //     '.anim-container',
+    //     '.anim-container #animation',
+    //     '.anim-container #stat-frame',
+    //     '.anim-container #stat-time',
+    //     '.anim-container #stat-dur',
+    //     '.anim-container #stat-prog')
+    // animPlayer.node.addEventListener('onupdate', (e) =>
+    // {
+    //     const anim = e.detail.video
+    //     const modalBg = document.querySelector('.media-bg img')
+    //     modalBg.src = anim.currentFrameUrl
+    //
+    //     magnifier.setImage(anim.currentFrameUrl)
+    // })
 
     // board
     boardWidget = new WidgetBoard('', '#board-button', () => selection.selectedIds)
@@ -231,7 +248,7 @@ function initializeComponents()
     {
         if (!infoPopup.contains(event.target) && event.target !== infoBtn)
         {
-            infoPopup.classList.add('vis-hide')
+            infoPopup.classList.add('hidden')
         }
     })
 
@@ -248,71 +265,71 @@ function initializeComponents()
     })
 
 
-    const dropTarget = document.querySelector('#drop-target')
-    const body = document.querySelector('body')
-    body.addEventListener('dragover', e =>
-    {
-        if (dropTarget.classList.contains('vis-hide')) { dropTarget.classList.remove('vis-hide') }
-
-        e.preventDefault()
-    })
-        body.addEventListener('mouseup', e =>
-    {
-        if (!dropTarget.classList.contains('vis-hide')) { dropTarget.classList.add('vis-hide') }
-    })
-    // body.addEventListener('dragleave', e =>
+    // const dropTarget = document.querySelector('#drop-target')
+    // const body = document.querySelector('body')
+    // body.addEventListener('dragover', e =>
+    // {
+    //     if (dropTarget.classList.contains('hidden')) { dropTarget.classList.remove('hidden') }
+    //
+    //     e.preventDefault()
+    // })
+    //     body.addEventListener('mouseup', e =>
+    // {
+    //     if (!dropTarget.classList.contains('hidden')) { dropTarget.classList.add('hidden') }
+    // })
+    // // body.addEventListener('dragleave', e =>
+    // // {
+    // //     e.preventDefault()
+    // //
+    // //     if (!dropTarget.classList.contains('hidden')) { dropTarget.classList.add('hidden') }
+    // // })
+    //
+    // dropTarget.addEventListener('dragover', e=>
+    // {
+    //     console.log('target')
+    //     // console.log(e)
+    //     e.preventDefault()
+    // })
+    //
+    // dropTarget.addEventListener('drop', e=>
     // {
     //     e.preventDefault()
     //
-    //     if (!dropTarget.classList.contains('vis-hide')) { dropTarget.classList.add('vis-hide') }
+    //     console.log('target')
+    //     // console.log(e)
+    //
+    //     if (!dropTarget.classList.contains('hidden')) { dropTarget.classList.add('hidden') }
+    //
+    //     const files = e.dataTransfer.items ?
+    //         [...e.dataTransfer.items].filter(item => item.kind === "file").map(item => item.getAsFile()) :
+    //         [...e.dataTransfer.files]
+    //
+    //     files.forEach((file, i) =>
+    //     {
+    //         // console.log(`… file[${i}].name = ${file.name}`)
+    //         let reader = new FileReader()
+    //         reader.readAsDataURL(file)
+    //         reader.onloadend = function()
+    //         {
+    //             const data = {
+    //                 "id": -666,
+    //                 "thumb": reader.result,
+    //                 "url_image": reader.result,
+    //                 "url_folder": "/folder/-1",
+    //                 "path": file,
+    //                 "path_id": -1,
+    //                 "content_type": 1,
+    //                 "video": 0,
+    //                 "fav": 0,
+    //                 "rating": 0,
+    //                 "extra": {}
+    //             }
+    //             console.log(data)
+    //             injectImageData(data)
+    //             updateComponents(data)
+    //         }
+    //     })
     // })
-
-    dropTarget.addEventListener('dragover', e=>
-    {
-        console.log('target')
-        // console.log(e)
-        e.preventDefault()
-    })
-
-    dropTarget.addEventListener('drop', e=>
-    {
-        e.preventDefault()
-
-        console.log('target')
-        // console.log(e)
-
-        if (!dropTarget.classList.contains('vis-hide')) { dropTarget.classList.add('vis-hide') }
-
-        const files = e.dataTransfer.items ?
-            [...e.dataTransfer.items].filter(item => item.kind === "file").map(item => item.getAsFile()) :
-            [...e.dataTransfer.files]
-
-        files.forEach((file, i) =>
-        {
-            // console.log(`… file[${i}].name = ${file.name}`)
-            let reader = new FileReader()
-            reader.readAsDataURL(file)
-            reader.onloadend = function()
-            {
-                const data = {
-                    "id": -666,
-                    "thumb": reader.result,
-                    "url_image": reader.result,
-                    "url_folder": "/folder/-1",
-                    "path": file,
-                    "path_id": -1,
-                    "content_type": 1,
-                    "video": 0,
-                    "fav": 0,
-                    "rating": 0,
-                    "extra": {}
-                }
-                console.log(data)
-                injectImageData(data)
-                updateComponents(data)
-            }
-        })
-    })
 
     // hotkeys
     document.addEventListener('keydown', (e) =>
@@ -385,12 +402,16 @@ function updateComponents(data)
     rateImage.imageId = data.id
     rateFolder.imageId = data.id
 
+    // color picker
     colorPicker.reset(data.id)
 
     fav.setData(data.id, data.fav === 1)
     fav.update(data.fav === 1)
 
     timer.reset()
+
+    if (data.video === 0)
+        drawCanvas.updateCanvas('.media .media-img')
 }
 
 function loadImage() {
@@ -408,34 +429,39 @@ function injectImageData(data)
 {
     currentImageData = data
 
-    const imgId = document.getElementById('image-id')
+    const imgId = document.querySelector('#image-id')
     imgId.textContent = data.id
 
-    const modalBg = document.querySelector('.modal-bg img')
-    const modalImg = document.querySelector('.modal-img')
+    const mediaBg = document.querySelector('.media-bg')
+    // insert appropriate bg
+    insertMediaBg(mediaBg, data)
 
-    magnifier.reset()
-    if (data.content_type === 2) // animated something
-    {
-        modalImg.classList.add('vis-hide')
-        animPlayer.node.classList.remove('vis-hide')
-        animPlayer.pause()
-        animPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
-    }
-    else
-    {
-        modalImg.classList.remove('vis-hide')
-        animPlayer.node.classList.add('vis-hide')
-        animPlayer.pause()
+    const media = document.querySelector('.media')
+    insertMediaContent(media, data)
 
-        magnifier.setImage(data.url_image)
-
-        Array.from([modalBg, modalImg]).forEach(im =>
-        {
-            im.src = data.url_image
-            im.alt = `${data.id}:${data.path}`
-        })
-    }
+    // // magnifier
+    // magnifier.reset()
+    // if (data.content_type === 2) // animated something
+    // {
+    //     mediaImg.classList.add('hidden')
+    //     animPlayer.node.classList.remove('hidden')
+    //     animPlayer.pause()
+    //     animPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
+    // }
+    // else
+    // {
+    //     mediaImg.classList.remove('hidden')
+    //     animPlayer.node.classList.add('hidden')
+    //     animPlayer.pause()
+    //
+    //     magnifier.setImage(data.url_image)
+    //
+    //     Array.from([mediaBg, mediaImg]).forEach(im =>
+    //     {
+    //         im.src = data.url_image
+    //         im.alt = `${data.id}:${data.path}`
+    //     })
+    // }
 
     const rating = document.querySelector('#image-rating')
     rating.textContent = data.rating
@@ -459,8 +485,8 @@ function injectImageData(data)
     stubThumb.setAttribute('data-id', data.id)
 
     const openVidBtn = document.getElementById('open-vid-btn')
-    if (data.video) {openVidBtn.classList.remove('vis-hide')}
-    else openVidBtn.classList.add('vis-hide')
+    if (data.video) {openVidBtn.classList.remove('hidden')}
+    else openVidBtn.classList.add('hidden')
 }
 
 function updateImageTags()
@@ -489,6 +515,56 @@ function updateImageTags()
 
             imageTagEditor.highlightTags(Array.from(data[0].tags).map(t => t.name))
         })
+}
+
+function insertMediaBg(container, data)
+{
+    container.childNodes.forEach(el => el.remove())
+
+    // image
+    if (data.video === 0)
+    {
+        const tpl = document.querySelector('#tpl-media-bg-image')
+        const node = tpl.cloneNode(true).content
+
+        node.querySelector('img').src = data.url_image
+
+        container.appendChild(node)
+    }
+    // video
+    else
+    {
+        const tpl = document.querySelector('#tpl-media-bg-video')
+        const node = tpl.cloneNode(true).content
+
+        container.appendChild(node)
+    }
+}
+
+function insertMediaContent(container, data)
+{
+    container.childNodes.forEach(el => el.remove())
+
+    // image
+    if (data.video === 0)
+    {
+        const tpl = document.querySelector('#tpl-media-image')
+        const node = tpl.cloneNode(true).content
+
+        node.querySelector('img').src = data.url_image
+
+        container.appendChild(node)
+    }
+    // video
+    else
+    {
+        const tpl = document.querySelector('#tpl-media-video')
+        const node = tpl.cloneNode(true).content
+
+        node.querySelector('source').src = data.url_image
+
+        container.appendChild(node)
+    }
 }
 
 function doubleCheckWeHaveAllWeNeedInUrl()
@@ -535,7 +611,7 @@ function toggleSameFolder(e)
 function toggleInfoPopup()
 {
     const infoPopup = document.getElementById('image-info-popup')
-    infoPopup.classList.toggle('vis-hide')
+    infoPopup.classList.toggle('hidden')
 }
 
 function getUrlFilterParameters()
