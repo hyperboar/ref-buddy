@@ -19,7 +19,7 @@ class FracturedColors
             this._container = document.createElement('div')
             this._container.classList.add('fractured-colors')
             this._container.id = 'frac-color-totally-not-occupied-name-' + Math.round(Math.random() * 1000)
-            // this._container.classList.add('vis-hide')
+            // this._container.classList.add('hidden')
             document.querySelector('body').appendChild(this._container)
 
             this._containerSel = '#' + this._container.id

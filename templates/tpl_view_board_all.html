@@ -13,7 +13,7 @@
     <h1>Boards</h1>
 </div>
 <div><button id="add-btn">Add</button></div>
-<form id="board-form" class="vis-hide">
+<form id="board-form" class="hidden">
     <label for="title">Title:</label>
     <input type="text" id="title" name="title">
 
@@ -33,7 +33,7 @@
 
     document.getElementById('add-btn').addEventListener('click', e =>
     {
-        document.getElementById('board-form').classList.remove('vis-hide')
+        document.getElementById('board-form').classList.remove('hidden')
     })
 
     document.getElementById('board-form').addEventListener('submit', e =>
@@ -65,7 +65,7 @@
 
                 brds.appendChild(tpl)
 
-                document.getElementById('board-form').classList.add('vis-hide')
+                document.getElementById('board-form').classList.add('hidden')
             })
             .catch(function (error)
             {

@@ -23,7 +23,7 @@ class DiscoverPost
         const tags = data.tags.map(t => '#' + t.replace(' ', '_')).join(' ')
         this.node.querySelector(this._selTags).textContent = tags
 
-        this.node.classList.remove('vis-hide')
+        this.node.classList.remove('hidden')
 
         this.node.ugly_link = this
 

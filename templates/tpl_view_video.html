@@ -14,7 +14,7 @@
             <video id="video" class="modal-img video-fix" tabindex="-1">
                 <source src="/video/{{ image.image_id }}" type="video/mp4">
             </video>
-            <video id="video-fwd" class="modal-img video-fix vis-hide" tabindex="-1">
+            <video id="video-fwd" class="modal-img video-fix hidden" tabindex="-1">
                 <source src="/video/{{ image.image_id }}" type="video/mp4">
             </video>
             <table class="stats-overlay">
@@ -59,7 +59,7 @@
         </div>
     </div>
 </div>
-<table class="vis-hide">
+<table class="hidden">
     <tr id="key-tpl" data-id="-1" data-time="0" class="key-row" >
         <td>
             <span id="sel"></span><span id="frame" class="key-text"></span> (<span id="time" class="key-text"></span>)

@@ -155,7 +155,7 @@ class WidgetImageTagsEditor
         {
             this._container = document.createElement('div')
             this._container.id = 'tag-editor-totally-not-occupied-name-' + Math.round(Math.random() * 1000)
-            this._container.classList.add('vis-hide')
+            this._container.classList.add('hidden')
             document.querySelector('body').appendChild(this._container)
 
             this._containerSel = '#' + this._container.id
@@ -174,7 +174,7 @@ class WidgetImageTagsEditor
 
         this._bgOverlay = new BgOverlay()
 
-        this._container.classList.remove('vis-hide')
+        this._container.classList.remove('hidden')
 
         document.addEventListener('keydown', (e) =>
         {
@@ -231,12 +231,12 @@ class WidgetImageTagsEditor
         const tagsContainer = this._container.querySelector('#tagList')
         const tplTag = this._container.querySelector('#tpl-tag-item').cloneNode(true)
         tplTag.id = ''
-        tplTag.classList.remove('vis-hide')
+        tplTag.classList.remove('hidden')
 
         tags.forEach(tag =>
         {
             const node = tplTag.cloneNode(true)
-            node.classList.remove('vis-hide')
+            node.classList.remove('hidden')
             node.setAttribute('data-id', tag.name)
             node.setAttribute('data-color', tag.hex)
             node.querySelector('.tag-pin').setAttribute('value', tag.name)
@@ -303,7 +303,7 @@ class WidgetImageTagsEditor
 
     showWidgetReal()
     {
-        this._pMain.classList.remove('vis-hide')
+        this._pMain.classList.remove('hidden')
         this._bgOverlay.show()
         this._pMain.querySelector('#images-count').textContent = '' + this._getSelector().selectedIds.length
 
@@ -313,7 +313,7 @@ class WidgetImageTagsEditor
     hideWidget()
     {
         // hide
-        this._pMain.classList.add('vis-hide')
+        this._pMain.classList.add('hidden')
         this._bgOverlay.hide()
 
         this._pMain.querySelector('#tags-submit-add').classList.remove('op-success', 'op-fail', 'loading')
@@ -329,7 +329,7 @@ class WidgetImageTagsEditor
             this.showWidget()
             return
         }
-        if (this._pMain.classList.contains('vis-hide'))
+        if (this._pMain.classList.contains('hidden'))
         {
             this.showWidget()
         }
@@ -432,7 +432,7 @@ class WidgetImageTagsEditor
             const id = elem.getAttribute('data-id')
             if (!ids.includes(id)) { return }
 
-            elem.querySelector('.overlay').classList.remove('vis-hide')
+            elem.querySelector('.overlay').classList.remove('hidden')
 
             const tl = elem.querySelector('.recent-tags')
             let recentTags = tl.textContent
@@ -507,7 +507,7 @@ class WidgetImageTagsEditor
             this.tmpTagProxyBtns[tagId] = btn
         }
 
-        btn.classList.remove('vis-hide')
+        btn.classList.remove('hidden')
     }
 
     removeTagFromPinList(tagId)

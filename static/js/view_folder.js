@@ -29,7 +29,7 @@ function fetchTags()
     if (showTagsMode === 0)
     {
         document.querySelectorAll('.tags-list').forEach(elem => elem.textContent = '')
-        document.querySelectorAll('.overlay').forEach(elem => elem.classList.remove('vis-hide'))
+        document.querySelectorAll('.overlay').forEach(elem => elem.classList.remove('hidden'))
     }
     // fetch tags
     else if (showTagsMode === 1)
@@ -51,7 +51,7 @@ function fetchTags()
                     }
                     data[id].sort()
                     tl.textContent = (rt === '' ? '' : ', ') + data[id].join(', ')
-                    tile.querySelector('.overlay').classList.remove('vis-hide')
+                    tile.querySelector('.overlay').classList.remove('hidden')
                 })
             })
             .catch(error =>
@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () =>
     const tplThumbRaw = document.querySelector('#tpl-thumbnail')
     const tplThumb = tplThumbRaw.cloneNode(true)
     tplThumb.id = ''
-    tplThumb.classList.remove('vis-hide')
+    tplThumb.classList.remove('hidden')
     const container = document.querySelector('.gallery')
 
     const thumbUrl = ApiImage.GetPlainUrlThumbImage()
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () =>
         node.querySelector('a').href  = tplStudyUrl.replace(studyUrl['keys']['image_id'], im.id)
         node.querySelector('img').alt = im.id
         node.querySelector('img').setAttribute('data-src', tplThumbUrl.replace(thumbUrl['keys']['image_id'], im.id))
-        if (im.video) node.querySelector('.play').classList.remove('vis-hide')
+        if (im.video) node.querySelector('.play').classList.remove('hidden')
         container.appendChild(node)
     })
 

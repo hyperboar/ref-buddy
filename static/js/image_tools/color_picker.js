@@ -125,7 +125,7 @@ class ColorPicker
 
     appendColor(hexColor, x, y, id = -1)
     {
-        this.palletTag.classList.remove('vis-hide')
+        this.palletTag.classList.remove('hidden')
 
         const exists = this.colors.filter(c => this.isSameColor(c.getAttribute(this.attrHex), hexColor))
 
@@ -380,12 +380,12 @@ class ColorPicker
         cell.addEventListener('mouseenter', () =>
         {
             this.placeFrame(cell)
-            this.frameTag.classList.remove('vis-hide')
+            this.frameTag.classList.remove('hidden')
         })
 
         cell.addEventListener('mouseleave', () =>
         {
-            this.frameTag.classList.add('vis-hide')
+            this.frameTag.classList.add('hidden')
         })
     }
 

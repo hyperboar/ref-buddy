@@ -223,7 +223,7 @@ const forwardKeys = []
 //
 // onionSwitch.addEventListener('click', e =>
 // {
-//     videoOnionFwd.classList.toggle('vis-hide')
+//     videoOnionFwd.classList.toggle('hidden')
 // })
 //
 // forwardStep = parseInt(document.getElementById('frame-step').value)

@@ -139,14 +139,14 @@ class ImageSelection
         const tileId = tile.getAttribute(this.attrDataId)
 
         // add, batch select, this tile NOT included
-        if (isBatch && !this.selectedIds.includes(tileId) && !tile.classList.contains('vis-hide'))
+        if (isBatch && !this.selectedIds.includes(tileId) && !tile.classList.contains('hidden'))
         {
             this.selectedIds.push(tileId)
             const img = tile.querySelector('img')
             img.classList.add(this.classSelected)
         }
         // add, single select, this tile NOT included
-        else if (!isBatch && !this.selectedIds.includes(tileId) && !tile.classList.contains('vis-hide'))
+        else if (!isBatch && !this.selectedIds.includes(tileId) && !tile.classList.contains('hidden'))
         {
             this.selectedIds.push(tileId)
             const img = tile.querySelector('img')

@@ -21,7 +21,7 @@ class WidgetBoard
         {
             this._container = document.createElement('div')
             this._container.id = 'board-add-totally-not-occupied-name-' + Math.round(Math.random() * 1000)
-            this._container.classList.add('vis-hide')
+            this._container.classList.add('hidden')
             document.querySelector('body').appendChild(this._container)
 
             this._containerSel = '#' + this._container.id
@@ -84,21 +84,21 @@ class WidgetBoard
         })
         this._bgOverlay.node.addEventListener('click', () => this.hideWidget())
 
-        this._container.classList.remove('vis-hide')
+        this._container.classList.remove('hidden')
     }
 
     showWidget()
     {
         if (this.isLoaded)
         {
-            document.querySelector(`${this._containerSel} .popup`).classList.remove('vis-hide')
+            document.querySelector(`${this._containerSel} .popup`).classList.remove('hidden')
             this._bgOverlay.show()
         }
         else
         {
             this.loadWidget().then(() =>
             {
-                document.querySelector(`${this._containerSel} .popup`).classList.remove('vis-hide')
+                document.querySelector(`${this._containerSel} .popup`).classList.remove('hidden')
                 this._bgOverlay.show()
             })
         }
@@ -107,7 +107,7 @@ class WidgetBoard
     hideWidget()
     {
         if (!this.isLoaded) return
-        document.querySelector(`${this._containerSel} .popup`).classList.add('vis-hide')
+        document.querySelector(`${this._containerSel} .popup`).classList.add('hidden')
         document.querySelector(`${this._containerSel} #board-send-btn`).classList.remove('op-success', 'op-fail')
 
         this._bgOverlay.hide()

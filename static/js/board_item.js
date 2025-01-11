@@ -357,7 +357,7 @@ const RemoveItemMixin =
                 .then(r =>
                 {
                     if (!r.ok) { throw new Error("Node not removed") }
-                    node.classList.add('vis-hide')
+                    node.classList.add('hidden')
 
                     const clone = node.cloneNode(true)
                     node.parentNode.replaceChild(clone, node)

@@ -1,4 +1,4 @@
-<div id="tags-filter" class="tags-popup vis-hide">
+<div id="tags-filter" class="tags-popup hidden">
     <h3>Tags Filter</h3>
     <div>
         <label for="tag-sets">Sets</label>
@@ -12,13 +12,13 @@
         <button id="sort-import" data-dir="1">Import date</button>&nbsp;
         <button id="sort-rating" data-dir="1">Rating</button>
     </div>
-    <div id="filter-by-name" class="vis-hide">
+    <div id="filter-by-name" class="hidden">
         <input id="search-text" type="text" width="200" placeholder="Some part of file name"/>
     </div>
     <button id="tags-filter-apply" title="When in gallery view, reload the page.">Apply</button>
-    <button id="tags-filter-gallery-apply" class="vis-hide" title="Hide all images that have negative tag assigned.">Filter local </button>
-    <button id="tags-filter-gallery-unapply" class="vis-hide" title="Show all hidden images.">Cancel filter</button>
+    <button id="tags-filter-gallery-apply" class="hidden" title="Hide all images that have negative tag assigned.">Filter local </button>
+    <button id="tags-filter-gallery-unapply" class="hidden" title="Show all hidden images.">Cancel filter</button>
     <button id="tags-filter-close">Close</button>
 </div>
-<div id="tpl-tag-item" class="tag-filter vis-hide" data-tag="{#{{ t.tag }}#}" data-tag-id="{#{{ t.id }}#}" data-state="0" style="{#color:{{ t.hex }}#}">{#{{ t.tag }}#}</div>
-<option id="tpl-tagset-option" class="vis-hide" value="{#{{ ts.set_alias }}#}" data-tags="{#{{ ts.tag_list }}#}">{#{{ ts.set_name }}#}</option>
+<div id="tpl-tag-item" class="tag-filter hidden" data-tag="{#{{ t.tag }}#}" data-tag-id="{#{{ t.id }}#}" data-state="0" style="{#color:{{ t.hex }}#}">{#{{ t.tag }}#}</div>
+<option id="tpl-tagset-option" class="hidden" value="{#{{ ts.set_alias }}#}" data-tags="{#{{ ts.tag_list }}#}">{#{{ ts.set_name }}#}</option>

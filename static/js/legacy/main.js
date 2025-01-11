@@ -108,7 +108,7 @@ function simpleShowLoadableWidget(url, selTrigger, selContainer, triggerAction =
                 })
                 .finally(() =>
                 {
-                    container.classList.remove('vis-hide')
+                    container.classList.remove('hidden')
                     trigger.classList.remove('loading')
 
                     IS_LOADED = true

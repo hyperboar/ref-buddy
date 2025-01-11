@@ -31,13 +31,13 @@
     <button id="toggle-selection-mode-btn" class="btn-bg-blend">Select <span id="sel-count"></span></button>
 </div>
 
-<div id="tpl-thumbnail" class="thumbnail vis-hide" title="{#{{ image.filename }}#}" data-id="{#{{ image.image_id }}#}" data-fn="{#{{ image.filename }}#}" data-rt="{#{{ image.rating }}#}">
+<div id="tpl-thumbnail" class="thumbnail hidden" title="{#{{ image.filename }}#}" data-id="{#{{ image.image_id }}#}" data-fn="{#{{ image.filename }}#}" data-rt="{#{{ image.rating }}#}">
     <a href="{#/study-image/{{ image.image_id }}?same-folder=true&time-planned=120&tags=&tag-set=#}">
         <img src="" class="thumb thumb-hidden" data-src="{#/thumb/{{ image.image_id }}.jpg#}" alt="{#{{ image.image_id }}#}">
-        <div class="overlay vis-hide">
+        <div class="overlay hidden">
             <span class="recent-tags"></span><span class="tags-list" data-recent=""></span>
         </div>
-        <div class="play vis-hide"></div>
+        <div class="play hidden"></div>
     </a>
 </div>
 

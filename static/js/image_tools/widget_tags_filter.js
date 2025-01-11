@@ -25,7 +25,7 @@ class WidgetImageTagsFilter
         {
             this._container = document.createElement('div')
             this._container.id = 'tag-filter-totally-not-occupied-name-' + Math.round(Math.random() * 1000)
-            this._container.classList.add('vis-hide')
+            this._container.classList.add('hidden')
             document.querySelector('body').appendChild(this._container)
 
             this._containerSel = '#' + this._container.id
@@ -107,15 +107,15 @@ class WidgetImageTagsFilter
             this.widget.querySelector('#tags-filter-gallery-apply').addEventListener('click', () => this.applyGalleryFilter())
             this.widget.querySelector('#tags-filter-gallery-unapply').addEventListener('click', () => this.unapplyGalleryFilter())
 
-            this.widget.querySelector('#tags-filter-gallery-apply').classList.remove('vis-hide')
-            this.widget.querySelector('#tags-filter-gallery-unapply').classList.remove('vis-hide')
-            this.widget.querySelector('#filter-by-name').classList.remove('vis-hide')
+            this.widget.querySelector('#tags-filter-gallery-apply').classList.remove('hidden')
+            this.widget.querySelector('#tags-filter-gallery-unapply').classList.remove('hidden')
+            this.widget.querySelector('#filter-by-name').classList.remove('hidden')
         }
 
         let container = this.widget.querySelector('#tagList')
         let tplItem = this._container.querySelector('#tpl-tag-item').cloneNode(true)
         tplItem.id = ''
-        tplItem.classList.remove('vis-hide')
+        tplItem.classList.remove('hidden')
         tags.forEach(tag =>
         {
             const node = tplItem.cloneNode(true)
@@ -129,7 +129,7 @@ class WidgetImageTagsFilter
         container = this.widget.querySelector('#tag-sets')
         tplItem = this._container.querySelector('#tpl-tagset-option').cloneNode(true)
         tplItem.id = ''
-        tplItem.classList.remove('vis-hide')
+        tplItem.classList.remove('hidden')
         tagsets.forEach(tag =>
         {
             const node = tplItem.cloneNode(true)
@@ -143,7 +143,7 @@ class WidgetImageTagsFilter
         this.initTags()
         this.initSort()
 
-        this._container.classList.remove('vis-hide')
+        this._container.classList.remove('hidden')
 
         document.addEventListener('keydown', (e) =>
         {
@@ -168,7 +168,7 @@ class WidgetImageTagsFilter
 
     showWidgetReal()
     {
-        this.widget.classList.remove('vis-hide')
+        this.widget.classList.remove('hidden')
 
         this._bgOverlay.show()
     }
@@ -177,7 +177,7 @@ class WidgetImageTagsFilter
     {
         this.widget.focus()
 
-        this.widget.classList.add('vis-hide')
+        this.widget.classList.add('hidden')
 
         this._bgOverlay.hide()
 
@@ -204,7 +204,7 @@ class WidgetImageTagsFilter
             return
         }
 
-        if (this.widget.classList.contains('vis-hide')) {this.showWidget()}
+        if (this.widget.classList.contains('hidden')) {this.showWidget()}
         else this.hideWidget()
     }
 
@@ -433,11 +433,11 @@ class WidgetImageTagsFilter
 
         Array.from(g.children).forEach(ov =>
         {
-            ov.classList.remove('vis-hide')
+            ov.classList.remove('hidden')
 
             if (text.length > 0 && !ov.title.toLowerCase().includes(text))
             {
-                ov.classList.add('vis-hide')
+                ov.classList.add('hidden')
                 return
             }
 
@@ -449,7 +449,7 @@ class WidgetImageTagsFilter
             {
                 if (tags.includes(tagNeg[i]))
                 {
-                    ov.classList.add('vis-hide')
+                    ov.classList.add('hidden')
                     break
                 }
             }
@@ -463,7 +463,7 @@ class WidgetImageTagsFilter
 
         Array.from(g.children).forEach(ov =>
         {
-            ov.classList.remove('vis-hide')
+            ov.classList.remove('hidden')
         })
     }
 

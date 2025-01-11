@@ -78,7 +78,7 @@ class Magnification
         {
             this.lastModalImage.classList.add('modal-img-darken')
 
-            this.container.classList.remove('vis-hide')
+            this.container.classList.remove('hidden')
 
             this.magnification.style.width  = `100%`
             this.magnification.style.height = `100%`
@@ -169,7 +169,7 @@ class Magnification
 
         this.isZoomed = false
         this.lastModalImage .classList.remove('modal-img-darken')
-        this.container.classList.add('vis-hide')
+        this.container.classList.add('hidden')
 
         this.scaleStep = 1
         this.scale = 1 + this.scaleAdd * this.scaleStep

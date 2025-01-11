@@ -17,7 +17,7 @@ class YesNoPopup
         {
             this._container = document.createElement('div')
             this._container.id = 'popup_yesno-totally-not-occupied-name-' + Math.round(Math.random() * 1000)
-            this._container.classList.add('vis-hide')
+            this._container.classList.add('hidden')
             document.querySelector('body').appendChild(this._container)
 
             this._containerSel = '#' + this._container.id
@@ -36,7 +36,7 @@ class YesNoPopup
 
         this._bgOverlay = new BgOverlay()
 
-        this._container.classList.remove('vis-hide')
+        this._container.classList.remove('hidden')
     }
 
     get isLoaded()
@@ -104,12 +104,12 @@ class YesNoPopup
         this._widget.querySelector('.title').textContent = this._lastTitle
         this._widget.querySelector('.text').textContent  = this._lastText
 
-        this._widget.classList.remove('vis-hide')
+        this._widget.classList.remove('hidden')
     }
 
     hide()
     {
-        this._widget.classList.add('vis-hide')
+        this._widget.classList.add('hidden')
         this._bgOverlay.hide()
         this._isShown = false
     }

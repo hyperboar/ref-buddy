@@ -47,8 +47,8 @@
 
             container.appendChild(form)
 
-            row.querySelector('#edit-btn').classList.add('vis-hide')
-            form.classList.remove('vis-hide')
+            row.querySelector('#edit-btn').classList.add('hidden')
+            form.classList.remove('hidden')
             form.setAttribute('data-id', pathId)
 
             form.querySelector('#tags-list').value = row.querySelector('#path-tags').textContent
@@ -89,8 +89,8 @@
             {
                 const row = form.parentNode.parentNode
                 row.classList.add('op-success')
-                row.querySelector('#edit-btn').classList.remove('vis-hide')
-                form.classList.add('vis-hide')
+                row.querySelector('#edit-btn').classList.remove('hidden')
+                form.classList.add('hidden')
                 row.querySelector('#path-tags').textContent = data['tags'].join(', ')
             })
     })
@@ -101,8 +101,8 @@
 
         const row = form.parentNode.parentNode
 
-        form.classList.add('vis-hide')
-        row.querySelector('#edit-btn').classList.remove('vis-hide')
+        form.classList.add('hidden')
+        row.querySelector('#edit-btn').classList.remove('hidden')
     })
 </script>
 </body>

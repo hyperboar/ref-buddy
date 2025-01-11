@@ -51,7 +51,7 @@ function fetchTags()
     if (showTagsMode === 0)
     {
         document.querySelectorAll('.tags-list').forEach(elem => elem.textContent = '')
-        document.querySelectorAll('.overlay').forEach(elem => elem.classList.remove('vis-hide'))
+        document.querySelectorAll('.overlay').forEach(elem => elem.classList.remove('hidden'))
     }
     // fetch tags
     else if (showTagsMode === 1)
@@ -65,7 +65,7 @@ function fetchTags()
                 document.querySelectorAll('.thumbnail').forEach((tile) => {
                     const id = tile.getAttribute('data-id')
                     tile.querySelector('.tags-list').textContent = data[id].join(', ')
-                    tile.querySelector('.overlay').classList.remove('vis-hide')
+                    tile.querySelector('.overlay').classList.remove('hidden')
                 })
             })
             .catch(error => {

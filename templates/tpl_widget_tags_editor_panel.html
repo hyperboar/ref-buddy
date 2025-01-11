@@ -1,4 +1,4 @@
-<div id="tags-editor-popup" class="tags-popup vis-hide">
+<div id="tags-editor-popup" class="tags-popup hidden">
     <h3>Tags (<span id="images-count"></span> images selected)</h3>
     <div id="tagList" class="tag-container">
         {# tpl-tag-items here #}
@@ -9,7 +9,7 @@
     <button id="pins-clear">Clear Pins</button>
     <button id="tags-close">Close</button>
 </div>
-<div id="tpl-tag-item" class="tag-item vis-hide" data-id="{#{{ tag }}#}" data-color="{#{{ hex }}#}">
+<div id="tpl-tag-item" class="tag-item hidden" data-id="{#{{ tag }}#}" data-color="{#{{ hex }}#}">
     <div id="highlight">
         <button class="tag-pin" value="{#{{ tag }}#}"></button>
         <input type="checkbox" id="{#{{ tag }}#}" value="{#{{ tag }}#}"/>
@@ -28,7 +28,7 @@
         <button id="tags-pins-clear">Clear</button>
     </div>
 </div>
-<div id="tag-pin-template" class="tag-edit-pin vis-hide" data-id="{#{{ hex }}#}">
+<div id="tag-pin-template" class="tag-edit-pin hidden" data-id="{#{{ hex }}#}">
     <input type="checkbox" id="{#{{ hex }}#}" value="{#{{ hex }}#}"/>
     <label style="{#{{ hex }}#}" for="{#{{ hex }}#}">{#{{ hex }}#}</label>
 </div>

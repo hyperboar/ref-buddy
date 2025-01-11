@@ -22,7 +22,7 @@ class BgOverlay
         {
             this._node = document.createElement('div')
             this._node.id = this._selNodeId.replace('#', '')
-            this._node.classList.add('vis-hide', 'bg-overlay')
+            this._node.classList.add('hidden', 'bg-overlay')
             document.querySelector('body').appendChild(this._node)
         }
 
@@ -43,7 +43,7 @@ class BgOverlay
 
     show()
     {
-        if (this.count === 0) this._node.classList.remove('vis-hide')
+        if (this.count === 0) this._node.classList.remove('hidden')
         this.count++
     }
 
@@ -52,7 +52,7 @@ class BgOverlay
         this.count = Math.max(0, this.count - 1)
         if (this.count > 0) return
 
-        this._node.classList.add('vis-hide')
+        this._node.classList.add('hidden')
     }
 }
 

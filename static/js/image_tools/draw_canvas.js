@@ -124,7 +124,7 @@ class DrawCanvas
                 this.updateBrushesUI(evt.target)
                 this.setColor(evt.target.value)
             })
-            clr.classList.remove("vis-hide")
+            clr.classList.remove("hidden")
             elem.before(clr)
             this._brushes.push(clr)
         }
@@ -133,21 +133,21 @@ class DrawCanvas
 
     toggle()
     {
-        this.setDrawingMode(this._canvas.classList.contains('vis-hide'))
+        this.setDrawingMode(this._canvas.classList.contains('hidden'))
     }
 
     setDrawingMode(isOn)
     {
         if (isOn)
         {
-            this._canvas.classList.remove('vis-hide')
-            this._ctrls.classList.remove('vis-hide')
+            this._canvas.classList.remove('hidden')
+            this._ctrls.classList.remove('hidden')
             this.isDrawingMode = true
         }
         else
         {
-            this._canvas.classList.add('vis-hide')
-            this._ctrls.classList.add('vis-hide')
+            this._canvas.classList.add('hidden')
+            this._ctrls.classList.add('hidden')
             this.isDrawingMode = false
         }
     }
