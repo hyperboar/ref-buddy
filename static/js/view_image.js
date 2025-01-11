@@ -122,7 +122,7 @@ function initializeComponents()
 
     // // TODO distinguish between img, gif, video
     // // magnification
-    // magnifier = new Magnification(['.modal-img', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
+    // magnifier = new Magnification(['stub!', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
     imageGrayScale = new ImageGrayscale(['.media',  '.media-bg', '.magnification'])
@@ -179,23 +179,6 @@ function initializeComponents()
                 console.log('Last Viewed time updated!')
             })
     })
-
-    // // animation
-    // animPlayer = new AnimPlayer(
-    //     '.anim-container',
-    //     '.anim-container #animation',
-    //     '.anim-container #stat-frame',
-    //     '.anim-container #stat-time',
-    //     '.anim-container #stat-dur',
-    //     '.anim-container #stat-prog')
-    // animPlayer.node.addEventListener('onupdate', (e) =>
-    // {
-    //     const anim = e.detail.video
-    //     const modalBg = document.querySelector('.media-bg img')
-    //     modalBg.src = anim.currentFrameUrl
-    //
-    //     magnifier.setImage(anim.currentFrameUrl)
-    // })
 
     // board
     boardWidget = new WidgetBoard('', '#board-button', () => selection.selectedIds)
@@ -410,7 +393,7 @@ function updateComponents(data)
 
     timer.reset()
 
-    if (data.video === 0)
+    if (data.content_type === 1)
         drawCanvas.updateCanvas('.media .media-img')
 }
 
@@ -439,29 +422,25 @@ function injectImageData(data)
     const media = document.querySelector('.media')
     insertMediaContent(media, data)
 
-    // // magnifier
+    // magnifier
     // magnifier.reset()
-    // if (data.content_type === 2) // animated something
-    // {
-    //     mediaImg.classList.add('hidden')
-    //     animPlayer.node.classList.remove('hidden')
-    //     animPlayer.pause()
-    //     animPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
-    // }
-    // else
-    // {
-    //     mediaImg.classList.remove('hidden')
-    //     animPlayer.node.classList.add('hidden')
-    //     animPlayer.pause()
-    //
-    //     magnifier.setImage(data.url_image)
-    //
-    //     Array.from([mediaBg, mediaImg]).forEach(im =>
-    //     {
-    //         im.src = data.url_image
-    //         im.alt = `${data.id}:${data.path}`
-    //     })
-    // }
+
+    if (data.content_type === 1)
+    {
+        // magnifier.setImage(data.url_image)
+        const mediaImg = document.querySelector('.media-img')
+        Array.from([mediaBg, mediaImg]).forEach(im =>
+        {
+            im.src = data.url_image
+            im.alt = `${data.id}:${data.path}`
+        })
+    }
+    // animatiuon
+    if (data.content_type === 2) {
+        animPlayer.node.classList.remove('hidden')
+        animPlayer.pause()
+        animPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
+    }
 
     const rating = document.querySelector('#image-rating')
     rating.textContent = data.rating
@@ -522,7 +501,7 @@ function insertMediaBg(container, data)
     container.childNodes.forEach(el => el.remove())
 
     // image
-    if (data.video === 0)
+    if (data.content_type === 1 || data.content_type === 2)
     {
         const tpl = document.querySelector('#tpl-media-bg-image')
         const node = tpl.cloneNode(true).content
@@ -546,7 +525,7 @@ function insertMediaContent(container, data)
     container.childNodes.forEach(el => el.remove())
 
     // image
-    if (data.video === 0)
+    if (data.content_type === 1)
     {
         const tpl = document.querySelector('#tpl-media-image')
         const node = tpl.cloneNode(true).content
@@ -556,6 +535,31 @@ function insertMediaContent(container, data)
         container.appendChild(node)
     }
     // video
+    else if (data.content_type === 2)
+    {
+        const tpl = document.querySelector('#tpl-media-frames')
+        const node = tpl.cloneNode(true).content
+
+        node.querySelector('img').src = data.url_image
+        container.appendChild(node)
+
+        // animation
+        animPlayer = new AnimPlayer(
+            '.anim-container',
+            '.anim-container #animation',
+            '.anim-container #stat-frame',
+            '.anim-container #stat-time',
+            '.anim-container #stat-dur',
+            '.anim-container #stat-prog')
+        animPlayer.node.addEventListener('onupdate', (e) =>
+        {
+            const anim = e.detail.video
+            const modalBg = document.querySelector('.media-bg img')
+            modalBg.src = anim.currentFrameUrl
+
+            // magnifier.setImage(anim.currentFrameUrl)
+        })
+    }
     else
     {
         const tpl = document.querySelector('#tpl-media-video')
