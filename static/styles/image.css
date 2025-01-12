@@ -79,6 +79,8 @@ main aside {
 
 .media {
     position: relative;
+    touch-action: none;
+    user-select: none;
     cursor: var(--cursor-transp);
 }
 
@@ -273,8 +275,14 @@ li.ai-tag {
     transform:  translateY(-50%);
     z-index: calc(var(--z-ref-compose) + 100);
 
+    background-color: var(--clr-main-bg-darker);
+    border-radius: 5px;
+
     gap:10px;
     padding: 10px;
+
+    touch-action: none;
+    user-select: none;
 }
 
 .canvas-controls-left {

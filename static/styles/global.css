@@ -16,6 +16,7 @@
     --z-fract: 299999; /* in development */
 
     --clr-main-bg: #7a7676;
+    --clr-main-bg-darker: rgba(84, 81, 81, 100%);
     --clr-text: #181818;
     --clr-gray3: #545151;
     --clr-popup-bg: #918d8d;

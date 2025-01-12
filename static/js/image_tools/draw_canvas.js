@@ -19,6 +19,8 @@ class DrawCanvas
     _isDrawing
     _isErasing
 
+    _resizeTarget
+
     _brushColors = [
         "#ffffffff",
         "#ab0649",
@@ -49,15 +51,18 @@ class DrawCanvas
     prevY = 0
     currY = 0
 
-    constructor(selCnvId, selImg, selControls, imgId)
+    constructor(selCnvId, selResizeTarget, selControls, imgId)
     {
         this._imgId = imgId
         this._canvas = document.querySelector(selCnvId)
         this._ctrls = document.querySelector(selControls)
         this._ctx = this._canvas.getContext("2d")
 
+        this._resizeTarget = document.querySelector(selResizeTarget)
+
         this.initCanvas()
         this.initControls()
+        this.initResizing()
         // this.restoreFromSave()
 
         this._lastStrokeCount = 1
@@ -80,13 +85,53 @@ class DrawCanvas
     {
         // console.log(`initializing canvas`)
 
+        this._canvas.addEventListener('contextmenu', (evt) => {
+            evt.preventDefault()
+        })
+        this._canvas.addEventListener('dragstart', (evt) => {
+            evt.preventDefault()
+        })
+
+        // desktop
         this._canvas.addEventListener("mousemove", (evt) => {this.drawByCoord(this.kActionMove, evt)}, false)
         this._canvas.addEventListener("mousedown", (evt) => {this.drawByCoord(this.kActionDown, evt)}, false)
         this._canvas.addEventListener("mouseup",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, false)
         this._canvas.addEventListener("mouseout",  (evt) => {this.drawByCoord(this.kActionOut,  evt)}, false)
 
+        // mobile
+        this._canvas.addEventListener("touchmove", (evt) => {this.drawByCoord(this.kActionMove, evt)}, false)
+        this._canvas.addEventListener("touchstart", (evt) => {this.drawByCoord(this.kActionDown, evt)}, false)
+        this._canvas.addEventListener("touchend",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, false)
+
         this.setColor(this._selectedColor)
         this.setLineWeight(this._lineWeight)
+    }
+
+    initResizing()
+    {
+        const resizeCanvasToParent = () => {
+            // Save current canvas content
+            const tempCanvas = document.createElement('canvas')
+            const tempCtx = tempCanvas.getContext('2d')
+            tempCanvas.width = this._canvas.width
+            tempCanvas.height = this._canvas.height
+            tempCtx.drawImage(this._canvas, 0, 0)
+
+            // Resize canvas to match parent element
+            this._canvas.width = this._resizeTarget.clientWidth
+            this._canvas.height = this._resizeTarget.clientHeight
+
+            // Restore content
+            this._ctx.drawImage(tempCanvas, 0, 0, this._canvas.width, this._canvas.height)
+        }
+
+        // Observe parent size changes
+        const resizeObserver = new ResizeObserver(() => {
+            resizeCanvasToParent()
+        });
+
+        // Start observing the parent element
+        resizeObserver.observe(this._resizeTarget)
     }
 
     initControls()
@@ -110,6 +155,9 @@ class DrawCanvas
         elem = this._ctrls.querySelector('#erase-weight')
         elem.value = this._eraseWeight
         elem.addEventListener("change", (evt) => { this.setEraseWeight(parseInt(evt.target.value)) })
+
+        elem = this._ctrls.querySelector('#draw-undo')
+        elem.addEventListener("click", (evt) => { this.undo() })
 
         // color buttons
         elem = this._ctrls.querySelector('#tlp-draw-clr')
@@ -215,22 +263,26 @@ class DrawCanvas
 
     drawByCoord(action, evt)
     {
+        evt.preventDefault()
+
         if (!this.isDrawingMode) return
 
         if (action === this.kActionMove && this._isDrawing)
         {
+            const currCoord = this.getCoord(evt)
             this.prevX = this.currX
             this.prevY = this.currY
-            this.currX = evt.clientX - this._canvas.offsetLeft
-            this.currY = evt.clientY - this._canvas.offsetTop
+            this.currX = currCoord[0]
+            this.currY = currCoord[1]
             this.realDraw()
         }
         else if (action === this.kActionDown && !this._isDrawing)
         {
-            this.prevX = this.currX
-            this.prevY = this.currY
-            this.currX = evt.clientX - this._canvas.offsetLeft
-            this.currY = evt.clientY - this._canvas.offsetTop
+            const currCoord = this.getCoord(evt)
+            this.prevX = currCoord[0]
+            this.prevY = currCoord[1]
+            this.currX = currCoord[0]
+            this.currY = currCoord[1]
 
             this._isDrawing = true
             this._lastStrokeCount = 0
@@ -303,6 +355,31 @@ class DrawCanvas
         if (this._history.length === 0) this._history.push(blob)
 
         // this.saveHistory()
+    }
+
+    getCoord(evt)
+    {
+        const x = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const y = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        if ('ontouchstart' in window || navigator.maxTouchPoints) {
+
+            const rect = this._canvas.getBoundingClientRect();
+            return [
+                x - rect.left,
+                y - rect.top
+        ]
+        }
+        else {
+            const rect = this._canvas.getBoundingClientRect();
+            // return [
+            //     x - this._canvas.offsetLeft,
+            //     y - this._canvas.offsetTop
+            // ]
+            return [
+                x - rect.left,
+                y - rect.top
+            ]
+        }
     }
 
     // saveHistory()
