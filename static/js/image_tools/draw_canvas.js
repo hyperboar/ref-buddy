@@ -1,4 +1,5 @@
 import {waitForCondition}    from "/static/js/discover/utils.js"
+import {OSInfo}    from "/static/js/main.js"
 
 /*
 Source: https://stackoverflow.com/questions/2368784/draw-on-html5-canvas-using-a-mouse
@@ -8,12 +9,14 @@ class DrawCanvas
     kActionMove = 0
     kActionDown = 1
     kActionUp   = 2
-    kActionOut  = 3
     kHistoryLength = 50
 
     _imgId
     _canvas
     _ctx
+
+    _theMediaSel
+    _theMedia = null
 
     isDrawingMode
     _isDrawing
@@ -38,7 +41,7 @@ class DrawCanvas
 
     _selectedColor = 1
     _lineWeight = 4
-    _eraseWeight = 6
+    _eraseWeight = 7
 
     _history = []
     _totalHistoryWrites = 0
@@ -51,7 +54,7 @@ class DrawCanvas
     prevY = 0
     currY = 0
 
-    constructor(selCnvId, selResizeTarget, selControls, imgId)
+    constructor(selCnvId, selResizeTarget, selTheMedia, selControls, imgId)
     {
         this._imgId = imgId
         this._canvas = document.querySelector(selCnvId)
@@ -60,9 +63,10 @@ class DrawCanvas
 
         this._resizeTarget = document.querySelector(selResizeTarget)
 
+        this._theMediaSel = selTheMedia
+
         this.initCanvas()
         this.initControls()
-        this.initResizing()
         // this.restoreFromSave()
 
         this._lastStrokeCount = 1
@@ -78,30 +82,65 @@ class DrawCanvas
             this._canvas.height = initImg.height
 
             this.fillMark()
+
+            this.initResizing()
         })
     }
+
+    this
 
     initCanvas()
     {
         // console.log(`initializing canvas`)
 
-        this._canvas.addEventListener('contextmenu', (evt) => {
-            evt.preventDefault()
-        })
         this._canvas.addEventListener('dragstart', (evt) => {
             evt.preventDefault()
+            evt.stopPropagation()
         })
 
-        // desktop
-        this._canvas.addEventListener("mousemove", (evt) => {this.drawByCoord(this.kActionMove, evt)}, false)
-        this._canvas.addEventListener("mousedown", (evt) => {this.drawByCoord(this.kActionDown, evt)}, false)
-        this._canvas.addEventListener("mouseup",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, false)
-        this._canvas.addEventListener("mouseout",  (evt) => {this.drawByCoord(this.kActionOut,  evt)}, false)
+        if (OSInfo.isMobile)
+        {
+            // mobile
+            this._canvas.addEventListener("touchmove", (evt) => {this.drawByCoord(this.kActionMove, evt)}, { passive: false })
+            this._canvas.addEventListener("touchstart", (evt) => {this.drawByCoord(this.kActionDown, evt)}, { passive: false })
+            this._canvas.addEventListener("touchend",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, { passive: false })
+            this._canvas.addEventListener("touchcancel",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, { passive: false })
 
-        // mobile
-        this._canvas.addEventListener("touchmove", (evt) => {this.drawByCoord(this.kActionMove, evt)}, false)
-        this._canvas.addEventListener("touchstart", (evt) => {this.drawByCoord(this.kActionDown, evt)}, false)
-        this._canvas.addEventListener("touchend",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, false)
+            this._canvas.addEventListener('contextmenu', (evt) => {
+                evt.preventDefault()
+                evt.stopPropagation()
+            })
+
+            // Prevent scrolling when touching the canvas
+            document.body.addEventListener("touchstart", function (e) {
+                if (e.target == this._canvas) {
+                    e.preventDefault()
+                }
+            }, {passive: false})
+            document.body.addEventListener("touchend", function (e) {
+                if (e.target == this._canvas) {
+                    e.preventDefault()
+                }
+            }, {passive: false})
+            document.body.addEventListener("touchmove", function (e) {
+                if (e.target == this._canvas) {
+                    e.preventDefault()
+                }
+            }, {passive: false })
+                    document.body.addEventListener("touchcancel", function (e) {
+                if (e.target == this._canvas) {
+                    e.preventDefault()
+                }
+            }, {passive: false })
+        }
+        else
+        {
+            // desktop
+            this._canvas.addEventListener("mousemove", (evt) => {this.drawByCoord(this.kActionMove, evt)}, false)
+            this._canvas.addEventListener("mousedown", (evt) => {this.drawByCoord(this.kActionDown, evt)}, false)
+            this._canvas.addEventListener("mouseup",   (evt) => {this.drawByCoord(this.kActionUp,   evt)}, false)
+            this._canvas.addEventListener("mouseout",  (evt) => {this.drawByCoord(this.kActionUp,  evt)}, false)
+        }
 
         this.setColor(this._selectedColor)
         this.setLineWeight(this._lineWeight)
@@ -110,6 +149,9 @@ class DrawCanvas
     initResizing()
     {
         const resizeCanvasToParent = () => {
+
+            if (this._resizeTarget.clientWidth === 0 || this._resizeTarget.clientHeight === 0) return
+
             // Save current canvas content
             const tempCanvas = document.createElement('canvas')
             const tempCtx = tempCanvas.getContext('2d')
@@ -156,8 +198,19 @@ class DrawCanvas
         elem.value = this._eraseWeight
         elem.addEventListener("change", (evt) => { this.setEraseWeight(parseInt(evt.target.value)) })
 
+        elem = this._ctrls.querySelector('#layer-opacity')
+        elem.value = 100
+        elem.addEventListener("change", (evt) => { this.setDrawLayerOpacity(parseInt(evt.target.value)) })
+
+        elem = this._ctrls.querySelector('#orig-opacity')
+        elem.value = 100
+        elem.addEventListener("change", (evt) => { this.setOrigLayerOpacity(parseInt(evt.target.value)) })
+
         elem = this._ctrls.querySelector('#draw-undo')
         elem.addEventListener("click", (evt) => { this.undo() })
+
+        elem = this._ctrls.querySelector('#draw-panel-hide')
+        elem.addEventListener("click", (evt) => { this.toggle() })
 
         // color buttons
         elem = this._ctrls.querySelector('#tlp-draw-clr')
@@ -192,16 +245,23 @@ class DrawCanvas
         {
             this._canvas.classList.remove('hidden')
             this._ctrls.classList.remove('hidden')
+            this._canvas.parentElement.parentElement.classList.add('bg-drawing')
             this.isDrawingMode = true
+            document.querySelector('body').classList.add('draw-disable-touch')
+
         }
         else
         {
             this._canvas.classList.add('hidden')
             this._ctrls.classList.add('hidden')
+            this._canvas.parentElement.parentElement.classList.remove('bg-drawing')
             this.isDrawingMode = false
+            document.querySelector('body').classList.remove('draw-disable-touch')
+            this._theMedia?.style.removeProperty('opacity')
         }
     }
 
+    // 0 is eraser
     setColor(id)
     {
         this._selectedColor = id
@@ -214,6 +274,8 @@ class DrawCanvas
         {
             this._ctx.globalCompositeOperation = 'source-over'
         }
+
+        this.updateWeightSlidersUI(id)
     }
 
     setLineWeight(w)
@@ -264,8 +326,11 @@ class DrawCanvas
     drawByCoord(action, evt)
     {
         evt.preventDefault()
+        evt.stopPropagation()
 
         if (!this.isDrawingMode) return
+
+        const interactionsCount = this.getInteractionsCount(evt, action)
 
         if (action === this.kActionMove && this._isDrawing)
         {
@@ -284,10 +349,10 @@ class DrawCanvas
             this.currX = currCoord[0]
             this.currY = currCoord[1]
 
-            this._isDrawing = true
+            this._isDrawing = interactionsCount > 0
             this._lastStrokeCount = 0
         }
-        else if (action === this.kActionUp || action === this.kActionOut)
+        else if (interactionsCount < 1 && (action === this.kActionUp))
         {
             this._isDrawing = false
 
@@ -361,7 +426,7 @@ class DrawCanvas
     {
         const x = evt.touches ? evt.touches[0].clientX : evt.clientX;
         const y = evt.touches ? evt.touches[0].clientY : evt.clientY;
-        if ('ontouchstart' in window || navigator.maxTouchPoints) {
+        if (OSInfo.isMobile) {
 
             const rect = this._canvas.getBoundingClientRect();
             return [
@@ -380,6 +445,53 @@ class DrawCanvas
                 y - rect.top
             ]
         }
+    }
+
+    getInteractionsCount(evt, action)
+    {
+        if (OSInfo.isMobile)
+        {
+            return evt.touches.length
+        }
+        else
+        {
+            switch (action) {
+                case this.kActionUp:
+                    return 0
+                default:
+                    return 1
+            }
+        }
+    }
+
+    updateWeightSlidersUI(id)
+    {
+        const er = this._ctrls.querySelector('#erase-weight')
+        const dr = this._ctrls.querySelector('#draw-weight')
+
+        if (id === 0)
+        {
+            er.parentElement.classList.remove('hidden')
+            dr.parentElement.classList.add('hidden')
+        }
+        else
+        {
+            er.parentElement.classList.add('hidden')
+            dr.parentElement.classList.remove('hidden')
+        }
+    }
+
+    setDrawLayerOpacity(value)
+    {
+        this._canvas.style.opacity = (value / 100).toString()
+    }
+
+    setOrigLayerOpacity(value)
+    {
+        if (this._theMedia === null)
+            this._theMedia = document.querySelector(this._theMediaSel)
+
+        this._theMedia.style.opacity = (value / 100).toString()
     }
 
     // saveHistory()
