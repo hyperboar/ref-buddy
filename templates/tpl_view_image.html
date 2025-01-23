@@ -21,7 +21,7 @@
             </div>
 
             <div id="drawing">
-                <canvas id="draw-overlay" width="0" height="0" class="hidden" draggable="false"></canvas>
+                <canvas id="draw-overlay" width="0" height="0" class="hidden draw-disable-touch" draggable="false"></canvas>
             </div>
         </div>
     </section>
@@ -118,20 +118,33 @@
 
     <!-- canvas controls -->
     <div class="hidden canvas-controls canvas-controls-flex canvas-controls-right" id="draw-canvas-controls">
-        {#    <label for="draw-cnv">Drawing:</label>#}
-        <button class="btn-bg-blend hidden" id="tlp-draw-clr" value="#000000ff">С1</button>
+        <div class="color-btns">
+            <button class="btn-bg-blend hidden" id="tlp-draw-clr" value="#000000ff">С1</button>
+        </div>
         <button class="btn-bg-blend" id="draw-eraser" value="#ffffff00">Ers</button>
         <button class="btn-bg-blend" id="draw-clear">Clr</button>
-        {#    <input type="number" min="1" max="100" class="btn-bg-blend" id="draw-weight" size="2" value="2"/>#}
-        <div class="slider-container">
-            <label for="draw-weight">br <span class="size"></span></label>
-            <input type="range" min="1" max="10" value="2" step="1" id="draw-weight"/>
+        <div>
+            <div class="slider-container">
+                <label for="draw-weight"><span class="size"></span></label>
+                <input type="range" min="1" max="10" value="2" step="1" id="draw-weight"/>
+            </div>
+            <div class="slider-container">
+                <label for="erase-weight"><span class="size"></span></label>
+                <input type="range" min="1" max="10" value="2" step="1" id="erase-weight"/>
+            </div>
         </div>
-        <div class="slider-container">
-            <label for="erase-weight">er <span class="size"></span></label>
-            <input type="range" min="1" max="10" value="2" step="1" id="erase-weight"/>
+        <div>
+            <div class="slider-container">
+                <label for="layer-opacity">op <span class="size"></span></label>
+                <input type="range" min="1" max="100" value="100" step="10" id="layer-opacity"/>
+            </div>
+            <div class="slider-container">
+                <label for="orig-opacity">bg <span class="size"></span></label>
+                <input type="range" min="1" max="100" value="100" step="10" id="orig-opacity"/>
+            </div>
         </div>
         <button class="btn-bg-blend" id="draw-undo">Undo</button>
+        <button class="btn-bg-blend" id="draw-panel-hide">&gt;&gt;</button>
     </div>
 </section>
 
@@ -154,11 +167,11 @@
 
 <!-- media -->
 <template id="tpl-media-image">
-     <img class="media-img" src="{{ content_url }}" alt="{# setup #}" tabindex="-1">
+     <img id="the-media" class="media-img" src="{{ content_url }}" alt="{# setup #}" tabindex="-1">
 </template>
 
 <template id="tpl-media-frames">
-    <div class="anim-container">
+    <div id="the-media" class="anim-container">
         <img id="animation" src="{# setup #}" alt="" tabindex="-1"/>
         <table class="stats-overlay">
             <tr><td>Dur </td><td id="stat-dur" class="table-value">0</td></tr>
@@ -171,7 +184,7 @@
 </template>
 
 <template id="tpl-media-video">
-    <div class="video-container">
+    <div id="the-media" class="video-container">
         <video id="video" class="modal-img video-fix" tabindex="-1">
             <source src="{# setup #}" type="video/mp4">
         </video>

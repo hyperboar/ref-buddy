@@ -133,7 +133,7 @@ function initializeComponents()
     cursor = new ImageCursor('.media', '.magnification')
 
     // draw canvas
-    drawCanvas = new DrawCanvas('#draw-overlay', '.media', '#draw-canvas-controls', imageId)
+    drawCanvas = new DrawCanvas('#draw-overlay', '.media','#the-media', '#draw-canvas-controls', imageId)
     const dcButton = document.getElementById('draw-button')
     dcButton.addEventListener('click', () => drawCanvas.toggle())
 

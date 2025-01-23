@@ -84,6 +84,10 @@ main aside {
     cursor: var(--cursor-transp);
 }
 
+section #media {
+    border-radius: 5px;
+}
+
 .media img {
     display: block;
     border-radius: 5px;
@@ -257,16 +261,32 @@ li.ai-tag {
 
 /*#region DRAWING */
 
+.bg-drawing {
+    /* perceptual middle gray. i.e. 18% reflectance of visible light*/
+    background-color: rgba(119,119,119,1);
+}
+
 #draw-overlay
 {
     position: absolute;
     display: flex;
     z-index: var(--z-ref-compose);
-    opacity: 0.5;
+    opacity: 1;
+    cursor: pointer;
 }
 .draw-selected
 {
     border: 2px solid;
+}
+
+.draw-disable-touch {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: none;
 }
 
 .canvas-controls {
@@ -306,9 +326,20 @@ li.ai-tag {
     border-radius: 5px;
 }
 
+.color-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .canvas-controls .slider-container
 {
     display: inline-block;
+    max-width: 1em;
+    margin-right: 10px;
+}
+.canvas-controls .slider-container:last-child {
+    margin-right: 0;
 }
 
 .canvas-controls .slider-container label,
@@ -316,13 +347,25 @@ li.ai-tag {
 {
     display: block;
 }
-
-.canvas-controls input[type="range"] {
-    writing-mode: vertical-lr;
+.canvas-controls .slider-container label {
+    margin-bottom: 5px;
 }
 
-.canvas-controls input[type="range"]::-webkit-slider-thumb,
-.canvas-controls input[type="range"]::-moz-range-thumb {
+.canvas-controls .slider-container input[type="range"] {
+    -ms-writing-mode: lr-tb;
+    -moz-writing-mode: vertical-lr;
+    -webkit-writing-mode: vertical-lr;
+    -webkit-appearance: slider-vertical;
+    writing-mode: vertical-lr;
+    direction: rtl;
+    width: 1em;
+}
+/*.canvas-controls .slider-container .vertical {*/
+/*    transform: rotateZ(90deg);*/
+/*}*/
+
+.canvas-controls .slider-container input[type="range"]::-webkit-slider-thumb,
+.canvas-controls .slider-container input[type="range"]::-moz-range-thumb {
     width: 2rem;
     height: 2rem;
 }
