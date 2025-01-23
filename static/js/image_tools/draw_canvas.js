@@ -415,7 +415,7 @@ class DrawCanvas
         {
             URL.revokeObjectURL(url)
             this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height)
-            this._ctx.drawImage(this._tmpImg, 0, 0)
+            this._ctx.drawImage(this._tmpImg, 0, 0, this._canvas.width, this._canvas.height)
         }
         this._tmpImg.src = url
 
