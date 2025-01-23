@@ -22,7 +22,11 @@ class OSInfo
     }
 
     static get isMultitouch() {
-        return navigator.maxTouchPoints > 1
+        return 'ontouchstart' in window && navigator.maxTouchPoints > 1
+    }
+
+    static get isMobile() {
+        return 'ontouchstart' in window || navigator.maxTouchPoints
     }
 }
 
