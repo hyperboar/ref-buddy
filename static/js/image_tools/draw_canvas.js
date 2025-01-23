@@ -14,6 +14,7 @@ class DrawCanvas
     _imgId
     _canvas
     _ctx
+    _ctrls
 
     _theMediaSel
     _theMedia = null
@@ -181,6 +182,8 @@ class DrawCanvas
         let elem = this._ctrls.querySelector('#draw-eraser')
         elem.addEventListener("click", (evt) =>
         {
+            this.evtStop(evt);
+
             this._isErasing = true
             this.setColor(0)
             this.updateBrushesUI(evt.target)
@@ -188,29 +191,29 @@ class DrawCanvas
         this._brushes.push(elem)
 
         elem = this._ctrls.querySelector('#draw-clear')
-        elem.addEventListener("click", (evt) => { this.clear() })
+        elem.addEventListener("click", (evt) => { this.evtStop(evt); this.clear() })
 
         elem = this._ctrls.querySelector('#draw-weight')
         elem.value = this._lineWeight
-        elem.addEventListener("change", (evt) => { this.setLineWeight(parseInt(evt.target.value)) })
+        elem.addEventListener("change", (evt) => { this.evtStop(evt); this.setLineWeight(parseInt(evt.target.value)) })
 
         elem = this._ctrls.querySelector('#erase-weight')
         elem.value = this._eraseWeight
-        elem.addEventListener("change", (evt) => { this.setEraseWeight(parseInt(evt.target.value)) })
+        elem.addEventListener("change", (evt) => { this.evtStop(evt); this.setEraseWeight(parseInt(evt.target.value)) })
 
         elem = this._ctrls.querySelector('#layer-opacity')
         elem.value = 100
-        elem.addEventListener("change", (evt) => { this.setDrawLayerOpacity(parseInt(evt.target.value)) })
+        elem.addEventListener("change", (evt) => { this.evtStop(evt); this.setDrawLayerOpacity(parseInt(evt.target.value)) })
 
         elem = this._ctrls.querySelector('#orig-opacity')
         elem.value = 100
-        elem.addEventListener("change", (evt) => { this.setOrigLayerOpacity(parseInt(evt.target.value)) })
+        elem.addEventListener("change", (evt) => { this.evtStop(evt); this.setOrigLayerOpacity(parseInt(evt.target.value)) })
 
         elem = this._ctrls.querySelector('#draw-undo')
-        elem.addEventListener("click", (evt) => { this.undo() })
+        elem.addEventListener("click", (evt) => { this.evtStop(evt); this.undo() })
 
         elem = this._ctrls.querySelector('#draw-panel-hide')
-        elem.addEventListener("click", (evt) => { this.toggle() })
+        elem.addEventListener("click", (evt) => { this.evtStop(evt); this.toggle() })
 
         // color buttons
         elem = this._ctrls.querySelector('#tlp-draw-clr')
@@ -223,6 +226,7 @@ class DrawCanvas
             clr.style.backgroundColor = this._brushColors[i]
             clr.addEventListener("click", (evt) =>
             {
+                this.evtStop(evt);
                 this._isErasing = false
                 this.updateBrushesUI(evt.target)
                 this.setColor(evt.target.value)
@@ -491,6 +495,10 @@ class DrawCanvas
             this._theMedia = document.querySelector(this._theMediaSel)
 
         this._theMedia.style.opacity = (value / 100).toString()
+    }
+
+    evtStop(evt) {
+        evt.stopPropagation()
     }
 
     // saveHistory()
