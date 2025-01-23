@@ -370,6 +370,10 @@ li.ai-tag {
     height: 2rem;
 }
 
+#draw-undo {
+    margin-top: 20px;
+}
+
 /*#endregion DRAWING */
 
 /*#region PALETTE */
