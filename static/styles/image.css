@@ -50,7 +50,7 @@ main.content {
     position: relative;
     overflow: hidden;
     width: 100%;
-    height: 100vh;
+    height: var(--vh);
     padding: var(--padding-main);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
@@ -92,8 +92,8 @@ section #media {
     display: block;
     border-radius: 5px;
     object-fit: contain;
-    width: 100%;
-    max-height: calc(100vh - 20px);
+    max-width: 100%;
+    max-height: calc(var(--vh) - 20px);
 }
 
 /*#endregion MEDIA */
