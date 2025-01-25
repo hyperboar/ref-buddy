@@ -3,11 +3,13 @@
     <div id="tagList" class="tag-container">
         {# tpl-tag-items here #}
     </div>
-    <button id="tags-submit-add">Add</button>
-    <button id="tags-submit-del">Del</button>
-    <button id="tags-clear">Clear</button>
-    <button id="pins-clear">Clear Pins</button>
-    <button id="tags-close">Close</button>
+    <div class="buttons">
+        <button id="tags-submit-add">Add</button>
+        <button id="tags-submit-del">Del</button>
+        <button id="tags-clear">Clear</button>
+        <button id="pins-clear">Clear Pins</button>
+        <button id="tags-close">Close</button>
+    </div>
 </div>
 <div id="tpl-tag-item" class="tag-item hidden" data-id="{#{{ tag }}#}" data-color="{#{{ hex }}#}">
     <div id="highlight">

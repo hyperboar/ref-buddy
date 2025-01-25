@@ -73,6 +73,10 @@
     --cursor-transp:  url("/static/images/cursor-transp.png") , auto;
 
     --vh: 100vh;
+    --padding-btn-1: 2px 5px;
+    --padding-btn-2: 3px 6px;
+
+    --btn-text-size-1: 0.8em;
 }
 
 /*#endregion GLOBAL*/
@@ -223,7 +227,7 @@ button
 /* Paging */
 .paging
 {
-    width: 100%;
+    /*width: 100%;*/
     margin: 15px;
 }
 .paging-btns
@@ -234,6 +238,8 @@ button
 .page-btn
 {
     margin: 5px;
+    padding: var(--padding-btn-2);
+    font-size: var(--btn-text-size-1);
 }
 
 /*#endregion MAIN*/
@@ -247,9 +253,24 @@ button
     transform: translate(-50%, -50%);
     background-color: var(--clr-popup-bg);
     border: 1px var(--clr-popup-bg-border);
+    border-radius: 5px;
     padding: 15px;
     overflow: auto;
     z-index: var(--z-popup);
+}
+
+.tags-pins, button,
+.tags-popup button {
+    padding: var(--padding-btn-1);
+    font-family: inherit;
+    font-size: var(--btn-text-size-1);
+    color: inherit;
+}
+
+.tags-popup .buttons {
+    position: sticky;
+    bottom: 0;
+    left: 0;
 }
 
 .popup-row {
@@ -286,6 +307,11 @@ button
     right: 10px;
 }
 
+.top-menu button {
+    padding: var(--padding-btn-1);
+    font-size: var(--btn-text-size-1);
+}
+
 .tag-container {
     display: grid;
     max-width: calc(80vw);
@@ -294,10 +320,14 @@ button
     grid-template-columns: repeat(auto-fill, auto);
     grid-template-rows: repeat(auto-fill, minmax(20px, 1fr));
     grid-auto-flow: column;
-    grid-gap: 5px;
+    grid-row-gap: 5px;
+    grid-column-gap: 10px;
     margin: 10px;
     padding-bottom: 10px;
     padding-right: 10px;
+    align-items: center;
+    justify-content: space-between;
+
 }
 
 .tag-item
@@ -401,6 +431,10 @@ button
 }
 .tag-pin-on {background-image: var(--url-icon-pinon);}
 
+.tag-edit-pin {
+    padding: 2px;
+}
+
 
 .tags-list {}
 
@@ -414,7 +448,8 @@ button
 
 .tag-filter
 {
-    padding-left: 10px;
+    padding: 2px;
+    padding-left: 5px;
     user-select: none;
 }
 

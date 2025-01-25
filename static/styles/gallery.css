@@ -10,12 +10,12 @@
 
 /* Flex item */
 .gallery .thumbnail {
+    position: relative;
     min-height: 200px;
     min-width: 133px;
     max-width: 100%;
     height: auto;
     object-fit: cover;
-    position: relative;
 }
 
 .gallery .thumb {
