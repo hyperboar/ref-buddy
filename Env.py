@@ -23,6 +23,7 @@ class Env:
 
     # images
     IMAGES_PATH = os.getenv('IMAGES_PATH')
+    DRAWING_PATH = os.getenv('DRAWING_PATH')
     THUMB_PATH = os.getenv('THUMB_PATH')
     TMP_PATH = os.getenv('TMP_PATH')
     TMP_PATH_GIF = os.getenv('TMP_PATH_GIF')

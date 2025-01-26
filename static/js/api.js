@@ -252,6 +252,16 @@ class ApiImage
                 return r.blob()
             })
     }
+
+    static SaveDrawing(imageId, imgBase64)
+    {
+        return fetch('/drawing/save', ApiInternal.getPostRequest({'image_id': imageId, 'data': imgBase64}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
 }
 
 //#endregion Image

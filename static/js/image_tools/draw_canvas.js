@@ -1,5 +1,5 @@
 import {waitForCondition}    from "/static/js/discover/utils.js"
-import {OSInfo}    from "/static/js/main.js"
+import {OSInfo, }    from "/static/js/main.js"
 
 /*
 Source: https://stackoverflow.com/questions/2368784/draw-on-html5-canvas-using-a-mouse
@@ -50,12 +50,14 @@ class DrawCanvas
     _undoSeq = false
     _tmpImg = new Image()
 
+    _saveFn
+
     prevX = 0
     currX = 0
     prevY = 0
     currY = 0
 
-    constructor(selCnvId, selResizeTarget, selTheMedia, selControls, imgId)
+    constructor(selCnvId, selResizeTarget, selTheMedia, selControls, imgId, saveFn)
     {
         this._imgId = imgId
         this._canvas = document.querySelector(selCnvId)
@@ -65,6 +67,8 @@ class DrawCanvas
         this._resizeTarget = document.querySelector(selResizeTarget)
 
         this._theMediaSel = selTheMedia
+
+        this._saveFn = saveFn
 
         this.initCanvas()
         this.initControls()
@@ -214,6 +218,9 @@ class DrawCanvas
 
         elem = this._ctrls.querySelector('#draw-panel-hide')
         elem.addEventListener("click", (evt) => { this.evtStop(evt); this.toggle() })
+
+        elem = this._ctrls.querySelector('#draw-save')
+        elem.addEventListener("click", (evt) => {this.evtStop(evt);this.externalSave(evt)})
 
         // color buttons
         elem = this._ctrls.querySelector('#tlp-draw-clr')
@@ -499,6 +506,49 @@ class DrawCanvas
 
     evtStop(evt) {
         evt.stopPropagation()
+    }
+
+    /**
+     * @returns {Promise<String>}
+     */
+    getImageAsBase64() {
+        return new Promise((resolve, reject) =>
+        {
+            this._canvas.toBlob((blob) =>
+            {
+                if (blob == null) {
+                    return reject('blob is null')
+                }
+
+                const reader = new FileReader()
+                reader.onloadend = () => resolve(reader.result)
+                reader.readAsDataURL(blob);
+            })
+        })
+    }
+
+    externalSave(evt) {
+
+        const btn = evt.target
+        btn.classList.add('loading')
+        btn.classList.remove('op-success', 'op-fail')
+
+        this.getImageAsBase64()
+            .then(base64 =>
+            {
+                return this._saveFn(this._imgId, base64)
+            })
+            .then(json => {
+                if (json != null)
+                {
+                    btn.classList.add('op-success')
+                }
+                else
+                {
+                    btn.classList.add('op-fail')
+                }
+                btn.classList.remove('loading')
+            })
     }
 
     // saveHistory()

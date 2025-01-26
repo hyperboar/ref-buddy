@@ -244,6 +244,31 @@ def image_info(image_id):
 
     return Response(response=out, status=200, mimetype="application/json")
 
+@routes_image.route('/drawing/save', methods=['POST'])
+def drawing_save():
+    import base64
+
+    if request.method != 'POST':
+        return abort(404, 'Should be POST')
+
+    json = request.get_json()
+    image_id = json['image_id']
+    data = json['data']
+
+    prefix = image_id + '_'
+    next_count = 1
+    other = [int(file.split('_')[1].replace('.png', '')) for file in os.listdir(Env.DRAWING_PATH) if file.startswith(prefix)]
+    if len(other) > 0:
+        next_count = max(other) + 1
+
+    data = data.split(',')[1]
+    path = os.path.join(Env.DRAWING_PATH, f'{prefix}{next_count}.png')
+
+    img = Image.open(io.BytesIO(base64.b64decode(data)))
+    img.save(path, 'png')
+
+    return jsonify({'result': 'saved'}) if True else abort(404)
+
 @routes_image.route('/next-image/<pattern>/<int:image_id>')
 def next_image(pattern, image_id):
     lookup = {}
