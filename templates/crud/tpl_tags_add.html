@@ -2,20 +2,29 @@
 <html lang="en">
 <head>
     {% include 'tpl_part_header.html' %}
-    <title>Tag add</title>
+    <link rel="stylesheet" href="/static/styles/crud.css">
+    <title>Add Tag</title>
 </head>
 <body>
 <div class="header">
     <a class="back-btn no-decor btn-bg-blend" href="/tags">&lt;</a>
     <h1>Add Tag</h1>
 </div>
-<form method="POST" action="/tags/add">
-    <label for="tag">Tag:</label>
-    <input type="text" id="tag" name="tag" required>
-    <label for="color">Color:</label>
-    <input type="text" id="color" name="color" value="1" required>
-    <br>
-    <input type="submit" value="Add Tag">
-</form>
+
+<main class="content-flex">
+    <form method="POST" action="/tags/add">
+        <label for="tag">Tag:</label>
+        <input type="text" id="tag" name="tag" required>
+        <label for="color">Color:</label>
+        <select name="color" id="color">
+            <option value="1">None</option>
+            {% for c in colors %}
+                <option value="{{ c.id }}" style="color:{{ c.hex }}">{{ c.color_name }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <input type="submit" value="Add Tag">
+    </form>
+</main>
 </body>
 </html>

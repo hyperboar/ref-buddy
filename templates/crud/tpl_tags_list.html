@@ -6,34 +6,35 @@
     <title>Tags list</title>
 </head>
 <body>
-<div class="header">
+<header class="header">
     <a class="back-btn no-decor btn-bg-blend" href="/">&lt;</a>
     <h1>Tags</h1>
-</div>
+</header>
 
-<a href="/tags/add">Add Tag</a>
-<table class="list">
-    <tr>
-        <th>ID</th>
-        <th>Tag</th>
-        <th>Color</th>
-        <th>Actions</th>
-    </tr>
-    {% for tag in tags %}
+<main class="container container-flex">
+    <a href="/tags/add">+ Add Tag</a>
+    <table class="list">
         <tr>
-            <td class="dimmed" style="color: {{ tag.hex }}">{{ tag.id }}</td>
-            <td style="color: {{ tag.hex }}">{{ tag.tag }}</td>
-            <td class="dimmed" style="color: {{ tag.hex }}">{{ tag.color_id }}</td>
-            <td>
-                <a class="edit" href="/tags/edit/{{ tag.id }}">Edit</a>
-                <form method="POST" action="/tags/delete/{{ tag.id }}" style="display: inline;">
-                    <input class="del" type="submit" value="x" onclick="return confirmDelete('{{ tag.tag }}');">
-                </form>
-            </td>
+            <th>ID</th>
+            <th>Tag</th>
+            <th>Color</th>
+            <th>Actions</th>
         </tr>
-    {% endfor %}
-</table>
-
+        {% for tag in tags %}
+            <tr>
+                <td>{{ tag.id }}</td>
+                <td style="color: {{ tag.hex }}">{{ tag.tag }}</td>
+                <td style="color: {{ tag.hex }}">{{ tag.color_id }}</td>
+                <td>
+                    <a class="edit" href="/tags/edit/{{ tag.id }}">✎</a>
+                    <form method="POST" action="/tags/delete/{{ tag.id }}" style="display: inline;">
+                        <input class="del" type="submit" value="&cross;" onclick="return confirmDelete('{{ tag.tag }}');">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</main>
 
 <script>
     function confirmDelete(tag) {

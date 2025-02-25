@@ -3,17 +3,53 @@
     --clr-row-even: #7a7676;
     --clr-row-hover: #8d8989;
     --clr-text: black;
+    --z-thead: 10;
+}
+
+.container {
+}
+.container-flex {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 .list {
-    font-size: 14pt;
+    margin: 10px;
+    position: relative;
 }
 
+.list tr:first-child {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: var(--z-thead);
+}
+.list tr:first-child th {
+    padding: 5px;
+}
 .list td {
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 0 5px;
 }
 
+.list td:first-child,
+.list td:last-child {
+    opacity: 0.4;
+}
+.list tr:hover td:first-child,
+.list tr:hover td:last-child {
+    opacity: 1;
+}
+.list td:last-child {
+    font-size: 1.1em;
+}
+.list td:last-child > * {
+    padding: 0 2px;
+}
+
+.list td:nth-child(3) {
+    text-align: center;
+}
 .list tr:nth-child(odd) {
     background-color: var(--clr-row-odd);
 }
@@ -27,25 +63,19 @@
 .list .edit {
     color: var(--clr-text);
 }
-.list .edit, .list .edit:active,  .list .edit:visited {
+.list .edit,
+.list .edit:active,
+.list .edit:visited {
     text-decoration: none;
-}
-.list .edit:hover {
-    text-decoration: underline;
 }
 
 .list .del {
-    opacity: 0.5;
-    border-radius: 50%;
-    padding-left: 5px;
-    padding-right: 5px;
-    margin-left: 5px;
-    margin-right: 5px;
-}
-.list .del:hover {
-   opacity: 1;
+    background: none;
+    border: none;
 }
 
-.dimmed {
-    opacity: 0.7;
+.list .edit:hover,
+.list .del:hover {
+   text-decoration: underline;
+    cursor: pointer;
 }

@@ -13,7 +13,12 @@
     <label for="tag">Tag:</label>
     <input type="text" id="tag" name="tag" value="{{ tag.tag }}" required>
     <label for="color">Color:</label>
-    <input type="text" id="color" name="color" value="{{ tag.color_id }}" required>
+    <select name="color" id="color">
+        <option value="1">None</option>
+        {% for c in colors %}
+            <option value="{{ c.id }}" style="color:{{ c.hex }}">{{ c.color_name }}</option>
+        {% endfor %}
+    </select>
     <br>
     <input type="submit" value="Update Tag">
 </form>

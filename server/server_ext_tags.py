@@ -1,7 +1,7 @@
 from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify, url_for
 
 from image_metadata_controller import ImageMetadataController as Ctrl
-from models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag
+from models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag, Color
 from server_args_helpers import Args, get_arg
 
 routes_tags = Blueprint('routes_tags', __name__)
@@ -117,26 +117,36 @@ def show_tags():
 
 @routes_tags.route('/tags/add', methods=['GET', 'POST'])
 def add_tag():
-    if request.method == 'POST':
+    if request.method != 'POST':
         session = Session()
-        tag = request.form['tag'].strip()
-        color_id = int(request.form['color'].strip())
-        new_tag = Tag(tag=tag, color_id=color_id)
-        session.add(new_tag)
-        session.commit()
-        return redirect('/tags')
-    return render_template('crud/tpl_tags_add.html')
+        colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
+        return render_template('crud/tpl_tags_add.html', colors=colors)
+
+    session = Session()
+    tag = request.form['tag'].strip()
+    color_id = int(request.form['color'].strip())
+    new_tag = Tag(tag=tag, color_id=color_id)
+    session.add(new_tag)
+    session.commit()
+    return redirect('/tags')
+
 
 @routes_tags.route('/tags/edit/<int:tag_id>', methods=['GET', 'POST'])
 def edit_tag(tag_id):
     session = Session()
     tag = session.get(Tag, tag_id)
-    if request.method == 'POST':
-        tag.tag = request.form['tag'].strip()
-        tag.color_id = int(request.form['color'].strip())
-        session.commit()
-        return redirect('/tags')
-    return render_template('crud/tpl_tags_edit.html', tag=tag)
+
+    if request.method != 'POST':
+        session = Session()
+        tag = session.get(Tag, tag_id)
+        colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
+        return render_template('crud/tpl_tags_edit.html', tag=tag, colors=colors)
+
+    tag.tag = request.form['tag'].strip()
+    tag.color_id = int(request.form['color'].strip())
+    session.commit()
+    return redirect('/tags')
+
 
 @routes_tags.route('/tags/delete/<int:tag_id>', methods=['POST'])
 def delete_tag(tag_id):
