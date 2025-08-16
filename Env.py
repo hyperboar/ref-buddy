@@ -13,20 +13,20 @@ if os.path.exists(ENV_USER):
 
 class Env:
     # database
-    DB_FILE = os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME'))
-    DB_PATH = os.getenv('DB_PATH')
+    DB_FILE = os.path.abspath(os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME')))
+    DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
     DB_NAME = os.getenv('DB_NAME')
-    DB_BACKUP_PATH = os.getenv('DB_BACKUP_PATH', default=os.getenv('DB_PATH'))
+    DB_BACKUP_PATH = os.path.abspath(os.getenv('DB_BACKUP_PATH', default=os.getenv('DB_PATH')))
     # minutes. Happens only on app start
     DB_BACKUP_INTERVAL = int(os.getenv('DB_BACKUP_INTERVAL_MIN'))
     DB_BACKUP_MAX_COUNT = int(os.getenv('DB_BACKUP_MAX_COUNT'))
 
     # images
-    IMAGES_PATH = os.getenv('IMAGES_PATH')
-    DRAWING_PATH = os.getenv('DRAWING_PATH')
-    THUMB_PATH = os.getenv('THUMB_PATH')
-    TMP_PATH = os.getenv('TMP_PATH')
-    TMP_PATH_GIF = os.getenv('TMP_PATH_GIF')
+    IMAGES_PATH = os.path.abspath(os.getenv('IMAGES_PATH'))
+    DRAWING_PATH = os.path.abspath(os.getenv('DRAWING_PATH'))
+    THUMB_PATH = os.path.abspath(os.getenv('THUMB_PATH'))
+    TMP_PATH = os.path.abspath(os.getenv('TMP_PATH'))
+    TMP_PATH_GIF = os.path.abspath(os.getenv('TMP_PATH_GIF'))
     THUMB_MAX_SIZE = int(os.getenv('THUMB_MAX_SIZE'))
     IMPORT_FORMATS = list(map(lambda f: '.' + f.strip(), os.getenv('IMPORT_FORMATS').split(',')))
 
