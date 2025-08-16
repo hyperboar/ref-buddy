@@ -13,7 +13,7 @@ routes_tags_ai = Blueprint('routes_tags_ai', __name__)
 #region ---- JSON API ----
 @routes_tags_ai.route('/tags-ai/suck-folder-in')
 def suck_in_all_tags_in_folder():
-    path = os.path.join(os.getcwd(), 'autotag_fetcher', 'output_export_2d.json')
+    path = os.path.join(os.getcwd(), 'autotag_fetcher', 'output_export_new_images.json')
     session = Session()
 
     files = os.listdir(path)
