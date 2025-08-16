@@ -12,7 +12,7 @@ from export_vid_gifs import ExportVidGifs
 from gifextract import process_animation
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag, ImageExtra, BoardImage, Discover, \
-    ImageColor
+    ImageColor, DatabaseUtil
 
 
 def get_db_info():
@@ -48,6 +48,7 @@ def get_db_info():
 
 
 def create_new_db():
+    DatabaseUtil.create_if_not_exist()
     # make_database_backup(True)
     # if not os.path.isfile(Env.DB_FILE):
     #     print(f'Database file '{Env.DB_FILE}' do not exist. Creating one.')
@@ -71,6 +72,27 @@ def create_new_db():
     # cursor.close()
     # conn.close()
     pass
+
+def create_required_folders():
+    if not os.path.exists(Env.DB_PATH):
+        os.makedirs(Env.DB_PATH)
+    if not os.path.exists(Env.DB_BACKUP_PATH):
+        os.makedirs(Env.DB_BACKUP_PATH)
+    if not os.path.exists(Env.DRAWING_PATH):
+        os.makedirs(Env.DRAWING_PATH)
+    if not os.path.exists(Env.THUMB_PATH):
+        os.makedirs(Env.THUMB_PATH)
+    if not os.path.exists(Env.TMP_PATH):
+        os.makedirs(Env.TMP_PATH)
+    if not os.path.exists(Env.TMP_PATH_GIF):
+        os.makedirs(Env.TMP_PATH_GIF)
+
+    if not os.path.exists(Env.IMAGES_PATH):
+        os.makedirs(Env.IMAGES_PATH)
+        os.makedirs(os.path.join(Env.IMAGES_PATH, 'academic'))
+        os.makedirs(os.path.join(Env.IMAGES_PATH, 'other'))
+        with open(os.path.join(Env.IMAGES_PATH, 'put_images_into_sub_folders.txt'), 'w') as f:
+            f.write('Images are supposed to be in sub folders.\nImages won\'t be imported when put into this directory!')
 
 def generate_thumbs(start_at=None, session=None):
     # Create thumbnail folder if it doesn't exist
@@ -555,6 +577,10 @@ def make_database_backup(marker:str='',force:bool=False):
 
     if not os.path.exists(path):
         os.mkdir(path)
+
+    if not os.path.exists(Env.DB_FILE):
+        print(f'No existing database found.')
+        return
 
     backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
     start_pos = len(db_file_name)

@@ -12,7 +12,8 @@ from export_vid_gifs import ExportVidGifs
 
 from image_metadata_importer import ImageMetadataImporter
 from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \
-    make_database_backup, cleanup_image_thumbs, cleanup_paths, cleanup_vacuum, gif_split
+    make_database_backup, cleanup_image_thumbs, cleanup_paths, cleanup_vacuum, gif_split, create_new_db, \
+    create_required_folders
 from Env import Env
 from rehash_dialog import RehashDialog
 from utils import Utils
@@ -155,7 +156,9 @@ class MainWindow(tk.Frame):
 
 
 if __name__ == "__main__":
+    create_required_folders()
     make_database_backup()
+    create_new_db()
 
     root = tk.Tk()
     app = MainWindow(master=root)

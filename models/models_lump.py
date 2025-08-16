@@ -16,6 +16,48 @@ Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 
+class DatabaseUtil:
+    VERSION = "1.0"
+
+    @staticmethod
+    def create_if_not_exist():
+        if not (os.path.exists(Env.DB_FILE)):
+            Base.metadata.create_all(engine)
+            DatabaseUtil.add_predefined_data()
+
+    @staticmethod
+    def add_predefined_data():
+
+        session = Session()
+
+        # COLORS
+        color = Color(color_name='default')
+        session.add(color)
+
+        session.commit()
+
+        # TAGS
+        tag_anim = Tag(tag='animated', color_id=color.id)
+        tag_vid = Tag(tag='video', color_id=color.id)
+        session.add(tag_anim)
+        session.add(tag_vid)
+
+        session.commit()
+
+        # STUDY TYPES
+        study_type_1 = StudyType(type="academic")
+        study_type_2 = StudyType(type="other")
+        session.add(study_type_1)
+        session.add(study_type_2)
+
+        session.commit()
+
+        # TAG SET
+        tag_set = TagSet(set_name='All Images', set_alias='all')
+        session.add(tag_set)
+
+        session.commit()
+
 class MyTIMESTAMP(TypeDecorator):
     """
     Crutch for SQLAlchemy's inability to handle SQLite TIMESTAMP and DateTime as a string
