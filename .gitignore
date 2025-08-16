@@ -1,18 +1,9 @@
 .idea/
 venv/
+library/
 
 # ignoring user config
 config/user.env
 
-db_backups/
-
 # build
-dist/
-build/
 __pycache__/
-main.spec
-main.exe
-figure_drawing_trainer.spec
-figure_drawing_trainer.exe
-web_server.spec
-web_server.exe
