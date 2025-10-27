@@ -1,6 +1,6 @@
 import urllib
 from enum import Enum, auto
-from flask import abort
+from quart import abort
 from Env import Env
 
 

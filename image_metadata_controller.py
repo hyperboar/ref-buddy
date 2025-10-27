@@ -2,7 +2,7 @@ import os
 import urllib
 from datetime import datetime
 
-from flask import Request
+from quart import Request
 
 from Env import Env
 from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi

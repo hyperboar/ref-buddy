@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify, url_for
+from quart import Blueprint, request, abort, render_template_string, render_template, redirect, jsonify, url_for
 
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag, Color
@@ -8,19 +8,19 @@ routes_tags = Blueprint('routes_tags', __name__)
 
 
 @routes_tags.route('/embed-panel-tag-filter')
-def embed_panel_tag_filter():
-    return render_template('tpl_widget_tags_filter_panel.html')
+async def embed_panel_tag_filter():
+    return await render_template('tpl_widget_tags_filter_panel.html')
 
 @routes_tags.route('/embed-panel-tag-editor')
-def embed_panel_tag_editor():
-    return render_template('tpl_widget_tags_editor_panel.html')
+async def embed_panel_tag_editor():
+    return await render_template('tpl_widget_tags_editor_panel.html')
 
 @routes_tags.route('/add-image-tags', methods=['POST'])
-def add_image_tag():
+async def add_image_tag():
     if request.method != 'POST':
         return abort(404, 'Should be POST')
 
-    json = request.get_json()
+    json = await request.get_json()
     image_ids = json['image_ids']
     tags = json['tags']
 
@@ -34,11 +34,11 @@ def add_image_tag():
     return jsonify({'count': r})
 
 @routes_tags.route('/remove-image-tags', methods=['POST'])
-def remove_image_tag():
+async def remove_image_tag():
     if request.method != 'POST':
         return abort(404, 'Should be POST')
 
-    json = request.get_json()
+    json = await request.get_json()
     image_ids = json['image_ids']
     tags = json['tags']
 
@@ -53,17 +53,17 @@ def remove_image_tag():
     return jsonify({'count': r})
 
 @routes_tags.route('/add-folder-tags')
-def add_folder_tag():
+async def add_folder_tag():
     pass
 
 @routes_tags.route('/remove-folder-tags')
-def remove_folder_tag():
+async def remove_folder_tag():
     pass
 
 #region ---- JSON API ----
 
 @routes_tags.route('/tags/all')
-def get_all_tags():
+async def get_all_tags():
     session = Session()
     tags = session.query(Tag).all()
     out = {'colors': {}, 'tags': []}
@@ -74,7 +74,7 @@ def get_all_tags():
     return jsonify(out)
 
 @routes_tags.route('/tags/image/single/<int:image_id>')
-def image_tags_single(image_id):
+async def image_tags_single(image_id):
     session = Session()
     im = session.get(ImageMetadata, image_id)
     tags = [{'color': it.tag.color.hex, 'name': it.tag.tag, 'ai': it.by_ai} for it in im.tags]
@@ -83,11 +83,11 @@ def image_tags_single(image_id):
     return jsonify(out)
 
 @routes_tags.route('/tags/image/bulk', methods=['POST'])
-def image_tags_bulk():
+async def image_tags_bulk():
     if request.method != 'POST':
         return abort(404, 'Should be GET')
 
-    json = request.get_json()
+    json = await request.get_json()
     image_ids = json['image_ids'] if 'image_ids' in json else []
 
     session = Session()
@@ -98,7 +98,7 @@ def image_tags_bulk():
     return jsonify(data)
 
 @routes_tags.route('/tags/set-list')
-def tag_set_list():
+async def tag_set_list():
     session = Session()
     out = [{'alias': s.set_alias, 'name': s.set_name, 'tags': s.tag_list} for s in session.query(TagSet).order_by(TagSet.set_name).all()]
     session.close()
@@ -110,17 +110,17 @@ def tag_set_list():
 #region ---- CRUD TAG ----
 
 @routes_tags.route('/tags')
-def show_tags():
+async def show_tags():
     session = Session()
     tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
-    return render_template('crud/tpl_tags_list.html', tags=tags)
+    return await render_template('crud/tpl_tags_list.html', tags=tags)
 
 @routes_tags.route('/tags/add', methods=['GET', 'POST'])
-def add_tag():
+async def add_tag():
     if request.method != 'POST':
         session = Session()
         colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
-        return render_template('crud/tpl_tags_add.html', colors=colors)
+        return await render_template('crud/tpl_tags_add.html', colors=colors)
 
     session = Session()
     tag = request.form['tag'].strip()
@@ -132,7 +132,7 @@ def add_tag():
 
 
 @routes_tags.route('/tags/edit/<int:tag_id>', methods=['GET', 'POST'])
-def edit_tag(tag_id):
+async def edit_tag(tag_id):
     session = Session()
     tag = session.get(Tag, tag_id)
 
@@ -140,7 +140,7 @@ def edit_tag(tag_id):
         session = Session()
         tag = session.get(Tag, tag_id)
         colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
-        return render_template('crud/tpl_tags_edit.html', tag=tag, colors=colors)
+        return await render_template('crud/tpl_tags_edit.html', tag=tag, colors=colors)
 
     tag.tag = request.form['tag'].strip()
     tag.color_id = int(request.form['color'].strip())
@@ -149,7 +149,7 @@ def edit_tag(tag_id):
 
 
 @routes_tags.route('/tags/delete/<int:tag_id>', methods=['POST'])
-def delete_tag(tag_id):
+async def delete_tag(tag_id):
     session = Session()
     tag = session.get(Tag, tag_id)
     session.delete(tag)
@@ -161,13 +161,13 @@ def delete_tag(tag_id):
 #region ---- CRUD TAG SET ----
 
 @routes_tags.route('/tag-sets')
-def list_tag_sets():
+async def list_tag_sets():
     session = Session()
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
-    return render_template('crud/tpl_tagsets_list.html', tag_sets=tag_sets)
+    return await render_template('crud/tpl_tagsets_list.html', tag_sets=tag_sets)
 
 @routes_tags.route('/tag-sets/add', methods=['GET', 'POST'])
-def tag_set_add():
+async def tag_set_add():
     session = Session()
 
     if request.method == 'POST':
@@ -183,11 +183,11 @@ def tag_set_add():
 
     tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
 
-    out = render_template('crud/tpl_tagset_add.html', tags=tags)
+    out = await render_template('crud/tpl_tagset_add.html', tags=tags)
     return out
 
 @routes_tags.route('/tag-sets/<int:tag_set_id>/edit', methods=['GET', 'POST'])
-def tag_set_edit(tag_set_id):
+async def tag_set_edit(tag_set_id):
     session = Session()
     tag_set = session.get(TagSet, tag_set_id)
     if not tag_set:
@@ -203,7 +203,7 @@ def tag_set_edit(tag_set_id):
 
     tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
 
-    out = render_template('crud/tpl_tagset_edit.html', tag_set=tag_set, tags=tags)
+    out = await render_template('crud/tpl_tagset_edit.html', tag_set=tag_set, tags=tags)
     return out
 
 #endregion ---- CRUD TAG SET ----
@@ -211,14 +211,14 @@ def tag_set_edit(tag_set_id):
 #region ---- CRUD PATH TAG ----
 
 @routes_tags.route('/path-tags')
-def list_path_tags():
+async def list_path_tags():
     session = Session()
     paths = session.query(Path).order_by(Path.path_raw).all()
 
-    return render_template('crud/tpl_path_tags.html', paths=paths)
+    return await render_template('crud/tpl_path_tags.html', paths=paths)
 
 @routes_tags.route('/path-tag/<int:path_id>/<tags_str>', methods=['GET'])
-def path_tag_edit(path_id, tags_str:str):
+async def path_tag_edit(path_id, tags_str:str):
     if not path_id:
         return abort(404, 'Path id or tags list is not set')
 

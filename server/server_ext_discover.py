@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, jsonify, url_for, render_template_string
+from quart import Blueprint, render_template, jsonify, url_for, render_template_string
 from sqlalchemy import func
 
 from models.models_lump import Session, ImageMetadata, Discover
@@ -8,11 +8,11 @@ from models.models_lump import Session, ImageMetadata, Discover
 routes_discover = Blueprint('routes_discover', __name__)
 
 @routes_discover.route('/discover')
-def main_feed():
-    return render_template('tpl_discover.html')
+async def main_feed():
+    return await render_template('tpl_discover.html')
 
 @routes_discover.route('/discover-last-active/<int:image_id>/')
-def ping_image(image_id):
+async def ping_image(image_id):
     session = Session()
     d = session.get(Discover, image_id)
     if d is None:
@@ -23,10 +23,10 @@ def ping_image(image_id):
     session.commit()
     session.close()
 
-    return render_template_string('ok')
+    return await render_template_string('ok')
 
 @routes_discover.route('/discover-get-content/<int:count>/')
-def get_content(count:int):
+async def get_content(count:int):
     response = []
 
     session = Session()
@@ -46,7 +46,7 @@ def get_content(count:int):
     return jsonify(response)
 
 @routes_discover.route('/discover-get-old-content/<int:count>/<int:image_id>/')
-def get_old_content(count:int, image_id):
+async def get_old_content(count:int, image_id):
     session = Session()
 
     startId = session.get(Discover, image_id)

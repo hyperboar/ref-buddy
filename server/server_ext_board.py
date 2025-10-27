@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, render_template_string, render_template, jsonify, url_for
+from quart import Blueprint, request, abort, render_template_string, render_template, jsonify, url_for
 from models.models_lump import Session, ImageMetadata, Path, BoardImage, Board
 from server_args_helpers import get_arg, Args
 from server_widget_helpers import get_boards_all
@@ -7,25 +7,25 @@ import json
 routes_board = Blueprint('routes_board', __name__)
 
 @routes_board.route('/boards')
-def view_board_all():
+async def view_board_all():
     session = Session()
 
     boards = session.query(Board).all()
-    out = render_template('tpl_view_board_all.html', boards=boards)
+    out = await render_template('tpl_view_board_all.html', boards=boards)
     session.close()
     return out
 
 @routes_board.route('/board/<int:b_id>')
-def view_board(b_id):
+async def view_board(b_id):
     session = Session()
 
     board = session.get(Board, b_id)
-    out = render_template('tpl_view_board.html', board=board)
+    out = await render_template('tpl_view_board.html', board=board)
     session.close()
     return out
 
 @routes_board.route('/board/add', methods=['POST'])
-def board_add():
+async def board_add():
     title = request.form.get('title')
 
     session = Session()
@@ -38,7 +38,7 @@ def board_add():
     return out
 
 @routes_board.route('/board-images/<int:b_id>')
-def get_board_images(b_id):
+async def get_board_images(b_id):
     session = Session()
 
     images = [(bim.image, bim.tr_json, bim.board_id) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
@@ -58,7 +58,7 @@ def get_board_images(b_id):
     return out
 
 @routes_board.route('/set-board-image-transform')
-def set_board_image_transform():
+async def set_board_image_transform():
     args = request.args
     image_id = get_arg(request.args, Args.image_id)
     b_id = int(args.get('b-id', default='-1'))
@@ -78,11 +78,11 @@ def set_board_image_transform():
     return 'ok'
 
 @routes_board.route('/board/add-images', methods=['POST'])
-def add_images_to_board():
+async def add_images_to_board():
     if request.method != 'POST':
         return abort(404, 'Should be POST')
 
-    args = request.get_json()
+    args = await request.get_json()
     image_ids = args['image_ids']
     b_id = args['board_id']
 
@@ -98,7 +98,7 @@ def add_images_to_board():
     return 'ok'
 
 @routes_board.route('/board/del-images')
-def remove_images_from_board():
+async def remove_images_from_board():
     image_ids = get_arg(request.args, Args.mult_image_ids)
     b_id = int(request.args.get('b-id', default='-1'))
 
@@ -113,7 +113,7 @@ def remove_images_from_board():
     return 'ok'
 
 @routes_board.route('/widget/get-boards-all')
-def widget_get_boards_all():
+async def widget_get_boards_all():
     session = Session()
     out = get_boards_all(session=session)
     session.close()

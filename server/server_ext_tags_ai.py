@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from flask import Blueprint, request, abort, render_template, redirect, jsonify
+from quart import Blueprint, request, abort, render_template, redirect, jsonify
 from models.models_lump import Tag, Session, ImageMetadata, TagSet, TagAi, ImageTagAi, TagAiToTag, ImageTag
 from sqlalchemy.sql import exists
 from sqlalchemy import inspect
@@ -11,13 +11,13 @@ routes_tags_ai = Blueprint('routes_tags_ai', __name__)
 
 
 @routes_tags_ai.route('/tags-ai/process')
-def process():
-    return render_template('tpl_tags_ai_process.html')
+async def process():
+    return await render_template('tpl_tags_ai_process.html')
 
 
 #region ---- JSON API ----
 @routes_tags_ai.route('/tags-ai/suck-folder-in')
-def suck_in_all_tags_in_folder():
+async def suck_in_all_tags_in_folder():
     path = os.path.join(os.getcwd(), 'autotag_fetcher', 'output_export_new_images.json')
     session = Session()
 
@@ -65,7 +65,7 @@ def suck_in_all_tags_in_folder():
     return jsonify({'ok': f'{path}'})
 
 @routes_tags_ai.route('/tags-ai/update-mapped-tags')
-def update_mapped_tags():
+async def update_mapped_tags():
     session = Session()
 
     mapping = session.query(TagAiToTag).all()
@@ -96,7 +96,7 @@ def update_mapped_tags():
     return jsonify({'ok': f'{count_new}', 'stat': new_tags})
 
 @routes_tags_ai.route('/tags-ai/all')
-def get_all_tags():
+async def get_all_tags():
     session = Session()
     tags = session.query(Tag).all()
     out = {'tags': []}
@@ -106,7 +106,7 @@ def get_all_tags():
     return jsonify(out)
 
 @routes_tags_ai.route('/tags-ai/image/single/<int:image_id>')
-def image_tags_single(image_id):
+async def image_tags_single(image_id):
     session = Session()
     im = session.get(ImageMetadata, image_id)
     tags = [{'color': it.tag.color.hex, 'name': it.tag.tag} for it in im.tags]
@@ -115,11 +115,11 @@ def image_tags_single(image_id):
     return jsonify(out)
 
 @routes_tags_ai.route('/tags/image/bulk', methods=['POST'])
-def image_tags_bulk():
+async def image_tags_bulk():
     if request.method != 'POST':
         return abort(404, 'Should be GET')
 
-    json = request.get_json()
+    json = await request.get_json()
     image_ids = json['image_ids'] if 'image_ids' in json else []
 
     session = Session()
@@ -130,7 +130,7 @@ def image_tags_bulk():
     return jsonify(data)
 
 @routes_tags_ai.route('/tags/set-list')
-def tag_set_list():
+async def tag_set_list():
     session = Session()
     out = [{'alias': s.set_alias, 'name': s.set_name, 'tags': s.tag_list} for s in session.query(TagSet).order_by(TagSet.set_name).all()]
     session.close()
@@ -142,13 +142,13 @@ def tag_set_list():
 #region ---- CRUD TAG ----
 
 @routes_tags_ai.route('/tags-ai')
-def show_tags():
+async def show_tags():
     session = Session()
     tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
-    return render_template('crud/tpl_tags_list.html', tags=tags)
+    return await render_template('crud/tpl_tags_list.html', tags=tags)
 
 @routes_tags_ai.route('/tags-ai/add', methods=['GET', 'POST'])
-def add_tag():
+async def add_tag():
     if request.method == 'POST':
         session = Session()
         tag = request.form['tag'].strip()
@@ -157,10 +157,10 @@ def add_tag():
         session.add(new_tag)
         session.commit()
         return redirect('/tags')
-    return render_template('crud/tpl_tags_add.html')
+    return await render_template('crud/tpl_tags_add.html')
 
 @routes_tags_ai.route('/tags-ai/edit/<int:tag_id>', methods=['GET', 'POST'])
-def edit_tag(tag_id):
+async def edit_tag(tag_id):
     session = Session()
     tag = session.get(Tag, tag_id)
     if request.method == 'POST':
@@ -168,10 +168,10 @@ def edit_tag(tag_id):
         tag.color_id = int(request.form['color'].strip())
         session.commit()
         return redirect('/tags')
-    return render_template('crud/tpl_tags_edit.html', tag=tag)
+    return await render_template('crud/tpl_tags_edit.html', tag=tag)
 
 @routes_tags_ai.route('/tags-ai/delete/<int:tag_id>', methods=['POST'])
-def delete_tag(tag_id):
+async def delete_tag(tag_id):
     session = Session()
     tag = session.get(Tag, tag_id)
     session.delete(tag)

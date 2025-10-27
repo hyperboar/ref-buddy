@@ -1,6 +1,6 @@
 import urllib
 
-from flask import Request
+from quart import Request
 
 from Env import Env
 from image_metadata_controller import ImageMetadataController as Ctrl

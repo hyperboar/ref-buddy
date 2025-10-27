@@ -1,7 +1,7 @@
 import os.path
 from itertools import combinations
 
-from flask import Blueprint, request, render_template_string, render_template
+from quart import Blueprint, request, render_template_string, render_template
 from PIL import Image
 
 from Env import Env
@@ -11,7 +11,7 @@ from server_args_helpers import get_arg, Args
 routes_dupes = Blueprint('routes_dupes', __name__)
 
 @routes_dupes.route('/dupes')
-def view_dupes():
+async def view_dupes():
     s = Session()
 
     limit = 500
@@ -32,10 +32,10 @@ def view_dupes():
 
     print(len(dupes))
 
-    return render_template('tpl_view_dupes.html', dupes=dupes)
+    return await render_template('tpl_view_dupes.html', dupes=dupes)
 
 @routes_dupes.route('/dupes-resolve-pick-largest')
-def pick_largest_and_resolve():
+async def pick_largest_and_resolve():
     ids = get_arg(request.args, Args.mult_image_ids)
 
     session = Session()
@@ -74,10 +74,10 @@ def pick_largest_and_resolve():
 
     session.close()
 
-    return render_template_string('ok')
+    return await render_template_string('ok')
 
 @routes_dupes.route('/dupes-not-same')
-def mark_not_same():
+async def mark_not_same():
     ids = get_arg(request.args, Args.mult_image_ids)
     session = Session()
 
@@ -100,10 +100,10 @@ def mark_not_same():
         raise
     session.close()
 
-    return render_template_string('ok')
+    return await render_template_string('ok')
 
 @routes_dupes.route('/dupes-remove')
-def mark_just_remove():
+async def mark_just_remove():
     ids = get_arg(request.args, Args.mult_image_ids)
     session = Session()
 
@@ -122,7 +122,7 @@ def mark_just_remove():
     # [print(f'{im.path}') for im in images]
 
 
-    return render_template_string('ok')
+    return await render_template_string('ok')
 
 # def sync_images(master:[int], clones:[int], session=None):
 #     if session is None:

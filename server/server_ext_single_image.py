@@ -1,12 +1,11 @@
 import io
-import json
 import os
 from datetime import datetime
 from typing import Callable
 from zipfile import ZipFile
 
 from PIL import Image
-from flask import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
+from quart import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
     current_app, jsonify, Request, Response
 
 from image_metadata_controller import ImageMetadataController as Ctrl
@@ -18,37 +17,37 @@ from utils import Utils
 routes_image = Blueprint('routes_image', __name__)
 
 @routes_image.route('/image/<int:image_id>')
-def send_static_image(image_id):
+async def send_static_image(image_id):
     session = Session()
     metadata = Ctrl.get_by_id(image_id, session=session)
     ext = os.path.splitext(metadata.filename)[1]
-    out = send_file(metadata.path_abs, mimetype=f'image/{ext}')
+    out = await send_file(metadata.path_abs, mimetype=f'image/{ext}')
     session.close()
     return out
 
 @routes_image.route('/thumb/<path>')
-def send_static_image_thumb(path):
-    return send_from_directory(current_app.config['THUMB_STATIC'], path)
+async def send_static_image_thumb(path):
+    return await send_from_directory(current_app.config['THUMB_STATIC'], path)
 
 @routes_image.route('/set-image-fav/<int:image_id>/<int:is_fav>')
-def set_image_fav(image_id, is_fav):
+async def set_image_fav(image_id, is_fav):
     r = Ctrl.set_image_fav(image_id, is_fav)
     if not r:
         abort(404, 'Something went wrong, fav not set, probably...')
-    return render_template_string('yep')
+    return await render_template_string('yep')
 
 @routes_image.route('/set-image-last-viewed/<int:image_id>')
-def set_image_last_viewed(image_id):
+async def set_image_last_viewed(image_id):
     now = datetime.now()
 
     r = Ctrl.set_image_last_viewed(image_id, now)
 
     if not r:
         abort(404, 'Something went wrong, last viewed not updated, probably...')
-    return render_template_string('yep')
+    return await render_template_string('yep')
 
 @routes_image.route('/color/palette/<int:image_id>')
-def get_color_palette(image_id):
+async def get_color_palette(image_id):
     session = Session()
     im = session.get(ImageMetadata, image_id)
     out = [{'id': ic.color.id, 'hex': ic.color.hex, 'x': ic.x, 'y': ic.y} for ic in im.colors]
@@ -56,7 +55,7 @@ def get_color_palette(image_id):
     return jsonify({'id': image_id, 'palette': out})
 
 @routes_image.route('/color-at-coord')
-def get_color_at_coord():
+async def get_color_at_coord():
     image_id = get_arg(request.args, Args.image_id)
     x_r = float(request.args.get('x'))
     y_r = float(request.args.get('y'))
@@ -85,7 +84,7 @@ def get_color_at_coord():
     return jsonify({'hex': hex_color})
 
 @routes_image.route('/save-image-color')
-def save_image_color():
+async def save_image_color():
     try:
         image_id = get_arg(request.args, Args.image_id)
         x = float(request.args.get('x'))
@@ -113,7 +112,7 @@ def save_image_color():
     return jsonify({'id': color.id})
 
 @routes_image.route('/color/palette/remove/<int:image_id>/<int:color_id>')
-def remove_image_color(image_id, color_id):
+async def remove_image_color(image_id, color_id):
     session = Session()
 
     im_color_usage = session.query(ImageColor).filter(ImageColor.color_id == color_id).all()
@@ -135,7 +134,7 @@ def remove_image_color(image_id, color_id):
 
 
 @routes_image.route('/study-video/<int:item_id>')
-def study_video(item_id):
+async def study_video(item_id):
     session = Session()
     metadata = session.get(ImageMetadata, item_id)
 
@@ -145,12 +144,12 @@ def study_video(item_id):
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
     extra = metadata.extras[0].data
 
-    out = render_template('tpl_view_video.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+    out = await render_template('tpl_view_video.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
     session.close()
     return out
 
 @routes_image.route('/video/<int:item_id>')
-def send_video(item_id):
+async def send_video(item_id):
     session = Session()
     metadata = session.get(ImageMetadata, item_id)
 
@@ -161,7 +160,7 @@ def send_video(item_id):
     return out
 
 @routes_image.route('/open-video')
-def open_video():
+async def open_video():
 
     if not os.path.exists(Env.VIDEO_PLAYER_PATH):
         print('No video player set up yet.')
@@ -193,7 +192,7 @@ def select_file_cmd_os_specific(path:str) -> str:
 
 
 @routes_image.route('/study-anim/<int:item_id>')
-def study_animation(item_id):
+async def study_animation(item_id):
     session = Session()
     metadata = session.get(ImageMetadata, item_id)
 
@@ -203,12 +202,12 @@ def study_animation(item_id):
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
     extra = '{}' #metadata.extras[0].data
 
-    out = render_template('tpl_view_anim.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
+    out = await render_template('tpl_view_anim.html', image=metadata, extra=extra, tag_sets=tag_sets, tags=[t.tag for t in metadata.tags])
     session.close()
     return out
 
 @routes_image.route('/anim-info/<int:item_id>')
-def animation_info(item_id):
+async def animation_info(item_id):
     session = Session()
 
     im = session.get(ImageMetadata, item_id)
@@ -219,7 +218,7 @@ def animation_info(item_id):
     return open(path, 'r').read() #json.load(open(path, 'r'))
 
 @routes_image.route('/anim-frames-zip/<int:image_id>')
-def send_static_anim_frame_zip(image_id):
+async def send_static_anim_frame_zip(image_id):
     session = Session()
     metadata = session.get(ImageMetadata, image_id)
     fn = metadata.filename
@@ -229,29 +228,29 @@ def send_static_anim_frame_zip(image_id):
     return out
 
 @routes_image.route('/study-image/<int:image_id>')
-def study_image(image_id):
-    return render_template('tpl_view_image.html', content_id=image_id, content_url=f"/image/{image_id}")
+async def study_image(image_id):
+    return await render_template('tpl_view_image.html', content_id=image_id, content_url=f"/image/{image_id}")
 
 
 @routes_image.route('/image-info/<int:image_id>')
-def image_info(image_id):
+async def image_info(image_id):
     session = Session()
     image = session.get(ImageMetadata, image_id)
     extra = image.extras[0].data if len(image.extras) > 0 else "{}"
     is_video = 1 if image.source_type_id == 2 or image.source_type_id == 3 else 0
-    out = render_template('json/tpl_image_info.json.html', image=image, extra=extra, is_video=is_video)
+    out = await render_template('json/tpl_image_info.json.html', image=image, extra=extra, is_video=is_video)
     session.close()
 
     return Response(response=out, status=200, mimetype="application/json")
 
 @routes_image.route('/drawing/save', methods=['POST'])
-def drawing_save():
+async def drawing_save():
     import base64
 
     if request.method != 'POST':
         return abort(404, 'Should be POST')
 
-    json = request.get_json()
+    json = await request.get_json()
     image_id = json['image_id']
     data = json['data']
 
@@ -270,7 +269,7 @@ def drawing_save():
     return jsonify({'result': 'saved'}) if True else abort(404)
 
 @routes_image.route('/next-image/<pattern>/<int:image_id>')
-def next_image(pattern, image_id):
+async def next_image(pattern, image_id):
     lookup = {}
     lookup['_'] = lambda im_id: None
     lookup['fwd_id']  = lambda im_id: im_id + 1
@@ -282,7 +281,7 @@ def next_image(pattern, image_id):
     next_im: Callable[[int], int | None] = lookup[pattern] if pattern in lookup else lookup['_']
 
     image_id = next_im(image_id)
-    return jsonify({'id': image_id, 'pattern': pattern}) if image_id else abort(404)
+    return jsonify({'id': image_id, 'pattern': pattern}) if image_id else await abort(404)
 
 def next_random_image_id(image_id: int, req: Request) -> int:
     session = Session()

@@ -1,7 +1,7 @@
 import os.path
 
-from flask import Flask, request, render_template, jsonify
-from flask_caching import Cache
+from quart import Quart, request, render_template, jsonify
+# from flask_caching import Cache
 
 # Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
 import sys
@@ -28,18 +28,18 @@ from server_ext_tags_ai import routes_tags_ai
 
 config = {
     # "DEBUG": True,          # some Flask specific configs
-    "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-    "CACHE_DEFAULT_TIMEOUT": 300,
+    # "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
+    # "CACHE_DEFAULT_TIMEOUT": 300,
     'THUMB_STATIC': Env.THUMB_PATH
 }
 
 template_dir = os.path.join('..', 'templates')
 static_dir = os.path.join('..', 'static')
 
-app = Flask(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
+app = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
 app.config.from_mapping(config)
 
-cache = Cache(app)
+# cache = Cache(app)
 
 app.register_blueprint(routes_image)
 app.register_blueprint(routes_image_remove)
@@ -57,15 +57,15 @@ def before_request():
     make_database_backup()
 
 @app.route('/')
-def overview():
+async def overview():
     args = request.args
     hidden = int(args.get('hidden', default='0')) != 0
 
     images = ImageMetadataOverview.get_overview(hidden)
-    return render_template('tpl_view_index.html', images=images)
+    return await render_template('tpl_view_index.html', images=images)
 
 @app.route('/json/overview')
-def json_overview():
+async def json_overview():
     args = request.args
     hidden = int(args.get('hidden', default='0')) != 0
 
@@ -86,7 +86,7 @@ def json_overview():
     return jsonify(result)
 
 @app.route('/favs')
-def view_favs():
+async def view_favs():
     page, offset, limit = get_current_paging(request.args)
     rating = get_arg(request.args, Args.min_rating)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
@@ -100,10 +100,10 @@ def view_favs():
 
     paging = get_paging_widget(page)
 
-    return render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None)
+    return await render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None)
 
 @app.route('/latest_study')
-def view_last():
+async def view_last():
     page, offset, limit = get_current_paging(request.args)
     rating = get_arg(request.args, Args.min_rating)
     tags_pos, tags_neg = get_arg(request.args, Args.tags)
@@ -117,20 +117,22 @@ def view_last():
 
     paging = get_paging_widget(page)
 
-    return render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None)
+    return await render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None)
 
 @app.route('/palettes')
-def view_image_colors():
+async def view_image_colors():
     session = Session()
 
     sub = session.query(ImageColor.image_id).group_by(ImageColor.image_id).subquery()
     images = session.query(ImageMetadata).join(sub, ImageMetadata.image_id == sub.c.image_id).all()
-    out = render_template('tpl_view_palettes.html', images=images)
+    out = await render_template('tpl_view_palettes.html', images=images)
     return out
 
 
-if __name__ == '__main__':
+def run() -> None:
     # db = sqlite3.connect(Env.DB_FILE)
     # ImageMetadataCtrl.static_initialize(db)
-
     app.run(host='0.0.0.0', port=Env.SERVER_PORT)
+
+if __name__ == '__main__':
+    run()

@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from flask import Blueprint, request, abort, render_template_string, render_template, jsonify
+from quart import Blueprint, request, abort, render_template_string, render_template, jsonify
 from models.models_lump import Session, ImageMetadata, Path
 from models.view_filter_mapper import ViewFilterMapper
 from server_args_helpers import get_current_paging, get_arg, Args
@@ -12,7 +12,7 @@ from server_widget_helpers import get_paging_widget
 routes_folder = Blueprint('routes_folder', __name__)
 
 @routes_folder.route('/all')
-def view_tags():
+async def view_tags():
 
     mapper = ViewFilterMapper()
     params = mapper.request_to_filter_multiple_dto(request)
@@ -26,14 +26,14 @@ def view_tags():
         overview["study_type"] += ' exclude:' + ', '.join(params.tags_neg_names)
     overview["path"] = ""
 
-    paging = get_paging_widget(params.page)
+    paging = await get_paging_widget(params.page)
 
-    out = render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images, session), overview=overview, paging=paging)
+    out = await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images, session), overview=overview, paging=paging)
     session.close()
     return out
 
 @routes_folder.route('/folder/<int:path_id>')
-def view_folder(path_id):
+async def view_folder(path_id):
 
     mapper = ViewFilterMapper()
     params = mapper.request_to_filter_multiple_dto(request)
@@ -56,14 +56,14 @@ def view_folder(path_id):
 
 
 
-    paging = get_paging_widget(params.page)
+    paging = await get_paging_widget(params.page)
 
-    out = render_template('tpl_view_folder.html', title='Folder', d_sort='filename', images=json_for_folder_view(images, session), overview=overview, paging=paging)
+    out = await render_template('tpl_view_folder.html', title='Folder', d_sort='filename', images=json_for_folder_view(images, session), overview=overview, paging=paging)
     session.close()
     return out
 
 @routes_folder.route('/folder-ord-add')
-def add_folder_ord():
+async def add_folder_ord():
     args = request.args
     rating = int(args.get('rating', default='0'))
     image_id = int(args.get('image-id'))
@@ -73,11 +73,11 @@ def add_folder_ord():
     path.ord += rating
     s.commit()
 
-    return render_template_string(str('ok'))
+    return await render_template_string(str('ok'))
 
 
 @routes_folder.route('/set-folder-cover')
-def set_folder_cover():
+async def set_folder_cover():
     args = request.args
     image_id = int(args.get('image-id'))
 
@@ -86,11 +86,11 @@ def set_folder_cover():
     path.preview = image_id
     s.commit()
 
-    return render_template_string(str('ok'))
+    return await render_template_string(str('ok'))
 
 
 @routes_folder.route('/toggle-folder-hide')
-def toggle_folder_hide():
+async def toggle_folder_hide():
     args = request.args
     image_id = int(args.get('image-id'))
 
@@ -99,7 +99,7 @@ def toggle_folder_hide():
     path.hidden = (path.hidden + 1) % 2
     s.commit()
 
-    return render_template_string(str('ok'))
+    return await render_template_string(str('ok'))
 
 def json_for_folder_view(images, session=None) -> str:
     data = {'images': []}
@@ -116,7 +116,7 @@ def json_for_folder_view(images, session=None) -> str:
     return json.dumps(data)
 
 @routes_folder.route('/export-urls/')
-def export_urls():
+async def export_urls():
     params = Ctrl.get_default_query_params()
 
     page, offset, limit = get_current_paging(request.args)
