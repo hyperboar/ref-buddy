@@ -1,7 +1,7 @@
 import os.path
 
 from quart import Quart, request, render_template, jsonify
-# from flask_caching import Cache
+from flask_caching import Cache
 
 # Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
 import sys
@@ -28,8 +28,8 @@ from server_ext_tags_ai import routes_tags_ai
 
 config = {
     # "DEBUG": True,          # some Flask specific configs
-    # "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-    # "CACHE_DEFAULT_TIMEOUT": 300,
+    "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
+    "CACHE_DEFAULT_TIMEOUT": 300,
     'THUMB_STATIC': Env.THUMB_PATH
 }
 
@@ -39,7 +39,7 @@ static_dir = os.path.join('..', 'static')
 app = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
 app.config.from_mapping(config)
 
-# cache = Cache(app)
+cache = Cache(app)
 
 app.register_blueprint(routes_image)
 app.register_blueprint(routes_image_remove)
