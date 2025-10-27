@@ -65,7 +65,7 @@ class MyTIMESTAMP(TypeDecorator):
     impl = TIMESTAMP
     cache_ok = True
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value, dialect) -> datetime:
         if type(value) is str:
             return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
         return value
@@ -81,6 +81,7 @@ class Path(Base):
     preview = Column(Integer, nullable=False, default=0)
     hidden = Column(Integer, nullable=False, default=0)
     ord = Column(Integer, nullable=False, default=0)
+    last_updated = Column(MyTIMESTAMP, default='1999-01-01 00:00:00')
 
     @property
     def tags_plain(self) -> [str]:

@@ -2,7 +2,8 @@ import os, shutil
 
 # Script to append folder name to a file names
 print('rename')
-path = 'D:\\Video\\Pron\\Behind Moon (Q)\\Behind Moon (Q) Doujinshi Phallic Girls'
+# path = 'D:\\Video\\Pron\\Behind Moon (Q)\\Behind Moon (Q) Doujinshi Phallic Girls'
+path = 'D:\\Distr\\_new\\refs\\Power in Motion Muscles Lines and Form'
 
 dirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))]
 

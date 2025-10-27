@@ -10,6 +10,11 @@ from sqlalchemy import inspect
 routes_tags_ai = Blueprint('routes_tags_ai', __name__)
 
 
+@routes_tags_ai.route('/tags-ai/process')
+def process():
+    return render_template('tpl_tags_ai_process.html')
+
+
 #region ---- JSON API ----
 @routes_tags_ai.route('/tags-ai/suck-folder-in')
 def suck_in_all_tags_in_folder():

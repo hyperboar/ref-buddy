@@ -425,6 +425,24 @@ class ApiBoards
 //#endregion Boards
 
 
+//#region Tags AI
+
+class ApiTagsAi
+{
+    static getPopupYesNo()
+    {
+        return fetch('/misc/yesno')
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.text()
+            })
+    }
+}
+
+//#endregion Tags AI
+
+
 //#region Misc
 
 class ApiMisc
@@ -481,4 +499,4 @@ class ApiInternal
     }
 }
 
-export { ApiImage, ApiTags, ApiBoards, ApiMisc }
+export { ApiImage, ApiTags, ApiBoards, ApiTagsAi, ApiMisc }

@@ -1,12 +1,13 @@
 import os
 
-PATH = 'E:\\Distr\\__new\\__new\\Playful Female Poses'
+PATH = 'C:\\Users\\might\\Desktop\\FuzzAmorous Animation Tut'
 
 files_mv = []
 
+
 for root, dir, files in os.walk(PATH):
     for file in files:
-        if not file.endswith('jpg') and not file.endswith('mp4') and PATH == root:
+        if not file.endswith('jpg') and not file.endswith('mp4') and not file.endswith('png') and not file.endswith('gif') and PATH == root:
             continue
         files_mv.append([os.path.relpath(root, PATH), file])
 

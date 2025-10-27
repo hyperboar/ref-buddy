@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            margin: 100px auto 0;
+        }
+
+        .section {
+
+        }
+    </style>
+	<title>Tags AI</title>
+</head>
+<body>
+
+<main class="container">
+    <section class="section">
+        <div class="row">
+            <label for="fetch-tags-filter" class="visually-hidden"></label>
+            <input id="fetch-tags-filter" type="text" value="-set,pron,-animated&limit=10000">
+        </div>
+        <div class="row">
+            <label for="fetch-tags-filter" class="visually-hidden"></label>
+            <input id="fetch-tags-filter" type="text" value="-set,pron,-animated&limit=10000"/>
+        </div>
+        <div class="row">
+            <button id="fetch-images">Fetch Images Info</button>
+        </div>
+        <div class="row">
+            <textarea id="fetch-images-output" cols="30" rows="10"></textarea>
+        </div>
+    </section>
+</main>
+
+
+<script type="importmap">
+    {
+        "imports":
+        {
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
+<script type="module" src="/static/js/view_tags_ai.js"></script>
+</body>
+</html>

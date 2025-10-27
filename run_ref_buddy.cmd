@@ -16,8 +16,6 @@ if %errorlevel% neq 0 (
     set /p DUMMY=Press ENTER to close this window...
     exit /b 1
 )
-    exit /b 1
-)
 
 REM Check Python version
 python -c "import sys; assert sys.version_info >= (3, 10), 'Python 3.10 or higher is required'; print('Python version check passed.')"

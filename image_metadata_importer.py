@@ -24,8 +24,6 @@ class ImageMetadataImporter:
         self.print_begin(f'Starting image import from folder "{folder_path}"')
         self.print_begin(f'Image formats to be imported: {formats}')
 
-        make_database_backup(marker='before_import', force=True)
-
         session = Session()
 
         time_of_import = datetime.now()
@@ -36,14 +34,25 @@ class ImageMetadataImporter:
             count = 0
             max_count = len(filenames)
             msg_dir = f'Importing "{os.path.relpath(dir_path, folder_path)}"...'
-            self.print_total(msg_dir, len(filenames))
 
             dir_path = os.path.normpath(dir_path)
             rel_path = Path.path_serialize(os.path.relpath(dir_path, folder_path))
             path_obj = session.query(Path).filter(Path.path_raw == rel_path).first()
             if path_obj is not None:
-                existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
-                filenames = [f for f in filenames if f not in existing_files]
+                # check and modify update time
+                path_mtime = int(os.path.getmtime(dir_path))
+                mdt = datetime.fromtimestamp(path_mtime)
+                pm_diff = mdt - path_obj.last_updated
+                if pm_diff.total_seconds() < 1.0:
+                    # self.print_total(msg_dir, len(filenames))
+                    # print(f'', flush=True)
+                    continue
+                else:
+                    print(f' {path_obj.last_updated} -> {mdt}')
+                    print(f' diff {pm_diff}')
+                    path_obj.last_updated = mdt
+                    existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
+                    filenames = [f for f in filenames if f not in existing_files]
 
             for file_name in filenames:
                 if not file_name.endswith(formats):
@@ -62,11 +71,15 @@ class ImageMetadataImporter:
                 except Exception as e:
                     print(f'\nError processing  {file_path}: {sys.exc_info()[0]}. {e}')
                     raise
-            print(f'')
+
+            if path_obj is not None:
+                print(f'', flush=True)
 
         if new_count == 0:
             print(f'Images import completed! Found {new_count} new files.')
+            session.rollback()
         else:
+            make_database_backup(marker='before_import', force=True)
             session.commit()
             print(f'Images import completed! Found {new_count} new files.')
             assign_folder_tags(start_at=update_time, session=session)
@@ -85,12 +98,12 @@ class ImageMetadataImporter:
 
     @staticmethod
     def print_total(msg_dir, total: int):
-        print(f'\r{msg_dir}. {total} files in this folder', end='')
+        print(f'\r{msg_dir}. {total} files in this folder', end='', flush=True)
 
     @staticmethod
     def print_progress(msg_dir, file_name: str, cur: int, total: int, is_new: bool):
         if is_new:
-            print(f'\r{msg_dir} ({cur}/{total}) New "{file_name}"', end='')
+            print(f'\r{msg_dir} ({cur}/{total}) New "{file_name}"', end='', flush=True)
         else:
             pass
             # print(f'\r{msg_dir} ({cur}/{total}) File exists '{file_name}'', end='')
