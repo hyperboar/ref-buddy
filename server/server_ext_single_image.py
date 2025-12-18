@@ -155,7 +155,7 @@ async def send_video(item_id):
 
     fn = metadata.path_abs.replace('.mp4.gif', '.mp4')
 
-    out = send_file(fn, mimetype=f'video/mp4')
+    out = await send_file(fn, mimetype=f'video/mp4')
     session.close()
     return out
 

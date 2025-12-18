@@ -123,8 +123,8 @@ async def add_tag():
         return await render_template('crud/tpl_tags_add.html', colors=colors)
 
     session = Session()
-    tag = request.form['tag'].strip()
-    color_id = int(request.form['color'].strip())
+    tag = (await request.form)['tag'].strip()
+    color_id = int((await request.form)['color'].strip())
     new_tag = Tag(tag=tag, color_id=color_id)
     session.add(new_tag)
     session.commit()
@@ -142,8 +142,8 @@ async def edit_tag(tag_id):
         colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
         return await render_template('crud/tpl_tags_edit.html', tag=tag, colors=colors)
 
-    tag.tag = request.form['tag'].strip()
-    tag.color_id = int(request.form['color'].strip())
+    tag.tag = (await request.form)['tag'].strip()
+    tag.color_id = int((await request.form)['color'].strip())
     session.commit()
     return redirect('/tags')
 
