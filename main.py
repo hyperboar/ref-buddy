@@ -157,7 +157,6 @@ class MainWindow(tk.Frame):
 
 if __name__ == "__main__":
     create_required_folders()
-    make_database_backup()
     create_new_db()
 
     root = tk.Tk()
