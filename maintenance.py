@@ -13,6 +13,7 @@ from gifextract import process_animation
 from image_metadata_controller import ImageMetadataController as Ctrl
 from models.models_lump import Session, ImageMetadata, Path, ImageTag, ImageDupe, Tag, ImageExtra, BoardImage, Discover, \
     ImageColor, DatabaseUtil
+from nice_print import PrinterInterface
 
 
 def get_db_info():
@@ -214,10 +215,10 @@ def rehash_images(rehash_all:bool):
     # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
-def assign_folder_tags(start_at=None, session=None):
+def assign_folder_tags(start_at=None, session=None, printer:PrinterInterface=None):
     """Go over all imag_metadata rows and add tags academic, pron, the_bits, artists and frames(video)"""
 
-    print(f'Assigning essential tags to new images...', end='')
+    printer.line('Assigning essential tags to new images...', same_line=True)
 
     if session is None:
         session = Session()
@@ -250,8 +251,10 @@ def assign_folder_tags(start_at=None, session=None):
 
     session.commit()
 
-    print(f'\rAssigning essential tags to new images... Done')
-    print(f'Assigning path tags...', end='')
+    printer.line(f'Assigning essential tags to new images... Done', replace=True)
+    printer.line('')
+
+    printer.line(f'Assigning path tags...', same_line=True)
 
     if session is None:
         session = Session()
@@ -272,12 +275,13 @@ def assign_folder_tags(start_at=None, session=None):
 
         session.flush()
 
-    print(f'\rAssigning path tags... Done')
+    printer.line(f'Assigning path tags... Done', replace=True)
+    printer.line('')
 
     session.commit()
 
-def assign_animation_tags(start_at=None, session=None):
-    print('Assigning tags to animations and videos...', end='')
+def assign_animation_tags(start_at=None, session=None, printer:PrinterInterface=None):
+    printer.line('Assigning tags to animations and videos...', same_line=True)
     if session is None:
         session = Session()
 
@@ -319,7 +323,8 @@ def assign_animation_tags(start_at=None, session=None):
 
     session.commit()
 
-    print('\rAssigning tags to animations and videos... Done', end='')
+    printer.line('Assigning tags to animations and videos... Done', replace=True)
+    printer.line('')
 
 def remove_broken_video_gifs(session=None):
     if session is None:
@@ -672,7 +677,7 @@ def collapse_import_times():
 
     make_database_backup('after_collapse_import_times', True)
 
-def assign_video_extra_data(start_at=None, is_force=False, session=None):
+def assign_video_extra_data(start_at=None, is_force=False, session=None, printer:PrinterInterface=None):
     if session is None:
         session = Session()
 
@@ -692,7 +697,8 @@ def assign_video_extra_data(start_at=None, is_force=False, session=None):
     i = 0
     step = 50
 
-    print(f'Assigning extra data for videos...', end='', flush=True)
+    printer.line(f'Assigning extra data for videos...', same_line=True)
+    printer.step_up()
     while True:
         images = q.offset(offset).limit(limit).all()
 
@@ -702,7 +708,7 @@ def assign_video_extra_data(start_at=None, is_force=False, session=None):
         for image in images:
             i += 1
             if i % step == 0:
-                print(f'\rAssigning extra data for videos... {progress[int((i / step) % len(progress))]}', end='', flush=True)
+                printer.line(f'Assigning extra data for videos... {progress[int((i / step) % len(progress))]}', replace=True)
 
             if not is_force and len(image.extras) != 0:
                 continue
@@ -730,9 +736,11 @@ def assign_video_extra_data(start_at=None, is_force=False, session=None):
 
         offset += limit
 
+    printer.step_down()
     session.commit()
 
-    print(f'\rAssigning extra data for videos... Done' + (' ' * 50), flush=True)
+    printer.line(f'Assigning extra data for videos... Done', replace=True)
+    printer.line('')
 
 def cleanup_paths(session=None):
     print(f'Cleanup paths...', end='', flush=True)

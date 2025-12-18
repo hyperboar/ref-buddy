@@ -8,11 +8,12 @@ from image_metadata_controller import ImageMetadataController as Ctrl
 from maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags, \
     assign_video_extra_data, gif_split
 from models.models_lump import Session, Path, ImageMetadata
+from nice_print import NicePrinter
 
 
 class ImageMetadataImporter:
     def __init__(self):
-        pass
+        self.np = NicePrinter(rblogging.getLoggerApp())
 
     def import_metadata(self, folder_path):
         folder_path = os.path.normpath(folder_path)
@@ -21,8 +22,10 @@ class ImageMetadataImporter:
 
         start_time = time.time()
         new_count = 0
-        self.print_begin(f'Starting image import from folder "{folder_path}"')
-        self.print_begin(f'Image formats to be imported: {formats}')
+        self.np.header(f'Starting image import from folder "{folder_path}"')
+        self.np.header(f'Image formats to be imported: {formats}')
+
+        self.np.step_up()
 
         session = Session()
 
@@ -44,12 +47,10 @@ class ImageMetadataImporter:
                 mdt = datetime.fromtimestamp(path_mtime)
                 pm_diff = mdt - path_obj.last_updated
                 if pm_diff.total_seconds() < 1.0:
-                    # self.print_total(msg_dir, len(filenames))
-                    # print(f'', flush=True)
                     continue
                 else:
-                    print(f' {path_obj.last_updated} -> {mdt}')
-                    print(f' diff {pm_diff}')
+                    self.np.line(msg_dir, replace=True)
+
                     path_obj.last_updated = mdt
                     existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
                     filenames = [f for f in filenames if f not in existing_files]
@@ -69,41 +70,38 @@ class ImageMetadataImporter:
                         count += 1
                         self.print_progress(msg_dir, file_name, count, max_count, False)
                 except Exception as e:
-                    print(f'\nError processing  {file_path}: {sys.exc_info()[0]}. {e}')
+                    self.np.header(f'\nError processing  {file_path}: {sys.exc_info()[0]}. {e}')
                     raise
 
             if path_obj is not None:
-                print(f'', flush=True)
+                self.np.line('')
 
+        self.np.step_down()
         if new_count == 0:
-            print(f'Images import completed! Found {new_count} new files.')
+            self.np.header(f'File search completed! No new images found.')
             session.rollback()
         else:
+            self.np.header(f'File search completed! Found {new_count} new files.')
             make_database_backup(marker='before_import', force=True)
             session.commit()
-            print(f'Images import completed! Found {new_count} new files.')
-            assign_folder_tags(start_at=update_time, session=session)
-            assign_animation_tags(start_at=update_time, session=session)
-            assign_video_extra_data(start_at=update_time, session=session)
+
+            self.np.step_up()
+
+            assign_folder_tags(start_at=update_time, session=session, printer=self.np)
+            assign_animation_tags(start_at=update_time, session=session, printer=self.np)
+            assign_video_extra_data(start_at=update_time, session=session, printer=self.np)
             rehash_images(False)
             make_database_backup(marker='after_import', force=True)
             generate_thumbs(start_at=update_time)
             gif_split(force_all=False)
 
-        print(f'Import completed ({int(time.time() - start_time)} sec).')
+            self.np.step_down()
 
-    @staticmethod
-    def print_begin(msg):
-        print(msg)
+        self.np.header(f'Import completed in {int(time.time() - start_time)} seconds.')
 
-    @staticmethod
-    def print_total(msg_dir, total: int):
-        print(f'\r{msg_dir}. {total} files in this folder', end='', flush=True)
-
-    @staticmethod
-    def print_progress(msg_dir, file_name: str, cur: int, total: int, is_new: bool):
+    def print_progress(self, msg_dir, file_name: str, cur: int, total: int, is_new: bool):
         if is_new:
-            print(f'\r{msg_dir} ({cur}/{total}) New "{file_name}"', end='', flush=True)
+            self.np.line(f'{msg_dir} ({cur}/{total}) New "{file_name}"', True)
         else:
             pass
             # print(f'\r{msg_dir} ({cur}/{total}) File exists '{file_name}'', end='')
