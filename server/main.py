@@ -98,7 +98,7 @@ async def view_favs():
     images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     images = json_for_folder_view(images)
 
-    paging = get_paging_widget(page)
+    paging = await get_paging_widget(page)
 
     return await render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None)
 
@@ -115,7 +115,7 @@ async def view_last():
     images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     images = json_for_folder_view(images)
 
-    paging = get_paging_widget(page)
+    paging = await get_paging_widget(page)
 
     return await render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None)
 
