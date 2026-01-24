@@ -468,6 +468,28 @@ def cleanup_image_thumbs():
             print(f'Something went wrong. Tried to remove file with name "' + str(i) + '.jpg' + '".')
     print(f'\r{int(count / count_max * 100)}% Removing thumbs... Done')
 
+
+def cleanup_lost_videos_preview():
+    """Remove .mp4.gif files for lost videos"""
+    s = Session()
+
+    lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
+
+    print('Removing video previews...')
+
+    for img in lost:
+        if img.is_video and os.path.exists(img.path_abs):
+            path = img.path_abs
+            if not os.path.exists(path):
+                continue
+            print(f'Removing {path}...', end='')
+            os.remove(path)
+            print(f'\rRemoving {path}... Done')
+
+    print('Removing video previews... Done')
+
+    s.close()
+
 def relink_lost_images():
     """Try to relink by unique name"""
     make_database_backup(marker='relink_imgs', force=True)

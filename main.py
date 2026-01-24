@@ -13,7 +13,7 @@ from export_vid_gifs import ExportVidGifs
 from image_metadata_importer import ImageMetadataImporter
 from maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \
     make_database_backup, cleanup_image_thumbs, cleanup_paths, cleanup_vacuum, gif_split, create_new_db, \
-    create_required_folders
+    create_required_folders, cleanup_lost_videos_preview
 from Env import Env
 from rehash_dialog import RehashDialog
 from utils import Utils
@@ -85,6 +85,7 @@ class MainWindow(tk.Frame):
         tools_menu.add_separator()
         tools_menu.add_command(label="Find lost images", command=mark_all_lost)
         tools_menu.add_command(label="Relink lost images", command=relink_lost_images)
+        tools_menu.add_command(label="Cleanup video previews", command=cleanup_lost_videos_preview)
         tools_menu.add_separator()
         tools_menu.add_command(label="Cleanup thumbs", command=cleanup_image_thumbs)
         tools_menu.add_command(label="Cleanup lost images", command=cleanup_lost_images)
