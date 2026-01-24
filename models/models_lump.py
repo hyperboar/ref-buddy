@@ -132,6 +132,14 @@ class ImageMetadata(Base):
     def is_fav(self):
         return self.fav
 
+    @property
+    def is_animated(self):
+        return self.source_type_id == 2 or self.source_type_id == 3
+
+    @property
+    def is_video(self):
+        return self.source_type_id == 3
+
     def is_removed(self):
         return self.removed
 

@@ -372,7 +372,6 @@ def mark_all_lost():
     q = s.query(ImageMetadata)
 
     lost = []
-    found = []
     while True:
         images = q.limit(limit).offset(offset).all()
         offset += limit
@@ -381,20 +380,24 @@ def mark_all_lost():
             break
 
         for image in images:
-            image_path = os.path.join(Env.IMAGES_PATH, image.path)
+            image_path = image.path_abs
 
-            if  image.lost == 1 and os.path.exists(image_path):
-                image.lost = 0
-                found.append(image_path)
-            elif image.lost == 0 and not os.path.exists(image_path):
+            if image.lost == 1:
+                continue
+
+            # video missing
+            # removing trailing .gif to get real video path
+            if image.is_video and not os.path.exists(image_path[:-4]):
                 image.mark_as_lost(session=s, auto_commit=False)
                 lost.append(image_path)
-        print(f'\r{int(offset / rows_max * 100)}%... Searching for lost images. {len(lost)} lost, {len(found)} found so far', end='')
+            # image missing
+            elif not os.path.exists(image_path):
+                image.mark_as_lost(session=s, auto_commit=False)
+                lost.append(image_path)
+        print(f'\r{int(offset / rows_max * 100)}%... Searching for lost images. Discovered {len(lost)}', end='')
 
     print(f'\n{len(lost)} lost images')
     [print(p) for p in lost]
-    print(f'\nUnlost {len(found)} lost images')
-    [print(p) for p in found]
 
     s.commit()
     s.close()
@@ -497,9 +500,48 @@ def relink_lost_images():
     s = Session()
 
     lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
+    found = []
+    count = 0
+
     print('Trying to relink lost files.')
+
+    print('Looking images that were mark lost but still exist...', end='')
+    for img in lost:
+        if not os.path.exists(img.path_abs):
+            continue
+        found.append((img.path_abs, "same"))
+        lost.remove(img)
+        count += 1
+    print(f'\rLooking images that were mark lost but still exist... Done ({count})')
+
+    s.flush()
+
+    print('Looking for png to jpg conversion...', end='')
+    count = 0
+    png_to_jpg = [img for img in lost if img.filename.endswith('.png')]
+    for img in png_to_jpg:
+        # check if jpg version exists
+        path = img.path_abs[:-3] + 'jpg'
+        if not os.path.exists(path) or not os.path.isfile(path):
+            continue
+        # check if jpg not imported already
+        fname = img.filename[:-3] + 'jpg'
+        if s.query(ImageMetadata).filter(ImageMetadata.filename==fname, ImageMetadata.path_id == img.path_id).first() is not None:
+            continue
+
+        img.filename = fname
+        img.mark_restored(session=s, auto_commit=False)
+        found.append(("png",path))
+        lost.remove(img)
+        count += 1
+
+    print(f'\rLooking for png to jpg conversion... Done ({count})')
+
+    s.flush()
+
+    print('Looking for folder change...')
     print('Collecting file names...', end='')
-    Ctrl.update_paths_containing_images()
+    Ctrl.update_paths_containing_images(session=s, auto_commit=False)
     files = {}
     paths = s.query(Path).all()
     count_max = len(paths)
@@ -507,6 +549,8 @@ def relink_lost_images():
     for p in paths:
         count += 1
         full_path = os.path.join(Env.IMAGES_PATH, p.path)
+        if not os.path.exists(full_path):
+            continue
         files[p.id] = [f for f in os.listdir(full_path) if os.path.isfile(os.path.join(full_path, f))]
         print(f'\r{int(count / count_max * 100)}% Collecting file names...', end='')
 
@@ -514,7 +558,6 @@ def relink_lost_images():
 
     count_max = len(lost)
     count = 0
-    found = []
     for l in lost:
         count += 1
         print(f'\r{int(count/count_max * 100)}% Searching for image lost from {l.path}', end='')
@@ -539,9 +582,8 @@ def relink_lost_images():
 
 
     print(f'\n')
-    print(f'Currently lost images {len(lost) - len(found)}')
-    print(f'Relinked images {len(found)}')
-    [print(f'Linked "{p[0]}" to "{p[1]}"') for p in found]
+    print(f'Currently lost images {len(lost) - len(found)}. Relinked {len(found)} images.')
+    [print(f'Linked "{p[0]}" -> "{p[1]}"') for p in found]
 
     s.commit()
     s.close()
@@ -835,7 +877,7 @@ if __name__ == '__main__':
     # assign_animation_tags()
     # remove_broken_video_gifs()
 
-    assign_video_extra_data(is_force=False)
+    # assign_video_extra_data(is_force=False)
     pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
