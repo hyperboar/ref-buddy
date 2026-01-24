@@ -552,9 +552,10 @@ class ImageMetadataController:
         return [t.tag for t in found]
 
     @staticmethod
-    def update_paths_containing_images():
+    def update_paths_containing_images(session=None, auto_commit=True):
         """Goes through the IMAGES_PATH and adds missing entries to paths table."""
-        session = Session()
+        if session is None:
+            session = Session()
 
         formats = tuple(Env.IMPORT_FORMATS)
 
@@ -579,8 +580,10 @@ class ImageMetadataController:
 
             new_paths.append(path)
 
-        session.rollback()
-        # session.commit()
+        session.flush()
+
+        if auto_commit:
+            session.commit()
 
         print('\rUpdating folder paths registry... Done\n')
 
