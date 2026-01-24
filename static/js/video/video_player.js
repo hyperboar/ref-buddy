@@ -5,6 +5,7 @@ class VideoPlayer
     _evtOnSeekAfter  = 'onseekafter'
 
     video = null
+    node = null
 
     fRate
     fRateFloat
@@ -17,10 +18,13 @@ class VideoPlayer
 
     constructor(sel, frameRate = 24)
     {
-        this.video = document.querySelector(sel)
+        this.node = document.querySelector(sel)
+        this.video = this.node.querySelector('video')
+
         this.frameRate = frameRate
 
         this._preventDefaultEvents()
+        this._setup_controls()
 
         this._onTimeUpdateEvent = new CustomEvent(this._evtOnTimeUpdate, { detail: { video: this }});
         this._onSeekBeforeEvent = new CustomEvent(this._evtOnSeekBefore,  { detail: { video: this }});
@@ -62,6 +66,22 @@ class VideoPlayer
             {
                 e.preventDefault()
                 e.stopPropagation()
+            }
+        })
+    }
+
+    _setup_controls()
+    {
+        this.node.querySelector('#video-play').addEventListener('click', e => {
+            if (this.paused)
+            {
+                this.play()
+                e.target.textContent = "Stop"
+            }
+            else
+            {
+                this.pause()
+                e.target.textContent = "Play"
             }
         })
     }

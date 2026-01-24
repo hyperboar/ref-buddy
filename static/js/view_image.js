@@ -18,6 +18,7 @@ import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import { AnimPlayer } from "/static/js/video/anim_player.js"
+import { VideoPlayer } from "/static/js/video/video_player.js"
 
 
 let selection = null
@@ -51,6 +52,7 @@ let dragged = null
 let dragInAction = false
 
 let animPlayer = null
+let videoPlayer = null
 
 // let fracColors = null
 
@@ -435,11 +437,17 @@ function injectImageData(data)
             im.alt = `${data.id}:${data.path}`
         })
     }
-    // animatiuon
+    // animation
     if (data.content_type === 2) {
         animPlayer.node.classList.remove('hidden')
         animPlayer.pause()
         animPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
+    }
+    // video
+    if (data.content_type === 3) {
+        videoPlayer.node.classList.remove('hidden')
+        videoPlayer.pause()
+        // videoPlayer.loadFrames(data.id).then(() => { animPlayer.play() })
     }
 
     const rating = document.querySelector('#image-rating')
@@ -560,7 +568,7 @@ function insertMediaContent(container, data)
             // magnifier.setImage(anim.currentFrameUrl)
         })
     }
-    else
+    else if (data.content_type === 3)
     {
         const tpl = document.querySelector('#tpl-media-video')
         const node = tpl.cloneNode(true).content
@@ -568,6 +576,9 @@ function insertMediaContent(container, data)
         node.querySelector('source').src = data.url_image
 
         container.appendChild(node)
+
+        videoPlayer = new VideoPlayer(
+            '.video-container')
     }
 }
 

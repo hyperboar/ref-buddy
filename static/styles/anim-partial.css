@@ -115,3 +115,39 @@
 /*{*/
 /*    text-decoration: underline;*/
 /*}*/
+
+
+.video-container {
+    position: relative;
+    width:100%;
+    height:100%;
+    z-index: var(--z-ref-img);
+}
+
+.video-container video
+{
+    width:100%;
+    height:100%;
+    max-height: calc(var(--vh) - 20px);
+    object-fit: cover;
+    cursor: var(--cursor-transp);
+}
+
+.video-container #row
+{
+    position: absolute;
+    
+}
+
+.video-container #video-play
+{
+    right: 20px;
+}
+.video-container #video-play
+{
+    right: 60px;
+}
+.video-container #video-play
+{
+    right: 140px;
+}
