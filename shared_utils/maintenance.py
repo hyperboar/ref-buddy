@@ -13,7 +13,7 @@ from launcher.gifextract import process_animation
 from app.image_metadata_controller import ImageMetadataController as Ctrl
 from app.models.models_lump import Session, ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
     ImageColor, DatabaseUtil
-from nice_print import PrinterInterface
+from shared_utils.nice_print import PrinterInterface
 
 
 def get_db_info():

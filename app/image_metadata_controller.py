@@ -5,10 +5,10 @@ from datetime import datetime
 from quart import Request
 
 from shared_utils.Env import Env
-from models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi
+from app.models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi
 from sqlalchemy import func
 
-from models.view_filter_dto import ViewFilterMultipleDTO
+from app.models.view_filter_dto import ViewFilterMultipleDTO
 
 
 class ImageMetadataController:

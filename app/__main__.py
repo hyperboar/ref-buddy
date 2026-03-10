@@ -35,8 +35,8 @@ config = {
     'THUMB_STATIC': Env.THUMB_PATH
 }
 
-template_dir = os.path.join('..', 'templates')
-static_dir = os.path.join('..', 'static')
+template_dir = os.path.join('templates')
+static_dir = os.path.join('static')
 
 app = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
 app.config.from_mapping(config)

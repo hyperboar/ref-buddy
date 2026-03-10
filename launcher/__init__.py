@@ -25,7 +25,7 @@ class MainWindow(tk.Frame):
         self.master.title("Ref Buddy")
         self.master.geometry("300x200")
 
-        ico = Image.open('../static/images/favicon.ico')
+        ico = Image.open('app/static/images/favicon.ico')
         photo = ImageTk.PhotoImage(ico)
         self.master.wm_iconphoto(False, photo)
 
@@ -121,9 +121,8 @@ class MainWindow(tk.Frame):
 
         py_path = os.path.join(sys.prefix, bin_fldr, executable)
         py = py_path if os.path.exists(py_path) else py_path + '3'
-        server_path = os.path.join('../app', 'main.py')
 
-        self.web_process = subprocess.Popen([py, server_path], cwd=os.getcwd())
+        self.web_process = subprocess.Popen([py, "-m", "app"], cwd=os.getcwd())
         self.link["state"] = "normal"
         self.server_button["state"] = "disabled"
 
