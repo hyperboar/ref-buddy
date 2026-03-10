@@ -1,6 +1,7 @@
 .idea/
 venv/
 library/
+logs/
 
 # ignoring user config
 config/user.env
