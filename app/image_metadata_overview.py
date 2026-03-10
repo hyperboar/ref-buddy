@@ -1,3 +1,4 @@
+import os
 from app.models.models_lump import Session, ImageMetadata, Path
 
 
