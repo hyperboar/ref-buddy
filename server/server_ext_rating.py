@@ -1,6 +1,6 @@
 from quart import Blueprint, request, abort, render_template_string
-from image_metadata_controller import ImageMetadataController
-from models.models_lump import Session
+from server.image_metadata_controller import ImageMetadataController
+from server.models.models_lump import Session
 
 routes_rating = Blueprint('routes_rating', __name__)
 

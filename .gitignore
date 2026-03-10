@@ -8,3 +8,6 @@ config/user.env
 
 # build
 __pycache__/
+
+# database
+database.db

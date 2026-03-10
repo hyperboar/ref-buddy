@@ -11,10 +11,10 @@ import sys
 sys.path.append(os.getcwd())
 
 from Env import Env
-from image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
-from image_metadata_overview import ImageMetadataOverview
-from maintenance import make_database_backup
-from models.models_lump import Session, ImageColor, ImageMetadata
+from server.image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
+from server.image_metadata_overview import ImageMetadataOverview
+from shared_utils.maintenance import make_database_backup
+from server.models.models_lump import Session, ImageColor, ImageMetadata
 from server_args_helpers import get_arg, get_current_paging, Args
 from server_ext_board import routes_board
 from server_ext_discover import routes_discover
