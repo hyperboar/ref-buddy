@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 from quart import Blueprint, request, abort, render_template, redirect, jsonify
-from server.models.models_lump import Tag, Session, ImageMetadata, TagSet, TagAi, ImageTagAi, TagAiToTag, ImageTag
+from app.models.models_lump import Tag, Session, ImageMetadata, TagSet, TagAi, ImageTagAi, TagAiToTag, ImageTag
 from sqlalchemy.sql import exists
 from sqlalchemy import inspect
 

@@ -7,9 +7,9 @@ from PIL import Image
 from quart import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
     current_app, jsonify, Request, Response
 
-from server.image_metadata_controller import ImageMetadataController as Ctrl
-from Env import Env
-from server.models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet, Tag
+from app.image_metadata_controller import ImageMetadataController as Ctrl
+from shared_utils.Env import Env
+from app.models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet, Tag
 from server_args_helpers import get_arg, Args
 from shared_utils.utils import Utils
 

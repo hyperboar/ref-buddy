@@ -1,5 +1,5 @@
 from models.models_lump import Session, ImageMetadata, Path
-import os
+
 
 class ImageMetadataOverview:
     @staticmethod
@@ -30,7 +30,7 @@ class ImageMetadataOverview:
 if __name__ == "__main__":
     import os
     import sqlite3
-    from Env import Env
+    from shared_utils.Env import Env
     db = sqlite3.connect(Env.DB_FILE)
     res = ImageMetadataOverview.get_overview(db)
 

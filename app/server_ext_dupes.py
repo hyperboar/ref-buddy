@@ -4,8 +4,8 @@ from itertools import combinations
 from quart import Blueprint, request, render_template_string, render_template
 from PIL import Image
 
-from Env import Env
-from server.models.models_lump import Session, ImageDupe, ImageMetadata, ImageTag, ImageColor
+from shared_utils.Env import Env
+from app.models.models_lump import Session, ImageDupe, ImageMetadata, ImageTag, ImageColor
 from server_args_helpers import get_arg, Args
 
 routes_dupes = Blueprint('routes_dupes', __name__)

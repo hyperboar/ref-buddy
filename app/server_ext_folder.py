@@ -3,10 +3,10 @@ import os
 from datetime import datetime
 
 from quart import Blueprint, request, render_template_string, render_template, jsonify
-from server.models.models_lump import Session, ImageMetadata
-from server.models.view_filter_mapper import ViewFilterMapper
+from app.models.models_lump import Session, ImageMetadata
+from app.models.view_filter_mapper import ViewFilterMapper
 from server_args_helpers import get_current_paging, get_arg, Args
-from server.image_metadata_controller import ImageMetadataController as Ctrl
+from app.image_metadata_controller import ImageMetadataController as Ctrl
 from server_widget_helpers import get_paging_widget
 
 routes_folder = Blueprint('routes_folder', __name__)

@@ -3,11 +3,11 @@ import sys
 import time
 from datetime import datetime, timedelta
 
-from Env import Env
-from server.image_metadata_controller import ImageMetadataController as Ctrl
+from shared_utils.Env import Env
+from app.image_metadata_controller import ImageMetadataController as Ctrl
 from shared_utils.maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags, \
     assign_video_extra_data, gif_split
-from server.models.models_lump import Session, Path, ImageMetadata
+from app.models.models_lump import Session, Path, ImageMetadata
 
 
 class ImageMetadataImporter:

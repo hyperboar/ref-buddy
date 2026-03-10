@@ -1,12 +1,12 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, func, TypeDecorator, Float
+from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, TypeDecorator, Float
 from sqlalchemy.orm import relationship, declarative_base, object_session, sessionmaker
 
 from PIL import Image
 
-from Env import Env
+from shared_utils.Env import Env
 
 # Create an in-memory SQLite database
 engine = create_engine(f'sqlite:///{Env.DB_FILE}') # , echo=True

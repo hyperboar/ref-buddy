@@ -9,8 +9,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
-from Env import Env
-from server.models.models_lump import Session, ImageMetadata, ImageDupe
+from shared_utils.Env import Env
+from app.models.models_lump import Session, ImageMetadata, ImageDupe
 
 
 class DupeSearcher:

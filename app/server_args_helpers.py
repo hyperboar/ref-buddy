@@ -1,7 +1,7 @@
 import urllib
 from enum import Enum, auto
 from quart import abort
-from Env import Env
+from shared_utils.Env import Env
 
 
 class Args(Enum):

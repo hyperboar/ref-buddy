@@ -7,11 +7,11 @@ import shutil
 from PIL import Image
 from sqlalchemy import func, exists, text
 
-from Env import Env
+from shared_utils.Env import Env
 from launcher.export_vid_gifs import ExportVidGifs
 from launcher.gifextract import process_animation
-from server.image_metadata_controller import ImageMetadataController as Ctrl
-from server.models.models_lump import Session, ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
+from app.image_metadata_controller import ImageMetadataController as Ctrl
+from app.models.models_lump import Session, ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
     ImageColor, DatabaseUtil
 from nice_print import PrinterInterface
 
