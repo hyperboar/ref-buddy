@@ -1,4 +1,5 @@
 import os
+import shutil
 from datetime import datetime
 
 from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, TypeDecorator, Float
@@ -44,13 +45,14 @@ class DatabaseUtil:
 
         session.commit()
 
-        # STUDY TYPES
-        category_1 = Category(type="academic")
-        category_2 = Category(type="other")
+        # CATEGORIES
+        category_1 = Category(type="everything")
         session.add(category_1)
-        session.add(category_2)
 
         session.commit()
+
+        if not os.path.exists(os.path.join(Env.IMAGES_PATH, "everything")):
+            os.makedirs(os.path.join(Env.IMAGES_PATH, "everything"))
 
         # TAG SET
         tag_set = TagSet(set_name='All Images', set_alias='all')
