@@ -11,10 +11,9 @@ from shared_utils.export_frames_window import ExportFramesWindow
 from shared_utils.export_vid_gifs import ExportVidGifs
 
 from launcher.image_metadata_importer import ImageMetadataImporter
-from shared_utils.maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \
+from shared_utils.maintenance import generate_thumbs, mark_all_lost, relink_lost_images, cleanup_lost_images, \
     cleanup_image_thumbs, cleanup_paths, cleanup_vacuum, gif_split, cleanup_lost_videos_preview
 from shared_utils.Env import Env
-from launcher.rehash_dialog import RehashDialog
 from shared_utils.utils import Utils
 
 
@@ -80,7 +79,6 @@ class MainWindow(tk.Frame):
         tools_menu.add_command(label="Shred gifs", command=gif_split)
         tools_menu.add_separator()
         tools_menu.add_command(label="Generate thumbs", command=generate_thumbs)
-        tools_menu.add_command(label="Rehash all images", command=self.rehash_options)
         tools_menu.add_separator()
         tools_menu.add_command(label="Find lost images", command=mark_all_lost)
         tools_menu.add_command(label="Relink lost images", command=relink_lost_images)
@@ -130,20 +128,6 @@ class MainWindow(tk.Frame):
         if evt.widget["state"] == "disabled":
             return "break"
         webbrowser.open(self.gallery_url)
-
-    def rehash_options(self):
-        dialog = RehashDialog(self.master)
-        self.master.wait_window(dialog)
-        result = dialog.result
-        dialog.destroy()
-
-        match result:
-            case "all":
-                print("\nRehashing ALL images...")
-                rehash_images(rehash_all=True)
-            case "new":
-                print("\nHashing new images...")
-                rehash_images(rehash_all=False)
 
     def on_closing(self):
         self.on_app_exit()
