@@ -10,17 +10,21 @@ class VideoPlayer
     fRate
     fRateFloat
 
-    KeyNext = 'ArrowRight'
-    KeyPrev = 'ArrowLeft'
-    KeyNextJump = 'ArrowUp'
-    KeyPrevJump = 'ArrowDown'
+    KeyPlay = 'Slash'
+    KeyNext = 'Period'
+    KeyPrev = 'Comma'
+    KeyNextJump = 'Period'
+    KeyPrevJump = 'Comma'
+
+    extraInfo
 
 
-    constructor(sel, frameRate = 24)
+    constructor(sel, extraInfo = null, frameRate = 24)
     {
         this.node = document.querySelector(sel)
         this.video = this.node.querySelector('video')
 
+        this.extraInfo = extraInfo
         this.frameRate = frameRate
 
         this._preventDefaultEvents()
@@ -45,29 +49,31 @@ class VideoPlayer
             e.stopPropagation()
         })
 
-        this.video.addEventListener('keydown', e =>
-        {
-            if (e.code === this.KeyPrev)
-            {
-                e.preventDefault()
-                e.stopPropagation()
-            }
-            else if (e.code === this.KeyNext)
-            {
-                e.preventDefault()
-                e.stopPropagation()
-            }
-            else if (e.code === this.KeyPrevJump)
-            {
-                e.preventDefault()
-                e.stopPropagation()
-            }
-            else if (e.code === this.KeyNextJump)
-            {
-                e.preventDefault()
-                e.stopPropagation()
-            }
-        })
+        // document.addEventListener('keydown', e =>
+        // {
+        //     if (e.code === this.KeyPrev)
+        //     {
+        //         e.preventDefault()
+        //         e.stopPropagation()
+        //         console.log('prev')
+        //     }
+        //     else if (e.code === this.KeyNext)
+        //     {
+        //         e.preventDefault()
+        //         e.stopPropagation()
+        //         console.log('next')
+        //     }
+        //     else if (e.code === this.KeyPrevJump)
+        //     {
+        //         e.preventDefault()
+        //         e.stopPropagation()
+        //     }
+        //     else if (e.code === this.KeyNextJump)
+        //     {
+        //         e.preventDefault()
+        //         e.stopPropagation()
+        //     }
+        // })
     }
 
     _setup_controls()

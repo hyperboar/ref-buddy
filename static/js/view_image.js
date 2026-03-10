@@ -578,7 +578,63 @@ function insertMediaContent(container, data)
         container.appendChild(node)
 
         videoPlayer = new VideoPlayer(
-            '.video-container')
+            '.video-container',
+            data.extra,
+            data.extra.fps[0] / data.extra.fps[1])
+
+        // stats
+        const vFrame = document.getElementById('stat-frame')
+        const vTime  = document.getElementById('stat-time')
+        const vFps   = document.getElementById('stat-fps')
+        const vDur   = document.getElementById('stat-dur')
+        const vProg   = document.getElementById('stat-prog')
+
+        const fwdStep = document.getElementById('video-jump')
+        let forwardStep = parseInt(fwdStep.value)
+        const fwdAllowedKeys = ["Shift", "Control", "Backspace", "Delete", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+
+        fwdStep.addEventListener('change', e =>
+        {
+            forwardStep = parseInt(fwdStep.value)
+        })
+        fwdStep.addEventListener('keydown', e =>
+        {
+            if (!fwdAllowedKeys.includes(e.key))
+                fwdStep.focused = false
+        })
+
+        vFps.textContent = videoPlayer.frameRate
+        vDur.textContent = data.extra.dur
+
+        // const ttlFrames = math.floor(data.extra.dur * videoPlayer.frameRate)
+
+        videoPlayer.addEventListener('onupdate', e =>
+        {
+            const vid = e.detail.video
+            vFrame.textContent = `${vid.frame}/${Math.floor(vid.frame / forwardStep)}`
+            vTime.textContent  = vid.currentTime.toFixed(2)
+            vProg.textContent = (vid.currentTime / e.detail.video.extraInfo.dur * 100.).toFixed(2)
+        })
+
+        document.addEventListener('keydown', e =>
+        {
+            const video = videoPlayer
+            if (e.code === video.KeyPlay)
+            {
+                if (video.paused) { video.play() }
+                else { video.pause() }
+            }
+            else if (e.code === video.KeyNextJump)
+            {
+                if (!video.paused) { video.pause() }
+                video.seekFrame(video.frame + forwardStep)
+            }
+            else if (e.code === video.KeyPrevJump)
+            {
+                if (!video.paused) { video.pause() }
+                video.seekFrame(video.frame - forwardStep)
+            }
+        })
     }
 }
 

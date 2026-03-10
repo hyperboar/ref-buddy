@@ -19,7 +19,7 @@
 
 .stats-overlay {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     right: 15px;
     z-index: 100;
     font-size: 12px;
@@ -150,4 +150,9 @@
 .video-container #video-play
 {
     right: 140px;
+}
+
+.video-container #video-jump
+{
+    text-align: center;
 }
