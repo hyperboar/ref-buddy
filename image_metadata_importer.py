@@ -12,9 +12,6 @@ from nice_print import NicePrinter
 
 
 class ImageMetadataImporter:
-    def __init__(self):
-        self.np = NicePrinter(rblogging.getLoggerApp())
-
     def import_metadata(self, folder_path):
         folder_path = os.path.normpath(folder_path)
         formats = tuple(Env.IMPORT_FORMATS)
