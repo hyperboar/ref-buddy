@@ -1,4 +1,4 @@
-from models.models_lump import Session, ImageMetadata, Path
+from app.models.models_lump import Session, ImageMetadata, Path
 
 
 class ImageMetadataOverview:

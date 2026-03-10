@@ -7,8 +7,8 @@ from tkinter import messagebox
 
 from PIL import Image, ImageTk
 
-from launcher.export_frames_window import ExportFramesWindow
-from launcher.export_vid_gifs import ExportVidGifs
+from shared_utils.export_frames_window import ExportFramesWindow
+from shared_utils.export_vid_gifs import ExportVidGifs
 
 from launcher.image_metadata_importer import ImageMetadataImporter
 from shared_utils.maintenance import generate_thumbs, rehash_images, mark_all_lost, relink_lost_images, cleanup_lost_images, \

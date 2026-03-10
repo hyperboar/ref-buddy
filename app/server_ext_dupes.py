@@ -6,7 +6,7 @@ from PIL import Image
 
 from shared_utils.Env import Env
 from app.models.models_lump import Session, ImageDupe, ImageMetadata, ImageTag, ImageColor
-from server_args_helpers import get_arg, Args
+from app.server_args_helpers import get_arg, Args
 
 routes_dupes = Blueprint('routes_dupes', __name__)
 

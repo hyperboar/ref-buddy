@@ -40,7 +40,7 @@ class DefaultPrinter(PrinterInterface):
         print(msg, flush=True)
 
 class NicePrinter(PrinterInterface):
-    def __init__(self, logger):
+    def __init__(self, logger = None):
         self.step = 0
         self.logger = logger
 

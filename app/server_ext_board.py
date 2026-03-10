@@ -1,7 +1,7 @@
 from quart import Blueprint, request, abort, render_template, jsonify, url_for
 from app.models.models_lump import Session, BoardImage, Board
-from server_args_helpers import get_arg, Args
-from server_widget_helpers import get_boards_all
+from app.server_args_helpers import get_arg, Args
+from app.server_widget_helpers import get_boards_all
 import json
 
 routes_board = Blueprint('routes_board', __name__)
