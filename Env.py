@@ -36,6 +36,8 @@ class Env:
     DEFAULT_PER_PAGE_LIMIT = int(os.getenv('PER_PAGE_LIMIT'))
     DEFAULT_STUDY_TIMER = int(os.getenv('STUDY_TIMER'))
 
+    LOGS = os.getenv('LOGS')
+
     VIDEO_PLAYER_PATH = os.getenv('VIDEO_PLAYER_PATH')
 
 # some additional setup
