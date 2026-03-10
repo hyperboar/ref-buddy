@@ -404,16 +404,6 @@ class Discover(Base):
 
     image = relationship('ImageMetadata')
 
-
-class ImageDupe(Base):
-    __tablename__ = 'dupes'
-
-    image1 = Column(Integer, name='image1', default=0, primary_key=True)
-    image2 = Column(Integer, name='image2', default=0, primary_key=True)
-    false_positive = Column(Integer, name='fp', default=0)
-    resolved = Column(Integer, name='r', default=0)
-    found_at = Column(MyTIMESTAMP, default=datetime.now)
-
 class Board(Base):
     __tablename__ = 'boards'
 

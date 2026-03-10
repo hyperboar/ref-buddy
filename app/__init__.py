@@ -18,7 +18,6 @@ from app.models.models_lump import Session, ImageColor, ImageMetadata
 from app.server_args_helpers import get_arg, get_current_paging, Args
 from app.server_ext_board import routes_board
 from app.server_ext_discover import routes_discover
-from app.server_ext_dupes import routes_dupes
 from app.server_ext_folder import routes_folder, json_for_folder_view
 from app.server_ext_image_remove import routes_image_remove
 from app.server_ext_misc import routes_misc
@@ -49,7 +48,6 @@ app.register_blueprint(routes_folder)
 app.register_blueprint(routes_rating)
 app.register_blueprint(routes_tags)
 app.register_blueprint(routes_tags_ai)
-app.register_blueprint(routes_dupes)
 app.register_blueprint(routes_board)
 app.register_blueprint(routes_discover)
 app.register_blueprint(routes_misc)
