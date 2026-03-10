@@ -1,5 +1,7 @@
 import os.path
 
+import socketio
+import uvicorn
 from quart import Quart, request, render_template, jsonify
 from flask_caching import Cache
 
@@ -51,6 +53,9 @@ app.register_blueprint(routes_dupes)
 app.register_blueprint(routes_board)
 app.register_blueprint(routes_discover)
 app.register_blueprint(routes_misc)
+
+sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+asgi_app = socketio.ASGIApp(sio, app)
 
 @app.before_request
 def before_request():
@@ -128,11 +133,29 @@ async def view_image_colors():
     out = await render_template('tpl_view_palettes.html', images=images)
     return out
 
+# Socket.IO events
+@sio.event
+async def connect(sid, environ):
+    print(f"Client connected: {sid}")
+
+@sio.event
+async def disconnect(sid):
+    print(f"Client disconnected: {sid}")
+
+@sio.event
+async def message(sid, data):
+    print(f"Received message from {sid}: {data}")
+    await sio.emit("response", f"Server got: {data}", to=sid)
+
+@sio.event
+async def join(sid, room):
+    print(f"{sid} joined room: {room}")
+    await sio.emit("response", f"{sid} joined room {room}", to=sid)
 
 def run() -> None:
     # db = sqlite3.connect(Env.DB_FILE)
     # ImageMetadataCtrl.static_initialize(db)
-    app.run(host='0.0.0.0', port=Env.SERVER_PORT)
+    uvicorn.run('main:asgi_app', host='0.0.0.0', port=int(Env.SERVER_PORT), reload=True, lifespan="off")
 
 if __name__ == '__main__':
     run()
