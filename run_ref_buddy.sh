@@ -27,7 +27,7 @@ echo "Installing required packages..."
 pip install -r requirements.txt
 
 # Run the main.py script
-python main.py
+python -m launcher
 
 # Deactivate the virtual environment
 deactivate

@@ -34,7 +34,7 @@ echo Installing required packages...
 pip install -r requirements.txt
 
 REM Run the main.py script
-python main.py
+python -m launcher
 
 REM Deactivate the virtual environment
 deactivate
