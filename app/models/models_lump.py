@@ -45,10 +45,10 @@ class DatabaseUtil:
         session.commit()
 
         # STUDY TYPES
-        study_type_1 = StudyType(type="academic")
-        study_type_2 = StudyType(type="other")
-        session.add(study_type_1)
-        session.add(study_type_2)
+        category_1 = Category(type="academic")
+        category_2 = Category(type="other")
+        session.add(category_1)
+        session.add(category_2)
 
         session.commit()
 
@@ -101,19 +101,19 @@ class Path(Base):
     def path_serialize(value:str) -> str:
         return value.replace(os.sep, '/')
 
-class StudyType(Base):
-    __tablename__ = 'study_types'
+class Category(Base):
+    __tablename__ = 'categories'
 
     id = Column(Integer, primary_key=True)
-    type = Column(Text, nullable=False, unique=True)
+    category = Column(Text, nullable=False, unique=True)
 
 
 class ImageMetadata(Base):
-    __tablename__ = 'image_metadata'
+    __tablename__ = 'images'
 
     image_id = Column(Integer, name='id', primary_key=True)
     filename = Column(Text, nullable=False)
-    study_type_id = Column(Integer, ForeignKey('study_types.id'), name='study_type', nullable=False)
+    category_id = Column(Integer, ForeignKey('categories.id'), name='category', nullable=False)
     source_type_id = Column(Integer, name='source_type', default=0, nullable=False)
     path_id = Column(Integer, ForeignKey('paths.id'), name='path', nullable=False)
     fav = Column(Integer, default=0)
@@ -123,9 +123,8 @@ class ImageMetadata(Base):
     removed = Column(Integer, default=0, nullable=False)
     last_viewed = Column(MyTIMESTAMP, default='1999-01-01 00:00:00')
     imported_at = Column(MyTIMESTAMP, default=datetime.now)
-    image_hash = Column(Text, name='hash')
 
-    study_type_ref = relationship('StudyType')
+    category_ref = relationship('Category')
     path_ref = relationship('Path', backref='images')
 
     @property
@@ -144,8 +143,8 @@ class ImageMetadata(Base):
         return self.removed
 
     @property
-    def study_type(self):
-        return self.study_type_ref.type
+    def category(self):
+        return self.category_ref.category
 
     @property
     def path(self):
@@ -223,7 +222,7 @@ class ImageMetadata(Base):
 class ImageExtra(Base):
     __tablename__ = 'image_extra'
 
-    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
     data = Column(Text, default='')
 
     image = relationship('ImageMetadata', backref='extras')
@@ -262,7 +261,7 @@ class Tag(Base):
 class ImageTag(Base):
     __tablename__ = 'image_tags'
 
-    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
     by_ai = Column(Integer, name='ai', default=0, nullable=False)
 
@@ -293,7 +292,7 @@ class TagAi(Base):
 class ImageTagAi(Base):
     __tablename__ = 'image_tags_ai'
 
-    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags_ai.id'), primary_key=True)
     rating = Column(Integer, name='rating', default=0, nullable=False)
     imported_at = Column(MyTIMESTAMP, name='imported_at', default=0, nullable=False)
@@ -382,7 +381,7 @@ class Color(Base):
 class ImageColor(Base):
     __tablename__ = 'image_colors'
 
-    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
     color_id = Column(Integer, ForeignKey('colors.id'), primary_key=True)
     x = Column(Float, nullable=False)
     y = Column(Float, nullable=False)
@@ -398,7 +397,7 @@ class ImageColor(Base):
 class Discover(Base):
     __tablename__ = 'discover'
 
-    image_id    = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    image_id    = Column(Integer, ForeignKey('images.id'), primary_key=True)
     last_active = Column(MyTIMESTAMP, default=datetime.now)
 
     image = relationship('ImageMetadata')
@@ -423,7 +422,7 @@ class BoardImage(Base):
     __tablename__ = 'board_images'
 
     board_id = Column(Integer, ForeignKey('boards.id'), primary_key=True)
-    image_id = Column(Integer, ForeignKey('image_metadata.id'), primary_key=True)
+    image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
 
     tr = Column(Text, default='{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}')
 

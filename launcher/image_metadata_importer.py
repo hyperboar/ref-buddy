@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from shared_utils.Env import Env
 from app.image_metadata_controller import ImageMetadataController as Ctrl
-from shared_utils.maintenance import assign_folder_tags, make_database_backup, generate_thumbs, rehash_images, assign_animation_tags, \
+from shared_utils.maintenance import assign_folder_tags, make_database_backup, generate_thumbs, assign_animation_tags, \
     assign_video_extra_data, gif_split
 from app.models.models_lump import Session, Path, ImageMetadata
 from shared_utils.nice_print import NicePrinter
@@ -18,7 +18,7 @@ class ImageMetadataImporter:
     def import_metadata(self, folder_path):
         folder_path = os.path.normpath(folder_path)
         formats = tuple(Env.IMPORT_FORMATS)
-        sts = Ctrl.get_study_types()
+        sts = Ctrl.get_categories()
 
         start_time = time.time()
         new_count = 0
@@ -90,7 +90,6 @@ class ImageMetadataImporter:
             assign_folder_tags(start_at=update_time, session=session, printer=self.np)
             assign_animation_tags(start_at=update_time, session=session, printer=self.np)
             assign_video_extra_data(start_at=update_time, session=session, printer=self.np)
-            rehash_images(False)
             make_database_backup(marker='after_import', force=True)
             generate_thumbs(start_at=update_time)
             gif_split(force_all=False)

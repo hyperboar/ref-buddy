@@ -83,7 +83,7 @@ async def json_overview():
             'thumb': f'/thumb/{ im.image_id }.jpg',
             'path_link': f'/folder/{im.path_id}',
             'path_dir': im.path_dir,
-            'type':im.study_type,
+            'type':im.category,
             'is_hidden': im.hidden,
             'study_first_link': f'/study-image/{ im.image_id }?same-folder=true&time-planned=120'
         })

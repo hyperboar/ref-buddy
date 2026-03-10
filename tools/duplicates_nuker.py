@@ -228,15 +228,15 @@ def search_by_hash_and_record():
 def search_by_grayscale_print_and_record():
     s = Session()
     imgs_pron = s.query(ImageMetadata)\
-        .filter(ImageMetadata.study_type_id == 2)\
+        .filter(ImageMetadata.category_id == 2)\
         .filter(ImageMetadata.lost != 0) \
         .order_by(ImageMetadata.imported_at.desc()).all()
     imgs_art = s.query(ImageMetadata)\
-        .filter(ImageMetadata.study_type_id == 3) \
+        .filter(ImageMetadata.category_id == 3) \
         .filter(ImageMetadata.lost != 0) \
         .order_by(ImageMetadata.imported_at.desc()).all()
     imgs_bits = s.query(ImageMetadata)\
-        .filter(ImageMetadata.study_type_id == 4) \
+        .filter(ImageMetadata.category_id == 4) \
         .filter(ImageMetadata.lost != 0) \
         .order_by(ImageMetadata.imported_at.desc()).all()
     imgs = imgs_pron + imgs_bits + imgs_art

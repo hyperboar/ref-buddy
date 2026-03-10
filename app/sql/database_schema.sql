@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS image_metadata (
     id INTEGER PRIMARY KEY,
     filename TEXT NOT NULL,
     path INTEGER NOT NULL,
-    study_type INTEGER NOT NULL,
+    category INTEGER NOT NULL,
     fav INTEGER DEFAULT 0,
     count INTEGER DEFAULT 0,
     rating INTEGER DEFAULT 0,
@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS image_metadata (
     imported_at TIMESTAMP DEFAULT (datetime('now')),
     hash TEXT,
     FOREIGN KEY (path) REFERENCES paths (id),
-    FOREIGN KEY (study_type) REFERENCES study_types (id)
+    FOREIGN KEY (category) REFERENCES categories (id)
 );
 
-CREATE INDEX fn_index ON image_metadata (filename);
+CREATE INDEX fn_index ON images (filename);
 
 CREATE TABLE IF NOT EXISTS paths (
     id INTEGER PRIMARY KEY,
@@ -28,16 +28,16 @@ CREATE TABLE IF NOT EXISTS paths (
     hidden  INTEGER DEFAULT 0 NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS study_types (
+CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY,
-    type TEXT NOT NULL UNIQUE
+    category TEXT NOT NULL UNIQUE
 );
 
-INSERT INTO study_types (type) VALUES ('academic');
-INSERT INTO study_types (type) VALUES ('pron');
-INSERT INTO study_types (type) VALUES ('artists');
-INSERT INTO study_types (type) VALUES ('the_bits');
-INSERT INTO study_types (type) VALUES ('frames');
+INSERT INTO categories (category) VALUES ('academic');
+INSERT INTO categories (category) VALUES ('pron');
+INSERT INTO categories (category) VALUES ('artists');
+INSERT INTO categories (category) VALUES ('the_bits');
+INSERT INTO categories (category) VALUES ('frames');
 
 
 CREATE TABLE IF NOT EXISTS tags (
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS tags (
 CREATE TABLE  IF NOT EXISTS image_tags (
     image_id INTEGER,
     tag_id INTEGER,
-    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (image_id) REFERENCES images(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id),
     PRIMARY KEY (image_id, tag_id)
 );
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS tags_ai (
 CREATE TABLE  IF NOT EXISTS image_tags_ai (
     image_id INTEGER,
     tag_id INTEGER,
-    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (image_id) REFERENCES images(id),
     FOREIGN KEY (tag_id) REFERENCES tags_ai(id),
     PRIMARY KEY (image_id, tag_id)
 );
@@ -96,7 +96,7 @@ CREATE TABLE  IF NOT EXISTS tags_ai_to_tags (
 CREATE TABLE  IF NOT EXISTS discover (
     image_id INTEGER,
     last_active TIMESTAMP DEFAULT (datetime('now')),
-    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (image_id) REFERENCES images(id),
     PRIMARY KEY (image_id)
 );
 
@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS image_colors (
     color_id INTEGER,
     x REAL NOT NULL,
     y REAL NOT NULL,
-    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (image_id) REFERENCES images(id),
     FOREIGN KEY (color_id) REFERENCES colors(id),
     PRIMARY KEY (image_id, color_id)
 );
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS image_colors (
 CREATE TABLE  IF NOT EXISTS image_extra (
     image_id INTEGER,
     data TEXT DEFAULT '',
-    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (image_id) REFERENCES images(id),
     PRIMARY KEY (image_id)
 );
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS board_images (
     tr TEXT DEFAULT '{tx:0.0, ty:0.0, rx:0.0, ry:0.0, s:1.0}', -- json transform
 
     PRIMARY KEY (board_id, image_id),
-    FOREIGN KEY (image_id) REFERENCES image_metadata(id),
+    FOREIGN KEY (image_id) REFERENCES images(id),
     FOREIGN KEY (board_id) REFERENCES boards(id)
 );
 

@@ -21,9 +21,9 @@ async def view_tags():
     response, images = Ctrl.get_all_by_tags_new3(params, session=session)
 
     overview = {}
-    overview["study_type"] = ', '.join(params.tags_pos_names)
+    overview["category"] = ', '.join(params.tags_pos_names)
     if len(params.tags_neg) > 0:
-        overview["study_type"] += ' exclude:' + ', '.join(params.tags_neg_names)
+        overview["category"] += ' exclude:' + ', '.join(params.tags_neg_names)
     overview["path"] = ""
 
     paging = await get_paging_widget(params.page)
@@ -47,7 +47,7 @@ async def view_folder(path_id):
     session = Session()
     # tags_pos, tags_neg = Ctrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
-    study_type, path, images = Ctrl.get_all_by_path_id2(params, session=session)
+    category, path, images = Ctrl.get_all_by_path_id2(params, session=session)
     if len(images) == 0:
         overview = None
     else:

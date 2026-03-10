@@ -23,8 +23,8 @@ class ImageMetadataOverview:
             im.path_dir = os.path.dirname(im.path)
             images.append(im)
 
-        images = sorted(images, key=lambda i: (i.study_type_id, -i.path_ord))
-        # images = s.query(ImageMetadata).group_by(ImageMetadata.path_id).order_by(ImageMetadata.study_type_id).all()
+        images = sorted(images, key=lambda i: (i.category_id, -i.path_ord))
+        # images = s.query(ImageMetadata).group_by(ImageMetadata.path_id).order_by(ImageMetadata.category_id).all()
         return images
 
 

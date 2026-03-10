@@ -5,7 +5,7 @@ from datetime import datetime
 from quart import Request
 
 from shared_utils.Env import Env
-from app.models.models_lump import Session, Tag, StudyType, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi
+from app.models.models_lump import Session, Tag, Category, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi
 from sqlalchemy import func
 
 from app.models.view_filter_dto import ViewFilterMultipleDTO
@@ -19,19 +19,19 @@ class ImageMetadataController:
     # region CRUD
 
     @staticmethod
-    def create(path: str, study_types=None, import_at=None, session=None) -> 'ImageMetadata':
+    def create(path: str, categories=None, import_at=None, session=None) -> 'ImageMetadata':
 
         dir = os.path.dirname(path)
         file = os.path.basename(path)
 
-        stype_list = [s for s in study_types if dir.startswith(s.type)]
+        cat_list = [s for s in categories if dir.startswith(s.category)]
 
-        if stype_list is None or len(stype_list) == 0:
+        if cat_list is None or len(cat_list) == 0:
             print(
-                f"Path '{path}' should be in study_type named folder (These: {','.join([s.type for s in study_types])})")
+                f"Path '{path}' should be in study_type named folder (These: {','.join([s.category for s in categories])})")
             return None
 
-        stype = stype_list[0]
+        ctg = cat_list[0]
         new_path = dir
 
 
@@ -51,11 +51,11 @@ class ImageMetadataController:
 
         source_type = ImageMetadata.source_type_by_path(os.path.join(Env.IMAGES_PATH, path))
 
-        # print(f"inserting {(path_id, stype.id, file)} for path '{new_path}'")
+        # print(f"inserting {(path_id, ctg.id, file)} for path '{new_path}'")
         if import_at is None:
-            new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type)
+            new_image = ImageMetadata(path_id=path_id, category_id=ctg.id, filename=file, source_type_id=source_type)
         else:
-            new_image = ImageMetadata(path_id=path_id, study_type_id=stype.id, filename=file, source_type_id=source_type, imported_at=import_at)
+            new_image = ImageMetadata(path_id=path_id, category_id=ctg.id, filename=file, source_type_id=source_type, imported_at=import_at)
         session.add(new_image)
 
         if auto_commit:
@@ -143,7 +143,7 @@ class ImageMetadataController:
             p = session.get(Path, path_id)
             return "", f'No images at path ({p.id}) "{p.path}"', []
 
-        return rows[0].study_type, rows[0], rows
+        return rows[0].category, rows[0], rows
 
     @staticmethod
     # def get_all_by_path_id2(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
@@ -162,7 +162,7 @@ class ImageMetadataController:
             p = session.get(Path, params.path_id)
             return "", f'No images at path ({p.id}) "{p.path}"', []
 
-        return rows[0].study_type, rows[0], rows
+        return rows[0].category, rows[0], rows
 
     @staticmethod
     def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
@@ -233,13 +233,13 @@ class ImageMetadataController:
         return tags_pos, tags_neg
 
     @staticmethod
-    def get_random_by_study_type(study_type:int=0, same_folder:int=0, prev_image_id:int=0,
-                                 min_rating=0, tags:([int],[int])=([],[]), session=None) -> 'ImageMetadata':
+    def get_random_by_category(category:int=0, same_folder:int=0, prev_image_id:int=0,
+                               min_rating=0, tags:([int],[int])=([],[]), session=None) -> 'ImageMetadata':
         if session is None:
             session = Session()
 
         q = ImageMetadataController.get_query_imagemetadata(
-            study_type=study_type, same_folder=same_folder, tags=tags,
+            category=category, same_folder=same_folder, tags=tags,
             image_id=prev_image_id, min_rating=min_rating, session=session)
         q = q.order_by(func.random())
         row = q.first()
@@ -310,7 +310,7 @@ class ImageMetadataController:
         return row
 
     @staticmethod
-    def get_query_imagemetadata(study_type:int=-1, same_folder:int=0, image_id:int=-1,
+    def get_query_imagemetadata(category:int=-1, same_folder:int=0, image_id:int=-1,
                                 min_rating:int=0, max_rating=9999, tags:([int],[int])=([],[]),
                                 path_id:int=-1, session=None):
         l = len(tags[0])
@@ -330,9 +330,9 @@ class ImageMetadataController:
         if len(tags[1]) > 0:
             q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags[1])))
 
-        # filter by study_type
-        # if study_type > 0:
-        #     q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+        # filter by category
+        # if category > 0:
+        #     q = q.filter(ImageMetadata.category_id == category, ImageMetadata.rating >= min_rating)
 
         # when same_folder get path_id by image_id
         if same_folder > 0 and image_id > 0:
@@ -377,9 +377,9 @@ class ImageMetadataController:
         if len(params['tags_neg']) > 0:
             q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(params['tags_neg'])))
 
-        # filter by study_type
-        # if study_type > 0:
-        #     q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+        # filter by category
+        # if category > 0:
+        #     q = q.filter(ImageMetadata.category_id == category, ImageMetadata.rating >= min_rating)
 
         # when same_folder get path_id by image_id
         if params['same_folder'] > 0 and len(params['image_ids']) > 0:
@@ -424,9 +424,9 @@ class ImageMetadataController:
         if len(params.tags_neg) > 0:
             q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(params.tags_neg)))
 
-        # filter by study_type
-        # if study_type > 0:
-        #     q = q.filter(ImageMetadata.study_type_id == study_type, ImageMetadata.rating >= min_rating)
+        # filter by category
+        # if category > 0:
+        #     q = q.filter(ImageMetadata.category_id == category, ImageMetadata.rating >= min_rating)
 
         # when same_folder get path_id by image_id
         if params.same_folder > 0 and len(params.image_ids) > 0:
@@ -529,10 +529,10 @@ class ImageMetadataController:
         return img.image_id
 
     @staticmethod
-    def get_study_types(session=None):
+    def get_categories(session=None):
         if session is None:
             session = Session()
-        return session.query(StudyType).all()
+        return session.query(Category).all()
 
     @staticmethod
     def get_all_tags(sort_by_name=False, session=None):
