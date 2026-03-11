@@ -37,8 +37,10 @@ class DatabaseUtil:
         session.commit()
 
         # TAGS
+        tag_tagme = Tag(id=1, tag='tagme', color_id=color.id)
         tag_anim = Tag(tag='animated', color_id=color.id)
         tag_vid = Tag(tag='video', color_id=color.id)
+        session.add(tag_tagme)
         session.add(tag_anim)
         session.add(tag_vid)
 
