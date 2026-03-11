@@ -45,7 +45,7 @@ class DatabaseUtil:
         session.commit()
 
         # CATEGORIES
-        category_1 = Category(type="everything")
+        category_1 = Category(category="everything")
         session.add(category_1)
 
         session.commit()
