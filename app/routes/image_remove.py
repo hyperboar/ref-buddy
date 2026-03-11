@@ -2,7 +2,7 @@ from quart import Blueprint, jsonify, request, abort, render_template
 
 from shared_utils.maintenance import remove_permanent
 from app.models.models_lump import Session, ImageMetadata
-from app.server_ext_folder import json_for_folder_view
+from app.utils.misc import json_for_folder_view
 
 routes_image_remove = Blueprint('routes_image_remove', __name__)
 
