@@ -83,7 +83,7 @@ class ApiImage
      */
     static GetRating(id)
     {
-        return fetch(`/get-image-rating?image-id=${id}`)
+        return fetch(`/get-image-rating?image-ids=${id}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
@@ -98,7 +98,7 @@ class ApiImage
      */
     static UpdateRatingSingle(id, offset)
     {
-        return fetch(`/add-image-rating?image-id=${id}&rating=${offset}`)
+        return fetch(`/add-image-rating?image-ids=${id}&r=${offset}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
@@ -113,7 +113,7 @@ class ApiImage
      */
     static UpdateRatingFolder(id, offset)
     {
-        return fetch(`/add-folder-rating?image-id=${id}&rating=${offset}`)
+        return fetch(`/add-folder-rating?image-ids=${id}&r=${offset}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
@@ -130,7 +130,7 @@ class ApiImage
     static UpdateRatingBulk(ids, offset)
     {
         const idsStr = ids.join(',')
-        return fetch(`/add-mult-image-rating?image-id=${idsStr}&rating=${offset}`)
+        return fetch(`/add-mult-image-rating?image-ids=${idsStr}&r=${offset}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
