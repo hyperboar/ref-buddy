@@ -19,7 +19,7 @@ from app.routes.folder import routes_folder
 from app.routes.image_remove import routes_image_remove
 from app.routes.misc import routes_misc
 from app.routes.rating import routes_rating
-from app.server_ext_single_image import routes_image
+from app.routes.image_single import routes_image
 from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
 
