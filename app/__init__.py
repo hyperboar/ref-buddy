@@ -21,7 +21,7 @@ from app.server_ext_discover import routes_discover
 from app.server_ext_folder import routes_folder, json_for_folder_view
 from app.server_ext_image_remove import routes_image_remove
 from app.server_ext_misc import routes_misc
-from app.server_ext_rating import routes_rating
+from app.routes.rating import routes_rating
 from app.server_ext_single_image import routes_image
 from app.server_ext_tags import routes_tags
 from app.server_widget_helpers import get_paging_widget
@@ -37,29 +37,29 @@ config = {
 template_dir = os.path.join('templates')
 static_dir = os.path.join('static')
 
-app = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
-app.config.from_mapping(config)
+app_quart = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
+app_quart.config.from_mapping(config)
 
-cache = Cache(app)
+cache = Cache(app_quart)
 
-app.register_blueprint(routes_image)
-app.register_blueprint(routes_image_remove)
-app.register_blueprint(routes_folder)
-app.register_blueprint(routes_rating)
-app.register_blueprint(routes_tags)
-app.register_blueprint(routes_tags_ai)
-app.register_blueprint(routes_board)
-app.register_blueprint(routes_discover)
-app.register_blueprint(routes_misc)
+app_quart.register_blueprint(routes_image)
+app_quart.register_blueprint(routes_image_remove)
+app_quart.register_blueprint(routes_folder)
+app_quart.register_blueprint(routes_rating)
+app_quart.register_blueprint(routes_tags)
+app_quart.register_blueprint(routes_tags_ai)
+app_quart.register_blueprint(routes_board)
+app_quart.register_blueprint(routes_discover)
+app_quart.register_blueprint(routes_misc)
 
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-asgi_app = socketio.ASGIApp(sio, app)
+asgi_app = socketio.ASGIApp(sio, app_quart)
 
-@app.before_request
+@app_quart.before_request
 def before_request():
     make_database_backup()
 
-@app.route('/')
+@app_quart.route('/')
 async def overview():
     args = request.args
     hidden = int(args.get('hidden', default='0')) != 0
@@ -67,7 +67,7 @@ async def overview():
     images = ImageMetadataOverview.get_overview(hidden)
     return await render_template('tpl_view_index.html', images=images)
 
-@app.route('/json/overview')
+@app_quart.route('/json/overview')
 async def json_overview():
     args = request.args
     hidden = int(args.get('hidden', default='0')) != 0
@@ -88,7 +88,7 @@ async def json_overview():
 
     return jsonify(result)
 
-@app.route('/favs')
+@app_quart.route('/favs')
 async def view_favs():
     page, offset, limit = get_current_paging(request.args)
     rating = get_arg(request.args, Args.min_rating)
@@ -105,7 +105,7 @@ async def view_favs():
 
     return await render_template('tpl_view_folder.html', title='Favorites', paging=paging, images=images, overview=None)
 
-@app.route('/latest_study')
+@app_quart.route('/latest_study')
 async def view_last():
     page, offset, limit = get_current_paging(request.args)
     rating = get_arg(request.args, Args.min_rating)
@@ -122,7 +122,7 @@ async def view_last():
 
     return await render_template('tpl_view_folder.html', title='Latest study', paging=paging, images=images, overview=None)
 
-@app.route('/palettes')
+@app_quart.route('/palettes')
 async def view_image_colors():
     session = Session()
 
