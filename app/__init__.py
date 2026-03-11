@@ -15,7 +15,7 @@ from shared_utils.maintenance import make_database_backup
 from app.routes.root import routes_root
 from app.routes.board import routes_board
 from app.routes.discover import routes_discover
-from app.server_ext_folder import routes_folder
+from app.routes.folder import routes_folder
 from app.routes.image_remove import routes_image_remove
 from app.routes.misc import routes_misc
 from app.routes.rating import routes_rating
