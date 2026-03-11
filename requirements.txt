@@ -12,3 +12,4 @@ numpy~=1.25.0
 scikit-learn~=1.2.2
 uvicorn==0.41.0
 python-socketio==5.16.1
+pydantic==2.12.5
