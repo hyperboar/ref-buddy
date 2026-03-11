@@ -60,6 +60,7 @@ class DatabaseUtil:
         session.add(tag_set)
 
         session.commit()
+        session.close()
 
 class MyTIMESTAMP(TypeDecorator):
     """
