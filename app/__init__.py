@@ -13,15 +13,15 @@ sys.path.append(os.getcwd())
 from shared_utils.Env import Env
 from shared_utils.maintenance import make_database_backup
 from app.routes.root import routes_root
-from app.server_ext_board import routes_board
-from app.server_ext_discover import routes_discover
+from app.routes.board import routes_board
+from app.routes.discover import routes_discover
 from app.server_ext_folder import routes_folder
-from app.server_ext_image_remove import routes_image_remove
-from app.server_ext_misc import routes_misc
+from app.routes.image_remove import routes_image_remove
+from app.routes.misc import routes_misc
 from app.routes.rating import routes_rating
 from app.server_ext_single_image import routes_image
-from app.server_ext_tags import routes_tags
-from app.server_ext_tags_ai import routes_tags_ai
+from app.routes.tags import routes_tags
+from app.routes.tags_ai import routes_tags_ai
 
 config = {
     # "DEBUG": True,          # some Flask specific configs
