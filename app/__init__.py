@@ -24,14 +24,14 @@ from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
 
 config = {
-    # "DEBUG": True,          # some Flask specific configs
-    "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
-    "CACHE_DEFAULT_TIMEOUT": 300,
+    # 'DEBUG': True,
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 300,
     'THUMB_STATIC': Env.THUMB_PATH
 }
 
-template_dir = os.path.join('templates')
-static_dir = os.path.join('static')
+template_dir = 'templates'
+static_dir = 'static'
 
 app_quart = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
 app_quart.config.from_mapping(config)
