@@ -10,7 +10,7 @@ from sqlalchemy import func, exists, text
 from shared_utils.Env import Env
 from shared_utils.export_vid_gifs import ExportVidGifs
 from shared_utils.gifextract import process_animation
-from app.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from app.models.models_lump import Session, ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
     ImageColor, DatabaseUtil
 from shared_utils.nice_print import PrinterInterface

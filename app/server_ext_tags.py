@@ -1,6 +1,6 @@
 from quart import Blueprint, request, abort, render_template, redirect, jsonify, url_for
 
-from app.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from app.models.models_lump import Tag, Session, ImageMetadata, TagSet, Path, PathTag, Color
 
 routes_tags = Blueprint('routes_tags', __name__)

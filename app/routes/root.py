@@ -1,11 +1,11 @@
 from quart import Blueprint
 from quart import request, render_template, jsonify
-from app.image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
+from app.services.image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from app.models.models_lump import Session, ImageColor, ImageMetadata
-from app.server_args_helpers import get_arg, get_current_paging, Args
-from app.image_metadata_overview import ImageMetadataOverview
-from app.server_ext_folder import json_for_folder_view
-from app.server_widget_helpers import get_paging_widget
+from app.services.server_args_helpers import get_arg, get_current_paging, Args
+from app.services.image_metadata_overview import ImageMetadataOverview
+from app.services.server_widget_helpers import get_paging_widget
+from app.utils.misc import json_for_folder_view
 
 routes_root = Blueprint('routes_root', __name__)
 

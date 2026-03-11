@@ -7,10 +7,10 @@ from PIL import Image
 from quart import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
     current_app, jsonify, Request, Response
 
-from app.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from shared_utils.Env import Env
 from app.models.models_lump import Session, ImageMetadata, Color, ImageColor, TagSet, Tag
-from app.server_args_helpers import get_arg, Args
+from app.services.server_args_helpers import get_arg, Args
 from shared_utils.utils import Utils
 
 routes_image = Blueprint('routes_image', __name__)

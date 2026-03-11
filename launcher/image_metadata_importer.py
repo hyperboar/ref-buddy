@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 from shared_utils.Env import Env
-from app.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from shared_utils.maintenance import assign_folder_tags, make_database_backup, generate_thumbs, assign_animation_tags, \
     assign_video_extra_data, gif_split
 from app.models.models_lump import Session, Path, ImageMetadata

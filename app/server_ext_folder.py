@@ -1,13 +1,12 @@
-import json
 import os
-from datetime import datetime
 
 from quart import Blueprint, request, render_template_string, render_template, jsonify
 from app.models.models_lump import Session, ImageMetadata
 from app.models.view_filter_mapper import ViewFilterMapper
-from app.server_args_helpers import get_current_paging, get_arg, Args
-from app.image_metadata_controller import ImageMetadataController as Ctrl
-from app.server_widget_helpers import get_paging_widget
+from app.services.server_args_helpers import get_current_paging, get_arg, Args
+from app.services.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.server_widget_helpers import get_paging_widget
+from app.utils.misc import json_for_folder_view
 
 routes_folder = Blueprint('routes_folder', __name__)
 
@@ -100,20 +99,6 @@ async def toggle_folder_hide():
     s.commit()
 
     return await render_template_string(str('ok'))
-
-def json_for_folder_view(images, session=None) -> str:
-    data = {'images': []}
-    for im in images:
-        print(im.imported_at)
-        data['images'].append({
-            'id': im.image_id,
-            'r': im.rating,
-            'fn': im.filename,
-            'i_at': datetime.timestamp(im.imported_at)*1000,
-            'video': 1 if im.source_type_id == 2 or im.source_type_id == 3 else 0
-        })
-
-    return json.dumps(data)
 
 @routes_folder.route('/export-urls/')
 async def export_urls():

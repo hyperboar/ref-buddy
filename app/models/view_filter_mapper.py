@@ -3,7 +3,7 @@ import urllib
 from quart import Request
 
 from shared_utils.Env import Env
-from app.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from app.models.models_lump import Session
 from app.models.view_filter_dto import ViewFilterMultipleDTO
 
