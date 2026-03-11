@@ -49,12 +49,10 @@ app_quart.register_blueprint(routes_board)
 app_quart.register_blueprint(routes_discover)
 app_quart.register_blueprint(routes_misc)
 
+if not is_testing:
+    app_quart.before_request(make_database_backup)
+
+
+
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
 asgi_app = socketio.ASGIApp(sio, app_quart)
-
-@app_quart.before_request
-def before_request():
-    make_database_backup()
-
-
-
