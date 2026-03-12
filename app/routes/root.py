@@ -47,7 +47,7 @@ async def view_favs():
     tag_set_id = get_arg(request.args, Args.tag_set)
 
     session = Session()
-    tags_pos, tags_neg = get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+    tags_pos, tags_neg = get_tags_by_set(tag_set_id, session, tags_pos, tags_neg)
 
     images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     images = json_for_folder_view(images)
@@ -64,7 +64,7 @@ async def view_last():
     tag_set_id = get_arg(request.args, Args.tag_set)
 
     session = Session()
-    tags_pos, tags_neg = get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+    tags_pos, tags_neg = get_tags_by_set(tag_set_id, session, tags_pos, tags_neg)
 
     images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     images = json_for_folder_view(images)

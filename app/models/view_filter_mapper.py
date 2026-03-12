@@ -29,7 +29,7 @@ class ViewFilterMapper:
         tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
 
         session = Session()
-        tags_pos, tags_neg = get_tags_by_set(dto.tag_set_name, tags_pos, tags_neg, session=session)
+        tags_pos, tags_neg = get_tags_by_set(dto.tag_set_name, session, tags_pos, tags_neg)
         tags_pos_names = get_tag_names(tags_pos, session=session)
         tags_neg_names = get_tag_names(tags_neg, session=session)
         dto.tags_pos = tags_pos

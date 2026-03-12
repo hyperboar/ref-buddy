@@ -1,9 +1,9 @@
-from app.models.models_lump import Session, Tag, TagSet
+from typing_extensions import deprecated
+
+from app.models.models_lump import Tag, TagSet, Session
 
 
-def get_tags_by_set(set_id:int|str, add_pos:[str]=None, add_neg:[str]=None, session=None):
-    if session is None:
-        session = Session()
+def get_tags_by_set(set_id:int|str, session:Session, add_pos:[str]=None, add_neg:[str]=None):
 
     try:
         set_id = int(set_id)
@@ -22,29 +22,22 @@ def get_tags_by_set(set_id:int|str, add_pos:[str]=None, add_neg:[str]=None, sess
 
     return tags_pos, tags_neg
 
-def get_all_tags(sort_by_name=False, session=None):
-    if session is None:
-        session = Session()
+@deprecated('')
+def get_all_tags(session:Session, sort_by_name=False):
 
     tags = session.query(Tag).all()
     if sort_by_name:
         tags.sort(key=(lambda t : t.tag))
     return tags
 
-def get_tags_by_names(tags: [str], session=None) -> [int]:
+def get_tags_by_names(tags: [str], session:Session) -> [int]:
     if tags is None or len(tags) == 0: return []
-
-    if session is None:
-        session = Session()
 
     rows = session.query(Tag).filter(Tag.tag.in_(tags)).all()
     return [row.id for row in rows]
 
-def get_tag_names(tags: [int], session=None):
+def get_tag_names(tags: [int], session:Session):
     if tags is None or len(tags) == 0: return []
-
-    if session is None:
-        session = Session()
 
     found = session.query(Tag).filter(Tag.id.in_(tags)).all()
     return [t.tag for t in found]

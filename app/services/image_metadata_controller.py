@@ -216,7 +216,7 @@ class ImageMetadataController:
 
         tag_set_id = request.args.get('tag-set', default='all')
         tag_set_id = tag_set_id if tag_set_id != '' else 'all'
-        tags_pos, tags_neg = get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+        tags_pos, tags_neg = get_tags_by_set(tag_set_id, session, tags_pos, tags_neg)
 
         q = ImageMetadataController.get_query_imagemetadata(
             same_folder=same_folder, tags=(tags_pos, tags_neg),
