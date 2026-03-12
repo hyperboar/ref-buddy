@@ -6,7 +6,7 @@ from quart import Request
 
 from shared_utils.Env import Env
 from app.models.models_lump import Session, Category, ImageMetadata, Path, ImageTag, ImageTagAi
-from app.services.tags import get_tags_by_names, get_tags_by_set
+from app.services.tags import get_tags_by_names, get_tags_by_set, handle_tags
 from sqlalchemy import func
 
 from app.models.view_filter_dto import ViewFilterMultipleDTO
@@ -212,7 +212,7 @@ class ImageMetadataController:
         min_rating  = request.args.get('r', default=0, type=int)
 
         tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
-        tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
+        tags_pos, tags_neg = handle_tags(tags_str)
 
         tag_set_id = request.args.get('tag-set', default='all')
         tag_set_id = tag_set_id if tag_set_id != '' else 'all'
@@ -237,7 +237,7 @@ class ImageMetadataController:
         im = session.get(ImageMetadata, image_id)
 
         tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
-        tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
+        tags_pos, tags_neg = handle_tags(tags_str)
 
         tags_pos = get_tags_by_names(tags_pos, session=session)
         tags_neg = get_tags_by_names(tags_neg, session=session)
