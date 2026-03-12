@@ -2,10 +2,11 @@ from quart import Blueprint
 from quart import request, render_template, jsonify
 from app.services.image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
 from app.models.models_lump import Session, ImageColor, ImageMetadata
-from app.services.server_args_helpers import get_arg, get_current_paging, Args
+from app.services.server_args_helpers import get_arg, Args
 from app.services.image_metadata_overview import ImageMetadataOverview
 from app.services.server_widget_helpers import get_paging_widget
-from app.utils.misc import json_for_folder_view
+from app.services.tags import get_tags_by_set
+from app.utils.misc import json_for_folder_view, get_current_paging
 
 routes_root = Blueprint('routes_root', __name__)
 
@@ -46,7 +47,7 @@ async def view_favs():
     tag_set_id = get_arg(request.args, Args.tag_set)
 
     session = Session()
-    tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+    tags_pos, tags_neg = get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     images = ImageMetadataCtrl.get_favs(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     images = json_for_folder_view(images)
@@ -63,7 +64,7 @@ async def view_last():
     tag_set_id = get_arg(request.args, Args.tag_set)
 
     session = Session()
-    tags_pos, tags_neg = ImageMetadataCtrl.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+    tags_pos, tags_neg = get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
     images = ImageMetadataCtrl.get_last(start=offset, count=limit, tags=(tags_pos,tags_neg), min_rating=rating, session=session)
     images = json_for_folder_view(images)

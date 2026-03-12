@@ -3,7 +3,7 @@ import urllib
 from quart import Request
 
 from shared_utils.Env import Env
-from app.services.image_metadata_controller import ImageMetadataController as Ctrl
+from app.services.tags import get_tags_by_set, get_tag_names
 from app.models.models_lump import Session
 from app.models.view_filter_dto import ViewFilterMultipleDTO
 
@@ -29,9 +29,9 @@ class ViewFilterMapper:
         tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
 
         session = Session()
-        tags_pos, tags_neg = Ctrl.get_tags_by_set(dto.tag_set_name, tags_pos, tags_neg, session=session)
-        tags_pos_names = Ctrl.get_tag_names(tags_pos, session=session)
-        tags_neg_names = Ctrl.get_tag_names(tags_neg, session=session)
+        tags_pos, tags_neg = get_tags_by_set(dto.tag_set_name, tags_pos, tags_neg, session=session)
+        tags_pos_names = get_tag_names(tags_pos, session=session)
+        tags_neg_names = get_tag_names(tags_neg, session=session)
         dto.tags_pos = tags_pos
         dto.tags_neg = tags_neg
         dto.tags_pos_names = tags_pos_names

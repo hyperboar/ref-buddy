@@ -3,12 +3,32 @@ import os
 from quart import Blueprint, request, render_template_string, render_template, jsonify
 from app.models.models_lump import Session, ImageMetadata
 from app.models.view_filter_mapper import ViewFilterMapper
-from app.services.server_args_helpers import get_current_paging, get_arg, Args
+from app.services.server_args_helpers import get_arg, Args
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from app.services.server_widget_helpers import get_paging_widget
-from app.utils.misc import json_for_folder_view
+from app.services.tags import get_tag_names
+from app.utils.misc import json_for_folder_view, get_current_paging
 
 routes_folder = Blueprint('routes_folder', __name__)
+
+
+def get_default_query_params():
+    return {
+        'image_ids': [],
+        'tags_pos': [],
+        'tags_neg': [],
+        'tag_set': 'all',
+        'min_rating': 0,
+        'max_rating': 9999,
+        'same_folder': 0,
+        'lost': 0,
+        'removed': 0,
+        'path_id': None,
+        'limit': None,
+        'offset': None,
+    }
+
+
 
 @routes_folder.route('/all')
 async def view_tags():
@@ -102,7 +122,7 @@ async def toggle_folder_hide():
 
 @routes_folder.route('/export-urls/')
 async def export_urls():
-    params = Ctrl.get_default_query_params()
+    params = get_default_query_params()
 
     page, offset, limit = get_current_paging(request.args)
     params['page'] = page
@@ -116,8 +136,8 @@ async def export_urls():
 
     session = Session()
     tags_pos, tags_neg = Ctrl.get_tags_by_set(params['tag_set'], tags_pos, tags_neg, session=session)
-    tags_pos_names = Ctrl.get_tag_names(tags_pos, session=session)
-    tags_neg_names = Ctrl.get_tag_names(tags_neg, session=session)
+    tags_pos_names = get_tag_names(tags_pos, session=session)
+    tags_neg_names = get_tag_names(tags_neg, session=session)
     params['tags_pos'] = tags_pos
     params['tags_neg'] = tags_neg
     params['tags_pos_names'] = tags_pos_names

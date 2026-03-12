@@ -1,9 +1,12 @@
 import urllib
 from enum import Enum, auto
+
 from quart import abort
+from typing_extensions import deprecated
+
 from shared_utils.Env import Env
 
-
+@deprecated("")
 class Args(Enum):
     image_id      = auto(),
     mult_image_ids = auto(),
@@ -16,7 +19,7 @@ class Args(Enum):
     study_timer   = auto(),
     is_same_folder = auto()
 
-
+@deprecated("")
 def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
     """
     :param args:
@@ -61,6 +64,7 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
         case _:
             abort(404, f'Error: Unknown argument "{arg_name}"')
 
+@deprecated("")
 def get_tag_names(args):
     tags_all = urllib.parse.unquote(args.get(Args.tags.name, default=""), encoding='utf-8', errors='replace').split(',')
     tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
@@ -69,16 +73,3 @@ def get_tag_names(args):
     # tags_pos = Ctrl.get_tags_by_names(tags_pos)
     # tags_neg = Ctrl.get_tags_by_names(tags_neg)
     return tags_pos, tags_neg
-
-def get_offset_by_page(page:int, limit:int) -> int:
-    return limit * page
-
-def get_current_paging(args):
-    """
-    :param args: Web request args
-    :return: page, offset, limit
-    """
-    limit = get_arg(args, Args.limit)
-    page = get_arg(args, Args.page)
-    offset = get_offset_by_page(page, limit)
-    return page, offset, limit

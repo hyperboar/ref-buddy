@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
 
+from app.services.server_args_helpers import get_arg, Args
+
 
 def json_for_folder_view(images, session=None) -> str:
     data = {'images': []}
@@ -15,3 +17,17 @@ def json_for_folder_view(images, session=None) -> str:
         })
 
     return json.dumps(data)
+
+
+def get_offset_by_page(page:int, limit:int) -> int:
+    return limit * page
+
+def get_current_paging(args):
+    """
+    :param args: Web request args
+    :return: page, offset, limit
+    """
+    limit = get_arg(args, Args.limit)
+    page = get_arg(args, Args.page)
+    offset = get_offset_by_page(page, limit)
+    return page, offset, limit

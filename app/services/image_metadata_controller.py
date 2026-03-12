@@ -5,7 +5,8 @@ from datetime import datetime
 from quart import Request
 
 from shared_utils.Env import Env
-from app.models.models_lump import Session, Tag, Category, ImageMetadata, Path, ImageTag, TagSet, ImageTagAi
+from app.models.models_lump import Session, Category, ImageMetadata, Path, ImageTag, ImageTagAi
+from app.services.tags import get_tags_by_names, get_tags_by_set
 from sqlalchemy import func
 
 from app.models.view_filter_dto import ViewFilterMultipleDTO
@@ -68,23 +69,6 @@ class ImageMetadataController:
     # endregion CRUD
 
     # region Convenience
-
-    @staticmethod
-    def get_default_query_params():
-        return {
-            'image_ids': [],
-            'tags_pos': [],
-            'tags_neg': [],
-            'tag_set': 'all',
-            'min_rating': 0,
-            'max_rating': 9999,
-            'same_folder': 0,
-            'lost': 0,
-            'removed': 0,
-            'path_id': None,
-            'limit': None,
-            'offset': None,
-        }
 
     @staticmethod
     def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
@@ -203,34 +187,7 @@ class ImageMetadataController:
 
         return "", result
 
-    @staticmethod
-    def get_tags_by_names(tags: [str], session=None) -> [int]:
-        if session is None:
-            session = Session()
-        rows = session.query(Tag).filter(Tag.tag.in_(tags)).all()
-        return [row.id for row in rows]
 
-    @staticmethod
-    def get_tags_by_set(set_id:int|str, add_pos:[str]=None, add_neg:[str]=None, session=None):
-        if session is None:
-            session = Session()
-
-        try:
-            set_id = int(set_id)
-        except ValueError:
-            set_id = session.query(TagSet).filter(TagSet.set_alias == set_id).first().id
-
-
-        tag_set = session.query(TagSet).filter(TagSet.id == set_id).first()
-        tags_pos, tags_neg = tag_set.get_tags()
-
-        add_pos = ImageMetadataController.get_tags_by_names(add_pos, session=session) if add_pos and len(add_pos) > 0 else []
-        add_neg = ImageMetadataController.get_tags_by_names(add_neg, session=session) if add_neg and len(add_neg) > 0 else []
-
-        tags_pos = list(set(tags_pos) - set(add_neg)) + add_pos
-        tags_neg = list(set(tags_neg) - set(add_pos)) + add_neg
-
-        return tags_pos, tags_neg
 
     @staticmethod
     def get_random_by_category(category:int=0, same_folder:int=0, prev_image_id:int=0,
@@ -259,7 +216,7 @@ class ImageMetadataController:
 
         tag_set_id = request.args.get('tag-set', default='all')
         tag_set_id = tag_set_id if tag_set_id != '' else 'all'
-        tags_pos, tags_neg = ImageMetadataController.get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
+        tags_pos, tags_neg = get_tags_by_set(tag_set_id, tags_pos, tags_neg, session=session)
 
         q = ImageMetadataController.get_query_imagemetadata(
             same_folder=same_folder, tags=(tags_pos, tags_neg),
@@ -268,14 +225,6 @@ class ImageMetadataController:
         row = q.first()
 
         return row
-
-    @staticmethod
-    def handle_tags(tag_str:str) -> ([str], [str]):
-        tags_all = tag_str.split(',')
-        tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
-        tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
-
-        return tags_pos, tags_neg
 
     @staticmethod
     def get_next_name_by_request(image_id:int, step:int, request:Request, session=None) -> 'ImageMetadata':
@@ -290,8 +239,8 @@ class ImageMetadataController:
         tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
         tags_pos, tags_neg = ([], []) if tags_str == "" else ImageMetadataController.handle_tags(tags_str)
 
-        tags_pos = ImageMetadataController.get_tags_by_names(tags_pos, session=session)
-        tags_neg = ImageMetadataController.get_tags_by_names(tags_neg, session=session)
+        tags_pos = get_tags_by_names(tags_pos, session=session)
+        tags_neg = get_tags_by_names(tags_neg, session=session)
 
         q = ImageMetadataController.get_query_imagemetadata(
             same_folder=same_folder, tags=(tags_pos, tags_neg),
@@ -486,7 +435,7 @@ class ImageMetadataController:
     def add_image_tags(image_ids: [int], tags_str: [str], session=None) -> int:
         if session is None:
             raise ValueError('No sql session')
-        tags = ImageMetadataController.get_tags_by_names(tags_str)
+        tags = get_tags_by_names(tags_str)
 
         for i in image_ids:
             [session.merge(ImageTag(image_id=i, tag_id=t)) for t in tags]
@@ -498,7 +447,7 @@ class ImageMetadataController:
     def remove_image_tags(image_ids: [int], tags_str: [str], session=None) -> int:
         if session is None:
             raise ValueError('No sql session')
-        tags = ImageMetadataController.get_tags_by_names(tags_str)
+        tags = get_tags_by_names(tags_str)
         q = session.query(ImageTag)\
             .filter(ImageTag.image_id.in_(image_ids))\
             .filter(ImageTag.tag_id.in_(tags))
@@ -534,22 +483,6 @@ class ImageMetadataController:
             session = Session()
         return session.query(Category).all()
 
-    @staticmethod
-    def get_all_tags(sort_by_name=False, session=None):
-        if session is None:
-            session = Session()
-
-        tags = session.query(Tag).all()
-        if sort_by_name:
-            tags.sort(key=(lambda t : t.tag))
-        return tags
-
-    @staticmethod
-    def get_tag_names(tags: [int], session=None):
-        if session is None:
-            session = Session()
-        found = session.query(Tag).filter(Tag.id.in_(tags)).all()
-        return [t.tag for t in found]
 
     @staticmethod
     def update_paths_containing_images(session=None, auto_commit=True):
