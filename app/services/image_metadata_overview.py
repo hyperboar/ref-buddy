@@ -1,13 +1,11 @@
 import os
-from app.models.models_lump import Session, ImageMetadata, Path
+from app.models.models_lump import ImageMetadata, Path
 
 
 class ImageMetadataOverview:
     @staticmethod
-    def get_overview(show_hidden:bool=False) -> [ImageMetadata]:
-        s = Session()
-
-        q = s.query(Path)
+    def get_overview(session, show_hidden:bool=False) -> [ImageMetadata]:
+        q = session.query(Path)
         if not show_hidden:
             q = q.filter(Path.hidden == 0)
         paths = q.order_by(Path.ord).all()
@@ -15,9 +13,9 @@ class ImageMetadataOverview:
         images = []
         for p in paths:
             if p.preview == 0:
-                im = s.query(ImageMetadata).filter(ImageMetadata.path_id == p.id).group_by(ImageMetadata.path_id).first()
+                im = session.query(ImageMetadata).filter(ImageMetadata.path_id == p.id).group_by(ImageMetadata.path_id).first()
             else:
-                im = s.get(ImageMetadata, p.preview)
+                im = session.get(ImageMetadata, p.preview)
             im.path_ord = p.ord
             im.hidden = p.hidden
             im.path_dir = os.path.dirname(im.path)

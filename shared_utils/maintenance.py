@@ -7,12 +7,14 @@ import shutil
 from PIL import Image
 from sqlalchemy import func, exists, text
 
+from app.models.database_util import DatabaseUtil
 from shared_utils.Env import Env
 from shared_utils.export_vid_gifs import ExportVidGifs
 from shared_utils.gifextract import process_animation
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl
-from app.models.models_lump import Session, ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
-    ImageColor, DatabaseUtil
+from app.models import Session, get_engine
+from app.models.models_lump import ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
+    ImageColor
 from shared_utils.nice_print import PrinterInterface
 
 
@@ -49,7 +51,7 @@ def get_db_info():
 
 
 def create_new_db():
-    DatabaseUtil.create_if_not_exist()
+    DatabaseUtil.create_if_not_exist(get_engine())
     # make_database_backup(True)
     # if not os.path.isfile(Env.DB_FILE):
     #     print(f'Database file '{Env.DB_FILE}' do not exist. Creating one.')

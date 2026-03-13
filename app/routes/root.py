@@ -19,7 +19,8 @@ async def json_overview():
     args = request.args
     hidden = int(args.get('hidden', default='0')) != 0
 
-    images = ImageMetadataOverview.get_overview(hidden)
+    session = Session()
+    images = ImageMetadataOverview.get_overview(session, hidden)
 
     result = []
     for im in images:
