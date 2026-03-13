@@ -3,12 +3,19 @@ from dotenv import load_dotenv
 
 ENV_DEFAULT = './config/default.env'
 ENV_USER = './config/user.env'
+ENV_TEST = './tests/config/testing.env'
+
+is_testing = os.environ.get('APP_ENV') == 'test'
+print("testing ", is_testing)
 
 # Load environment variables from default .env file
 load_dotenv(ENV_DEFAULT)
+
 # load environment overrides from user's .env file
-if os.path.exists(ENV_USER):
+if not is_testing and os.path.exists(ENV_USER):
     load_dotenv(ENV_USER, override=True)
+elif is_testing and os.path.exists(ENV_TEST):
+    load_dotenv(ENV_TEST, override=True)
 
 
 class Env:
