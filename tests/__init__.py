@@ -1,3 +1,3 @@
 import os
 
-os.environ['TESTING'] = 'True'
+os.environ['APP_ENV'] = 'test'

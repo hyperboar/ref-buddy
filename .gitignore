@@ -11,3 +11,6 @@ __pycache__/
 
 # database
 database.db
+
+# test data
+tests/test_app/assets/test_database.db
