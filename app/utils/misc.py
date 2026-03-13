@@ -4,7 +4,7 @@ from datetime import datetime
 from app.services.server_args_helpers import get_arg, Args
 
 
-def json_for_folder_view(images, session=None) -> str:
+def json_for_folder_view(images) -> str:
     data = {'images': []}
     for im in images:
         print(im.imported_at)

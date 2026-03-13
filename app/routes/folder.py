@@ -47,7 +47,7 @@ async def view_tags():
 
     paging = await get_paging_widget(params.page)
 
-    out = await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images, session), overview=overview, paging=paging)
+    out = await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images), overview=overview, paging=paging)
     session.close()
     return out
 
@@ -77,7 +77,7 @@ async def view_folder(path_id):
 
     paging = await get_paging_widget(params.page)
 
-    out = await render_template('tpl_view_folder.html', title='Folder', d_sort='filename', images=json_for_folder_view(images, session), overview=overview, paging=paging)
+    out = await render_template('tpl_view_folder.html', title='Folder', d_sort='filename', images=json_for_folder_view(images), overview=overview, paging=paging)
     session.close()
     return out
 
