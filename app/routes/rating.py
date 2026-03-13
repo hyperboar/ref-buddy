@@ -2,7 +2,7 @@ from typing import Annotated
 
 from quart import Blueprint, request, abort, render_template_string
 from app.services.image_metadata_controller import ImageMetadataController
-from app.models.models_lump import Session
+from app.models import Session
 
 from pydantic import BaseModel, Field, BeforeValidator
 

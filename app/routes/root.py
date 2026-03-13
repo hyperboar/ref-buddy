@@ -1,7 +1,8 @@
 from quart import Blueprint
 from quart import request, render_template, jsonify
 from app.services.image_metadata_controller import ImageMetadataController as ImageMetadataCtrl
-from app.models.models_lump import Session, ImageColor, ImageMetadata
+from app.models import Session
+from app.models.models_lump import ImageColor, ImageMetadata
 from app.services.server_args_helpers import get_arg, Args
 from app.services.image_metadata_overview import ImageMetadataOverview
 from app.services.server_widget_helpers import get_paging_widget

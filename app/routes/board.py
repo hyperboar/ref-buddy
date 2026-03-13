@@ -1,5 +1,6 @@
 from quart import Blueprint, request, abort, render_template, jsonify, url_for
-from app.models.models_lump import Session, BoardImage, Board
+from app.models import Session
+from app.models.models_lump import BoardImage, Board
 from app.services.server_args_helpers import get_arg, Args
 from app.services.server_widget_helpers import get_boards_all
 import json

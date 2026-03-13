@@ -1,66 +1,15 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import create_engine, Column, Integer, Text, ForeignKey, TIMESTAMP, TypeDecorator, Float
-from sqlalchemy.orm import relationship, declarative_base, object_session, sessionmaker
+from sqlalchemy import Column, Integer, Text, ForeignKey, TIMESTAMP, TypeDecorator, Float
+from sqlalchemy.orm import relationship, object_session, declarative_base
 
 from PIL import Image
 
 from shared_utils.Env import Env
 
-# Create an in-memory SQLite database
-engine = create_engine(f'sqlite:///{Env.DB_FILE}') # , echo=True
-Session = sessionmaker(bind=engine)
-
 # Create a base class for declarative models
 Base = declarative_base()
-
-
-class DatabaseUtil:
-    VERSION = "1.0"
-
-    @staticmethod
-    def create_if_not_exist():
-        if not (os.path.exists(Env.DB_FILE)):
-            Base.metadata.create_all(engine)
-            DatabaseUtil.add_predefined_data()
-
-    @staticmethod
-    def add_predefined_data():
-
-        session = Session()
-
-        # COLORS
-        color = Color(color_name='default')
-        session.add(color)
-
-        session.commit()
-
-        # TAGS
-        tag_tagme = Tag(id=1, tag='tagme', color_id=color.id)
-        tag_anim = Tag(tag='animated', color_id=color.id)
-        tag_vid = Tag(tag='video', color_id=color.id)
-        session.add(tag_tagme)
-        session.add(tag_anim)
-        session.add(tag_vid)
-
-        session.commit()
-
-        # CATEGORIES
-        category_1 = Category(category="everything")
-        session.add(category_1)
-
-        session.commit()
-
-        if not os.path.exists(os.path.join(Env.IMAGES_PATH, "everything")):
-            os.makedirs(os.path.join(Env.IMAGES_PATH, "everything"))
-
-        # TAG SET
-        tag_set = TagSet(set_name='All Images', set_alias='all')
-        session.add(tag_set)
-
-        session.commit()
-        session.close()
 
 class MyTIMESTAMP(TypeDecorator):
     """
@@ -425,24 +374,3 @@ class BoardImage(Base):
             .replace('rx', '"rx"')\
             .replace('ry', '"ry"')\
             .replace('s', '"s"')
-
-# Create the tables
-# Base.metadata.create_all(engine, checkfirst=True)
-
-if __name__ == '__main__':
-    print('main!')
-
-    session = Session()
-
-    paths = session.query(Path).all()
-
-    # for p in paths:
-    #     print(f'{p.id} {p.path}')
-
-    image_metadata = session.query(ImageMetadata).filter(
-        ImageMetadata.rating > 3,
-        ImageMetadata.fav == 1
-    ).limit(1).all()
-
-    for p in image_metadata:
-        print(f'{p.image_id} {p.path.path}/{p.filename} {",".join([t.tag for t in p.tags])}')

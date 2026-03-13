@@ -1,7 +1,8 @@
 from quart import render_template
 from markupsafe import Markup
 
-from app.models.models_lump import Board, Session
+from app.models import Session
+from app.models.models_lump import Board
 
 
 async def get_paging_widget(selected_page:int=0, span:int=3, skip=10) -> 'str':

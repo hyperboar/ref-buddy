@@ -1,7 +1,8 @@
 import os
 
 from quart import Blueprint, request, render_template_string, render_template, jsonify
-from app.models.models_lump import Session, ImageMetadata
+from app.models import Session
+from app.models.models_lump import ImageMetadata
 from app.models.view_filter_mapper import ViewFilterMapper
 from app.services.server_args_helpers import get_arg, Args
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl

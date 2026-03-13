@@ -1,6 +1,7 @@
 from typing_extensions import deprecated
 
-from app.models.models_lump import Tag, TagSet, Session
+from app.models import Session
+from app.models.models_lump import Tag, TagSet
 
 
 def get_tags_by_set(set_id:int|str, session:Session, add_pos:[str]=None, add_neg:[str]=None):

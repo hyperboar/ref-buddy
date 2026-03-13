@@ -3,7 +3,8 @@ from datetime import datetime
 from quart import Blueprint, render_template, jsonify, url_for, render_template_string
 from sqlalchemy import func
 
-from app.models.models_lump import Session, ImageMetadata, Discover
+from app.models import Session
+from app.models.models_lump import ImageMetadata, Discover
 
 routes_discover = Blueprint('routes_discover', __name__)
 
