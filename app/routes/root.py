@@ -12,11 +12,7 @@ routes_root = Blueprint('routes_root', __name__)
 
 @routes_root.route('/')
 async def overview():
-    args = request.args
-    hidden = int(args.get('hidden', default='0')) != 0
-
-    images = ImageMetadataOverview.get_overview(hidden)
-    return await render_template('tpl_view_index.html', images=images)
+    return await render_template('tpl_view_index.html')
 
 @routes_root.route('/json/overview')
 async def json_overview():
