@@ -228,7 +228,7 @@ class ApiImage
             })
     }
 
-        /**
+    /**
      * @param id single int id
      * @param tryPreload
      * @returns Promise<{image_data}>
