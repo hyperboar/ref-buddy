@@ -6,6 +6,7 @@ from typing import Callable
 from PIL import Image
 from quart import render_template_string, request, send_file, abort, render_template, Blueprint, send_from_directory, \
     current_app, jsonify, Request, Response
+from typing_extensions import deprecated
 
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from shared_utils.Env import Env
@@ -129,7 +130,7 @@ async def remove_image_color(image_id, color_id):
 
     return jsonify({'color_id': color_id})
 
-
+@deprecated('study-image handles video')
 @routes_image.route('/study-video/<int:item_id>')
 async def study_video(item_id):
     session = Session()
@@ -187,7 +188,7 @@ def select_file_cmd_os_specific(path:str) -> str:
         return f'C:\\Windows\\explorer.exe /root, "{get_path_os_specific(path)}", /select'
     return f'open -R "{path}"'
 
-
+@deprecated('study-image handles animations')
 @routes_image.route('/study-anim/<int:item_id>')
 async def study_animation(item_id):
     session = Session()
