@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker
 
 from shared_utils.Env import Env
 
+TRACK_SESSIONS = False
+
 class DatabaseEnvironment:
     _engine = None
     _session_maker = None
@@ -32,7 +34,8 @@ class DatabaseEnvironment:
     @classmethod
     def session(cls) -> sessionmaker:
         s = cls._session_maker()
-        cls.track_session(s)
+        if TRACK_SESSIONS:
+            cls.track_session(s)
         return s
 
     @classmethod
@@ -43,6 +46,9 @@ class DatabaseEnvironment:
 
     @classmethod
     def print_sessions_info(cls):
+        print('Tracked sessions:')
+        if not TRACK_SESSIONS:
+            print('   Sessions were not tracked')
         [print('   active:', item[0].is_active, ' from:', item[1]) for item in cls._sessions]
 
 # for the sake not modifying the rest of the code too much
