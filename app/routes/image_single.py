@@ -220,7 +220,7 @@ async def send_static_anim_frame_zip(image_id):
     metadata = session.get(ImageMetadata, image_id)
     fn = metadata.filename
     path = os.path.join(Env.TMP_PATH_GIF, fn + '.zip')
-    out = send_file(open(path, "rb"), mimetype=f'application/zip')
+    out = await send_file(path, mimetype=f'application/zip')
     session.close()
     return out
 
