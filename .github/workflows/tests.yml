@@ -3,11 +3,11 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  app-shared-tests:
+  shared-utils:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -20,11 +20,11 @@ jobs:
       - name: Run tests
         run: pytest -v tests/test_shared
 
-  app-server-tests:
+  app-server:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -37,11 +37,11 @@ jobs:
       - name: Run tests
         run: pytest -v tests/test_app
 
-  app-launcher-tests:
+  app-launcher:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -54,11 +54,11 @@ jobs:
       - name: Run tests
         run: pytest -v tests/test_launcher
 
-  app-tools-tests:
+  tools:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Python
         uses: actions/setup-python@v5
