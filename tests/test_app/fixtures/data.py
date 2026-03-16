@@ -1,5 +1,9 @@
+from app.models import get_engine
+from app.models.database_util import DatabaseUtil
 from app.models.models_lump import Path, ImageMetadata
 
+def clean_database():
+    DatabaseUtil.drop_and_create(get_engine())
 
 def add_4_images_1_path(session) -> None:
     session.merge(Path(id=1, path="everything"))

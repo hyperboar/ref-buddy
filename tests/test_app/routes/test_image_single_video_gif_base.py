@@ -1,7 +1,11 @@
 import pytest
 
-from tests.test_app.fixtures.data import add_4_images_1_path, add_1_mp4_1_path, add_1_gif_1_path
+from tests.test_app.fixtures.data import add_4_images_1_path, add_1_mp4_1_path, add_1_gif_1_path, clean_database
 
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_database():
+    clean_database()
 
 @pytest.fixture(scope="module", autouse=True)
 def add_images_for_all_tests(setup_database, session_real):

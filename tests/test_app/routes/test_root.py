@@ -1,5 +1,12 @@
 import pytest
 
+from tests.test_app.fixtures.data import clean_database
+
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_database():
+    clean_database()
+
 @pytest.mark.asyncio
 async def test_are_we_online(client):
     resp = await client.get('/')
