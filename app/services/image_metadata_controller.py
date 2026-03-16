@@ -222,7 +222,7 @@ class ImageMetadataController:
         q = ImageMetadataController.get_query_imagemetadata(
             same_folder=same_folder, tags=(tags_pos, tags_neg),
             image_id=image_id, min_rating=min_rating, session=session)
-        q = q.order_by(func.random())
+        q = q.filter(ImageMetadata.image_id != image_id).order_by(func.random())
         row = q.first()
 
         return row
