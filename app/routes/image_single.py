@@ -54,12 +54,9 @@ async def get_color_palette(image_id):
     session.close()
     return jsonify({'id': image_id, 'palette': out})
 
-@routes_image.route('/color-at-coord')
-async def get_color_at_coord():
-    image_id = get_arg(request.args, Args.image_id)
-    x_r = float(request.args.get('x'))
-    y_r = float(request.args.get('y'))
-
+@routes_image.route('/color-at-coord/<int:image_id>/<int:x_r>/<int:y_r>')
+@routes_image.route('/color-at-coord/<int:image_id>/<float:x_r>/<float:y_r>')
+async def get_color_at_coord(image_id, x_r, y_r):
     session = Session()
     im = session.get(ImageMetadata, image_id)
 

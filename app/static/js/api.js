@@ -170,7 +170,7 @@ class ApiImage
 
     static PickColorAt(id, x, y)
     {
-        return fetch(`/color-at-coord?image-id=${id}&x=${x}&y=${y}`)
+        return fetch(`/color-at-coord/${id}/${x}/${y}`)
             .then(r =>
                 {
                     if (!r.ok) throw new Error('Not ok')
