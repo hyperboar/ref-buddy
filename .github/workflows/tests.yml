@@ -3,8 +3,12 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  all-tests:
-    runs-on: ubuntu-latest
+  tests:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v6
@@ -12,7 +16,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
+          python-version: '3.10'
           cache: 'pip'
 
       - name: Install dependencies
