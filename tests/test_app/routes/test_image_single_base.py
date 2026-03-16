@@ -57,7 +57,7 @@ async def test_image_get_next_image_data(client):
     resp = await client.get('/next-image/fwd_rnd/1')
     assert resp.status_code == 200
     json = await resp.json
-    assert json['id'] != 1
+    assert json['id'] != 1, 'Random image should not repeat current image'
 
     resp = await client.get('/next-image/fwd_name/3')
     assert resp.status_code == 200
