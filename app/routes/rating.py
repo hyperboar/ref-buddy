@@ -4,13 +4,19 @@ from quart import Blueprint, request, abort, render_template_string
 from app.services.image_metadata_controller import ImageMetadataController
 from app.models import Session
 
-from pydantic import BaseModel, Field, BeforeValidator
+from pydantic import BaseModel, Field, BeforeValidator, model_validator
 
 routes_rating = Blueprint('routes_rating', __name__)
 
 class DtoImageRating(BaseModel):
     rating: Annotated[int, BeforeValidator(lambda v: v[0])] = Field(alias='r', default=0)
-    image_ids: list[int] = Field(alias='image-ids', default='')
+    image_ids: Annotated[list[int], BeforeValidator(lambda v: [int(i) for i in v[0].split(',')])] = Field(alias='image-ids')
+
+    @model_validator(mode='before')
+    def validate_args(values):
+        if 'image-ids' not in values:
+            abort(404, 'No images ids')
+        return values
 
 @routes_rating.route('/add-image-rating')
 async def add_image_rating():
@@ -59,7 +65,5 @@ async def get_image_rating():
     dto = DtoImageRating.model_validate(data)
 
     r = ImageMetadataController.get_image_rating(dto.image_ids[0])
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
 
     return await render_template_string(str(r))
