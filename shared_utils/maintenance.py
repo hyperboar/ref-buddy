@@ -1,7 +1,6 @@
 import json
 import math
 from datetime import datetime, timedelta
-import hashlib
 import os
 import shutil
 from PIL import Image
@@ -167,53 +166,6 @@ def generate_thumbs(start_at=None, session=None):
     if len(broken_files) > 0:
         print(f'{len(broken_files)} files had issues:')
         [print(p) for p in broken_files]
-
-
-def rehash_images(rehash_all:bool):
-    s = Session()
-
-    rows_max = s.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.image_hash.is_(None)).scalar() if rehash_all else s.query(func.count()).select_from(ImageMetadata).scalar()
-    limit = 500
-    offset = 0
-
-    q = s.query(ImageMetadata)
-
-    print(f'0% Hashing images...', end='')
-    while True:
-        if rehash_all:
-            images = q.offset(offset).limit(limit).all()
-        else:
-            images = q.filter(ImageMetadata.image_hash.is_(None)).limit(limit).all()
-
-        if len(images) == 0:
-            break
-
-        for image in images:
-            print(f'\r{int(offset/rows_max * 100)}% Hashing images {image.image_id} {image.path}', end='')
-            image_path = os.path.join(Env.IMAGES_PATH, image.path)
-
-            if not os.path.exists(image_path):
-                image.mark_as_lost(s, auto_commit=False)
-                continue
-
-            with open(image_path, 'rb') as file:
-                image_data = file.read()
-            image.image_hash = hashlib.sha1(image_data).hexdigest()
-            s.flush()
-
-        offset += limit
-
-    s.commit()
-
-    print('\r100% Hashing images... Done' + (' ' * 50))
-
-    # display duplicates
-    # SELECT pa.path, A.filename, A.lost, pb.path, B.filename
-    # FROM image_metadata AS A
-    # JOIN image_metadata AS B ON A.hash = B.hash
-    # JOIN paths as pa ON A.path = pa.id
-    # JOIN paths as pb ON B.path = pb.id
-    # WHERE A.path <> B.path AND A.lost <> 1 AND B.lost <> 1
 
 
 def assign_folder_tags(start_at=None, session=None, printer:PrinterInterface=None):
