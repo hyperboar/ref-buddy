@@ -1,6 +1,6 @@
 import os
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 
 
 def test_env_default_exist(config_path_default):

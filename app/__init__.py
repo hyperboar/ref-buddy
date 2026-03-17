@@ -10,7 +10,7 @@ import sys
 
 sys.path.append(os.getcwd())
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from shared_utils.maintenance import make_database_backup
 from app.routes.root import routes_root
 from app.routes.board import routes_board
@@ -24,7 +24,7 @@ from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
 
 from app.models import DatabaseEnvironment
-from shared_utils.Env import is_testing
+from shared_utils.env import is_testing
 
 DatabaseEnvironment.update_db_connection(is_testing)
 

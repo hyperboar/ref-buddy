@@ -4,7 +4,7 @@ import shutil
 
 from win32_setctime import setctime
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 
 TMP_RESTORE_METADATA_NAMES_LOG = 'log_restore_metadata_filenames.log'
 

@@ -2,7 +2,7 @@ import urllib
 
 from quart import Request
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from app.services.tags import get_tags_by_set, get_tag_names
 from app.models import Session
 from app.models.view_filter_dto import ViewFilterMultipleDTO

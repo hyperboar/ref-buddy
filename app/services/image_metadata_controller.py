@@ -4,7 +4,7 @@ from datetime import datetime
 
 from quart import Request
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from app.models import Session
 from app.models.models_lump import Category, ImageMetadata, Path, ImageTag, ImageTagAi
 from app.services.tags import get_tags_by_names, get_tags_by_set, handle_tags

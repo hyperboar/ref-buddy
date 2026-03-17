@@ -13,7 +13,7 @@ from shared_utils.export_vid_gifs import ExportVidGifs
 from launcher.image_metadata_importer import ImageMetadataImporter
 from shared_utils.maintenance import generate_thumbs, mark_all_lost, relink_lost_images, cleanup_lost_images, \
     cleanup_image_thumbs, cleanup_paths, cleanup_vacuum, gif_split, cleanup_lost_videos_preview
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from shared_utils.utils import Utils
 
 

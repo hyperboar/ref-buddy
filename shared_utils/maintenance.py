@@ -8,7 +8,7 @@ from PIL import Image
 from sqlalchemy import func, exists, text
 
 from app.models.database_util import DatabaseUtil
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from shared_utils.export_vid_gifs import ExportVidGifs
 from shared_utils.gifextract import process_animation
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl

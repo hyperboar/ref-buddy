@@ -5,7 +5,7 @@ import uuid
 
 import pytest
 
-from shared_utils.Env import Env, ENV_DEFAULT
+from shared_utils.env import Env, ENV_DEFAULT
 from tests import config_tmp_factory
 
 @pytest.fixture(scope="session", autouse=True)

@@ -4,7 +4,7 @@ from enum import Enum, auto
 from quart import abort
 from typing_extensions import deprecated
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 
 @deprecated("")
 class Args(Enum):

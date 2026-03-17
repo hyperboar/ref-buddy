@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship, object_session, declarative_base
 
 from PIL import Image
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 
 # Create a base class for declarative models
 Base = declarative_base()

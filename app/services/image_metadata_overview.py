@@ -29,7 +29,7 @@ class ImageMetadataOverview:
 if __name__ == "__main__":
     import os
     import sqlite3
-    from shared_utils.Env import Env
+    from shared_utils.env import Env
     db = sqlite3.connect(Env.DB_FILE)
     res = ImageMetadataOverview.get_overview(db)
 

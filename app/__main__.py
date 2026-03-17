@@ -1,7 +1,7 @@
 import uvicorn
 
 from app.utils.misc import is_debugging
-from shared_utils.Env import Env
+from shared_utils.env import Env
 
 if is_debugging():
     from app import app_quart

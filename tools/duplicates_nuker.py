@@ -9,7 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sqlalchemy import func, and_
 from sqlalchemy.orm import aliased
 
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from app.models.models_lump import Session, ImageMetadata, ImageDupe
 
 

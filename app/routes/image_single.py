@@ -9,7 +9,7 @@ from quart import render_template_string, request, send_file, abort, render_temp
 from typing_extensions import deprecated
 
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from app.models import Session
 from app.models.models_lump import ImageMetadata, Color, ImageColor, TagSet, Tag
 from app.services.server_args_helpers import get_arg, Args

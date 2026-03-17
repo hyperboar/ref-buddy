@@ -3,7 +3,7 @@ import shutil
 import tkinter as tk
 from tkinter import filedialog
 import subprocess
-from shared_utils.Env import Env
+from shared_utils.env import Env
 from PIL import Image
 
 
