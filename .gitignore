@@ -14,3 +14,7 @@ database.db
 
 # test data
 tests/test_app/assets/test_database.db
+
+# test coverage
+.coverage
+coverage.xml

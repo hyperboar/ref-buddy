@@ -1,0 +1,5 @@
+[run]
+omit =
+    tests/*
+    app/models/__main__.py
+    app/here_you_go_uvicorn.py
