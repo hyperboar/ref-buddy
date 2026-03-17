@@ -1,5 +1,10 @@
 [run]
 omit =
     tests/*
+    app/__main__.py
+    app/sql/*
+    app/static/*
+    app/templates/*
     app/models/__main__.py
     app/here_you_go_uvicorn.py
+    launcher/__main__.py
