@@ -92,8 +92,7 @@ def create_required_folders():
 
     if not os.path.exists(Env.IMAGES_PATH):
         os.makedirs(Env.IMAGES_PATH)
-        os.makedirs(os.path.join(Env.IMAGES_PATH, 'academic'))
-        os.makedirs(os.path.join(Env.IMAGES_PATH, 'other'))
+        os.makedirs(os.path.join(Env.IMAGES_PATH, 'everything'))
         with open(os.path.join(Env.IMAGES_PATH, 'put_images_into_sub_folders.txt'), 'w') as f:
             f.write('Images are supposed to be in sub folders.\nImages won\'t be imported when put into this directory!')
 
