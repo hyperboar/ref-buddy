@@ -20,7 +20,7 @@ routes_image = Blueprint('routes_image', __name__)
 @routes_image.route('/image/<int:image_id>')
 async def send_static_image(image_id):
     session = Session()
-    metadata = Ctrl.get_by_id(image_id, session=session)
+    metadata = Ctrl.get_or_404(session, image_id)
     ext = os.path.splitext(metadata.filename)[1]
     out = await send_file(metadata.path_abs, mimetype=f'image/{ext}')
     session.close()
@@ -28,29 +28,27 @@ async def send_static_image(image_id):
 
 @routes_image.route('/thumb/<path>')
 async def send_static_image_thumb(path):
+    if not os.path.exists(os.path.join(current_app.config['THUMB_STATIC'], path)):
+        abort(404, f'Thumb not found for {path}')
     return await send_from_directory(current_app.config['THUMB_STATIC'], path)
 
 @routes_image.route('/set-image-fav/<int:image_id>/<int:is_fav>')
 async def set_image_fav(image_id, is_fav):
-    r = Ctrl.set_image_fav(image_id, is_fav)
-    if not r:
-        abort(404, 'Something went wrong, fav not set, probably...')
+    session = Session()
+    r = Ctrl.set_image_fav(image_id, is_fav, session=session)
     return await render_template_string('yep')
 
 @routes_image.route('/set-image-last-viewed/<int:image_id>')
 async def set_image_last_viewed(image_id):
+    session = Session()
     now = datetime.now()
-
-    r = Ctrl.set_image_last_viewed(image_id, now)
-
-    if not r:
-        abort(404, 'Something went wrong, last viewed not updated, probably...')
+    r = Ctrl.set_image_last_viewed(session, image_id, now)
     return await render_template_string('yep')
 
 @routes_image.route('/color/palette/<int:image_id>')
 async def get_color_palette(image_id):
     session = Session()
-    im = session.get(ImageMetadata, image_id)
+    im = Ctrl.get_or_404(session, image_id)
     out = [{'id': ic.color.id, 'hex': ic.color.hex, 'x': ic.x, 'y': ic.y} for ic in im.colors]
     session.close()
     return jsonify({'id': image_id, 'palette': out})
@@ -59,7 +57,7 @@ async def get_color_palette(image_id):
 @routes_image.route('/color-at-coord/<int:image_id>/<float:x_r>/<float:y_r>')
 async def get_color_at_coord(image_id, x_r, y_r):
     session = Session()
-    im = session.get(ImageMetadata, image_id)
+    im = Ctrl.get_or_404(session, image_id)
 
     hex_color = '#000000'
     with Image.open(im.path_abs) as image:
@@ -134,10 +132,7 @@ async def remove_image_color(image_id, color_id):
 @routes_image.route('/study-video/<int:item_id>')
 async def study_video(item_id):
     session = Session()
-    metadata = session.get(ImageMetadata, item_id)
-
-    if metadata is None:
-        abort(404, f'Error: No video found with id "{item_id}"')
+    metadata = Ctrl.get_or_404(session, item_id)
 
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
     extra = metadata.extras[0].data
@@ -149,8 +144,7 @@ async def study_video(item_id):
 @routes_image.route('/video/<int:item_id>')
 async def send_video(item_id):
     session = Session()
-    metadata = session.get(ImageMetadata, item_id)
-
+    metadata = Ctrl.get_or_404(session, item_id)
     fn = metadata.path_abs.replace('.mp4.gif', '.mp4')
 
     out = await send_file(fn, mimetype=f'video/mp4')
@@ -194,9 +188,6 @@ async def study_animation(item_id):
     session = Session()
     metadata = session.get(ImageMetadata, item_id)
 
-    if metadata is None:
-        abort(404, f'Error: No animation found with id "{item_id}"')
-
     tag_sets = session.query(TagSet).order_by(TagSet.set_name).all()
     extra = '{}' #metadata.extras[0].data
 
@@ -208,19 +199,21 @@ async def study_animation(item_id):
 async def animation_info(item_id):
     session = Session()
 
-    im = session.get(ImageMetadata, item_id)
+    im = Ctrl.get_or_404(session, item_id)
     path = os.path.join(Env.TMP_PATH_GIF, im.filename + '.json')
     if not os.path.exists(path):
-        abort(404, f'Error: No animation info found with id "{item_id}"')
+        abort(404, f'No animation json info found with id "{item_id}"')
 
     return open(path, 'r').read() #json.load(open(path, 'r'))
 
 @routes_image.route('/anim-frames-zip/<int:image_id>')
 async def send_static_anim_frame_zip(image_id):
     session = Session()
-    metadata = session.get(ImageMetadata, image_id)
+    metadata = Ctrl.get_or_404(session, image_id)
     fn = metadata.filename
     path = os.path.join(Env.TMP_PATH_GIF, fn + '.zip')
+    if not os.path.exists(path):
+        abort(404, f'No animation zip found with id "{image_id}"')
     out = await send_file(path, mimetype=f'application/zip')
     session.close()
     return out
@@ -233,7 +226,7 @@ async def study_image(image_id):
 @routes_image.route('/image-info/<int:image_id>')
 async def image_info(image_id):
     session = Session()
-    image = session.get(ImageMetadata, image_id)
+    image = Ctrl.get_or_404(session, image_id)
     extra = image.extras[0].data if len(image.extras) > 0 else "{}"
     is_video = 1 if image.source_type_id == 2 or image.source_type_id == 3 else 0
     out = await render_template('json/tpl_image_info.json.html', image=image, extra=extra, is_video=is_video)
@@ -268,32 +261,33 @@ async def drawing_save():
 
 @routes_image.route('/next-image/<pattern>/<int:image_id>')
 async def next_image(pattern, image_id):
+    session = Session()
+    Ctrl.get_or_404(session, image_id)
+
     lookup = {}
-    lookup['_'] = lambda im_id: None
-    lookup['fwd_id']  = lambda im_id: im_id + 1
-    lookup['bck_id']  = lambda im_id: im_id - 1
-    lookup['fwd_rnd'] = lambda im_id: next_random_image_id(im_id, request)
-    lookup['fwd_name'] = lambda im_id: next_image_by_name(im_id, 1, request)
-    lookup['bck_name'] = lambda im_id: next_image_by_name(im_id, -1, request)
+    lookup['_'] = lambda im_id, s: None
+    lookup['fwd_id']  = lambda im_id, s : im_id + 1
+    lookup['bck_id']  = lambda im_id, s: im_id - 1
+    lookup['fwd_rnd'] = lambda im_id, s: next_random_image_id(im_id, request, s)
+    lookup['fwd_name'] = lambda im_id, s: next_image_by_name(im_id, 1, request, s)
+    lookup['bck_name'] = lambda im_id,s : next_image_by_name(im_id, -1, request, s)
 
-    next_im: Callable[[int], int | None] = lookup[pattern] if pattern in lookup else lookup['_']
+    next_im:Callable[[int, Session], int|None] = lookup[pattern] if pattern in lookup else lookup['_']
 
-    image_id = next_im(image_id)
+    image_id = next_im(image_id, session)
     return jsonify({'id': image_id, 'pattern': pattern}) if image_id else await abort(404)
 
-def next_random_image_id(image_id: int, req: Request) -> int:
-    session = Session()
+def next_random_image_id(image_id: int, req: Request, session:Session) -> int:
     metadata = Ctrl.get_random_by_request(request=req, image_id=image_id, session=session)
     if metadata is None:
-        raise Exception(f'No images found (id:{image_id})')
+        abort(404, f'{image_id} is not found')
     session.close()
     return metadata.image_id
 
-def next_image_by_name(image_id: int, step: int,  req: Request) -> int:
-    session = Session()
+def next_image_by_name(image_id: int, step: int,  req: Request, session:Session) -> int:
     metadata = Ctrl.get_next_name_by_request(image_id=image_id, step=step, request=req, session=session)
     if metadata is None:
-        raise Exception(f'No images found (id:{image_id})')
+        abort(404, f'{image_id} is not found')
     session.close()
     return metadata.image_id
 

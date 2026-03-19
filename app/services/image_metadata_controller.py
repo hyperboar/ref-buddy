@@ -88,9 +88,6 @@ class ImageMetadataController:
 
     @staticmethod
     def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
-        if session is None:
-            session = Session()
-
         q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
         q = q.filter(ImageMetadata.fav == 1).order_by(ImageMetadata.imported_at.desc())
         rows = q.offset(start).limit(count).all()
@@ -98,24 +95,12 @@ class ImageMetadataController:
 
     @staticmethod
     def get_last(count: int = 60, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
-        if session is None:
-            session = Session()
-
         q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
         rows = q.order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
         return rows
 
     @staticmethod
-    def get_by_id(image_id: int, session=None):
-        if session is None:
-            session = Session()
-        return session.get(ImageMetadata, image_id)
-
-    @staticmethod
     def get_by_path(path, session=None) -> 'ImageMetadata':
-        if session is None:
-            session = Session()
-
         filename = os.path.basename(path)
         rows = session.query(ImageMetadata).filter(ImageMetadata.filename == filename).all()
         if len(rows) == 0:
@@ -133,9 +118,6 @@ class ImageMetadataController:
 
     @staticmethod
     def get_all_by_path_id(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
-        if session is None:
-            session = Session()
-
         q = ImageMetadataController.get_query_imagemetadata(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
         rows = q.order_by(-ImageMetadata.rating,ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
 
@@ -148,9 +130,6 @@ class ImageMetadataController:
     @staticmethod
     # def get_all_by_path_id2(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
     def get_all_by_path_id2(params: ViewFilterMultipleDTO, session=None) -> '[ImageMetadata]':
-        if session is None:
-            session = Session()
-
         # q = ImageMetadataController.get_query_imagemetadata_new3(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
         q = ImageMetadataController.get_query_imagemetadata_new3(params, session=session)
         q = q.order_by(-ImageMetadata.rating,ImageMetadata.imported_at.desc(), ImageMetadata.filename)
@@ -166,9 +145,6 @@ class ImageMetadataController:
 
     @staticmethod
     def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
-        if session is None:
-            session = Session()
-
         q = ImageMetadataController.get_query_imagemetadata(tags=(tags_pos, tags_neg), session=session)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
@@ -179,9 +155,6 @@ class ImageMetadataController:
     @staticmethod
     # def get_all_by_tags_new2(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
     def get_all_by_tags_new2(params, session=None) -> '[ImageMetadata]':
-        if session is None:
-            session = Session()
-
         q = ImageMetadataController.get_query_imagemetadata_new2(params, session=session)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
@@ -192,9 +165,6 @@ class ImageMetadataController:
     @staticmethod
     # def get_all_by_tags_new2(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
     def get_all_by_tags_new3(params: ViewFilterMultipleDTO, session=None) -> '[ImageMetadata]':
-        if session is None:
-            session = Session()
-
         # q = ImageMetadataController.get_query_imagemetadata_new2(params, session=session)
         q = ImageMetadataController.get_query_imagemetadata_new3(params, session=session)
         q = q.order_by(ImageMetadata.imported_at.desc())
@@ -208,9 +178,6 @@ class ImageMetadataController:
     @staticmethod
     def get_random_by_category(category:int=0, same_folder:int=0, prev_image_id:int=0,
                                min_rating=0, tags:([int],[int])=([],[]), session=None) -> 'ImageMetadata':
-        if session is None:
-            session = Session()
-
         q = ImageMetadataController.get_query_imagemetadata(
             category=category, same_folder=same_folder, tags=tags,
             image_id=prev_image_id, min_rating=min_rating, session=session)
@@ -221,9 +188,6 @@ class ImageMetadataController:
 
     @staticmethod
     def get_random_by_request(image_id, request:Request, session=None) -> 'ImageMetadata':
-        if session is None:
-            raise Exception('No session')
-
         same_folder = request.args.get('sf', default=0, type=int)
         min_rating  = request.args.get('r', default=0, type=int)
 
@@ -244,9 +208,6 @@ class ImageMetadataController:
 
     @staticmethod
     def get_next_name_by_request(image_id:int, step:int, request:Request, session=None) -> 'ImageMetadata':
-        if session is None:
-            raise Exception('No session')
-
         same_folder = 1
         min_rating  = request.args.get('r', default=0, type=int)
 
@@ -409,31 +370,22 @@ class ImageMetadataController:
 
         return q
 
-    @staticmethod
-    def set_image_fav(image_id: int, is_fav: int, session=None):
-        if session is None:
-            session = Session()
-
-        im = session.get(ImageMetadata, image_id)
+    @classmethod
+    def set_image_fav(cls, image_id: int, is_fav: int, session=None):
+        im = cls.get_or_404(session, image_id)
         im.fav = is_fav
         session.commit()
         return im
 
-    @staticmethod
-    def add_image_rating(image_id: int=None, rating_add: int=None, session=None) -> int:
-        if session is None:
-            session = Session()
-
-        im = session.get(ImageMetadata, image_id)
+    @classmethod
+    def add_image_rating(cls, image_id: int=None, rating_add: int=None, session=None) -> int:
+        im = cls.get_or_404(session, image_id)
         im.rating += rating_add
         session.commit()
         return im.rating
 
     @staticmethod
     def add_mult_image_rating(image_ids:[int]=None, rating_add: int=None, session=None) -> int:
-        if session is None:
-            session = Session()
-
         for im_id in image_ids:
             im = session.get(ImageMetadata, im_id)
             im.rating += rating_add
@@ -442,16 +394,8 @@ class ImageMetadataController:
         return len(image_ids)
 
     @staticmethod
-    def get_image_rating(image_id):
-        s = Session()
-        im = s.get(ImageMetadata, image_id)
-        return im.rating
-
-    @staticmethod
     def add_image_tags(image_ids: [int], tags_str: [str], session=None) -> int:
-        if session is None:
-            raise ValueError('No sql session')
-        tags = get_tags_by_names(tags_str)
+        tags = get_tags_by_names(tags_str, session)
 
         for i in image_ids:
             [session.merge(ImageTag(image_id=i, tag_id=t)) for t in tags]
@@ -461,9 +405,7 @@ class ImageMetadataController:
 
     @staticmethod
     def remove_image_tags(image_ids: [int], tags_str: [str], session=None) -> int:
-        if session is None:
-            raise ValueError('No sql session')
-        tags = get_tags_by_names(tags_str)
+        tags = get_tags_by_names(tags_str, session)
         q = session.query(ImageTag)\
             .filter(ImageTag.image_id.in_(image_ids))\
             .filter(ImageTag.tag_id.in_(tags))
@@ -477,13 +419,12 @@ class ImageMetadataController:
         return len(rows_to_delete)
 
 
-    @staticmethod
-    def set_image_last_viewed(image_id: int, time: 'datetime'):
-        s = Session()
-        im = s.get(ImageMetadata, image_id)
+    @classmethod
+    def set_image_last_viewed(cls, session, image_id: int, time: 'datetime'):
+        im = cls.get_or_404(session, image_id)
         im.last_viewed = time
         im.count += 1
-        s.commit()
+        session.commit()
         return im
 
     @deprecated('not in use')
@@ -496,8 +437,6 @@ class ImageMetadataController:
 
     @staticmethod
     def get_categories(session=None):
-        if session is None:
-            session = Session()
         return session.query(Category).all()
 
 
