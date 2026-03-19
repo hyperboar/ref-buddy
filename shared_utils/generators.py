@@ -285,26 +285,6 @@ def assign_video_extra_data(start_at=None, is_force=False, session=None, printer
     printer.line(f'Assigning extra data for videos... Done', replace=True)
     printer.line('')
 
-def reassign_source_type_to_all():
-    session = Session()
-    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0, ImageMetadata.lost == 0)
-
-    offset = 0
-    limit = 500
-    while True:
-        images = q.offset(offset).limit(limit).all()
-        if len(images) == 0:
-            break
-
-        for im in images:
-            if not os.path.exists(im.path_abs):
-                im.lost = 1
-                continue
-            im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
-        session.flush()
-
-    session.commit()
-
 def gif_split(force_all=True, session=None):
     if session is None:
         session = Session()

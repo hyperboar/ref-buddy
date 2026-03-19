@@ -107,6 +107,25 @@ def cleanup_image_thumbs():
             print(f'Something went wrong. Tried to remove file with name "' + str(i) + '.jpg' + '".')
     print(f'\r{int(count / count_max * 100)}% Removing thumbs... Done')
 
+def reassign_source_type_to_all():
+    session = Session()
+    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0, ImageMetadata.lost == 0)
+
+    offset = 0
+    limit = 500
+    while True:
+        images = q.offset(offset).limit(limit).all()
+        if len(images) == 0:
+            break
+
+        for im in images:
+            if not os.path.exists(im.path_abs):
+                im.lost = 1
+                continue
+            im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
+        session.flush()
+
+    session.commit()
 
 def cleanup_lost_videos_preview():
     """Remove .mp4.gif files for lost videos"""

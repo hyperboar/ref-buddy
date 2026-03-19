@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from shared_utils.backup import make_database_backup
 from shared_utils.env import Env
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl
-from shared_utils.maintenance import assign_folder_tags, generate_thumbs, assign_animation_tags, \
+from shared_utils.generators import assign_folder_tags, generate_thumbs, assign_animation_tags, \
     assign_video_extra_data, gif_split
 from app.models import Session
 from app.models.models_lump import Path, ImageMetadata

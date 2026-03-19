@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from launcher.main_window import MainWindow
-from shared_utils.maintenance import create_required_folders, create_new_db
+from shared_utils.generators import create_required_folders, create_new_db
 
 
 create_required_folders()

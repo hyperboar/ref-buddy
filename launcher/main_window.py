@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 
 from shared_utils.env import Env
 from shared_utils.lost_images import mark_all_lost, relink_lost_images
-from shared_utils.maintenance import generate_thumbs, gif_split
+from shared_utils.generators import generate_thumbs, gif_split
 from shared_utils.cleanup import cleanup_lost_videos_preview, cleanup_image_thumbs, cleanup_lost_images, cleanup_paths, \
     cleanup_vacuum
 from shared_utils.export_frames_window import ExportFramesWindow
