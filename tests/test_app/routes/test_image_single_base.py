@@ -4,11 +4,8 @@ from tests.test_app.fixtures.data import add_4_images_1_path, clean_database
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_database(copy_assets_to_env_mod):
+def add_images_for_all_tests(config_path_testing_fresh_mod, copy_assets_to_env_mod, session_real):
     clean_database()
-
-@pytest.fixture(scope="module", autouse=True)
-def add_images_for_all_tests(setup_database, session_real):
     session = session_real()
     add_4_images_1_path(session)
     session.close()
@@ -28,7 +25,6 @@ async def test_image_ok(client, route):
     assert resp.status_code == 200
 
 @pytest.mark.parametrize('route', [
-    '/study-image/999',
     '/image/999',
     '/image-info/999',
     '/thumb/999.jpg',
@@ -36,6 +32,7 @@ async def test_image_ok(client, route):
     '/color-at-coord/999/0.0/0.0',
     '/set-image-fav/999/0',
     '/set-image-last-viewed/999',
+    '/next-image/_/1',
     '/next-image/_/999',
     '/next-image/fwd_id/999',
     '/next-image/bck_id/999',
@@ -50,9 +47,6 @@ async def test_image_not_exist(client, route):
 
 @pytest.mark.asyncio
 async def test_image_get_next_image_data(client):
-    resp = await client.get('/next-image/_/1')
-    assert resp.status_code == 404
-
     resp = await client.get('/next-image/fwd_id/1')
     assert resp.status_code == 200
     json = await resp.json
