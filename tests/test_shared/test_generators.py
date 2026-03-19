@@ -1,6 +1,6 @@
 import os
 
-from app import DatabaseEnvironment
+from app.models import DatabaseEnvironment
 from shared_utils.generators import create_new_db, create_required_folders
 from shared_utils.env import Env
 

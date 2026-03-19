@@ -22,11 +22,6 @@ from app.routes.image_remove import routes_image_remove
 from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
 
-from app.models import DatabaseEnvironment
-from shared_utils.env import is_testing
-
-DatabaseEnvironment.update_db_connection(is_testing)
-
 config = {
     # 'DEBUG': True,
     'CACHE_TYPE': 'SimpleCache',
