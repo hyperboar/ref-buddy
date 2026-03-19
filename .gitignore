@@ -13,7 +13,7 @@ __pycache__/
 database.db
 
 # test data
-tests/test_app/assets/test_database.db
+tests/tmp/*
 
 # test coverage
 .coverage
