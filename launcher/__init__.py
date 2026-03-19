@@ -8,6 +8,9 @@ def create_window(testing=False) -> MainWindow:
     create_new_db()
 
     root = tk.Tk()
+    if testing:
+        root.withdraw()
+
     launcher = MainWindow(master=root)
 
     if not testing:
