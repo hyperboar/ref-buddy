@@ -26,7 +26,10 @@ async def add_image_tag():
 
     if tags is [] or image_ids is []:
         abort(404, 'Empty tags or image ids')
+
     session = Session()
+    Ctrl.all_exist_or_404(session, image_ids)
+
     r = Ctrl.add_image_tags(image_ids, tags, session)
     session.close()
     if r is None:
@@ -46,6 +49,8 @@ async def remove_image_tag():
         abort(404, 'Empty tags or image ids')
 
     session = Session()
+    Ctrl.all_exist_or_404(session, image_ids)
+
     r = Ctrl.remove_image_tags(image_ids, tags, session)
     session.close()
     if r is None:
