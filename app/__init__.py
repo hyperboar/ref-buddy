@@ -11,15 +11,14 @@ import sys
 sys.path.append(os.getcwd())
 
 from shared_utils.env import Env
-from shared_utils.maintenance import make_database_backup
 from app.routes.root import routes_root
 from app.routes.board import routes_board
 from app.routes.discover import routes_discover
 from app.routes.folder import routes_folder
-from app.routes.image_remove import routes_image_remove
 from app.routes.misc import routes_misc
 from app.routes.rating import routes_rating
 from app.routes.image_single import routes_image
+from app.routes.image_remove import routes_image_remove
 from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
 
@@ -53,10 +52,6 @@ app_quart.register_blueprint(routes_tags_ai)
 app_quart.register_blueprint(routes_board)
 app_quart.register_blueprint(routes_discover)
 app_quart.register_blueprint(routes_misc)
-
-if not is_testing:
-    app_quart.before_request(make_database_backup)
-
 
 
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")

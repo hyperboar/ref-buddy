@@ -1,96 +1,37 @@
 import json
-import math
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
-import shutil
 from PIL import Image
-from sqlalchemy import func, exists, text
+from sqlalchemy import func
 
 from app.models.database_util import DatabaseUtil
 from shared_utils.env import Env
 from shared_utils.export_vid_gifs import ExportVidGifs
 from shared_utils.gifextract import process_animation
-from app.services.image_metadata_controller import ImageMetadataController as Ctrl
+
 from app.models import Session, get_engine
-from app.models.models_lump import ImageMetadata, Path, ImageTag, Tag, ImageExtra, BoardImage, Discover, \
-    ImageColor
+from app.models.models_lump import ImageMetadata, Path, ImageTag, Tag, ImageExtra
 from shared_utils.nice_print import PrinterInterface
-
-
-def get_db_info():
-    # if not os.path.isfile(Env.DB_FILE):
-    #     print(f'Database file '{Env.DB_FILE}' does not exist.')
-    #     return
-    #
-    # conn = sqlite3.connect(Env.DB_FILE)
-    # cursor = conn.cursor()
-    #
-    # table = Ctrl.TABLE_NAME
-    #
-    # # Execute the query to check if the table exists
-    # cursor.execute(f'SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'')
-    #
-    # # Get the result set and check if the table exists
-    # result = cursor.fetchone()
-    # if result:
-    #     print(f'The '{table}' table exists.')
-    # else:
-    #     print(f'The '{table}' table does not exist.')
-    #     cursor.close()
-    #     conn.close()
-    #     return
-    #
-    # cursor.execute(f'SELECT COUNT(*) FROM {ImageMetadata.TABLE_NAME}')
-    # num_images = cursor.fetchone()[0]
-    # print(f'Database file '{Env.DB_FILE}' exists and contains {num_images} images.')
-    #
-    # cursor.close()
-    # conn.close()
-    pass
 
 
 def create_new_db():
     DatabaseUtil.create_if_not_exist(get_engine())
-    # make_database_backup(True)
-    # if not os.path.isfile(Env.DB_FILE):
-    #     print(f'Database file '{Env.DB_FILE}' do not exist. Creating one.')
-    #
-    # conn = sqlite3.connect(Env.DB_FILE)
-    # cursor = conn.cursor()
-    #
-    # table = ImageMetadata.TABLE_NAME
-    #
-    # # Execute the query to check if the table exists
-    # cursor.execute(f'SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'')
-    # # Get the result set and check if the table exists
-    # result = cursor.fetchone()
-    # if result:
-    #     print(f'The '{table}' table exists. Removing.')
-    #     cursor.execute('DROP TABLE image_metadata')
-    #
-    # cursor.execute(ImageMetadata.get_table_schema())
-    # print(f'New database created at path '{Env.DB_FILE}'.')
-    #
-    # cursor.close()
-    # conn.close()
-    pass
 
 def create_required_folders():
-    if not os.path.exists(Env.DB_PATH):
-        os.makedirs(Env.DB_PATH)
-    if not os.path.exists(Env.DB_BACKUP_PATH):
-        os.makedirs(Env.DB_BACKUP_PATH)
-    if not os.path.exists(Env.DRAWING_PATH):
-        os.makedirs(Env.DRAWING_PATH)
-    if not os.path.exists(Env.THUMB_PATH):
-        os.makedirs(Env.THUMB_PATH)
-    if not os.path.exists(Env.TMP_PATH):
-        os.makedirs(Env.TMP_PATH)
-    if not os.path.exists(Env.TMP_PATH_GIF):
-        os.makedirs(Env.TMP_PATH_GIF)
+    required_paths = [
+        Env.DB_PATH,
+        Env.DB_BACKUP_PATH,
+        Env.DRAWING_PATH,
+        Env.THUMB_PATH,
+        Env.TMP_PATH,
+        Env.TMP_PATH_GIF,
+        Env.IMAGES_PATH
+    ]
+    for path in required_paths:
+        if not os.path.exists(path):
+            os.makedirs(path)
 
     if not os.path.exists(Env.IMAGES_PATH):
-        os.makedirs(Env.IMAGES_PATH)
         os.makedirs(os.path.join(Env.IMAGES_PATH, 'everything'))
         with open(os.path.join(Env.IMAGES_PATH, 'put_images_into_sub_folders.txt'), 'w') as f:
             f.write('Images are supposed to be in sub folders.\nImages won\'t be imported when put into this directory!')
@@ -279,421 +220,6 @@ def assign_animation_tags(start_at=None, session=None, printer:PrinterInterface=
     printer.line('Assigning tags to animations and videos... Done', replace=True)
     printer.line('')
 
-def remove_broken_video_gifs(session=None):
-    if session is None:
-        session = Session()
-
-    images = session.query(ImageMetadata).filter(ImageMetadata.filename.like('%.mp4.gif')).all()
-
-    broken_files = []
-
-    for im in images:
-        if not os.path.exists(im.path_abs):
-            broken_files.append((im.path_abs, ''))
-            continue
-
-        try:
-            with Image.open(im.path_abs) as image:
-                image.thumbnail((Env.THUMB_MAX_SIZE, Env.THUMB_MAX_SIZE))
-
-                # Save thumbnail as JPEG file
-                image.convert('RGB')
-        except:
-            thumb_filename = os.path.join(Env.THUMB_PATH, f'{im.image_id}.jpg')
-            broken_files.append((im.path_abs, thumb_filename))
-
-    print(f'Found {len(broken_files)} broken files. Removing gif previews and thumbs...', end='')
-
-    for fn, th in broken_files:
-        if os.path.exists(fn):
-            os.remove(fn)
-        if os.path.exists(th):
-            os.remove(th)
-
-    print(f'\rFound {len(broken_files)} broken files. Removing gif previews and thumbs... Done')
-
-def mark_all_lost():
-    print(f'Marking lost images...')
-    make_database_backup(marker='mark_lost', force=True)
-
-    s = Session()
-
-    rows_max = s.query(func.count()).select_from(ImageMetadata).scalar()
-    limit = 500
-    offset = 0
-
-    q = s.query(ImageMetadata)
-
-    lost = []
-    while True:
-        images = q.limit(limit).offset(offset).all()
-        offset += limit
-
-        if len(images) == 0:
-            break
-
-        for image in images:
-            image_path = image.path_abs
-
-            if image.lost == 1:
-                continue
-
-            # video missing
-            # removing trailing .gif to get real video path
-            if image.is_video and not os.path.exists(image_path[:-4]):
-                image.mark_as_lost(session=s, auto_commit=False)
-                lost.append(image_path)
-            # image missing
-            elif not os.path.exists(image_path):
-                image.mark_as_lost(session=s, auto_commit=False)
-                lost.append(image_path)
-        print(f'\r{int(offset / rows_max * 100)}%... Searching for lost images. Discovered {len(lost)}', end='')
-
-    print(f'\n{len(lost)} lost images')
-    [print(p) for p in lost]
-
-    s.commit()
-    s.close()
-
-    print(f'Marking lost images... Done')
-
-def cleanup_lost_images():
-    make_database_backup(marker='cleanup_lost', force=True)
-
-    print(f'Removing records about images that are lost...')
-
-    session = Session()
-
-    print(f'Marking lost for removal...', end='', flush=True)
-
-    images = session.query(ImageMetadata).filter(ImageMetadata.lost == 1)
-    ids = []
-    for image in images:
-        image.mark_removed(session=session, auto_commit=False)
-        ids.append(image.image_id)
-
-    session.commit()
-
-    print(f'\rMarking lost for removal... Done', flush=True)
-
-    print(f'Removing records about images that are lost... {len(ids)} images to remove)... ', end='', flush=True)
-    count = remove_permanent(ids, session=session)
-    session.close()
-
-    print(f'\rRemoving records about images that are lost... Done. ({count} records removed)', flush=True)
-
-def cleanup_image_thumbs():
-    print(f'Cleaning up thumbs.')
-    print(f'Collecting thumbs info...', end='', flush=True)
-
-    ids = [int(os.path.splitext(f)[0]) for f in os.listdir(Env.THUMB_PATH) if os.path.isfile(os.path.join(Env.THUMB_PATH, f))]
-    print(f'\rCollecting thumbs info... Done')
-
-    s = Session()
-    ids_to_remove = []
-    count_max = len(ids)
-    count = 0
-    for i in ids:
-        count += 1
-        print(f'\r{int(count/count_max*100)}% Searching in database...', end='', flush=True)
-        if s.query(exists().where(ImageMetadata.image_id == i)).scalar():
-            continue
-        ids_to_remove.append(i)
-
-    print(f'\r{int(count / count_max * 100)}% Searching in database... Done')
-    print(f'Appending images marked as "lost"...', end='', flush=True)
-
-    lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
-    ids_to_remove += [l.image_id for l in lost if l.image_id in ids and l.image_id]
-    print(f'\rAppending images marked as "lost"... Done')
-
-    ids_to_remove = list(set(ids_to_remove))
-
-    if len(ids_to_remove) == 0:
-        print(f'Thumbs are already in a good shape! Nothing to delete!')
-        return
-
-    count_max = len(ids)
-    count = 0
-    for i in ids_to_remove:
-        count += 1
-        print(f'\r{int(count/count_max*100)}% Removing thumbs...', end='')
-        try:
-            os.remove(os.path.join(Env.THUMB_PATH, str(i) + '.jpg'))
-        except FileNotFoundError:
-            print(f'Something went wrong. Tried to remove file with name "' + str(i) + '.jpg' + '".')
-    print(f'\r{int(count / count_max * 100)}% Removing thumbs... Done')
-
-
-def cleanup_lost_videos_preview():
-    """Remove .mp4.gif files for lost videos"""
-    s = Session()
-
-    lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
-
-    print('Removing video previews...')
-
-    for img in lost:
-        if img.is_video and os.path.exists(img.path_abs):
-            path = img.path_abs
-            if not os.path.exists(path):
-                continue
-            print(f'Removing {path}...', end='')
-            os.remove(path)
-            print(f'\rRemoving {path}... Done')
-
-    print('Removing video previews... Done')
-
-    s.close()
-
-def relink_lost_images():
-    """Try to relink by unique name"""
-    make_database_backup(marker='relink_imgs', force=True)
-
-    s = Session()
-
-    lost = s.query(ImageMetadata).filter(ImageMetadata.lost == 1).all()
-    found = []
-    count = 0
-
-    print('Trying to relink lost files.')
-
-    print('Looking images that were mark lost but still exist...', end='')
-    for img in lost:
-        if not os.path.exists(img.path_abs):
-            continue
-        found.append((img.path_abs, "same"))
-        lost.remove(img)
-        count += 1
-    print(f'\rLooking images that were mark lost but still exist... Done ({count})')
-
-    s.flush()
-
-    print('Looking for png to jpg conversion...', end='')
-    count = 0
-    png_to_jpg = [img for img in lost if img.filename.endswith('.png')]
-    for img in png_to_jpg:
-        # check if jpg version exists
-        path = img.path_abs[:-3] + 'jpg'
-        if not os.path.exists(path) or not os.path.isfile(path):
-            continue
-        # check if jpg not imported already
-        fname = img.filename[:-3] + 'jpg'
-        if s.query(ImageMetadata).filter(ImageMetadata.filename==fname, ImageMetadata.path_id == img.path_id).first() is not None:
-            continue
-
-        img.filename = fname
-        img.mark_restored(session=s, auto_commit=False)
-        found.append(("png",path))
-        lost.remove(img)
-        count += 1
-
-    print(f'\rLooking for png to jpg conversion... Done ({count})')
-
-    s.flush()
-
-    print('Looking for folder change...')
-    print('Collecting file names...', end='')
-    Ctrl.update_paths_containing_images(session=s, auto_commit=False)
-    files = {}
-    paths = s.query(Path).all()
-    count_max = len(paths)
-    count = 0
-    for p in paths:
-        count += 1
-        full_path = os.path.join(Env.IMAGES_PATH, p.path)
-        if not os.path.exists(full_path):
-            continue
-        files[p.id] = [f for f in os.listdir(full_path) if os.path.isfile(os.path.join(full_path, f))]
-        print(f'\r{int(count / count_max * 100)}% Collecting file names...', end='')
-
-    print('\rCollecting file names... Done')
-
-    count_max = len(lost)
-    count = 0
-    for l in lost:
-        count += 1
-        print(f'\r{int(count/count_max * 100)}% Searching for image lost from {l.path}', end='')
-
-        names = s.query(ImageMetadata).filter(ImageMetadata.filename == l.filename).all()
-        if len(names) > 1:
-            # print(f'\nIN DATABASE More than 1 file for name {l.filename}. Found in:')
-            # [print(f'{n.image_id}: {n.path}') for n in names]
-            continue
-
-        new_paths = [folder_id for folder_id in files if l.filename in files[folder_id]]
-
-        if len(new_paths) == 1:
-            old_path = l.path
-            new_path = list(filter(lambda p: p.id == new_paths[0], paths))[0].path
-            l.path_id = new_paths[0]
-            l.lost = 0
-            found.append((old_path, new_path))
-        elif len(new_paths) > 1:
-            print(f'\nMore than 1 file for name {l.filename}. Found in:')
-            [print(f'{p}') for p in list(filter(lambda p: p.id in new_paths, paths))]
-
-
-    print(f'\n')
-    print(f'Currently lost images {len(lost) - len(found)}. Relinked {len(found)} images.')
-    [print(f'Linked "{p[0]}" -> "{p[1]}"') for p in found]
-
-    s.commit()
-    s.close()
-
-def remove_permanent(image_ids, session=None):
-    auto_close = False
-    if session is None:
-        session = Session()
-        auto_close = True
-
-    images = (session.query(ImageMetadata)
-              .filter(ImageMetadata.image_id.in_(image_ids))
-              .filter(ImageMetadata.removed == 1)
-              .all())
-
-    if len(images) > 0:
-        make_database_backup('before_perm_remove')
-
-    count = 0
-    for im in images:
-        try:
-            paths = [im.path_abs, os.path.join(Env.THUMB_PATH, str(im.image_id) + '.jpg')]
-            if im.source_type_id == 3:  # video
-                paths.append(im.path_abs[:-4])
-            [os.remove(p) for p in paths if os.path.exists(p)]
-
-            count += len(
-                [session.delete(item) for item in session.query(BoardImage).filter(BoardImage.image_id == im.image_id)])
-            count += len(
-                [session.delete(item) for item in session.query(Discover).filter(Discover.image_id == im.image_id)])
-            count += len(
-                [session.delete(item) for item in session.query(ImageColor).filter(ImageColor.image_id == im.image_id)])
-            count += len(
-                [session.delete(item) for item in session.query(ImageExtra).filter(ImageExtra.image_id == im.image_id)])
-            count += len(
-                [session.delete(item) for item in session.query(ImageTag).filter(ImageTag.image_id == im.image_id)])
-            session.delete(im)
-            count += 1
-            session.flush()
-        except Exception as e:
-            print(e)
-            raise e
-
-    session.commit()
-
-    cleanup_paths(session)
-
-    if auto_close:
-        session.close()
-
-    return count
-
-def make_database_backup(marker:str='',force:bool=False):
-    db_file = os.path.splitext(Env.DB_NAME)
-    db_file_name = f'{db_file[0]}_'
-    db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
-    time_fmt = '%Y-%m-%d_%H-%M'
-    backup_interval = 60 * Env.DB_BACKUP_INTERVAL # seconds
-    path = Env.DB_BACKUP_PATH
-
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-    if not os.path.exists(Env.DB_FILE):
-        print(f'No existing database found.')
-        return
-
-    backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
-    start_pos = len(db_file_name)
-    end_pos = start_pos + len(datetime.now().strftime(time_fmt))
-    dates = [f[start_pos:end_pos] for f in backup_files]
-    dates = sorted([datetime.strptime(d, time_fmt) for d in dates])
-
-    if not force and \
-            (len(dates) > 0 and datetime.now().timestamp() < (dates[-1].timestamp() + backup_interval)):
-        return
-
-    print(f'Backing up database. Found {len(backup_files)} backups, making new one.')
-
-    if marker != '':
-        marker = f'_{marker.lower().replace(" ", "_")}'
-    backup_name = f'{db_file_name}{datetime.now().strftime(time_fmt)}{marker}{db_file_ext}'
-    src = Env.DB_FILE
-    dst = os.path.join(path, backup_name)
-    shutil.copy(src, dst)
-
-    backup_files += [backup_name]
-    if len(backup_files) < Env.DB_BACKUP_MAX_COUNT:
-        return
-
-    backups = [(os.path.join(path, f), os.path.getctime(os.path.join(path, f))) for f in backup_files]
-    backups = sorted(backups, key=lambda b: b[1])
-    # print(f'{len(backups)} -> trim {len(backups) - Env.DB_BACKUP_MAX_COUNT}')
-    # [print(p) for p in backups[:len(backups) - Env.DB_BACKUP_MAX_COUNT]]
-    to_remove = backups[:len(backups) - Env.DB_BACKUP_MAX_COUNT]
-    [os.remove(p[0]) for p in to_remove]
-
-def reassign_source_type_to_all():
-    session = Session()
-    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0, ImageMetadata.lost == 0)
-
-    offset = 0
-    limit = 500
-    while True:
-        images = q.offset(offset).limit(limit).all()
-        if len(images) == 0:
-            break
-
-        for im in images:
-            if not os.path.exists(im.path_abs):
-                im.lost = 1
-                continue
-            im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
-        session.flush()
-
-    session.commit()
-
-def collapse_import_times():
-    session = Session()
-    q = session.query(ImageMetadata)
-
-    current_im = q.order_by(ImageMetadata.imported_at).first()
-    interval = 5 * 60
-
-    max_i = session.query(func.count()).select_from(ImageMetadata).scalar()
-    i = 0
-
-    make_database_backup('before_collapse_import_times' ,True)
-
-    print(f'{i} checks passed. Last timestamp was {current_im.imported_at}', end='')
-    while i < max_i:
-        i += 1
-        cur_time = current_im.imported_at
-        cur_time_ts = cur_time.timestamp()
-        start_time = cur_time - timedelta(seconds=1)
-        end_time = cur_time   + timedelta(seconds=interval)
-        images = q.filter(ImageMetadata.imported_at.between(start_time,end_time)).all()
-        for im in images:
-            if math.isclose(im.imported_at.timestamp(), cur_time_ts, rel_tol=1e-4, abs_tol=1e-4):
-                continue
-            im.imported_at = cur_time
-
-        session.commit()
-
-        print(f'\r{i} checks passed. Last timestamp was {cur_time}', end='')
-
-        current_im = q.filter(ImageMetadata.imported_at > cur_time).order_by(ImageMetadata.imported_at).first()
-
-        if current_im is None:
-            break
-
-    print(f'\r{i} checks passed. Last timestamp was {cur_time}... Done')
-
-    session.close()
-
-    make_database_backup('after_collapse_import_times', True)
-
 def assign_video_extra_data(start_at=None, is_force=False, session=None, printer:PrinterInterface=None):
     if session is None:
         session = Session()
@@ -759,35 +285,25 @@ def assign_video_extra_data(start_at=None, is_force=False, session=None, printer
     printer.line(f'Assigning extra data for videos... Done', replace=True)
     printer.line('')
 
-def cleanup_paths(session=None):
-    print(f'Cleanup paths...', end='', flush=True)
-    if session is None:
-        session = Session()
+def reassign_source_type_to_all():
+    session = Session()
+    q = session.query(ImageMetadata).filter(ImageMetadata.source_type_id == 0, ImageMetadata.lost == 0)
 
-    paths = session.query(Path).all()
-    for p in paths:
-        im = session.get(ImageMetadata, p.preview)
-        if im is not None: continue
-        p.preview = 0
-    session.flush()
+    offset = 0
+    limit = 500
+    while True:
+        images = q.offset(offset).limit(limit).all()
+        if len(images) == 0:
+            break
 
-    empty_paths = [p for p in paths if 0 == session.query(func.count()).select_from(ImageMetadata).filter(ImageMetadata.path_id == p.id).scalar()]
-
-    for p in empty_paths:
-        [session.delete(tag) for tag in p.tags]
-        session.delete(p)
+        for im in images:
+            if not os.path.exists(im.path_abs):
+                im.lost = 1
+                continue
+            im.source_type_id = ImageMetadata.source_type_by_path(im.path_abs)
         session.flush()
 
     session.commit()
-    print(f'\rCleanup paths... Done', flush=True)
-
-def cleanup_vacuum(session=None):
-    print(f'Vacuuming database...', end='', flush=True)
-    if session is None:
-        session = Session()
-
-    session.execute(text("VACUUM"))
-    print(f'\rVacuuming database... Done', flush=True)
 
 def gif_split(force_all=True, session=None):
     if session is None:

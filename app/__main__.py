@@ -1,7 +1,12 @@
 import uvicorn
 
 from app.utils.misc import is_debugging
-from shared_utils.env import Env
+from shared_utils.env import Env, is_testing
+
+if not is_testing:
+    from app import app_quart
+    from shared_utils.backup import make_database_backup
+    app_quart.before_request(make_database_backup)
 
 if is_debugging():
     from app import app_quart

@@ -1,9 +1,9 @@
 from quart import Blueprint, jsonify, request, abort, render_template
 
-from shared_utils.maintenance import remove_permanent
 from app.models import Session
 from app.models.models_lump import ImageMetadata
 from app.utils.misc import json_for_folder_view
+from shared_utils.cleanup import cleanup_paths, remove_permanent
 
 routes_image_remove = Blueprint('routes_image_remove', __name__)
 
@@ -74,5 +74,6 @@ async def permanent_remove():
     image_ids = json['image_ids']
 
     count = remove_permanent(image_ids, session = session)
+    cleanup_paths(session)
     return jsonify({'msg': 'ok', 'count': count})
 
