@@ -5,6 +5,7 @@ import uuid
 
 import pytest
 
+from app import DatabaseEnvironment
 from shared_utils.env import Env, ENV_DEFAULT
 from tests import config_tmp_factory
 
@@ -59,6 +60,7 @@ def config_path_testing_fresh_func():
     new_source = source.replace('__', '_' + marker)
     config_tmp_factory(source, new_source, marker)
     Env.apply_config(new_source)
+    DatabaseEnvironment.update_db_connection(True)
 
     yield new_source
 
@@ -71,6 +73,7 @@ def config_path_testing_fresh_mod():
     new_source = source.replace('__', '_' + marker)
     config_tmp_factory(source, new_source, marker)
     Env.apply_config(new_source)
+    DatabaseEnvironment.update_db_connection(True)
 
     yield new_source
 
