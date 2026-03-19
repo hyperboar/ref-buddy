@@ -4,7 +4,7 @@ from tests.test_app.fixtures.data import add_4_images_1_path, add_1_mp4_1_path, 
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_database():
+def setup_database(copy_assets_to_env_mod):
     clean_database()
 
 @pytest.fixture(scope="module", autouse=True)
@@ -14,6 +14,16 @@ def add_images_for_all_tests(setup_database, session_real):
     add_1_mp4_1_path(session)
     add_1_gif_1_path(session)
     session.close()
+
+@pytest.mark.parametrize('route', [
+    '/video/999',
+    '/anim-info/999',
+    '/anim-frames-zip/999'
+])
+@pytest.mark.asyncio
+async def test_video_anim_not_exist(client, route):
+    resp = await client.get(route)
+    assert resp.status_code == 404
 
 @pytest.mark.asyncio
 async def test_image_get_html(client):

@@ -13,6 +13,18 @@ def add_images_for_each_test(setup_database, session_real):
     add_4_images_1_path(session)
     session.close()
 
+@pytest.mark.parametrize('route', [
+    '/get-image-rating?image-ids=999',
+    '/add-image-rating?image-ids=999&r=0',
+    '/add-image-rating?image-ids=999&r=0',
+    '/add-mult-image-rating?image-ids=999,998&r=1',
+    '/add-folder-rating?image-ids=999&r=1'
+])
+@pytest.mark.asyncio
+async def test_image_not_exist(client, route):
+    resp = await client.get(route)
+    assert resp.status_code == 404
+
 @pytest.mark.asyncio
 async def test_image_get_single_rating(client):
     resp = await client.get('/get-image-rating?image-ids=1')
@@ -75,7 +87,6 @@ async def test_image_change_mult_rating(client):
     resp = await client.get('/get-image-rating?image-ids=2')
     text = await resp.data
     assert text == b'1'
-
 
 @pytest.mark.asyncio
 async def test_image_change_folder_rating(client):

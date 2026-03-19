@@ -4,7 +4,7 @@ from tests.test_app.fixtures.data import add_4_images_1_path, clean_database
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_database():
+def setup_database(copy_assets_to_env_mod):
     clean_database()
 
 @pytest.fixture(scope="module", autouse=True)
@@ -13,35 +13,40 @@ def add_images_for_all_tests(setup_database, session_real):
     add_4_images_1_path(session)
     session.close()
 
+@pytest.mark.parametrize('route', [
+    '/study-image/1',
+    '/image/1',
+    '/image-info/1',
+    '/thumb/1.jpg',
+    '/color/palette/1',
+    '/color-at-coord/1/0.0/0.0',
+    '/set-image-last-viewed/1'
+])
 @pytest.mark.asyncio
-async def test_image_get_html(client):
-    resp = await client.get('/study-image/1')
+async def test_image_ok(client, route):
+    resp = await client.get(route)
     assert resp.status_code == 200
 
+@pytest.mark.parametrize('route', [
+    '/study-image/999',
+    '/image/999',
+    '/image-info/999',
+    '/thumb/999.jpg',
+    '/color/palette/999',
+    '/color-at-coord/999/0.0/0.0',
+    '/set-image-fav/999/0',
+    '/set-image-last-viewed/999',
+    '/next-image/_/999',
+    '/next-image/fwd_id/999',
+    '/next-image/bck_id/999',
+    '/next-image/fwd_rnd/999',
+    '/next-image/fwd_name/999',
+    '/next-image/bck_name/999'
+])
 @pytest.mark.asyncio
-async def test_image_get_image_file(client):
-    resp = await client.get('/image/1')
-    assert resp.status_code == 200
-
-@pytest.mark.asyncio
-async def test_image_get_data(client):
-    resp = await client.get('/image-info/1')
-    assert resp.status_code == 200
-
-@pytest.mark.asyncio
-async def test_image_get_thumb(client):
-    resp = await client.get('/thumb/1.jpg')
-    assert resp.status_code == 200
-
-@pytest.mark.asyncio
-async def test_image_get_palette(client):
-    resp = await client.get('/color/palette/1')
-    assert resp.status_code == 200
-
-@pytest.mark.asyncio
-async def test_image_get_color_at_coord(client):
-    resp = await client.get('/color-at-coord/1/0.0/0.0')
-    assert resp.status_code == 200
+async def test_image_not_exist(client, route):
+    resp = await client.get(route)
+    assert resp.status_code == 404
 
 @pytest.mark.asyncio
 async def test_image_get_next_image_data(client):
@@ -72,11 +77,6 @@ async def test_image_get_next_image_data(client):
     assert resp.status_code == 200
     json = await resp.json
     assert json['id'] == 3
-
-@pytest.mark.asyncio
-async def test_image_mark_last_study(client):
-    resp = await client.get('/set-image-last-viewed/1')
-    assert resp.status_code == 200
 
 @pytest.mark.asyncio
 async def test_image_fav(client):
