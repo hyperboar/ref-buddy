@@ -1,6 +1,7 @@
 from app.models import get_engine
 from app.models.database_util import DatabaseUtil
-from app.models.models_lump import Path, ImageMetadata
+from app.models.models_lump import Path, ImageMetadata, Tag
+
 
 def clean_database():
     DatabaseUtil.drop_and_create(get_engine())
@@ -18,6 +19,12 @@ def add_4_images_1_path(session) -> None:
     new_image(session, 2, "Lenna_2.jpg")
     new_image(session, 3, "Lenna_3.jpg")
     new_image(session, 4, "Lenna_4.jpg")
+    session.commit()
+
+def add_2_tags(session) -> None:
+    new_tag = lambda s, imid, tag: s.add(Tag(id=imid, tag=tag))
+    new_tag(session, 1, "tag_1")
+    new_tag(session, 2, "tag_2")
     session.commit()
 
 def add_1_mp4_1_path(session) -> None:
