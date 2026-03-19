@@ -2,7 +2,8 @@ import os
 import urllib
 from datetime import datetime
 
-from quart import Request
+from quart import Request, abort
+from typing_extensions import deprecated
 
 from shared_utils.env import Env
 from app.models import Session
@@ -70,6 +71,20 @@ class ImageMetadataController:
     # endregion CRUD
 
     # region Convenience
+
+    @staticmethod
+    def get_or_404(session:Session, image_id:int) -> ImageMetadata|None:
+        img = session.get(ImageMetadata, image_id)
+        if img is None:
+            abort(404, f'Image not found for {image_id}')
+        return img
+
+    @staticmethod
+    def all_exist_or_404(session:Session, image_ids:[int]) -> ImageMetadata|None:
+        count = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).count()
+        if count < len(image_ids):
+            abort(404, f'Some images not found for {image_ids}')
+        return True
 
     @staticmethod
     def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
@@ -471,6 +486,7 @@ class ImageMetadataController:
         s.commit()
         return im
 
+    @deprecated('not in use')
     @staticmethod
     def get_id_by_path(path: str) -> int:
         img = ImageMetadataController.get_by_path(path)
