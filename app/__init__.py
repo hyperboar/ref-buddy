@@ -22,32 +22,34 @@ from app.routes.image_remove import routes_image_remove
 from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
 
-config = {
-    # 'DEBUG': True,
-    'CACHE_TYPE': 'SimpleCache',
-    'CACHE_DEFAULT_TIMEOUT': 300,
-    'THUMB_STATIC': Env.THUMB_PATH
-}
+def create_app():
+    config = {
+        # 'DEBUG': True,
+        'CACHE_TYPE': 'SimpleCache',
+        'CACHE_DEFAULT_TIMEOUT': 300,
+        'THUMB_STATIC': Env.THUMB_PATH
+    }
 
-template_dir = 'templates'
-static_dir = 'static'
+    template_dir = 'templates'
+    static_dir = 'static'
 
-app_quart = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
-app_quart.config.from_mapping(config)
+    app_quart = Quart(__name__, static_url_path='/static', static_folder=static_dir, template_folder=template_dir)
+    app_quart.config.from_mapping(config)
 
-cache = Cache(app_quart)
+    cache = Cache(app_quart)
 
-app_quart.register_blueprint(routes_root)
-app_quart.register_blueprint(routes_image)
-app_quart.register_blueprint(routes_image_remove)
-app_quart.register_blueprint(routes_folder)
-app_quart.register_blueprint(routes_rating)
-app_quart.register_blueprint(routes_tags)
-app_quart.register_blueprint(routes_tags_ai)
-app_quart.register_blueprint(routes_board)
-app_quart.register_blueprint(routes_discover)
-app_quart.register_blueprint(routes_misc)
+    app_quart.register_blueprint(routes_root)
+    app_quart.register_blueprint(routes_image)
+    app_quart.register_blueprint(routes_image_remove)
+    app_quart.register_blueprint(routes_folder)
+    app_quart.register_blueprint(routes_rating)
+    app_quart.register_blueprint(routes_tags)
+    app_quart.register_blueprint(routes_tags_ai)
+    app_quart.register_blueprint(routes_board)
+    app_quart.register_blueprint(routes_discover)
+    app_quart.register_blueprint(routes_misc)
 
+    return app_quart
 
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-asgi_app = socketio.ASGIApp(sio, app_quart)
+def create_sio():
+    return socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
