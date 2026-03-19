@@ -4,11 +4,37 @@ on: [push, pull_request]
 
 jobs:
   tests:
-#    strategy:
-#      matrix:
-#        os: [ ubuntu-latest, windows-latest, macos-latest ]
-#
-#    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run shared utils tests
+        run: pytest -v tests/test_shared
+
+      - name: Run app server tests
+        run: pytest -v tests/test_app
+
+      - name: Run launcher tests
+        run: pytest -v tests/test_launcher
+
+      - name: Run tools tests
+        run: pytest -v tests/test_tools
+
+  coverage:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,44 +49,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: pwd
-        run: pwd
-
-      - name: ls
-        run: ls -R
-
-      - name: Run shared utils tests
-        run: pytest -v tests/test_shared
-
-      - name: Run app server tests
-        run: pytest -v tests/test_app
-
-      - name: Run launcher tests
-        run: pytest -v tests/test_launcher
-
       - name: Run tools tests
-        run: pytest -v tests/test_tools
+        run: pytest -v --cov=app --cov=launcher --cov=tools --cov=shared_utils --cov-report=xml --cov-report=term-missing tests
 
-#  coverage:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v6
-#
-#      - name: Setup Python
-#        uses: actions/setup-python@v6
-#        with:
-#          python-version: '3.10'
-#          cache: 'pip'
-#
-#      - name: Install dependencies
-#        run: pip install -r requirements.txt
-#
-#      - name: Run tools tests
-#        run: pytest -v --cov=app --cov=launcher --cov=tools --cov=shared_utils --cov-report=xml --cov-report=term-missing tests
-#
-#      - name: Upload coverage to Codecov
-#        uses: codecov/codecov-action@v5
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          files: ./coverage.xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
