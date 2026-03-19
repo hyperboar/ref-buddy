@@ -9,7 +9,7 @@ class DatabaseUtil:
     @staticmethod
     def create_if_not_exist(engine):
         if not (os.path.exists(Env.DB_FILE)):
-            os.makedirs(os.path.split(Env.DB_FILE)[0])
+            os.makedirs(os.path.split(Env.DB_FILE)[0], exist_ok=True)
             Base.metadata.create_all(engine)
             DatabaseUtil.add_predefined_data(Session)
 
