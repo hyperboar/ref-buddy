@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 
 ENV_DEFAULT = './config/default.env'
 ENV_USER = './config/user.env'
-ENV_TEST = './tests/config/testing.env'
 
 is_testing = os.environ.get('APP_ENV') == 'test'
 
@@ -74,5 +73,3 @@ class Env:
 
 if not is_testing and os.path.exists(ENV_USER):
     Env.apply_config(ENV_USER)
-elif is_testing and os.path.exists(ENV_TEST):
-    Env.apply_config(ENV_TEST)
