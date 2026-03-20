@@ -1,5 +1,6 @@
 from app.models.models_lump import Tag, TagSet
-from app.services.tags import handle_tags, get_tag_names, get_tags_by_names, get_all_tags, get_tags_by_set
+from app.services.tags import get_tag_names, get_tags_by_names, get_all_tags, get_tags_by_set
+from app.utils.tags_helpers import handle_tags
 
 
 def test_handle_tags_1(raw_tags_both, proc_tags_pos_only, proc_tags_neg_only):
