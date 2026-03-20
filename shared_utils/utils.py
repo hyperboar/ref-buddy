@@ -28,6 +28,18 @@ class Utils:
         if Utils.is_windows():
             setctime(dest, cr_time)
 
+    @staticmethod
+    def get_path_os_specific(path: str) -> str:
+        if Utils.is_windows():
+            return path.replace('/', '\\')
+        return path
+
+    @staticmethod
+    def select_file_cmd_os_specific(path: str) -> str:
+        if Utils.is_windows():
+            return f'C:\\Windows\\explorer.exe /root, "{Utils.get_path_os_specific(path)}", /select'
+        return f'open -R "{path}"'
+
 
 # Importing win32 module... have no idea how to do it better than this :(
 if Utils.is_windows():
