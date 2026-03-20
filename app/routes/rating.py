@@ -37,7 +37,7 @@ async def add_mult_image_rating():
     dto = DtoImageRating.model_validate(data)
 
     session = Session()
-    ImageMetadataController.all_exist_or_404(session, dto.image_ids)
+    ImageMetadataController.all_exist_or_raise(session, dto.image_ids)
 
     r = ImageMetadataController.add_mult_image_rating(image_ids=dto.image_ids, rating_add=dto.rating, session=session)
     if r < 0:
@@ -52,7 +52,7 @@ async def add_folder_rating():
     dto = DtoImageRating.model_validate(data)
 
     s = Session()
-    img = ImageMetadataController.get_or_404(s, dto.image_ids[0])
+    img = ImageMetadataController.get_or_raise(s, dto.image_ids[0])
     imgs = ImageMetadataController.get_all_by_path_id(img.path_id, session=s)[2]
     res = 0
     for i in imgs:
@@ -68,6 +68,6 @@ async def get_image_rating():
     data = request.args.to_dict(flat=False)
     dto = DtoImageRating.model_validate(data)
     session = Session()
-    r = ImageMetadataController.get_or_404(session, dto.image_ids[0]).rating
+    r = ImageMetadataController.get_or_raise(session, dto.image_ids[0]).rating
 
     return await render_template_string(str(r))

@@ -2,9 +2,10 @@ import os
 import urllib
 from datetime import datetime
 
-from quart import Request, abort
+from quart import Request
 from typing_extensions import deprecated
 
+from app.common.exceptions import ImageNotFoundError
 from shared_utils.env import Env
 from app.models import Session
 from app.models.models_lump import Category, ImageMetadata, Path, ImageTag, ImageTagAi
@@ -73,17 +74,17 @@ class ImageMetadataController:
     # region Convenience
 
     @staticmethod
-    def get_or_404(session:Session, image_id:int) -> ImageMetadata|None:
+    def get_or_raise(session:Session, image_id:int) -> ImageMetadata | None:
         img = session.get(ImageMetadata, image_id)
         if img is None:
-            abort(404, f'Image not found for {image_id}')
+            raise ImageNotFoundError(image_id)
         return img
 
     @staticmethod
-    def all_exist_or_404(session:Session, image_ids:[int]) -> ImageMetadata|None:
+    def all_exist_or_raise(session:Session, image_ids:[int]) -> bool:
         count = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_(image_ids)).count()
         if count < len(image_ids):
-            abort(404, f'Some images not found for {image_ids}')
+            raise ImageNotFoundError(image_ids)
         return True
 
     @staticmethod
@@ -372,14 +373,14 @@ class ImageMetadataController:
 
     @classmethod
     def set_image_fav(cls, image_id: int, is_fav: int, session=None):
-        im = cls.get_or_404(session, image_id)
+        im = cls.get_or_raise(session, image_id)
         im.fav = is_fav
         session.commit()
         return im
 
     @classmethod
     def add_image_rating(cls, image_id: int=None, rating_add: int=None, session=None) -> int:
-        im = cls.get_or_404(session, image_id)
+        im = cls.get_or_raise(session, image_id)
         im.rating += rating_add
         session.commit()
         return im.rating
@@ -421,7 +422,7 @@ class ImageMetadataController:
 
     @classmethod
     def set_image_last_viewed(cls, session, image_id: int, time: 'datetime'):
-        im = cls.get_or_404(session, image_id)
+        im = cls.get_or_raise(session, image_id)
         im.last_viewed = time
         im.count += 1
         session.commit()
