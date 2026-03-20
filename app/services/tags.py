@@ -31,13 +31,13 @@ def get_all_tags(session:Session, sort_by_name=False):
         tags.sort(key=(lambda t : t.tag))
     return tags
 
-def get_tags_by_names(tags: [str], session:Session) -> [int]:
+def get_tags_by_names(tags: list[str], session:Session) -> [int]:
     if tags is None or len(tags) == 0: return []
 
     rows = session.query(Tag).filter(Tag.tag.in_(tags)).all()
     return [row.id for row in rows]
 
-def get_tag_names(tags: [int], session:Session):
+def get_tag_names(tags: list[int], session:Session):
     if tags is None or len(tags) == 0: return []
 
     found = session.query(Tag).filter(Tag.id.in_(tags)).all()
