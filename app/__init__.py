@@ -9,6 +9,7 @@ from flask_caching import Cache
 import sys
 
 from app.common.error_handlers import register_error_handlers
+from app.utils.custom_json_provider import CustomJSONProvider
 
 sys.path.append(os.getcwd())
 
@@ -39,6 +40,8 @@ def create_app():
     app_quart.config.from_mapping(config)
 
     cache = Cache(app_quart)
+
+    app_quart.json = CustomJSONProvider(app_quart)
 
     register_error_handlers(app_quart)
 
