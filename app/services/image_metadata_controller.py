@@ -1,14 +1,11 @@
 import os
-import urllib
 from datetime import datetime
 
 from quart import Request
-from typing_extensions import deprecated
 from sqlalchemy import func
 
 from app.common.folder_dtos import FilterRequestDto
 from shared_utils.env import Env
-from app.utils.tags_helpers import handle_tags
 from app.common.exceptions import ImageNotFoundError
 from app.models import Session
 from app.models.models_lump import Category, ImageMetadata, Path, ImageTag, ImageTagAi
@@ -18,14 +15,11 @@ from shared_utils.utils import Utils
 
 
 class ImageMetadataController:
-    @staticmethod
-    def get_table_schema() -> str:
-        pass
 
     # region CRUD
 
     @staticmethod
-    def create(path: str, categories=None, import_at=None, session=None) -> 'ImageMetadata':
+    def create(path: str, categories=None, import_at=None, session=None) -> ImageMetadata|None:
 
         dir = os.path.dirname(path)
         file = os.path.basename(path)
@@ -76,7 +70,7 @@ class ImageMetadataController:
     # region Convenience
 
     @staticmethod
-    def get_or_raise(session:Session, image_id:int) -> ImageMetadata | None:
+    def get_or_raise(session:Session, image_id:int) -> ImageMetadata:
         img = session.get(ImageMetadata, image_id)
         if img is None:
             raise ImageNotFoundError(image_id)
@@ -90,20 +84,20 @@ class ImageMetadataController:
         return True
 
     @staticmethod
-    def get_favs(count: int = 10000, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
-        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
+    def get_favs(filter_dto:FilterRequestDto, session) -> [ImageMetadata]:
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         q = q.filter(ImageMetadata.fav == 1).order_by(ImageMetadata.imported_at.desc())
-        rows = q.offset(start).limit(count).all()
+        rows = q.offset(filter_dto.offset).limit(filter_dto.limit).all()
         return rows
 
     @staticmethod
-    def get_last(count: int = 60, start: int = 0, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None):
-        q = ImageMetadataController.get_query_imagemetadata(tags=tags, min_rating=min_rating, session=session)
-        rows = q.order_by(ImageMetadata.last_viewed.desc()).offset(start).limit(count).all()
+    def get_last(filter_dto:FilterRequestDto, session) -> [ImageMetadata]:
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
+        rows = q.order_by(ImageMetadata.last_viewed.desc()).offset(filter_dto.offset).limit(filter_dto.limit).all()
         return rows
 
     @staticmethod
-    def get_by_path(path, session=None) -> 'ImageMetadata':
+    def get_by_path(path, session=None) -> ImageMetadata|None:
         filename = os.path.basename(path)
         rows = session.query(ImageMetadata).filter(ImageMetadata.filename == filename).all()
         if len(rows) == 0:
@@ -120,8 +114,8 @@ class ImageMetadataController:
         return targets[0]
 
     @staticmethod
-    def get_all_by_path_id(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
-        q = ImageMetadataController.get_query_imagemetadata(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
+    def get_all_by_path_id(filter_dto: FilterRequestDto, path_id:int, session=None) -> [ImageMetadata]:
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session=session)
         rows = q.order_by(-ImageMetadata.rating,ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
 
         if len(rows) == 0:
@@ -131,90 +125,75 @@ class ImageMetadataController:
         return rows[0].category, rows[0], rows
 
     @staticmethod
-    # def get_all_by_path_id2(path_id:int, tags:([int],[int])=([],[]), min_rating:int=-1000, session=None) -> '[ImageMetadata]':
-    # def get_all_by_path_id2(params: ViewFilterMultipleDTO, session=None) -> '[ImageMetadata]':
-    def get_all_by_path_id2(params: FilterRequestDto, session=None) -> '[ImageMetadata]':
-        # q = ImageMetadataController.get_query_imagemetadata_new3(path_id=path_id, tags=tags, min_rating=min_rating, session=session)
-        q = ImageMetadataController.get_query_images_new4(params, session=session)
+    def get_all_by_path_id2(filter_dto: FilterRequestDto, session=None) -> [ImageMetadata]:
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session=session)
         q = q.order_by(-ImageMetadata.rating,ImageMetadata.imported_at.desc(), ImageMetadata.filename)
-        q = q.offset(params.offset).limit(params.limit)
+        q = q.offset(filter_dto.offset).limit(filter_dto.limit)
 
         rows = q.all()
 
         if len(rows) == 0:
-            p = session.get(Path, params.path_id)
+            p = session.get(Path, filter_dto.path_id)
             return "", f'No images at path ({p.id}) "{p.path}"', []
 
         return rows[0].category, rows[0], rows
 
-    @deprecated('not in use')
     @staticmethod
-    def get_all_by_tags(tags_pos: [int], tags_neg: [int], limit:int=100, offset:int=0, session=None) -> '[ImageMetadata]':
-        q = ImageMetadataController.get_query_imagemetadata(tags=(tags_pos, tags_neg), session=session)
+    def get_all_by_tags_new4(filter_dto:FilterRequestDto, session) -> [ImageMetadata]:
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
-        result = q.offset(offset).limit(limit).all()
+        result = q.offset(filter_dto.offset).limit(filter_dto.limit).all()
 
         return "", result
-
-    @staticmethod
-    def get_all_by_tags_new4(params:FilterRequestDto, session) -> '[ImageMetadata]':
-        q = ImageMetadataController.get_query_images_new4(params, session)
-        q = q.order_by(ImageMetadata.imported_at.desc())
-
-        result = q.offset(params.offset).limit(params.limit).all()
-
-        return "", result
-
-
-
-    @staticmethod
-    def get_random_by_category(category:int=0, same_folder:int=0, prev_image_id:int=0,
-                               min_rating=0, tags:([int],[int])=([],[]), session=None) -> 'ImageMetadata':
-        q = ImageMetadataController.get_query_imagemetadata(
-            category=category, same_folder=same_folder, tags=tags,
-            image_id=prev_image_id, min_rating=min_rating, session=session)
-        q = q.order_by(func.random())
-        row = q.first()
-
-        return row
 
     @staticmethod
     def get_random_by_request(image_id, request:Request, session=None) -> 'ImageMetadata':
-        same_folder = request.args.get('sf', default=0, type=int)
-        min_rating  = request.args.get('r', default=0, type=int)
+        # same_folder = request.args.get('sf', default=0, type=int)
+        # min_rating  = request.args.get('r', default=0, type=int)
 
-        tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
-        tags_pos, tags_neg = handle_tags(tags_str)
+        data = request.args.to_dict()
+        data['same-folder'] = data['sf'] if 'sf' in data else 0
+        data['minr'] = data['r'] if 'r' in data else 0
+        filter_dto = FilterRequestDto.model_validate(data)
 
-        tag_set_id = request.args.get('tag-set', default='all')
-        tag_set_id = tag_set_id if tag_set_id != '' else 'all'
-        tags_pos, tags_neg = get_tags_by_set(tag_set_id, session, tags_pos, tags_neg)
+        # tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
+        # tags_pos, tags_neg = handle_tags(tags_str)
 
-        q = ImageMetadataController.get_query_imagemetadata(
-            same_folder=same_folder, tags=(tags_pos, tags_neg),
-            image_id=image_id, min_rating=min_rating, session=session)
+        # tag_set_id = request.args.get('tag-set', default='all')
+        # tag_set_id = tag_set_id if tag_set_id != '' else 'all'
+        # tags_pos, tags_neg = get_tags_by_set(tag_set_id, session, tags_pos, tags_neg)
+
+        # q = ImageMetadataController.get_query_imagemetadata(
+        #     same_folder=same_folder, tags=(tags_pos, tags_neg),
+        #     image_id=image_id, min_rating=min_rating, session=session)
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         q = q.filter(ImageMetadata.image_id != image_id).order_by(func.random())
         row = q.first()
 
         return row
 
     @staticmethod
-    def get_next_name_by_request(image_id:int, step:int, request:Request, session=None) -> 'ImageMetadata':
-        same_folder = 1
-        min_rating  = request.args.get('r', default=0, type=int)
+    def get_next_name_by_request(image_id:int, step:int, request:Request, session=None) -> ImageMetadata:
+        # same_folder = 1
+        # min_rating  = request.args.get('r', default=0, type=int)
 
-        im = session.get(ImageMetadata, image_id)
+        data = request.args.to_dict()
+        data['same-folder'] = '1'
+        filter_dto = FilterRequestDto.model_validate(data)
 
-        tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
-        tags_pos, tags_neg = handle_tags(tags_str)
+        im = ImageMetadataController.get_or_raise(session, image_id)
 
-        tags_pos = get_tags_by_names(tags_pos, session=session)
-        tags_neg = get_tags_by_names(tags_neg, session=session)
+        # tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
+        # tags_pos, tags_neg = handle_tags(tags_str)
+        #
+        # tags_pos = get_tags_by_names(tags_pos, session=session)
+        # tags_neg = get_tags_by_names(tags_neg, session=session)
 
-        q = ImageMetadataController.get_query_imagemetadata(
-            same_folder=same_folder, tags=(tags_pos, tags_neg),
-            image_id=image_id, min_rating=min_rating, session=session)
+        # q = ImageMetadataController.get_query_imagemetadata(
+        #     same_folder=same_folder, tags=(tags_pos, tags_neg),
+        #     image_id=image_id, min_rating=min_rating, session=session)
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         if step > 0:
             q = q.filter(ImageMetadata.filename > im.filename)
             q = q.order_by(ImageMetadata.filename)
@@ -227,47 +206,6 @@ class ImageMetadataController:
             return im
 
         return row
-
-    # @staticmethod
-    # def get_query_imagemetadata(category:int=-1, same_folder:int=0, image_id:int=-1,
-    #                             min_rating:int=0, max_rating=9999, tags:([int],[int])=([],[]),
-    #                             path_id:int=-1, session=None):
-    #     l = len(tags[0])
-    #
-    #     # limit by tags_pos
-    #     if l > 0:
-    #         subquery = session.query(ImageTag.image_id)\
-    #             .filter(ImageTag.tag_id.in_(tags[0]))\
-    #             .group_by(ImageTag.image_id)\
-    #             .having(func.count(ImageTag.tag_id) == l)\
-    #             .subquery()
-    #         q = session.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
-    #     else:
-    #         q = session.query(ImageMetadata)
-    #
-    #     # remove tags_neg
-    #     if len(tags[1]) > 0:
-    #         q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags[1])))
-    #
-    #     # filter by category
-    #     # if category > 0:
-    #     #     q = q.filter(ImageMetadata.category_id == category, ImageMetadata.rating >= min_rating)
-    #
-    #     # when same_folder get path_id by image_id
-    #     if same_folder > 0 and image_id > 0:
-    #         im = session.get(ImageMetadata, image_id)
-    #         q = q.filter(ImageMetadata.path_id == im.path_id)
-    #
-    #     # filter by path specifically
-    #     if path_id > 0:
-    #         q = q.filter(ImageMetadata.path_id == path_id)
-    #
-    #     # unconditional min_rating
-    #     q = q.filter(min_rating <= ImageMetadata.rating, ImageMetadata.rating <= max_rating)
-    #     q = q.filter(ImageMetadata.lost == 0)
-    #     q = q.filter(ImageMetadata.removed == 0)
-    #
-    #     return q
 
     @staticmethod
     def get_query_images_new4(filter_dto:FilterRequestDto, session):
@@ -371,14 +309,6 @@ class ImageMetadataController:
         im.count += 1
         session.commit()
         return im
-
-    @deprecated('not in use')
-    @staticmethod
-    def get_id_by_path(path: str) -> int:
-        img = ImageMetadataController.get_by_path(path)
-        if img is None:
-            return -1
-        return img.image_id
 
     @staticmethod
     def get_categories(session=None):
