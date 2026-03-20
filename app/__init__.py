@@ -8,6 +8,8 @@ from flask_caching import Cache
 # Moved server scripts to subdir. Env, maintenance and other scripts are now in PARENT directory, so...
 import sys
 
+from app.common.error_handlers import register_error_handlers
+
 sys.path.append(os.getcwd())
 
 from shared_utils.env import Env
@@ -37,6 +39,8 @@ def create_app():
     app_quart.config.from_mapping(config)
 
     cache = Cache(app_quart)
+
+    register_error_handlers(app_quart)
 
     app_quart.register_blueprint(routes_root)
     app_quart.register_blueprint(routes_image)
