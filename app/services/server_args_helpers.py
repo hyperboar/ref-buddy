@@ -1,9 +1,9 @@
-import urllib
 from enum import Enum, auto
 
 from quart import abort
 from typing_extensions import deprecated
 
+from app.utils.tags_helpers import handle_tags
 from shared_utils.env import Env
 
 @deprecated("")
@@ -36,7 +36,7 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
             return int(args.get(Args.limit.name, default=Env.DEFAULT_PER_PAGE_LIMIT))
 
         case Args.tags:
-            return get_tag_names(args)
+            return handle_tags(args)
 
         case Args.tag_set:
             set_id = args.get('tag-set', default='1')
@@ -63,13 +63,3 @@ def get_arg(args, arg_name:'Args') -> 'int|[int]|str|([str],[str])':
         
         case _:
             abort(404, f'Error: Unknown argument "{arg_name}"')
-
-@deprecated("")
-def get_tag_names(args):
-    tags_all = urllib.parse.unquote(args.get(Args.tags.name, default=""), encoding='utf-8', errors='replace').split(',')
-    tags_pos = [tag for tag in tags_all if not tag.startswith('-')]
-    tags_neg = [tag[1:] for tag in tags_all if tag.startswith('-')]
-
-    # tags_pos = Ctrl.get_tags_by_names(tags_pos)
-    # tags_neg = Ctrl.get_tags_by_names(tags_neg)
-    return tags_pos, tags_neg
