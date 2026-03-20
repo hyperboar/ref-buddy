@@ -40,6 +40,11 @@ class Utils:
             return f'C:\\Windows\\explorer.exe /root, "{Utils.get_path_os_specific(path)}", /select'
         return f'open -R "{path}"'
 
+    @staticmethod
+    def is_debugging():
+        import sys
+        return sys.gettrace() is not None
+
 
 # Importing win32 module... have no idea how to do it better than this :(
 if Utils.is_windows():

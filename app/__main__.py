@@ -1,7 +1,7 @@
 import uvicorn
 
-from app.utils.misc import is_debugging
 from shared_utils.env import Env, is_testing
+from shared_utils.utils import Utils
 
 if not is_testing:
     from app import create_app
@@ -11,7 +11,7 @@ if not is_testing:
     app_quart.before_request(make_database_backup)
     DatabaseEnvironment.update_db_connection(is_testing)
 
-if is_debugging():
+if Utils.is_debugging():
     app_quart = create_app()
     app_quart.run(host='0.0.0.0', port=int(Env.SERVER_PORT))
 else:

@@ -31,7 +31,3 @@ def get_current_paging(args):
     page = get_arg(args, Args.page)
     offset = get_offset_by_page(page, limit)
     return page, offset, limit
-
-def is_debugging():
-    import sys
-    return sys.gettrace() is not None
