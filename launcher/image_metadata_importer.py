@@ -20,7 +20,10 @@ class ImageMetadataImporter:
     def import_metadata(self, folder_path):
         folder_path = os.path.normpath(folder_path)
         formats = tuple(Env.IMPORT_FORMATS)
-        sts = Ctrl.get_categories()
+
+        session = Session()
+
+        sts = Ctrl.get_categories(session)
 
         start_time = time.time()
         new_count = 0
@@ -28,8 +31,6 @@ class ImageMetadataImporter:
         self.np.header(f'Image formats to be imported: {formats}')
 
         self.np.step_up()
-
-        session = Session()
 
         time_of_import = datetime.now()
         # -1 just to make sure we're in the past
