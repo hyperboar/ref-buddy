@@ -18,7 +18,7 @@ async def view_tags():
     filter_dto = FilterRequestDto.model_validate(request.args.to_dict())
 
     with Session() as session:
-        response, images = Ctrl.get_all_by_tags_new4(filter_dto, session=session)
+        images = Ctrl.get_all_by_tags_new4(filter_dto, session=session)
 
         tags_pos_ids, tags_neg_ids = get_tags_by_set(filter_dto.tag_set, session, filter_dto.tags.pos,
                                                      filter_dto.tags.neg)
@@ -98,6 +98,6 @@ async def export_urls():
     filter_dto = FilterRequestDto.model_validate(request.args.to_dict())
 
     with Session() as session:
-        response, images = Ctrl.get_all_by_tags_new4(filter_dto, session)
+        images = Ctrl.get_all_by_tags_new4(filter_dto, session)
         out = [FolderExportDto.model_validate(img) for img in images]
         return jsonify(out)

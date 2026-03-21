@@ -141,9 +141,7 @@ class ImageMetadataController:
         q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
-        result = q.offset(filter_dto.offset).limit(filter_dto.limit).all()
-
-        return "", result
+        return q.offset(filter_dto.offset).limit(filter_dto.limit).all()
 
     @staticmethod
     def get_random_by_request(image_id, request:Request, session=None) -> 'ImageMetadata':
