@@ -95,7 +95,9 @@ async def toggle_folder_hide():
 
 @routes_folder.route('/export-urls')
 async def export_urls():
-    filter_dto = FilterRequestDto.model_validate(request.args.to_dict())
+    data = request.args.to_dict()
+    data['no-ai-tags'] = '1'
+    filter_dto = FilterRequestDto.model_validate(data)
 
     with Session() as session:
         images = Ctrl.get_all_by_tags_new4(filter_dto, session)
