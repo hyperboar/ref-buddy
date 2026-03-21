@@ -1,6 +1,13 @@
 import pytest
 from unittest.mock import MagicMock
 
+from app.models import Session
+
+
+@pytest.fixture(scope="module")
+def session_real():
+    return Session
+
 @pytest.fixture
 def raw_tags_pos_only():
     return "pos_1,pos_2,pos_3"
