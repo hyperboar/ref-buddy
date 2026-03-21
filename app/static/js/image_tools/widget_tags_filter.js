@@ -100,6 +100,11 @@ class WidgetImageTagsFilter
         this.widget.querySelector('#tags-filter-close').addEventListener('click', () => this.hideWidget())
         this._bgOverlay.node.addEventListener('click', () => this.hideWidget())
 
+        this.widget.addEventListener('wheel', e => {
+            e.preventDefault()
+            this.widget.scrollLeft += e.deltaY
+        })
+
         // only when gallery is present
         const g = document.querySelector('.gallery')
         if (g !== null)

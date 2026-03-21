@@ -269,6 +269,11 @@ class WidgetImageTagsEditor
         this._pPins.querySelector('#tags-pins-submit-del').addEventListener('click', (e) => this.submitRemoveTags(e))
         this._pPins.querySelector('#tags-pins-clear').addEventListener('click', (e) => this.clearTagsPopup(e))
 
+        this._pMain.addEventListener('wheel', e => {
+            e.preventDefault()
+            this._pMain.scrollLeft += e.deltaY
+        })
+
         this.populatePinnedTags()
 
         document.addEventListener('keydown', (e) =>
