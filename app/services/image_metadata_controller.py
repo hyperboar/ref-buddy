@@ -6,7 +6,7 @@ from sqlalchemy import func
 
 from app.common.folder_dtos import FilterRequestDto
 from shared_utils.env import Env
-from app.common.exceptions import ImageNotFoundError
+from app.common.exceptions import ImageNotFoundError, PathEmptyError
 from app.models import Session
 from app.models.models_lump import Category, ImageMetadata, Path, ImageTag, ImageTagAi
 from app.services.tags import get_tags_by_names, get_tags_by_set, get_tag_names
@@ -114,15 +114,13 @@ class ImageMetadataController:
         return targets[0]
 
     @staticmethod
-    def get_all_by_path_id(filter_dto: FilterRequestDto, path_id:int, session=None) -> [ImageMetadata]:
-        q = ImageMetadataController.get_query_images_new4(filter_dto, session=session)
-        rows = q.order_by(-ImageMetadata.rating,ImageMetadata.imported_at.desc(), ImageMetadata.filename).all()
+    def get_all_by_path_id(path_id:int, session) -> [ImageMetadata]:
+        imgs = session.query(ImageMetadata).filter(ImageMetadata.path_id == path_id).all()
 
-        if len(rows) == 0:
-            p = session.get(Path, path_id)
-            return "", f'No images at path ({p.id}) "{p.path}"', []
+        if len(imgs) == 0:
+            raise PathEmptyError(path_id)
 
-        return rows[0].category, rows[0], rows
+        return imgs
 
     @staticmethod
     def get_all_by_path_id2(filter_dto: FilterRequestDto, session=None) -> [ImageMetadata]:
@@ -155,6 +153,7 @@ class ImageMetadataController:
         data = request.args.to_dict()
         data['same-folder'] = data['sf'] if 'sf' in data else 0
         data['minr'] = data['r'] if 'r' in data else 0
+        data['image-ids'] = str(image_id)
         filter_dto = FilterRequestDto.model_validate(data)
 
         # tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
@@ -180,6 +179,7 @@ class ImageMetadataController:
 
         data = request.args.to_dict()
         data['same-folder'] = '1'
+        data['image-ids'] = str(image_id)
         filter_dto = FilterRequestDto.model_validate(data)
 
         im = ImageMetadataController.get_or_raise(session, image_id)
@@ -270,7 +270,7 @@ class ImageMetadataController:
     @staticmethod
     def add_mult_image_rating(image_ids:[int]=None, rating_add: int=None, session=None) -> int:
         for im_id in image_ids:
-            im = session.get(ImageMetadata, im_id)
+            im = ImageMetadataController.get_or_raise (session, im_id)
             im.rating += rating_add
             session.flush()
         session.commit()
