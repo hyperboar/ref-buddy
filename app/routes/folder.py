@@ -32,10 +32,7 @@ async def view_tags():
         overview["path"] = ""
 
         paging = await get_paging_widget(filter_dto.page)
-
-        out = await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images), overview=overview, paging=paging)
-        session.close()
-        return out
+        return await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images), overview=overview, paging=paging)
 
 @routes_folder.route('/folder/<int:path_id>')
 async def view_folder(path_id):
