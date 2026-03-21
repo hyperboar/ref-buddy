@@ -23,8 +23,8 @@ def add_4_images_1_path(session) -> None:
 
 def add_2_tags(session) -> None:
     new_tag = lambda s, imid, tag: s.add(Tag(id=imid, tag=tag))
-    new_tag(session, 1, "tag_1")
-    new_tag(session, 2, "tag_2")
+    new_tag(session, 10, "pos_1")
+    new_tag(session, 20, "pos_2")
     session.commit()
 
 def add_1_mp4_1_path(session) -> None:
