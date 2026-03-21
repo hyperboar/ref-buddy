@@ -12,7 +12,7 @@ class FilterRequestDto(BaseModel):
     page:Annotated[int, AfterValidator(lambda v: max(v - 1, 0))] = Field(default=0)
     limit:int = Field(default=Env.DEFAULT_PER_PAGE_LIMIT)
     offset:int|None = None
-    no_ai_tags:int = Field(default=1, alias='no-ai-tags')
+    no_ai_tags:int|None = Field(default=None, alias='no-ai-tags')
     min_rating:int = Field(default=0, alias='minr')
     max_rating:int = Field(default=9999, alias='maxr')
     tag_set:int|str = Field(default='all', alias='tag-set')

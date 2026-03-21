@@ -1,6 +1,8 @@
+from datetime import datetime
+
 from app.models import get_engine
 from app.models.database_util import DatabaseUtil
-from app.models.models_lump import Path, ImageMetadata, Tag
+from app.models.models_lump import Path, ImageMetadata, Tag, ImageTag, ImageTagAi, TagAi
 
 
 def clean_database():
@@ -25,6 +27,11 @@ def add_2_tags(session) -> None:
     new_tag = lambda s, imid, tag: s.add(Tag(id=imid, tag=tag))
     new_tag(session, 10, "pos_1")
     new_tag(session, 20, "pos_2")
+    session.commit()
+
+def assign_ai_tag(session) -> None:
+    session.add(TagAi(id=1, tag="ai_imported"))
+    session.add(ImageTagAi(image_id=1, tag_id=1, imported_at=datetime.now()))
     session.commit()
 
 def add_1_mp4_1_path(session) -> None:
