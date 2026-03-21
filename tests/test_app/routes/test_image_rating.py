@@ -42,32 +42,32 @@ async def test_image_change_single_rating(client):
     assert resp.status_code == 200
     resp = await client.get('/get-image-rating?image-ids=1')
     assert resp.status_code == 200
-    text = await resp.data
-    assert text == b'0'
+    json = await resp.json
+    assert json['result'] == 0
 
     # +1
     resp = await client.get('/add-image-rating?image-ids=1&r=1')
     assert resp.status_code == 200
     resp = await client.get('/get-image-rating?image-ids=1')
     assert resp.status_code == 200
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
 
     # +10
     resp = await client.get('/add-image-rating?image-ids=1&r=10')
     assert resp.status_code == 200
     resp = await client.get('/get-image-rating?image-ids=1')
     assert resp.status_code == 200
-    text = await resp.data
-    assert text == b'11'
+    json = await resp.json
+    assert json['result'] == 11
 
     # -1, negative
     resp = await client.get('/add-image-rating?image-ids=2&r=-1')
     assert resp.status_code == 200
     resp = await client.get('/get-image-rating?image-ids=2')
     assert resp.status_code == 200
-    text = await resp.data
-    assert text == b'-1'
+    json = await resp.json
+    assert json['result'] == -1
 
 @pytest.mark.asyncio
 async def test_image_change_mult_rating(client):
@@ -76,22 +76,22 @@ async def test_image_change_mult_rating(client):
     assert resp.status_code == 200
 
     resp = await client.get('/get-image-rating?image-ids=1')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
     resp = await client.get('/get-image-rating?image-ids=2')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
 
     # change 2
     resp = await client.get('/add-mult-image-rating?image-ids=1&r=1')
     assert resp.status_code == 200
 
     resp = await client.get('/get-image-rating?image-ids=1')
-    text = await resp.data
-    assert text == b'2'
+    json = await resp.json
+    assert json['result'] == 2
     resp = await client.get('/get-image-rating?image-ids=2')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
 
 @pytest.mark.asyncio
 async def test_image_change_folder_rating(client):
@@ -99,14 +99,14 @@ async def test_image_change_folder_rating(client):
     assert resp.status_code == 200
 
     resp = await client.get('/get-image-rating?image-ids=1')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
     resp = await client.get('/get-image-rating?image-ids=2')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
     resp = await client.get('/get-image-rating?image-ids=3')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
     resp = await client.get('/get-image-rating?image-ids=4')
-    text = await resp.data
-    assert text == b'1'
+    json = await resp.json
+    assert json['result'] == 1
