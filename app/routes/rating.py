@@ -1,8 +1,8 @@
 from typing import Annotated
 
-from quart import Blueprint, request, render_template_string, jsonify
+from quart import Blueprint, request, jsonify
 
-from app.common.dto_basic import EmptyResponse
+from app.common.dto_basic import IntResultResponse
 from app.services.image_metadata_controller import ImageMetadataController
 from app.models import Session
 
@@ -25,8 +25,8 @@ class ImageRatingDto(BaseModel):
 async def add_image_rating():
     dto = ImageRatingDto.model_validate(request.args.to_dict())
     with Session() as session:
-        ImageMetadataController.add_image_rating(image_id=dto.image_ids[0], rating_add=dto.rating, session=session)
-        return jsonify(EmptyResponse())
+        r = ImageMetadataController.add_image_rating(image_id=dto.image_ids[0], rating_add=dto.rating, session=session)
+        return jsonify(IntResultResponse.model_validate(r))
 
 @routes_rating.route('/add-mult-image-rating')
 async def add_mult_image_rating():
@@ -34,9 +34,9 @@ async def add_mult_image_rating():
 
     session = Session()
     ImageMetadataController.all_exist_or_raise(session, dto.image_ids)
-    ImageMetadataController.add_mult_image_rating(image_ids=dto.image_ids, rating_add=dto.rating, session=session)
+    r = ImageMetadataController.add_mult_image_rating(image_ids=dto.image_ids, rating_add=dto.rating, session=session)
 
-    return jsonify(EmptyResponse())
+    return jsonify(IntResultResponse.model_validate(r))
 
 
 @routes_rating.route('/add-folder-rating')
@@ -48,9 +48,9 @@ async def add_folder_rating():
         imgs = ImageMetadataController.get_all_by_path_id(img.path_id, session=session)
         image_ids = [im.image_id for im in imgs]
         ImageMetadataController.all_exist_or_raise(session, image_ids)
-        ImageMetadataController.add_mult_image_rating(image_ids=image_ids, rating_add=dto.rating, session=session)
+        r = ImageMetadataController.add_mult_image_rating(image_ids=image_ids, rating_add=dto.rating, session=session)
 
-        return jsonify(EmptyResponse())
+        return jsonify(IntResultResponse.model_validate(r))
 
 @routes_rating.route('/get-image-rating')
 async def get_image_rating():
@@ -58,4 +58,4 @@ async def get_image_rating():
     session = Session()
     r = ImageMetadataController.get_or_raise(session, dto.image_ids[0]).rating
 
-    return await render_template_string(str(r))
+    return jsonify(IntResultResponse.model_validate(r))
