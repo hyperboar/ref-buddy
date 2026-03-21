@@ -1,37 +1,36 @@
 from typing import Annotated
 
-from quart import Blueprint, request, abort, render_template_string, jsonify
+from quart import Blueprint, request, render_template_string, jsonify
 
 from app.common.dto_basic import EmptyResponse
 from app.services.image_metadata_controller import ImageMetadataController
 from app.models import Session
 
-from pydantic import BaseModel, Field, BeforeValidator, model_validator
+from pydantic import BaseModel, Field, BeforeValidator, model_validator, ValidationError
 
 routes_rating = Blueprint('routes_rating', __name__)
 
 class ImageRatingDto(BaseModel):
-    rating: Annotated[int, BeforeValidator(lambda v: v[0])] = Field(alias='r', default=0)
-    image_ids: Annotated[list[int], BeforeValidator(lambda v: [int(i) for i in v[0].split(',')])] = Field(alias='image-ids')
+    rating: int = Field(alias='r', default=0)
+    image_ids: Annotated[list[int], BeforeValidator(lambda v: [int(i) for i in v.split(',')])] = Field(alias='image-ids')
 
     @model_validator(mode='before')
-    def validate_args(values):
+    @classmethod
+    def validate_args(cls, values):
         if 'image-ids' not in values:
-            abort(404, 'No images ids')
+            raise ValidationError('image-ids is empty')
         return values
 
 @routes_rating.route('/add-image-rating')
 async def add_image_rating():
-    data = request.args.to_dict(flat=False)
-    dto = ImageRatingDto.model_validate(data)
+    dto = ImageRatingDto.model_validate(request.args.to_dict())
     with Session() as session:
         ImageMetadataController.add_image_rating(image_id=dto.image_ids[0], rating_add=dto.rating, session=session)
         return jsonify(EmptyResponse())
 
 @routes_rating.route('/add-mult-image-rating')
 async def add_mult_image_rating():
-    data = request.args.to_dict(flat=False)
-    dto = ImageRatingDto.model_validate(data)
+    dto = ImageRatingDto.model_validate(request.args.to_dict())
 
     session = Session()
     ImageMetadataController.all_exist_or_raise(session, dto.image_ids)
@@ -42,8 +41,7 @@ async def add_mult_image_rating():
 
 @routes_rating.route('/add-folder-rating')
 async def add_folder_rating():
-    data = request.args.to_dict(flat=False)
-    dto = ImageRatingDto.model_validate(data)
+    dto = ImageRatingDto.model_validate(request.args.to_dict())
 
     with Session() as session:
         img = ImageMetadataController.get_or_raise(session, dto.image_ids[0])
@@ -56,8 +54,7 @@ async def add_folder_rating():
 
 @routes_rating.route('/get-image-rating')
 async def get_image_rating():
-    data = request.args.to_dict(flat=False)
-    dto = ImageRatingDto.model_validate(data)
+    dto = ImageRatingDto.model_validate(request.args.to_dict())
     session = Session()
     r = ImageMetadataController.get_or_raise(session, dto.image_ids[0]).rating
 
