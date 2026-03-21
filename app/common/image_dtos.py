@@ -8,6 +8,7 @@ from app.common.dto_basic import AttrModel
 class ImageInfoDto(AttrModel):
     id:int = Field(alias='image_id')
     path_id:int
+    path:str = Field(alias='path_abs')
     content_type:int = Field(alias='source_type_id')
     video:int = None
     fav:int
