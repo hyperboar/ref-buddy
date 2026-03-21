@@ -19,7 +19,7 @@ async def process():
 #region ---- JSON API ----
 @routes_tags_ai.route('/tags-ai/suck-folder-in')
 async def suck_in_all_tags_in_folder():
-    path = os.path.join(os.getcwd(), 'autotag_fetcher', 'output_export_new_images.json')
+    path = os.path.join(os.getcwd(), 'tools', 'autotag_fetcher', 'output_export_new_images.json')
     session = Session()
 
     files = os.listdir(path)
