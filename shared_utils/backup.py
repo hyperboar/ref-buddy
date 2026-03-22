@@ -6,6 +6,10 @@ from shared_utils.env import Env
 
 
 def make_database_backup(marker:str='',force:bool=False):
+    if not os.path.exists(Env.DB_FILE):
+        print(f'No existing database found to backup.')
+        return
+
     db_file = os.path.splitext(Env.DB_NAME)
     db_file_name = f'{db_file[0]}_'
     db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
@@ -15,11 +19,7 @@ def make_database_backup(marker:str='',force:bool=False):
     path = Env.DB_BACKUP_PATH
 
     if not os.path.exists(path):
-        os.mkdir(path)
-
-    if not os.path.exists(Env.DB_FILE):
-        print(f'No existing database found.')
-        return
+        os.makedirs(path, exist_ok=True)
 
     backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
     start_pos = len(db_file_name)
