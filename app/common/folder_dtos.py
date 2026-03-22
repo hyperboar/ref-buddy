@@ -10,7 +10,7 @@ from shared_utils.env import Env
 
 class FilterRequestDto(BaseModel):
     page:Annotated[int, AfterValidator(lambda v: max(v - 1, 0))] = Field(default=0)
-    limit:int = Field(default=Env.DEFAULT_PER_PAGE_LIMIT)
+    limit:int|None = None
     offset:int|None = None
     no_ai_tags:int|None = Field(default=None, alias='no-ai-tags')
     min_rating:int = Field(default=0, alias='minr')
@@ -26,6 +26,8 @@ class FilterRequestDto(BaseModel):
     def parse_tags(cls, values):
         values['tags'] = {'tags': (values['tags'] if 'tags' in values else '')}
         values['image-ids'] = values['image-ids'].split(',') if 'image-ids' in values else None
+        if 'limit' not in values:
+            values['limit'] = Env.DEFAULT_PER_PAGE_LIMIT
         return values
 
     @model_validator(mode='after')
