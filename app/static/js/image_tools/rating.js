@@ -92,7 +92,7 @@ class RateSingle extends RateBase
             .then(data =>
             {
                 this.onSuccess(data)
-                this.total.innerText = data
+                this.total.innerText = data['result']
             })
             .catch(error => this.onFail(error))
             .finally(() => this.onFinal());

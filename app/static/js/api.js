@@ -87,7 +87,7 @@ class ApiImage
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return r.text()
+                return r.json()
             })
     }
 
@@ -102,7 +102,7 @@ class ApiImage
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return r.text()
+                return r.json()
             })
     }
 
@@ -117,7 +117,7 @@ class ApiImage
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return ApiImage.GetRating(id)
+                return r.json()
             })
     }
 
@@ -134,7 +134,7 @@ class ApiImage
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return r.text()
+                return r.json()
             })
     }
 
@@ -144,7 +144,7 @@ class ApiImage
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return r.text()
+                return r.json()
             })
     }
 
@@ -154,7 +154,7 @@ class ApiImage
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return r.text()
+                return r.json()
             })
     }
 
