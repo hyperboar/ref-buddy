@@ -1,6 +1,6 @@
 import os
 import shutil
-from datetime import datetime, timezone
+from datetime import datetime
 
 from shared_utils.env import Env
 
@@ -10,7 +10,7 @@ def make_database_backup(marker:str='',force:bool=False):
     db_file_name = f'{db_file[0]}_'
     db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
     time_fmt = '%Y-%m-%d_%H-%M'
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now() # intentionally without tz=timezone.utc
     backup_interval = 60 * Env.DB_BACKUP_INTERVAL # seconds
     path = Env.DB_BACKUP_PATH
 
