@@ -1,6 +1,6 @@
 import imghdr
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 import json
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     all_tags = {'tags': [], 'images': []}
 
-    time = datetime.now().timestamp()
+    time = datetime.now(tz=timezone.utc).timestamp()
     flush_rate = 20
     count = 1
     new_data = 0

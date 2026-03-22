@@ -1,7 +1,7 @@
 import io
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Callable
 
 from PIL import Image
@@ -103,7 +103,7 @@ async def set_image_fav(image_id, is_fav):
 @routes_image.route('/set-image-last-viewed/<int:image_id>')
 async def set_image_last_viewed(image_id):
     with Session() as session:
-        now = datetime.now()
+        now = datetime.now(tz=timezone.utc)
         Ctrl.set_image_last_viewed(session, image_id, now)
         return jsonify(EmptyResponse())
 

@@ -1,6 +1,6 @@
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 
 from shared_utils.env import Env
 
@@ -10,6 +10,7 @@ def make_database_backup(marker:str='',force:bool=False):
     db_file_name = f'{db_file[0]}_'
     db_file_ext  = f'{db_file[1]}' if len(db_file) > 1 else ''
     time_fmt = '%Y-%m-%d_%H-%M'
+    now = datetime.now(tz=timezone.utc)
     backup_interval = 60 * Env.DB_BACKUP_INTERVAL # seconds
     path = Env.DB_BACKUP_PATH
 
@@ -22,19 +23,19 @@ def make_database_backup(marker:str='',force:bool=False):
 
     backup_files = [f for f in os.listdir(path) if f.startswith(db_file_name) and os.path.isfile(os.path.join(path, f))]
     start_pos = len(db_file_name)
-    end_pos = start_pos + len(datetime.now().strftime(time_fmt))
+    end_pos = start_pos + len(now.strftime(time_fmt))
     dates = [f[start_pos:end_pos] for f in backup_files]
     dates = sorted([datetime.strptime(d, time_fmt) for d in dates])
 
     if not force and \
-            (len(dates) > 0 and datetime.now().timestamp() < (dates[-1].timestamp() + backup_interval)):
+            (len(dates) > 0 and now.timestamp() < (dates[-1].timestamp() + backup_interval)):
         return
 
     print(f'Backing up database. Found {len(backup_files)} backups, making new one.')
 
     if marker != '':
         marker = f'_{marker.lower().replace(" ", "_")}'
-    backup_name = f'{db_file_name}{datetime.now().strftime(time_fmt)}{marker}{db_file_ext}'
+    backup_name = f'{db_file_name}{now.strftime(time_fmt)}{marker}{db_file_ext}'
     src = Env.DB_FILE
     dst = os.path.join(path, backup_name)
     shutil.copy(src, dst)

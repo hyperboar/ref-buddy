@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from quart import Blueprint, request, abort, render_template, redirect, jsonify
 from app.models import Session
@@ -54,7 +54,7 @@ async def suck_in_all_tags_in_folder():
             count_new = 0
             for img in data['images']:
                 img_id = int(img['id'])
-                timestamp = datetime.fromtimestamp(int(img['timestamp']))
+                timestamp = datetime.fromtimestamp(int(img['timestamp']), tz=timezone.utc)
                 for key, value in img['tags'].items():
                     result = session.merge(ImageTagAi(image_id=img_id, tag_id=tags_to_db[key], rating=value, imported_at=timestamp))
                     if inspect(result).pending:

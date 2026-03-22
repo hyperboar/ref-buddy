@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from shared_utils.backup import make_database_backup
 from shared_utils.env import Env
@@ -32,7 +32,7 @@ class ImageMetadataImporter:
 
         self.np.step_up()
 
-        time_of_import = datetime.now()
+        time_of_import = datetime.now(tz=timezone.utc)
         # -1 just to make sure we're in the past
         update_time = time_of_import - timedelta(seconds=1)
 
@@ -47,7 +47,7 @@ class ImageMetadataImporter:
             if path_obj is not None:
                 # check and modify update time
                 path_mtime = int(os.path.getmtime(dir_path))
-                mdt = datetime.fromtimestamp(path_mtime)
+                mdt = datetime.fromtimestamp(path_mtime, tz=timezone.utc)
                 pm_diff = mdt - path_obj.last_updated
                 if pm_diff.total_seconds() < 1.0:
                     continue

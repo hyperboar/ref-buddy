@@ -1,7 +1,7 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
-from sqlalchemy import Column, Integer, Text, ForeignKey, TIMESTAMP, TypeDecorator, Float
+from sqlalchemy import Column, Integer, Text, ForeignKey, TypeDecorator, Float
 from sqlalchemy.orm import relationship, object_session, declarative_base
 
 from PIL import Image
@@ -11,17 +11,21 @@ from shared_utils.env import Env
 # Create a base class for declarative models
 Base = declarative_base()
 
-class MyTIMESTAMP(TypeDecorator):
-    """
-    Crutch for SQLAlchemy's inability to handle SQLite TIMESTAMP and DateTime as a string
-    """
-    impl = TIMESTAMP
+class UnixTimestamp(TypeDecorator):
+    impl = Integer
     cache_ok = True
 
-    def process_bind_param(self, value, dialect) -> datetime:
-        if type(value) is str:
-            return datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
-        return value
+    def process_bind_param(self, value, dialect) -> int:
+        if type(value) == datetime:
+            return int(value.timestamp())
+        elif type(value) == str:
+            return int(datetime.strptime(value, '%Y-%m-%d %H:%M:%S').timestamp())
+        elif type(value) == int:
+            return value
+        return 0
+
+    def process_result_value(self, value, dialect) -> datetime:
+        return datetime.fromtimestamp(value, tz=timezone.utc) if value is not None else None
 
 class Path(Base):
     """
@@ -34,7 +38,7 @@ class Path(Base):
     preview = Column(Integer, nullable=False, default=0)
     hidden = Column(Integer, nullable=False, default=0)
     ord = Column(Integer, nullable=False, default=0)
-    last_updated = Column(MyTIMESTAMP, default='1999-01-01 00:00:00')
+    last_updated = Column(UnixTimestamp, nullable=False, default=0)
 
     @property
     def tags_plain(self) -> [str]:
@@ -74,8 +78,8 @@ class ImageMetadata(Base):
     rating = Column(Integer, default=0)
     lost = Column(Integer, default=0)
     removed = Column(Integer, default=0, nullable=False)
-    last_viewed = Column(MyTIMESTAMP, default='1999-01-01 00:00:00')
-    imported_at = Column(MyTIMESTAMP, default=datetime.now)
+    last_viewed = Column(UnixTimestamp, nullable=False, default=0)
+    imported_at = Column(UnixTimestamp, nullable=False, default=datetime.now(tz=timezone.utc))
 
     category_ref = relationship('Category')
     path_ref = relationship('Path', backref='images')
@@ -247,8 +251,8 @@ class ImageTagAi(Base):
 
     image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags_ai.id'), primary_key=True)
-    rating = Column(Integer, name='rating', default=0, nullable=False)
-    imported_at = Column(MyTIMESTAMP, name='imported_at', default=0, nullable=False)
+    rating = Column(Integer, default=0, nullable=False)
+    imported_at = Column(UnixTimestamp, default=0, nullable=False)
 
     images = relationship('ImageMetadata')
 
@@ -345,7 +349,7 @@ class Discover(Base):
     __tablename__ = 'discover'
 
     image_id    = Column(Integer, ForeignKey('images.id'), primary_key=True)
-    last_active = Column(MyTIMESTAMP, default=datetime.now)
+    last_active = Column(UnixTimestamp, nullable=False, default=datetime.now(tz=timezone.utc))
 
     image = relationship('ImageMetadata')
 

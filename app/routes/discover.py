@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from quart import Blueprint, render_template, jsonify, url_for, render_template_string
 from sqlalchemy import func
@@ -19,7 +19,7 @@ async def ping_image(image_id):
     if d is None:
         session.add(Discover(image_id=image_id))
     else:
-        d.last_active = datetime.now()
+        d.last_active = datetime.now(tz=timezone.utc)
 
     session.commit()
     session.close()
@@ -52,7 +52,7 @@ async def get_old_content(count:int, image_id):
 
     startId = session.get(Discover, image_id)
     if startId is None:
-        timestamp = datetime.now()
+        timestamp = datetime.now(tz=timezone.utc)
     else:
         timestamp = startId.last_active
 
