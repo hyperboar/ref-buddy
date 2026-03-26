@@ -24,7 +24,7 @@ class ImportedAiImage(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def convert_tags(cls, values):
-        values['tags'] = list(map(lambda key: {'tag_local_id': int(key), 'rating':values['tags'][key]}, values['tags']))
+        values['tags'] = list(map(lambda key: {'tag_local_id': key, 'rating':values['tags'][key]}, values['tags']))
         return values
 
 class ImportedAiFile(BaseModel):
@@ -39,6 +39,7 @@ def suck_folder_in(session):
     files_count = 0
     max = len(files)
 
+    count_new = 0
     for file in files:
         print(f"({files_count}/{max}) Checking file {os.path.join(path, file)}...", flush=True)
         with open(os.path.join(path, file), 'r') as f:
@@ -75,3 +76,5 @@ def suck_folder_in(session):
                         count_new += 1
             if count_new > 0:
                 session.commit()
+
+    return count_new
