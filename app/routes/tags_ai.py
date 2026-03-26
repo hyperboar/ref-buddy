@@ -2,13 +2,53 @@ import json
 import os
 from datetime import datetime, timezone
 
+from pydantic import BaseModel
 from quart import Blueprint, request, abort, render_template, redirect, jsonify
+
+from app.common.dto_basic import EmptyResponse
 from app.models import Session
 from app.models.models_lump import Tag, ImageMetadata, TagSet, TagAi, ImageTagAi, TagAiToTag, ImageTag
 from sqlalchemy.sql import exists
 from sqlalchemy import inspect
 
+from shared_utils.env import Env
+
 routes_tags_ai = Blueprint('routes_tags_ai', __name__)
+
+EXPORTED_URLS_FILENAME = 'exported_urls.json'
+AI_TAGS_DIRNAME = 'output_' + EXPORTED_URLS_FILENAME
+
+class ExportedUrlRow(BaseModel):
+    id:int
+    url:str
+
+class ExportedUrlsToSave(BaseModel):
+    json_urls:list[ExportedUrlRow]
+
+@routes_tags_ai.route('/tags-ai/begin')
+async def begin_processing():
+    return await render_template('tpl_tags_ai_begin.html')
+
+@routes_tags_ai.route('/tags-ai/save-exported-urls', methods=['POST'])
+async def save_exported_urls_to_be_fetched():
+
+    data = await request.json
+    model = ExportedUrlsToSave.model_validate(data)
+    if model.json_urls == '':
+        raise Exception('empty input')
+    if len(model.json_urls) == 0:
+        raise Exception('empty input')
+
+    path = os.path.join(Env.TMP_PATH, EXPORTED_URLS_FILENAME)
+    if os.path.exists(path):
+        os.remove(path)
+
+    with open(path, 'w', encoding='utf') as f:
+        json.dump(model.model_dump(), f)
+
+    return jsonify(EmptyResponse())
+
+
 
 
 @routes_tags_ai.route('/tags-ai/process')

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    {% include 'tpl_part_header.html' %}
+	<title>Tags AI Begin</title>
+</head>
+<body>
+<main class="">
+    <section id="fetch-tags-container" class="controls">
+
+        <div class="row" id="">
+            <label for="tags">Tags</label>
+            <textarea id="tags">
+                pron,-set,-animated
+            </textarea>
+            <label for="limit">Limit</label>
+            <input type="number" min="1" max="90000" value="10" id="limit"/>
+            <button class="btn-bg-blend" id="fetch-urls">Fetch</button>
+        </div>
+        <div class="row" id="save-fetched-container">
+            <label for="fetch-url-result">Export JSON</label>
+            <textarea id="fetched-url-result">
+            </textarea>
+            <button class="btn-bg-blend" id="save-exported-urls">Save</button>
+        </div>
+        <div class="" id="poll-tags-container">
+            <button class="btn-bg-blend" id="begin-fetch">BEGIN!</button>
+            <span id="fetch-status">Nothing yet</span>
+            <label for="ai-fetch-result"></label>
+            <textarea id="ai-fetch-result">
+
+            </textarea>
+        </div>
+
+{#            <div>#}
+{#                <div class="slider-container">#}
+{#                    <label for="orig-opacity">bg <span class="size"></span></label>#}
+{#                    <input type="range" min="1" max="100" value="100" step="10" id="orig-opacity"/>#}
+{#                </div>#}
+{#            </div>#}
+{#            <button class="btn-bg-blend" id="draw-save">Save</button>#}
+        </div>
+    </section>
+
+    <aside id="">
+{#        <div class="media-controls bg-blend-1">#}
+{#            <div class="controls-toggle"><button class="controls-toggle-btn" data-state="1" data-on="&gt;" data-off="&lt;">&gt;</button></div>#}
+{#            <div class="row timer">#}
+{#                <span class="timer-icon"></span>#}
+{#                <span id="time-current">0</span> / <span id="time-planned" value="120">0</span>#}
+{#                <div class="space"></div>#}
+{#                <button id="timer-start" class="btn-bg-blend" started="">Start</button>#}
+{#            </div>#}
+{#            <div class="row">#}
+{#                <label for="tag-set">Filter: </label>#}
+{#                <select id="tag-set" class="btn-bg-blend">#}
+{#                    <option value="none">None</option>#}
+{#                </select>#}
+{#                <div class="space"></div>#}
+{#                <button id="toggle-grayscale" class="btn-bg-blend" value="">Gray</button>#}
+{#            </div>#}
+{#            <div class="row">#}
+{#                <button id="open-vid-btn" class="btn-bg-blend hidden">play</button>#}
+{#                <button id="info-button" class="btn-bg-blend">info</button>#}
+{#                <button id="tags-filter-button" class="btn-bg-blend" title="Tags Filter">TF</button>#}
+{#                <button id="tags-edit-button" class="btn-bg-blend" title="Tags Editor">TE</button>#}
+{#                <button id="board-button" class="btn-bg-blend" title="Add to Board">B</button>#}
+{#                <button id="pallet-button" class="btn-bg-blend" title="Palette">plt</button>#}
+{#                <button id="draw-button" class="btn-bg-blend" title="Drawing Canvas">cnv</button>#}
+{#                <button class="fav btn-bg-blend" id="is-fav" value=""></button>#}
+{#            </div>#}
+{#            <div class="row">#}
+{#                <label for="rate-up">Rating: <span id="image-rating"></span></label>#}
+{#                <button class="rate-up btn-bg-blend" id="rate-up" value="0"></button>#}
+{#                <button class="rate-dn btn-bg-blend" id="rate-dn" value="0"></button>#}
+{#            </div>#}
+{#            <div class="row">#}
+{#                <label for="rate-up">Folder rating <span id="rate-fld"></span></label>#}
+{#                <button class="rate-up btn-bg-blend" id="rate-up-f" value="0"></button>#}
+{#                <button class="rate-dn btn-bg-blend" id="rate-dn-f" value="0"></button>#}
+{#            </div>#}
+{#            <div class="row">#}
+{#                <label for="same-folder">Same folder:</label>#}
+{#                <input type="checkbox" id="same-folder" value="true">#}
+{#                <input type="hidden" id="min-rating" value="0">#}
+{#                <a id="img-folder-link" href=""><img class="dir-link" src="/static/images/link.png"></a>#}
+{#            </div>#}
+{#            <div class="row">#}
+{#                <button id="prev" class="btn-bg-blend">&lt;</button>#}
+{#                <select id="pick-next-type" class="btn-bg-blend">#}
+{#                    <option value="rnd" selected="selected">At Random</option>#}
+{#                    <option value="name">By File Name</option>#}
+{#                    <option value="id">By Id</option>#}
+{#                    <option value="history">By History Only</option>#}
+{#                </select>#}
+{#                <button id="next" class="btn-bg-blend">&gt;</button>#}
+{#            </div>#}
+{#            <div id="history-marker" class="row hidden">#}
+{#                History shows&nbsp;<span id="h-cur-pos"></span>&nbsp;/&nbsp;<span id="h-max-pos"></span>#}
+{#            </div>#}
+{#        </div>#}
+    </aside>
+</main>
+
+
+
+<section hidden>
+
+</section>
+
+<!-- TEMPLATES -->
+
+<template id="">
+
+</template>
+
+<!-- END TEMPLATES -->
+
+
+<script type="importmap">
+    {
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "vendors/": "/static/js/vendors/",
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
+<script type="module" src="/static/js/view_tags_ai.js">
+</script>
+</body>
+</html>
