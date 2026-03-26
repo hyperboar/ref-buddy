@@ -18,3 +18,4 @@ tests/tmp/*
 # test coverage
 .coverage
 coverage.xml
+htmlcov/
