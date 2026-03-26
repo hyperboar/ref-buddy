@@ -429,13 +429,28 @@ class ApiBoards
 
 class ApiTagsAi
 {
-    static getPopupYesNo()
+    static getExportUrls(tags, limit)
     {
-        return fetch('/misc/yesno')
+        return fetch(`/export-urls?tags=${tags}&limit=${limit}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
                 return r.text()
+            })
+    }
+
+    static saveExportedUrls(json)
+    {
+        if (json === undefined || json === [])
+        {
+            throw new Error('Empty input')
+        }
+        const strData = JSON.stringify(json)
+        return fetch(`/tags-ai/save-exported-urls`, ApiInternal.getPostRequest({'json_urls': json}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
             })
     }
 }
