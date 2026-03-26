@@ -19,3 +19,8 @@ def copy_assets_to_env_func(assets_path):
 def copy_assets_to_env_mod(assets_path):
     dst = os.path.normpath(os.path.join(Env.IMAGES_PATH, '..'))
     shutil.copytree(assets_path, dst, dirs_exist_ok=True)
+
+@pytest.fixture
+def copy_assets_to_env_func(assets_path):
+    dst = os.path.normpath(os.path.join(Env.IMAGES_PATH, '..'))
+    shutil.copytree(assets_path, dst, dirs_exist_ok=True)

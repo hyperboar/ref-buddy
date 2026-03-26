@@ -64,3 +64,8 @@ async def test_save_exported_urls_invalid_empty(client, add_images_url_with_one_
     payload = {'json_urls': []}
     resp = await client.post('/tags-ai/save-exported-urls', json=payload)
     assert resp.status_code != 200
+
+@pytest.mark.asyncio
+async def test_suck_folder_in_works(client, add_images_url_with_one_ai_tag):
+    resp = await client.get('/tags-ai/suck-folder-in')
+    assert resp.status_code == 200
