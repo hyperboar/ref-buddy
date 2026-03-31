@@ -21,85 +21,84 @@ class ImageMetadataImporter:
         folder_path = os.path.normpath(folder_path)
         formats = tuple(Env.IMPORT_FORMATS)
 
-        session = Session()
+        with Session() as session:
+            sts = Ctrl.get_categories(session)
 
-        sts = Ctrl.get_categories(session)
-
-        start_time = time.time()
-        new_count = 0
-        self.np.header(f'Starting image import from folder "{folder_path}"')
-        self.np.header(f'Image formats to be imported: {formats}')
-
-        self.np.step_up()
-
-        time_of_import = datetime.now(tz=timezone.utc)
-        # -1 just to make sure we're in the past
-        update_time = time_of_import - timedelta(seconds=1)
-
-        for dir_path, dir_names, filenames in os.walk(folder_path):
-            count = 0
-            max_count = len(filenames)
-            msg_dir = f'Importing "{os.path.relpath(dir_path, folder_path)}"...'
-
-            dir_path = os.path.normpath(dir_path)
-            rel_path = Path.path_serialize(os.path.relpath(dir_path, folder_path))
-            path_obj = session.query(Path).filter(Path.path_raw == rel_path).first()
-            if path_obj is not None:
-                # check and modify update time
-                path_mtime = int(os.path.getmtime(dir_path))
-                mdt = datetime.fromtimestamp(path_mtime, tz=timezone.utc)
-                pm_diff = mdt - path_obj.last_updated
-                if pm_diff.total_seconds() < 1.0:
-                    continue
-                else:
-                    self.np.line(msg_dir, replace=True)
-
-                    path_obj.last_updated = mdt
-                    existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
-                    filenames = [f for f in filenames if f not in existing_files]
-
-            for file_name in filenames:
-                if not file_name.endswith(formats):
-                    continue
-                file_path = Path.path_serialize(os.path.join(rel_path, file_name))
-                try:
-                    existing_metadata = Ctrl.get_by_path(file_path, session=session)
-                    if not existing_metadata:
-                        count += 1
-                        new_count += 1
-                        self.print_progress(msg_dir, file_name, count, max_count, True)
-                        Ctrl.create(file_path, sts, time_of_import, session=session)
-                    else:
-                        count += 1
-                        self.print_progress(msg_dir, file_name, count, max_count, False)
-                except Exception as e:
-                    self.np.header(f'\nError processing  {file_path}: {sys.exc_info()[0]}. {e}')
-                    raise
-
-            if path_obj is not None:
-                self.np.line('')
-
-        self.np.step_down()
-        if new_count == 0:
-            self.np.header(f'File search completed! No new images found.')
-            session.rollback()
-        else:
-            self.np.header(f'File search completed! Found {new_count} new files.')
-            make_database_backup(marker='before_import', force=True)
-            session.commit()
+            start_time = time.time()
+            new_count = 0
+            self.np.header(f'Starting image import from folder "{folder_path}"')
+            self.np.header(f'Image formats to be imported: {formats}')
 
             self.np.step_up()
 
-            assign_folder_tags(start_at=update_time, session=session, printer=self.np)
-            assign_animation_tags(start_at=update_time, session=session, printer=self.np)
-            assign_video_extra_data(start_at=update_time, session=session, printer=self.np)
-            make_database_backup(marker='after_import', force=True)
-            generate_thumbs(start_at=update_time)
-            gif_split(force_all=False)
+            time_of_import = datetime.now(tz=timezone.utc)
+            # -1 just to make sure we're in the past
+            update_time = time_of_import - timedelta(seconds=1)
+
+            for dir_path, dir_names, filenames in os.walk(folder_path):
+                count = 0
+                max_count = len(filenames)
+                msg_dir = f'Importing "{os.path.relpath(dir_path, folder_path)}"...'
+
+                dir_path = os.path.normpath(dir_path)
+                rel_path = Path.path_serialize(os.path.relpath(dir_path, folder_path))
+                path_obj = session.query(Path).filter(Path.path_raw == rel_path).first()
+                if path_obj is not None:
+                    # check and modify update time
+                    path_mtime = int(os.path.getmtime(dir_path))
+                    mdt = datetime.fromtimestamp(path_mtime, tz=timezone.utc)
+                    pm_diff = mdt - path_obj.last_updated
+                    if pm_diff.total_seconds() < 1.0:
+                        continue
+                    else:
+                        self.np.line(msg_dir, replace=True)
+
+                        path_obj.last_updated = mdt
+                        existing_files = [im.filename for im in session.query(ImageMetadata).filter(ImageMetadata.path_id == path_obj.id)]
+                        filenames = [f for f in filenames if f not in existing_files]
+
+                for file_name in filenames:
+                    if not file_name.endswith(formats):
+                        continue
+                    file_path = Path.path_serialize(os.path.join(rel_path, file_name))
+                    try:
+                        existing_metadata = Ctrl.get_by_path(file_path, session=session)
+                        if not existing_metadata:
+                            count += 1
+                            new_count += 1
+                            self.print_progress(msg_dir, file_name, count, max_count, True)
+                            Ctrl.create(file_path, sts, time_of_import, session=session)
+                        else:
+                            count += 1
+                            self.print_progress(msg_dir, file_name, count, max_count, False)
+                    except Exception as e:
+                        self.np.header(f'\nError processing  {file_path}: {sys.exc_info()[0]}. {e}')
+                        raise
+
+                if path_obj is not None:
+                    self.np.line('')
 
             self.np.step_down()
+            if new_count == 0:
+                self.np.header(f'File search completed! No new images found.')
+                session.rollback()
+            else:
+                self.np.header(f'File search completed! Found {new_count} new files.')
+                make_database_backup(marker='before_import', force=True)
+                session.commit()
 
-        self.np.header(f'Import completed in {int(time.time() - start_time)} seconds.')
+                self.np.step_up()
+
+                assign_folder_tags(start_at=update_time, session=session, printer=self.np)
+                assign_animation_tags(start_at=update_time, session=session, printer=self.np)
+                assign_video_extra_data(start_at=update_time, session=session, printer=self.np)
+                make_database_backup(marker='after_import', force=True)
+                generate_thumbs(start_at=update_time)
+                gif_split(force_all=False)
+
+                self.np.step_down()
+
+            self.np.header(f'Import completed in {int(time.time() - start_time)} seconds.')
 
     def print_progress(self, msg_dir, file_name: str, cur: int, total: int, is_new: bool):
         if is_new:
