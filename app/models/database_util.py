@@ -1,8 +1,8 @@
 import os
 
+from shared_utils.env import Env
 from app.models import Session
 from app.models.models_lump import Color, Tag, Category, TagSet, Base
-from shared_utils.env import Env
 
 
 class DatabaseUtil:
