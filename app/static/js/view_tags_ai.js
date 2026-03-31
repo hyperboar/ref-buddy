@@ -18,9 +18,10 @@ function initializeComponents()
         const limit = stageFetchContainer.querySelector('#limit').value
         ApiTagsAi
             .getExportUrls(tags, limit)
-            .then(text =>
+            .then(json =>
             {
-                stageSaveFetchedContainer.querySelector('#fetched-url-result').value = text
+                stageSaveFetchedContainer.querySelector('#fetch-url-result-count').innerHTML = json.length
+                stageSaveFetchedContainer.querySelector('#fetched-url-result').value = JSON.stringify(json)
             })
     })
 

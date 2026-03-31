@@ -6,7 +6,7 @@
 </head>
 <body>
 <main class="">
-    <section id="fetch-tags-container" class="controls">
+    <section id="fetch-tags-container" class="">
 
         <div class="row" id="">
             <label for="tags">Tags</label>
@@ -18,10 +18,19 @@
             <button class="btn-bg-blend" id="fetch-urls">Fetch</button>
         </div>
         <div class="row" id="save-fetched-container">
-            <label for="fetch-url-result">Export JSON</label>
-            <textarea id="fetched-url-result">
-            </textarea>
-            <button class="btn-bg-blend" id="save-exported-urls">Save</button>
+            <div>
+                <label for="fetch-url-result">Export JSON</label>
+            </div>
+            <div>
+                Count: <span id="fetch-url-result-count">0</span>
+            </div>
+            <div>
+                <textarea id="fetched-url-result">
+                </textarea>
+            </div>
+            <div>
+                <button class="btn-bg-blend" id="save-exported-urls">Save</button>
+            </div>
         </div>
         <div class="" id="poll-tags-container">
             <button class="btn-bg-blend" id="begin-fetch">BEGIN!</button>

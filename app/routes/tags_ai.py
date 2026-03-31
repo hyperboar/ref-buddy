@@ -1,5 +1,7 @@
 import json
 import os
+import shutil
+from datetime import datetime
 
 from pydantic import BaseModel
 from quart import Blueprint, request, abort, render_template, redirect, jsonify
@@ -40,8 +42,14 @@ async def save_exported_urls_to_be_fetched():
         raise Exception('empty input')
 
     path = os.path.join(Env.TMP_PATH, EXPORTED_URLS_FILENAME)
+    out_dir = os.path.join(Env.TMP_PATH, AI_TAGS_DIRNAME)
     if os.path.exists(path):
-        os.remove(path)
+        if os.path.exists(out_dir):
+            stamp = datetime.now().strftime('_%Y-%m-%d-%H-%M-%S')
+            shutil.move(path, path + stamp + '.json')
+            shutil.move(out_dir, out_dir + stamp)
+        else:
+            os.remove(path)
 
     with open(path, 'w', encoding='utf') as f:
         json.dump(model.model_dump(), f)

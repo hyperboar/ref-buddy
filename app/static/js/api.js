@@ -435,7 +435,7 @@ class ApiTagsAi
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
-                return r.text()
+                return r.json()
             })
     }
 
