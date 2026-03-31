@@ -1,10 +1,10 @@
 import pytest
 
-from tests.test_app.fixtures.data import add_4_images_1_path, add_1_mp4_1_path, add_1_gif_1_path, clean_database
+from tests.fixtures.data import add_4_images_1_path, add_1_mp4_1_path, add_1_gif_1_path, clean_database
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_database(copy_assets_to_env_mod):
+def setup_database(copy_all_assets_to_env_mod):
     clean_database()
 
 @pytest.fixture(scope="module", autouse=True)

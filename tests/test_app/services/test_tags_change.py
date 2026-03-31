@@ -1,7 +1,7 @@
 import pytest
 
 from app.services.image_metadata_controller import ImageMetadataController
-from tests.test_app.fixtures.data import clean_database, add_4_images_1_path, add_2_tags
+from tests.fixtures.data import clean_database, add_4_images_1_path, add_2_tags
 
 
 @pytest.fixture(scope='module', autouse=True)

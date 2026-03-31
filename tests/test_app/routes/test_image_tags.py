@@ -1,9 +1,9 @@
 import pytest
 
-from tests.test_app.fixtures.data import clean_database, add_4_images_1_path, add_2_tags
+from tests.fixtures.data import clean_database, add_4_images_1_path, add_2_tags
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_module(config_path_testing_fresh_mod, copy_assets_to_env_mod):
+def setup_module(config_path_testing_fresh_mod, copy_all_assets_to_env_mod):
     pass
 
 @pytest.fixture(autouse=True)

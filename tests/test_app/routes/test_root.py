@@ -1,6 +1,6 @@
 import pytest
 
-from tests.test_app.fixtures.data import clean_database
+from tests.fixtures.data import clean_database
 
 
 @pytest.fixture(scope="module", autouse=True)

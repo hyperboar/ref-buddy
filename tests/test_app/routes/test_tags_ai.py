@@ -5,7 +5,7 @@ import pytest
 
 from app.routes.tags_ai import EXPORTED_URLS_FILENAME
 from shared_utils.env import Env
-from tests.test_app.fixtures.data import clean_database, add_4_images_1_path, assign_ai_tag
+from tests.fixtures.data import clean_database, add_4_images_1_path, assign_ai_tag
 
 
 @pytest.fixture(scope='module', autouse=True)

@@ -1,10 +1,10 @@
 import pytest
 
-from tests.test_app.fixtures.data import add_4_images_1_path, clean_database
+from tests.fixtures.data import add_4_images_1_path, clean_database
 
 
 @pytest.fixture(scope="module", autouse=True)
-def add_images_for_all_tests(config_path_testing_fresh_mod, copy_assets_to_env_mod, session_real):
+def add_images_for_all_tests(config_path_testing_fresh_mod, copy_all_assets_to_env_mod, session_real):
     clean_database()
     session = session_real()
     add_4_images_1_path(session)

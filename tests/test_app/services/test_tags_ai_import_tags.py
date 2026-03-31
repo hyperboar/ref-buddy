@@ -8,11 +8,11 @@ from pydantic import ValidationError
 from app.models.models_lump import TagAi
 from app.services.tags_ai import suck_folder_in, AI_TAGS_DIRNAME
 from shared_utils.env import Env
-from tests.test_app.fixtures.data import clean_database, add_4_images_1_path, assign_ai_tag
+from tests.fixtures.data import clean_database, add_4_images_1_path, assign_ai_tag
 
 
 @pytest.fixture
-def reset_database_with_assets_func(config_path_testing_fresh_func, copy_assets_to_env_func):
+def reset_database_with_assets_func(config_path_testing_fresh_func, copy_all_assets_to_env_func):
     clean_database()
 
 @pytest.fixture

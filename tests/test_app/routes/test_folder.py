@@ -1,6 +1,6 @@
 import pytest
 
-from tests.test_app.fixtures.data import add_4_images_1_path, clean_database, assign_ai_tag
+from tests.fixtures.data import add_4_images_1_path, clean_database, assign_ai_tag
 
 
 @pytest.fixture(scope='module', autouse=True)
