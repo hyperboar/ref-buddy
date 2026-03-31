@@ -9,7 +9,7 @@ def clean_database():
     DatabaseUtil.drop_and_create(get_engine())
 
 def add_4_images_1_path(session) -> None:
-    session.merge(Path(id=1, path="everything"))
+    session.merge(Path(id=1, path="everything/dir_1"))
     session.flush()
 
     new_image = lambda s, imid, fn: s.add(ImageMetadata(image_id=imid,
@@ -35,7 +35,7 @@ def assign_ai_tag(session) -> None:
     session.commit()
 
 def add_1_mp4_1_path(session) -> None:
-    session.merge(Path(id=1, path="everything"))
+    session.merge(Path(id=1, path="everything/dir_1"))
     session.flush()
 
     session.add(ImageMetadata(image_id=5,
@@ -46,7 +46,7 @@ def add_1_mp4_1_path(session) -> None:
     session.commit()
 
 def add_1_gif_1_path(session) -> None:
-    session.merge(Path(id=1, path="everything"))
+    session.merge(Path(id=1, path="everything/dir_1"))
     session.flush()
 
     session.add(ImageMetadata(image_id=6,
