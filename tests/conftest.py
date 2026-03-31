@@ -1,7 +1,9 @@
 import os
+import shutil
 
 import pytest
 
+from shared_utils.env import Env
 from tests import cleanup_tmp_files, init_new_env_config_template
 
 
@@ -33,3 +35,17 @@ def config_path_testing_fresh_func(config_path_testing_template):
 def config_path_testing_fresh_mod(config_path_testing_template):
     source, marker = init_new_env_config_template(config_path_testing_template)
     return source
+
+@pytest.fixture(scope='session')
+def assets_template_path():
+    return os.path.abspath('./tests/test_app/assets')
+
+@pytest.fixture(scope='module')
+def copy_assets_to_env_mod(assets_template_path):
+    dst = os.path.normpath(os.path.join(Env.IMAGES_PATH, '..'))
+    shutil.copytree(assets_template_path, dst, dirs_exist_ok=True)
+
+@pytest.fixture
+def copy_assets_to_env_func(assets_template_path):
+    dst = os.path.normpath(os.path.join(Env.IMAGES_PATH, '..'))
+    shutil.copytree(assets_template_path, dst, dirs_exist_ok=True)
