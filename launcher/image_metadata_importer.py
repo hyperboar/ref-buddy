@@ -22,7 +22,8 @@ class ImageMetadataImporter:
         formats = tuple(Env.IMPORT_FORMATS)
 
         with Session() as session:
-            sts = Ctrl.get_categories(session)
+            cats = Ctrl.get_categories(session)
+            cat_names = [c.category for c in cats]
 
             start_time = time.time()
             new_count = 0
@@ -42,6 +43,9 @@ class ImageMetadataImporter:
 
                 dir_path = os.path.normpath(dir_path)
                 rel_path = Path.path_serialize(os.path.relpath(dir_path, folder_path))
+
+                if rel_path in cat_names: continue
+
                 path_obj = session.query(Path).filter(Path.path_raw == rel_path).first()
                 if path_obj is not None:
                     # check and modify update time
@@ -67,7 +71,7 @@ class ImageMetadataImporter:
                             count += 1
                             new_count += 1
                             self.print_progress(msg_dir, file_name, count, max_count, True)
-                            Ctrl.create(file_path, sts, time_of_import, session=session)
+                            Ctrl.create(file_path, cats, time_of_import, session=session)
                         else:
                             count += 1
                             self.print_progress(msg_dir, file_name, count, max_count, False)
