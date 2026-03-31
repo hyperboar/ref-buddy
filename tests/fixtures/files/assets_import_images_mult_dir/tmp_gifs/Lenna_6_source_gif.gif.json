@@ -1,0 +1,23 @@
+{
+    "dur": 400,
+    "source": "Lenna_6_source_gif.gif",
+    "frames": [
+        {
+            "fn": "1.jpg",
+            "dur": 100
+        },
+        {
+            "fn": "2.jpg",
+            "dur": 100
+        },
+        {
+            "fn": "3.jpg",
+            "dur": 100
+        },
+        {
+            "fn": "4.jpg",
+            "dur": 100
+        }
+    ],
+    "image_id": 6
+}
