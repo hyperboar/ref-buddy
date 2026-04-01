@@ -15,58 +15,6 @@ from shared_utils.utils import Utils
 
 
 class ImageMetadataController:
-
-    # region CRUD
-
-    @staticmethod
-    def create(path: str, categories=None, import_at=None, session=None) -> ImageMetadata|None:
-
-        dir = os.path.dirname(path)
-        file = os.path.basename(path)
-
-        cat_list = [s for s in categories if dir.startswith(s.category)]
-
-        if cat_list is None or len(cat_list) == 0:
-            print(
-                f"Path '{path}' should be in study_type named folder (These: {','.join([s.category for s in categories])})")
-            return None
-
-        ctg = cat_list[0]
-        new_path = dir
-
-
-        auto_commit = False
-        if session is None:
-            auto_commit = True
-            session = Session()
-
-        path_row = session.query(Path).filter(Path.path_raw == new_path).first()
-        if path_row is None:
-            path_ref = Path(path_raw=new_path)
-            session.add(path_ref)
-            session.commit()
-            path_id = path_ref.id
-        else:
-            path_id = path_row.id
-
-        source_type = ImageMetadata.source_type_by_path(os.path.join(Env.IMAGES_PATH, path))
-
-        # print(f"inserting {(path_id, ctg.id, file)} for path '{new_path}'")
-        if import_at is None:
-            new_image = ImageMetadata(path_id=path_id, category_id=ctg.id, filename=file, source_type_id=source_type)
-        else:
-            new_image = ImageMetadata(path_id=path_id, category_id=ctg.id, filename=file, source_type_id=source_type, imported_at=import_at)
-        session.add(new_image)
-
-        if auto_commit:
-            session.commit()
-        else:
-            session.flush()
-
-        return new_image
-
-    # endregion CRUD
-
     # region Convenience
 
     @staticmethod
@@ -99,6 +47,7 @@ class ImageMetadataController:
     @staticmethod
     def get_by_path(path, session=None) -> ImageMetadata|None:
         filename = os.path.basename(path)
+
         rows = session.query(ImageMetadata).filter(ImageMetadata.filename == filename).all()
         if len(rows) == 0:
             return None
