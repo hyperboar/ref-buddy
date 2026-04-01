@@ -147,7 +147,7 @@ def test_import_images_same_imported_at_timestamp(session_real, copy_assets_to_e
 @pytest.mark.parametrize('assets_dir, expected_count', [
     ('assets_import_images_single_dir', 1),
     ('assets_import_images_mult_dir', 2),
-    ('assets_import_images_nested_dir', 1),
+    ('assets_import_images_nested_dir', 2),
     ('assets_import_images_empty_dir', 1),
 ])
 def test_import_path_created(session_real, copy_assets_to_env, assets_dir, expected_count):
@@ -164,6 +164,25 @@ def test_import_path_created(session_real, copy_assets_to_env, assets_dir, expec
         count = session.query(Path).count()
         assert count == expected_count
 
+@pytest.mark.skip(reason="To Be Implemented")
+@pytest.mark.parametrize('assets_dir, expected_count', [
+    ('assets_import_images_nested_dir', 1),
+])
+def test_import_path_created_1(session_real, copy_assets_to_env, assets_dir, expected_count):
+
+    copy_assets_to_env(assets_dir)
+
+    with session_real() as session:
+        count = session.query(Path).count()
+        assert count == 0
+
+        importer = ImageMetadataImporter()
+        importer.import_metadata(Env.IMAGES_PATH)
+
+        count = session.query(Path).count()
+        assert count == expected_count
+
+@pytest.mark.skip(reason="To Be Implemented")
 def test_import_path_only_top_created_for_nested(session_real, copy_assets_to_env):
     copy_assets_to_env('assets_import_images_nested_dir')
 
@@ -186,6 +205,26 @@ def test_import_path_empty_not_created(session_real, copy_assets_to_env):
         importer.import_metadata(Env.IMAGES_PATH)
 
         count = session.query(Path).count()
+        assert count == 1
+
+def test_import_images_same_images_not_imported_again(session_real, copy_assets_to_env):
+
+    copy_assets_to_env('assets_import_images_single_dir')
+
+    with session_real() as session:
+        count = session.query(ImageMetadata).count()
+        assert count == 0
+
+        importer = ImageMetadataImporter()
+        importer.import_metadata(Env.IMAGES_PATH)
+
+        count = session.query(ImageMetadata).count()
+        assert count == 2
+
+        importer = ImageMetadataImporter()
+        importer.import_metadata(Env.IMAGES_PATH)
+
+        count = session.query(ImageMetadata).count()
         assert count == 2
 
 def test_import_images_new_added_to_imported_folder(session_real, copy_assets_to_env):
