@@ -169,6 +169,8 @@ class ImageMetadata(Base):
             return 2
 
         if path.endswith('.webp'):
+            if not os.path.isabs(path):
+                path = os.path.join(Env.IMAGES_PATH, path)
             with Image.open(path) as img:
                 if hasattr(img, 'is_animated') and img.is_animated:
                     return 2
