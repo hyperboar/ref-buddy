@@ -49,7 +49,7 @@ jobs:
       - name: Run launcher tests
         run: pytest -v tests/test_launcher
 
-      - name: Run tools tests
+      - name: Run assets import tests
         run: pytest -v tests/test_import
 
       - name: Run tools tests
