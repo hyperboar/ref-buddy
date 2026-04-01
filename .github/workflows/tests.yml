@@ -32,6 +32,9 @@ jobs:
         run: pytest -v tests/test_launcher
 
       - name: Run tools tests
+        run: pytest -v tests/test_import
+
+      - name: Run tools tests
         run: pytest -v tests/test_tools
 
   coverage:
