@@ -104,10 +104,12 @@ def test_import_images_path_id(session_real, copy_assets_to_env):
 
         get_item = lambda session, fn: session.query(ImageMetadata).filter(ImageMetadata.filename == fn).first()
 
-        assert get_item(session, 'Lenna_1.jpg').path_id == 1
-        assert get_item(session, 'Lenna_2.jpg').path_id == 1
-        assert get_item(session, 'Lenna_3.jpg').path_id == 2
-        assert get_item(session, 'Lenna_4.jpg').path_id == 2
+        assert session.query(ImageMetadata).filter(ImageMetadata.path_id == 1).count() == 2
+        assert session.query(ImageMetadata).filter(ImageMetadata.path_id == 2).count() == 2
+
+        # same path
+        assert get_item(session, 'Lenna_1.jpg').path_id == get_item(session, 'Lenna_2.jpg').path_id
+        assert get_item(session, 'Lenna_3.jpg').path_id == get_item(session, 'Lenna_4.jpg').path_id
 
 @pytest.mark.parametrize('assets_dir', [
     'assets_import_images_mult_dir',
