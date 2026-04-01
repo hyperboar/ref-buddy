@@ -17,6 +17,7 @@ class UnixTimestamp(TypeDecorator):
 
     def process_bind_param(self, value, dialect) -> int:
         if type(value) == datetime:
+            if value == datetime.min: return 0
             return int(value.timestamp())
         elif type(value) == str:
             return int(datetime.strptime(value, '%Y-%m-%d %H:%M:%S').timestamp())
@@ -26,6 +27,10 @@ class UnixTimestamp(TypeDecorator):
 
     def process_result_value(self, value, dialect) -> datetime:
         return datetime.fromtimestamp(value, tz=timezone.utc) if value is not None else None
+
+    @staticmethod
+    def default() -> datetime:
+        return datetime.fromtimestamp(0, tz=timezone.utc)
 
 class Path(Base):
     """
@@ -38,7 +43,7 @@ class Path(Base):
     preview = Column(Integer, nullable=False, default=0)
     hidden = Column(Integer, nullable=False, default=0)
     ord = Column(Integer, nullable=False, default=0)
-    last_updated = Column(UnixTimestamp, nullable=False, default=0)
+    last_updated = Column(UnixTimestamp, nullable=False, default=UnixTimestamp.default())
 
     @property
     def tags_plain(self) -> [str]:
@@ -78,7 +83,7 @@ class ImageMetadata(Base):
     rating = Column(Integer, default=0)
     lost = Column(Integer, default=0)
     removed = Column(Integer, default=0, nullable=False)
-    last_viewed = Column(UnixTimestamp, nullable=False, default=0)
+    last_viewed = Column(UnixTimestamp, nullable=False, default=UnixTimestamp.default())
     imported_at = Column(UnixTimestamp, nullable=False, default=datetime.now(tz=timezone.utc))
 
     category_ref = relationship('Category')
@@ -105,7 +110,7 @@ class ImageMetadata(Base):
 
     @property
     def path(self):
-        return os.path.join(self.path_ref.path, self.filename)
+        return Path.path_serialize(os.path.join(self.path_ref.path, self.filename))
 
     @property
     def path_abs(self):
@@ -252,7 +257,7 @@ class ImageTagAi(Base):
     image_id = Column(Integer, ForeignKey('images.id'), primary_key=True)
     tag_id = Column(Integer, ForeignKey('tags_ai.id'), primary_key=True)
     rating = Column(Integer, default=0, nullable=False)
-    imported_at = Column(UnixTimestamp, default=0, nullable=False)
+    imported_at = Column(UnixTimestamp, default=UnixTimestamp.default(), nullable=False)
 
     images = relationship('ImageMetadata')
 
