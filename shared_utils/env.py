@@ -31,6 +31,8 @@ class Env:
 
     VIDEO_PLAYER_PATH:str
 
+    DB_CHANGES_TO_BACKUP:int
+
     @classmethod
     def apply_config(cls, config_path):
         if not os.path.exists(config_path):
@@ -67,6 +69,8 @@ class Env:
         cls.LOGS = os.getenv('LOGS')
 
         cls.VIDEO_PLAYER_PATH = os.getenv('VIDEO_PLAYER_PATH')
+
+        cls.DB_CHANGES_TO_BACKUP = int(os.getenv('DB_CHANGES_TO_BACKUP'))
 
         # some additional setup
         os.environ['SQLITE_TMPDIR'] = cls.TMP_PATH
