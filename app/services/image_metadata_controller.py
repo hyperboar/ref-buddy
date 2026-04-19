@@ -93,31 +93,17 @@ class ImageMetadataController:
         return q.offset(filter_dto.offset).limit(filter_dto.limit).all()
 
     @staticmethod
-    def get_random_by_request(image_id, request:Request, session=None) -> 'ImageMetadata':
-        # same_folder = request.args.get('sf', default=0, type=int)
-        # min_rating  = request.args.get('r', default=0, type=int)
-
+    def get_random_by_request(image_id, request:Request, session=None) -> ImageMetadata:
         data = request.args.to_dict()
         data['same-folder'] = data['sf'] if 'sf' in data else 0
         data['minr'] = data['r'] if 'r' in data else 0
         data['image-ids'] = str(image_id)
         filter_dto = FilterRequestDto.model_validate(data)
 
-        # tags_str = urllib.parse.unquote(request.args.get('tags', default=""))
-        # tags_pos, tags_neg = handle_tags(tags_str)
-
-        # tag_set_id = request.args.get('tag-set', default='all')
-        # tag_set_id = tag_set_id if tag_set_id != '' else 'all'
-        # tags_pos, tags_neg = get_tags_by_set(tag_set_id, session, tags_pos, tags_neg)
-
-        # q = ImageMetadataController.get_query_imagemetadata(
-        #     same_folder=same_folder, tags=(tags_pos, tags_neg),
-        #     image_id=image_id, min_rating=min_rating, session=session)
         q = ImageMetadataController.get_query_images_new4(filter_dto, session)
-        q = q.filter(ImageMetadata.image_id != image_id).order_by(func.random())
-        row = q.first()
+        q = q.filter(ImageMetadata.image_id != image_id).order_by(func.random()).limit(1)
 
-        return row
+        return q.first()
 
     @staticmethod
     def get_next_name_by_request(image_id:int, step:int, request:Request, session=None) -> ImageMetadata:
