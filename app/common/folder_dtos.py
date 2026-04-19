@@ -20,6 +20,10 @@ class FilterRequestDto(BaseModel):
     image_ids:list[int]|None = Field(default=None, alias='image-ids')
     same_folder:int|None = Field(default=None, alias='same-folder')
     path_id:int|None = Field(default=None, alias='path-id')
+    lost:int|None = Field(default=0)
+    removed:int|None = Field(default=0)
+    sort_order:int|None = Field(default=None, alias='order')
+    sort_type:int|None = Field(default=None, alias='by')
 
     @model_validator(mode='before')
     @classmethod
