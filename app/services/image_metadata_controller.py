@@ -195,8 +195,9 @@ class ImageMetadataController:
 
         # unconditional min_rating
         q = q.filter(filter_dto.min_rating <= ImageMetadata.rating, ImageMetadata.rating <= filter_dto.max_rating)
-        q = q.filter(ImageMetadata.lost == 0)
-        q = q.filter(ImageMetadata.removed == 0)
+
+        q = q.filter(ImageMetadata.lost == filter_dto.lost)
+        q = q.filter(ImageMetadata.removed == filter_dto.removed)
 
         return q
 
