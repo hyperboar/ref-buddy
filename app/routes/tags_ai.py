@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pydantic import BaseModel
 from quart import Blueprint, request, abort, render_template, redirect, jsonify
@@ -79,13 +79,27 @@ async def update_mapped_tags():
     if request.method == 'GET':
         return await render_template('tpl_tags_ai_update_mapped.html')
     else:
-        with Session() as session:
+        with (Session() as session):
             mapping = session.query(TagAiToTag).all()
+
+            latest_import_at = session.query(ImageTagAi.imported_at).order_by(ImageTagAi.imported_at.desc()).first()
+            latest_import_at = latest_import_at[0] - timedelta(days=30)
+            latest_import_at = int(latest_import_at.timestamp())
 
             count_new = 0
             new_tags = {}
+            max_count = len(mapping)
+            count = 0
             for m in mapping:
-                img_ids = [im[0] for im in session.query(ImageTagAi.image_id).filter(ImageTagAi.tag_id == m.ai_id).all()]
+                count += 1
+                print(f'({count}/{max_count}) new for {m.real_tag.tag}:{m.ai_tag.tag} _', end='', flush=True)
+                q = (
+                    session
+                        .query(ImageTagAi.image_id)
+                        .filter(ImageTagAi.tag_id == m.ai_id)
+                        .filter(ImageTagAi.imported_at > latest_import_at)
+                     )
+                img_ids = [im[0] for im in q.all()]
                 for img_id in img_ids:
                     result = session.merge(ImageTag(image_id=img_id, tag_id=m.real_id, by_ai=1))
                     if inspect(result).pending:
@@ -94,7 +108,7 @@ async def update_mapped_tags():
                         new_tags[m.real_tag.tag] += 1
                         count_new += 1
 
-                print(f'new for {m.real_tag.tag}:{m.ai_tag.tag} {count_new}')
+                print(f'\r({count}/{max_count}) new for {m.real_tag.tag}:{m.ai_tag.tag} {count_new}', flush=True)
                 if count_new > 0:
                     count_new = 0
                     session.commit()
