@@ -26,16 +26,29 @@ function initializeComponents()
     })
 
     // stage 2
-    stageSaveFetchedContainer.querySelector('#save-exported-urls').addEventListener('click', e =>
+    stageSaveFetchedContainer.querySelector('#save-exported-urls').addEventListener('click', evt =>
     {
         console.log('doing smth')
         const data = stageSaveFetchedContainer.querySelector('#fetched-url-result').value
         const jsonData = JSON.parse(data)
+
+        evt.target.classList.remove('op-success', 'op-fail')
+        evt.target.classList.add('loading')
+
         ApiTagsAi
             .saveExportedUrls(jsonData)
             .then(json =>
             {
+                evt.target.classList.add('op-success')
                 console.log('saved!!')
+            })
+            .catch(error =>
+            {
+                evt.target.classList.add('op-fail')
+            })
+            .finally(() =>
+            {
+                evt.target.classList.remove('loading')
             })
     })
 }
