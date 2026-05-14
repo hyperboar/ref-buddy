@@ -73,6 +73,7 @@ def relink_lost_images():
         if not os.path.exists(img.path_abs):
             continue
         found.append((img.path_abs, "same"))
+        img.lost = 0
         lost.remove(img)
         count += 1
     print(f'\rLooking images that were mark lost but still exist... Done ({count})')
@@ -95,6 +96,7 @@ def relink_lost_images():
         img.filename = fname
         img.mark_restored(session=s, auto_commit=False)
         found.append(("png",path))
+        img.lost = 0
         lost.remove(img)
         count += 1
 
