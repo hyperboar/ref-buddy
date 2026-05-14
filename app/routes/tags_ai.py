@@ -65,40 +65,46 @@ async def process():
 
 
 #region ---- JSON API ----
-@routes_tags_ai.route('/tags-ai/suck-folder-in')
+@routes_tags_ai.route('/tags-ai/suck-folder-in', methods=['GET', 'POST'])
 async def suck_in_all_tags_in_folder():
-    with Session() as session:
-        result = suck_folder_in(session)
-        return jsonify(IntResultResponse.model_validate(result))
+    if request.method == 'GET':
+        return await render_template('tpl_tags_ai_suck_in.html')
+    else:
+        with Session() as session:
+            result = suck_folder_in(session)
+            return jsonify(IntResultResponse.model_validate(result))
 
-@routes_tags_ai.route('/tags-ai/update-mapped-tags')
+@routes_tags_ai.route('/tags-ai/update-mapped-tags', methods=['GET', 'POST'])
 async def update_mapped_tags():
-    with Session() as session:
-        mapping = session.query(TagAiToTag).all()
+    if request.method == 'GET':
+        return await render_template('tpl_tags_ai_update_mapped.html')
+    else:
+        with Session() as session:
+            mapping = session.query(TagAiToTag).all()
 
-        count_new = 0
-        new_tags = {}
-        for m in mapping:
-            img_ids = [im[0] for im in session.query(ImageTagAi.image_id).filter(ImageTagAi.tag_id == m.ai_id).all()]
-            for img_id in img_ids:
-                result = session.merge(ImageTag(image_id=img_id, tag_id=m.real_id, by_ai=1))
-                if inspect(result).pending:
-                    if not m.real_tag.tag in new_tags:
-                        new_tags[m.real_tag.tag] = 0
-                    new_tags[m.real_tag.tag] += 1
-                    count_new += 1
+            count_new = 0
+            new_tags = {}
+            for m in mapping:
+                img_ids = [im[0] for im in session.query(ImageTagAi.image_id).filter(ImageTagAi.tag_id == m.ai_id).all()]
+                for img_id in img_ids:
+                    result = session.merge(ImageTag(image_id=img_id, tag_id=m.real_id, by_ai=1))
+                    if inspect(result).pending:
+                        if not m.real_tag.tag in new_tags:
+                            new_tags[m.real_tag.tag] = 0
+                        new_tags[m.real_tag.tag] += 1
+                        count_new += 1
 
-            print(f'new for {m.real_tag.tag}:{m.ai_tag.tag} {count_new}')
-            if count_new > 0:
-                count_new = 0
-                session.commit()
+                print(f'new for {m.real_tag.tag}:{m.ai_tag.tag} {count_new}')
+                if count_new > 0:
+                    count_new = 0
+                    session.commit()
 
-            # print(m.real_tag.tag)
+                # print(m.real_tag.tag)
 
-        print(f'new {count_new}')
-        # session.rollback()
-        # session.commit()
-        return jsonify({'ok': f'{count_new}', 'stat': new_tags})
+            print(f'new {count_new}')
+            # session.rollback()
+            # session.commit()
+            return jsonify({'ok': f'{count_new}', 'stat': new_tags})
 
 @routes_tags_ai.route('/tags-ai/all')
 async def get_all_tags():
