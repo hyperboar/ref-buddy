@@ -237,7 +237,7 @@ def assign_image_extra_data(start_at=0, is_force=False, session=None, printer:Pr
         imgs = (session.query(ImageMetadata)
                 .filter(ImageMetadata.lost == 0)
                 .filter(ImageMetadata.imported_at > start_at)
-                .offset(offset).limit(limit))
+                .offset(offset).limit(limit).all())
         if len(imgs) == 0: break
 
         offset += offset_step
