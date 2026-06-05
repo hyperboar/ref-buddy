@@ -221,7 +221,6 @@ def assign_animation_tags(start_at=None, session=None, printer:PrinterInterface=
     printer.line('')
 
 def assign_image_extra_data(start_at=0, is_force=False, session=None, printer:PrinterInterface=None):
-    from PIL import Image
     from PIL.ExifTags import Base
 
     printer.line('Assigning extra to images...', same_line=True)
@@ -393,13 +392,15 @@ if __name__ == '__main__':
     # else:
     #     get_db_info()
 
-    # from shared_utils.env import Env
+    # from shared_utils.env import Env, ENV_USER
     # from app.models import DatabaseEnvironment
-    # from datetime import datetime, timezone
+    # from datetime import datetime, timezone, timedelta
+    # from shared_utils.nice_print import NicePrinter
     #
     # Env.apply_config(ENV_USER)
     # DatabaseEnvironment.update_db_connection()
     # with Session() as session:
-    #     start_time = datetime.now(tz=timezone.utc) - timedelta(weeks=50)
-    #     assign_image_extra_data(start_at=int(start_time.timestamp()), session=session)
+    #     start_time = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+    #     np = NicePrinter()
+    #     assign_image_extra_data(start_at=int(start_time.timestamp()), session=session, printer=np)
     pass
