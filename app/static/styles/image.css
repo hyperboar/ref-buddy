@@ -242,7 +242,15 @@ span #time-current {
 /*#region INFO */
 
 li.ai-tag {
-    list-style: "🤖 ";
+    list-style: "🤖";
+}
+
+.popup-row #tags {
+    margin-left: 25px;
+}
+
+.popup-row #tags li {
+  padding-left: -10px;
 }
 
 .popup-row #tags a, .popup-row #tags a:visited, .popup-row #tags a:focus
