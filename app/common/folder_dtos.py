@@ -24,6 +24,8 @@ class FilterRequestDto(BaseModel):
     removed:int|None = Field(default=0)
     sort_order:int|None = Field(default=None, alias='order')
     sort_type:int|None = Field(default=None, alias='by')
+    has_comment:int|None = Field(default=None, alias='comment')
+    has_workflow:int|None = Field(default=None, alias='workflow')
 
     @model_validator(mode='before')
     @classmethod

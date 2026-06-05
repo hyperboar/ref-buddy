@@ -220,6 +220,60 @@ def assign_animation_tags(start_at=None, session=None, printer:PrinterInterface=
     printer.line('Assigning tags to animations and videos... Done', replace=True)
     printer.line('')
 
+def assign_image_extra_data(start_at=0, is_force=False, session=None, printer:PrinterInterface=None):
+    from PIL import Image
+    from PIL.ExifTags import Base
+
+    printer.line('Assigning extra to images...', same_line=True)
+
+    offset = 0
+    offset_step = 100
+    limit = 100
+    if is_force:
+        start_at = 0
+
+    found = 0
+    while True:
+        imgs = (session.query(ImageMetadata)
+                .filter(ImageMetadata.lost == 0)
+                .filter(ImageMetadata.imported_at > start_at)
+                .offset(offset).limit(limit))
+        if len(imgs) == 0: break
+
+        offset += offset_step
+
+        for im in imgs:
+            if im.source_type_id != 1: continue
+            if not os.path.exists(im.path_abs): continue
+            try:
+                img = Image.open(im.path_abs)
+                exif = img.getexif()
+            except Exception:
+                continue
+            if Base.XPComment not in exif: continue
+            found += 1
+            printer.line(f'Assigning extra to images... {found}', replace=True)
+
+            extra = session.query(ImageExtra).filter(ImageExtra.image_id == im.image_id).first()
+            if extra is None:
+                extra = ImageExtra(image_id=im.image_id, data='{}')
+                session.add(extra)
+
+            comment = str(exif[Base.XPComment], 'utf-16')
+            d = json.loads(extra.data)
+            if 'comment' in d:
+                if comment in d['comment']: continue
+                else:
+                    comment = d['comment'] + ' ' + comment
+            d['comment'] = comment
+            extra.data = json.dumps(d)
+            session.flush()
+
+    if found > 0:
+        session.commit()
+    printer.line(f'Assigning extra to images... {found} Done', replace=True)
+    printer.line('')
+
 def assign_video_extra_data(start_at=None, is_force=False, session=None, printer:PrinterInterface=None):
     if session is None:
         session = Session()
@@ -327,7 +381,7 @@ if __name__ == '__main__':
     # remove_broken_video_gifs()
 
     # assign_video_extra_data(is_force=False)
-    pass
+    # pass
     # print(f'\rAssigning essential tags to new images...', end='')
     # mark_all_lost()
     # print(f'\rAssigning essential tags to new images... Done!', end='')
@@ -338,3 +392,14 @@ if __name__ == '__main__':
     #     generate_thumbs()
     # else:
     #     get_db_info()
+
+    # from shared_utils.env import Env
+    # from app.models import DatabaseEnvironment
+    # from datetime import datetime, timezone
+    #
+    # Env.apply_config(ENV_USER)
+    # DatabaseEnvironment.update_db_connection()
+    # with Session() as session:
+    #     start_time = datetime.now(tz=timezone.utc) - timedelta(weeks=50)
+    #     assign_image_extra_data(start_at=int(start_time.timestamp()), session=session)
+    pass

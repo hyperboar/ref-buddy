@@ -7,7 +7,7 @@ from shared_utils.backup import make_database_backup
 from shared_utils.env import Env
 from app.services.image_metadata_controller import ImageMetadataController as Ctrl
 from shared_utils.generators import assign_folder_tags, generate_thumbs, assign_animation_tags, \
-    assign_video_extra_data, gif_split
+    assign_video_extra_data, gif_split, assign_image_extra_data
 from app.models import Session
 from app.models.models_lump import Path, ImageMetadata
 from shared_utils.nice_print import NicePrinter
@@ -129,6 +129,7 @@ class ImageMetadataImporter:
     def _additional_processing(self, session):
         assign_folder_tags(start_at=self.update_time, session=session, printer=self.np)
         assign_animation_tags(start_at=self.update_time, session=session, printer=self.np)
+        assign_image_extra_data(start_at=self.update_time, session=session, printer=self.np)
         assign_video_extra_data(start_at=self.update_time, session=session, printer=self.np)
 
     def print_progress(self, msg_dir, file_name: str, cur: int, total: int, is_new: bool):

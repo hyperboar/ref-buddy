@@ -465,6 +465,21 @@ function injectImageData(data)
     infoId.href = '/study-image/' + data.id
     infoId.textContent = data.id
 
+    const infoComment = document.querySelector('#info-comment')
+    if (data.extra && data.extra.comment !== undefined) {
+        infoComment.textContent = data.extra.comment
+        infoComment.parentElement.classList.remove('hidden')
+    } else {
+        infoComment.parentElement.classList.add('hidden')
+    }
+    const infoWorkflow = document.querySelector('#info-workflow')
+    if (data.extra && data.extra.workflow !== undefined) {
+        infoWorkflow.textContent = data.extra.workflow
+        infoWorkflow.parentElement.classList.remove('hidden')
+    } else {
+        infoWorkflow.parentElement.classList.add('hidden')
+    }
+
     updateImageTags()
 
     // misc

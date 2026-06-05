@@ -96,9 +96,9 @@
     <!-- info -->
     <div id="image-info-popup" class="popup hidden">
         <div class="popup-row">
+            <a href="" id="info-image-id"></a>
         </div>
         <div class="popup-row">
-            <a href="" id="info-image-id"></a>&nbsp;
             <span id="image-path">{# setup #}</span>&nbsp;
             <button id="image-path-copy-btn">Copy</button>
         </div>
@@ -106,6 +106,12 @@
             <ul id="tags">
                 {# <li><a href="/all?tags={{ tag.tag }}">{{ tag.tag }}</a></li> #}
             </ul>
+        </div>
+        <div class="popup-row hidden">
+            <span id="info-comment"></span>
+        </div>
+        <div class="popup-row hidden">
+            <span id="info-workflow"></span>
         </div>
     </div>
 

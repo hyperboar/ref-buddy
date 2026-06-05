@@ -8,7 +8,7 @@ from app.common.folder_dtos import FilterRequestDto
 from shared_utils.env import Env
 from app.common.exceptions import ImageNotFoundError, PathEmptyError
 from app.models import Session
-from app.models.models_lump import Category, ImageMetadata, Path, ImageTag, ImageTagAi
+from app.models.models_lump import Category, ImageMetadata, Path, ImageTag, ImageTagAi, ImageExtra
 from app.services.tags import get_tags_by_names, get_tags_by_set, get_tag_names
 
 from shared_utils.utils import Utils
@@ -161,6 +161,18 @@ class ImageMetadataController:
             q = session.query(ImageMetadata).join(subquery, ImageMetadata.image_id == subquery.c.image_id)
         else:
             q = session.query(ImageMetadata)
+
+        if filter_dto.has_comment:
+            subquery = (session.query(ImageExtra)
+                        .filter(ImageExtra.data.like('%"comment":%'))
+                        .subquery())
+            q = q.join(subquery, ImageMetadata.image_id == subquery.c.image_id)
+
+        if filter_dto.has_workflow:
+            subquery = (session.query(ImageExtra)
+                        .filter(ImageExtra.data.like('%"workflow":%'))
+                        .subquery())
+            q = q.join(subquery, ImageMetadata.image_id == subquery.c.image_id)
 
         if filter_dto.no_ai_tags is not None and filter_dto.no_ai_tags == 1:
             q = q.outerjoin(ImageTagAi, ImageMetadata.image_id == ImageTagAi.image_id)\
