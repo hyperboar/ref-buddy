@@ -259,7 +259,7 @@ def assign_image_extra_data(start_at=0, is_force=False, session=None, printer:Pr
                 extra = ImageExtra(image_id=im.image_id, data='{}')
                 session.add(extra)
 
-            comment = str(exif[Base.XPComment], 'utf-16')
+            comment = str(exif[Base.XPComment], 'utf-16')[:-1]
             d = json.loads(extra.data)
             if 'comment' in d:
                 if comment in d['comment']: continue
