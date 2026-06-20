@@ -93,6 +93,22 @@ class ImageMetadataController:
         return q.offset(filter_dto.offset).limit(filter_dto.limit).all()
 
     @staticmethod
+    def get_all_by_prompt(filter_dto:FilterRequestDto, session) -> [ImageMetadata]:
+        from shared_utils.image_to_embed import search_by_text
+
+        if filter_dto.prompt is None or filter_dto.prompt == '':
+            return []
+
+        ids = search_by_text(filter_dto.prompt, filter_dto.limit)
+        images = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_([pair[0] for pair in ids]))
+        ids_d = {i[0]: i[1] for i in ids}
+
+        images = sorted(images, key=lambda im: ids_d[im.image_id], reverse=True)
+
+        return images
+
+
+    @staticmethod
     def get_random_by_request(image_id, request:Request, session=None) -> ImageMetadata:
         data = request.args.to_dict()
         data['same-folder'] = data['sf'] if 'sf' in data else 0

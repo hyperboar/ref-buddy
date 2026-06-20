@@ -10,6 +10,9 @@ class Env:
     DB_FILE:str
     DB_PATH:str
     DB_NAME:str
+    DB_EMBED_FILE:str
+    DB_EMBED_PATH:str
+    DB_EMBED_NAME:str
 
     DB_BACKUP_PATH:str
     DB_BACKUP_INTERVAL:int
@@ -32,6 +35,7 @@ class Env:
     VIDEO_PLAYER_PATH:str
 
     DB_CHANGES_TO_BACKUP:int
+    IS_LOADED_ONCE:bool
 
     @classmethod
     def apply_config(cls, config_path):
@@ -46,6 +50,9 @@ class Env:
         cls.DB_FILE = os.path.abspath(os.path.join(os.getenv('DB_PATH'), os.getenv('DB_NAME')))
         cls.DB_PATH = os.path.abspath(os.getenv('DB_PATH'))
         cls.DB_NAME = os.getenv('DB_NAME')
+        cls.DB_EMBED_FILE = os.path.abspath(os.path.join(os.getenv('DB_EMBED_PATH'), os.getenv('DB_EMBED_NAME')))
+        cls.DB_EMBED_PATH = os.path.abspath(os.getenv('DB_EMBED_PATH'))
+        cls.DB_EMBED_NAME = os.path.abspath(os.getenv('DB_EMBED_NAME'))
         cls.DB_BACKUP_PATH = os.path.abspath(os.getenv('DB_BACKUP_PATH', default=os.getenv('DB_PATH')))
         # minutes. Happens only on app start
         cls.DB_BACKUP_INTERVAL = int(os.getenv('DB_BACKUP_INTERVAL_MIN'))
@@ -74,6 +81,8 @@ class Env:
 
         # some additional setup
         os.environ['SQLITE_TMPDIR'] = cls.TMP_PATH
+
+        cls.IS_LOADED_ONCE = True
 
 if not is_testing and os.path.exists(ENV_USER):
     Env.apply_config(ENV_USER)
