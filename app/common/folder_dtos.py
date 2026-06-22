@@ -27,6 +27,8 @@ class FilterRequestDto(BaseModel):
     has_comment:int|None = Field(default=None, alias='comment')
     has_workflow:int|None = Field(default=None, alias='workflow')
     prompt:str|None = Field(default=None)
+    prompt_id:str|None = Field(default=None, alias='prompt-id')
+    prompt_w:str|None = Field(default=None, alias='prompt-w')
 
     @model_validator(mode='before')
     @classmethod

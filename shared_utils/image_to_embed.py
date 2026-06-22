@@ -17,6 +17,7 @@ warnings.filterwarnings(
 )
 
 logging.getLogger("transformers").setLevel(logging.ERROR)
+logger = logging.getLogger(__name__)
 
 EMPTY_EMBEDS_THRESHOLD = 10
 
@@ -56,8 +57,12 @@ class Loadout:
 
     @classmethod
     def load(cls):
+
+        logger.info('Loadout... Begin')
+
         if cls.DEVICE == '':
             cls.DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+            logger.info(f"Loadout. Using device: {cls.DEVICE}")
 
         if cls.PROCESSOR is None:
             cls.PROCESSOR = AutoProcessor.from_pretrained(cls.MODEL_NAME, local_files_only=True)
@@ -70,6 +75,8 @@ class Loadout:
                 from shared_utils.env import ENV_USER
                 Env.apply_config(ENV_USER)
             cls.QCLIENT = QdrantClient(path=Env.DB_EMBED_FILE)
+
+        logger.info('Loadout... Done')
 
 def process_my_database(ignored_collections:[str]=None, force_full_scan=False):
 
@@ -95,7 +102,7 @@ def process_my_database(ignored_collections:[str]=None, force_full_scan=False):
         for cname, coll_data in COLLECTIONS.items():
             printer('Processing collection ' + cname)
 
-            if cname in ignored_collections:
+            if ignored_collections is not None and cname in ignored_collections:
                 printer('Skipping collection ' + cname)
                 continue
 
@@ -121,14 +128,14 @@ def process_my_database(ignored_collections:[str]=None, force_full_scan=False):
                     break
 
                 time_end_estimate = int((max_count - offset - step)/step * time_diff / 60)
-                printer(f'\r(~{time_end_estimate}m left. {time_diff:.2f}s) Batch {offset}-{offset+step} of {max_count}...')
+                printer(f'\r(~{time_end_estimate}m left. {time_diff:.2f}s {empty_embeds_count}) Batch {offset}-{offset+step} of {max_count}...')
 
                 offset += step
                 images = {im.image_id: im.path_abs for im in imgs}
 
                 start_time = datetime.now().timestamp()
                 count = generate_embeds(images, client, collection_name)
-                empty_embeds_count += 1 if count > 0 else 0
+                empty_embeds_count += 0 if count > 0 else 1
                 time_diff = datetime.now().timestamp() - start_time
 
     printer('Done generating embeds!')
@@ -234,39 +241,98 @@ def encode_text(text: str) -> list[float]:
     features = features / features.norm(p=2, dim=-1, keepdim=True)
     return features[0].cpu().tolist()
 
-def search_by_text(prompt:str, limit:int) -> [(int, float)]:
-    printer('Searching by text...', end='')
-    coll_idx = prompt.find(' ')
-    cname = prompt[:coll_idx]
-    prompt = prompt[coll_idx+1:]
+class SearchByPrompt:
+    def __init__(self, prompt:str, limit:int, image_id=None, c1:float=None, c2:float=None):
 
-    printer('\Searching by text... Loadout init ', end='')
-    Loadout.load()
-    client = Loadout.QCLIENT
+        logger.info('Search by prompt... init')
 
-    if cname is None or cname == '' or cname not in COLLECTIONS:
-        printer(f'Collection with name "{cname}" not found')
-        return []
+        Loadout.load()
 
-    cname = COLLECTIONS[cname]['collection_name']
+        self.is_ok:bool = True
 
-    printer('\Searching by text... Checking collection ', end='')
-    coll = client.get_collection(cname)
-    if coll is None or (coll.status != CollectionStatus.GREEN and coll.status != CollectionStatus.GREY):
-        printer(f'Collection "{cname}" is busy')
-        return []
-    printer('\Searching by text... Encoding text ', end='')
-    vector = encode_text(prompt)
-    hits = client.query_points(
-        collection_name=cname,
-        query=vector,
-        limit=limit
-    )
-    printer(f'\Searching by text... Done. Found {len(hits.points)} ')
-    if len(hits.points) == 0:
-        return []
+        self.limit:int = limit
+        self.offset:int = 0
 
-    return [(s.id, s.score) for s in hits.points]
+        self.cname:str = ''
+        self.cname_images:[str] = ''
+        self.prompt:str = ''
+        self.prompt_images:[int] = None
+        self.search_vector:[float] = None
+        self.c1 = c1
+        self.c2 = c2
+
+        self.image_id = image_id # self.prompt_images
+
+        self._client:QdrantClient = Loadout.QCLIENT
+
+        coll_idx = prompt.find(' ')
+        self.cname = prompt[:coll_idx]
+        self.prompt = prompt[coll_idx + 1:]
+
+        if self.cname is None or self.cname == '' or self.cname not in COLLECTIONS:
+            logger.error(f'Collection with name "{self.cname}" not found')
+            self.is_ok = False
+
+        self.cname = COLLECTIONS[self.cname]['collection_name']
+
+        self.search_vector = self._evaluate_vector()
+
+    def _evaluate_vector(self) -> [float]:
+        logger.info('Searching by prompt... Encoding text ')
+
+        vector = encode_text(self.prompt)
+
+        images_vector = self._evaluate_images_vector()
+        if images_vector is not None:
+            self._evaluate_text_to_image_prompt_weights()
+            import numpy as np
+            v1 = np.array(vector, dtype=np.float32)
+            v2 = np.array(images_vector, dtype=np.float32)
+            vector = (self.c1 * v1 + self.c2 * v2).tolist()
+            logger.info(f'Using image vector with text-{self.c1} image-{self.c2}) ')
+
+        return vector
+
+    def _evaluate_images_vector(self) -> [float]:
+        if self.image_id is None:
+            return None
+
+        pair = self.image_id.split('-')
+
+        cname_image_id = COLLECTIONS[pair[0]]['collection_name']
+
+        result = self._client.retrieve(collection_name=cname_image_id, ids=[int(pair[1])], with_vectors=True)
+        if len(result) == 0:
+            logger.error(f'Prompt id image not found for "{self.image_id}" ')
+            return None
+
+        return result[0].vector
+
+    def _evaluate_text_to_image_prompt_weights(self):
+        if self.c1 is None or self.c1 < 0.001 or self.c2 is None or self.c2 < 0.001:
+            logger.warning(f'Weights are not correct ({self.c1};{self.c2}) ')
+            self.c1 = 0.5
+            self.c2 = 0.5
+        s = self.c1 + self.c2
+        self.c1 = self.c1 / s
+        self.c2 = self.c2 / s
+
+    def next_batch(self) -> dict[int, float]:
+        logger.info('Search by prompt... Requesting next batch, offset:%s, limit:%d', self.offset, self.limit)
+        if not self.is_ok:
+            return {}
+
+        hits = self._client.query_points(
+            collection_name=self.cname,
+            query=self.search_vector,
+            limit=self.limit,
+            offset=self.offset
+        )
+
+        self.offset += self.limit
+
+        return {s.id: s.score for s in hits.points}
+
 
 if __name__ == "__main__":
     printer(f'Starting main at {__file__} ...')
@@ -284,6 +350,6 @@ if __name__ == "__main__":
     #     printer(r)
     #     printer(f'http://localhost:7071/study-image/{r[0]}')
 
-    # process_my_database(ignored_collections=['ai','porn_set', 'academic'], force_full_scan=True)
-    process_my_database(ignored_collections=['ai','porn','academic'], force_full_scan=True)
+    process_my_database()
+    # process_my_database(ignored_collections=['ai','porn','academic'], force_full_scan=True)
     pass

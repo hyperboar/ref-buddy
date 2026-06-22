@@ -38,6 +38,8 @@ class MainWindow(tk.Frame):
         self.create_menus()
 
         self.web_process = None
+        self.tag_fetch_process = None
+        self.image_index_ai_process = None
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -93,6 +95,15 @@ class MainWindow(tk.Frame):
 
         self.menu_bar.add_cascade(label="Tools", menu=tools_menu)
 
+        # create ai menu
+        ai_menu = tk.Menu(self.menu_bar, tearoff=0)
+        ai_menu.add_command(label="Fetch Tags", command=self.fetch_ai_tags)
+        ai_menu.add_command(label="Index Image", command=self.index_images_by_ai)
+        # ai_menu.add_separator()
+        # ai_menu.add_command(label="Compress Database", command=cleanup_vacuum)
+
+        self.menu_bar.add_cascade(label="AI", menu=ai_menu)
+
         self.master.config(menu=self.menu_bar)
 
     def import_images(self):
@@ -131,6 +142,48 @@ class MainWindow(tk.Frame):
             return "break"
         webbrowser.open(self.gallery_url)
 
+    def fetch_ai_tags(self):
+        if self.web_process is None:
+            print("Launch gallery first! Doing nothing.")
+            return
+
+        bin_fldr = "Scripts" if Utils.is_windows() else "bin"
+        executable = "python.exe" if Utils.is_windows() else "python"
+
+        py_path = os.path.join(sys.prefix, bin_fldr, executable)
+        py = py_path if os.path.exists(py_path) else py_path + '3'
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = os.getcwd()
+        self.tag_fetch_process = subprocess.Popen(
+            f'cmd /k title "Fetching AI Tags" & {py} ./tools/autotag_fetcher/fetch.py "./config/user.env"',
+            cwd = os.getcwd(),
+            env = env,
+            creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+        # self.web_process = subprocess.Popen([py, "-m", "app"], cwd=os.getcwd())
+
+    def index_images_by_ai(self):
+        if self.web_process is not None:
+            print("Turn off gallery! They can't work together atm.")
+            return
+
+        bin_fldr = "Scripts" if Utils.is_windows() else "bin"
+        executable = "python.exe" if Utils.is_windows() else "python"
+
+        py_path = os.path.join(sys.prefix, bin_fldr, executable)
+        py = py_path if os.path.exists(py_path) else py_path + '3'
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = os.getcwd()
+        self.image_index_ai_process = subprocess.Popen(
+            f'cmd /k title "AI Indexing Images" & {py} ./shared_utils/image_to_embed.py',
+            cwd = os.getcwd(),
+            env = env,
+            creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+        # self.web_process = subprocess.Popen([py, "-m", "app"], cwd=os.getcwd())
+
     def on_closing(self):
         self.on_app_exit()
         self.master.quit()
@@ -139,3 +192,11 @@ class MainWindow(tk.Frame):
         if self.web_process is not None and self.web_process.poll() is None:
             self.web_process.terminate()
             self.web_process.wait()
+
+        if self.tag_fetch_process is not None and self.tag_fetch_process.poll() is None:
+            self.tag_fetch_process.terminate()
+            self.tag_fetch_process.wait()
+
+        if self.image_index_ai_process is not None and self.image_index_ai_process.poll() is None:
+            self.image_index_ai_process.terminate()
+            self.image_index_ai_process.wait()

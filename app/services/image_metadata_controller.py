@@ -13,6 +13,9 @@ from app.services.tags import get_tags_by_names, get_tags_by_set, get_tag_names
 
 from shared_utils.utils import Utils
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class ImageMetadataController:
     # region Convenience
@@ -94,18 +97,51 @@ class ImageMetadataController:
 
     @staticmethod
     def get_all_by_prompt(filter_dto:FilterRequestDto, session) -> [ImageMetadata]:
-        from shared_utils.image_to_embed import search_by_text
+        from shared_utils.image_to_embed import SearchByPrompt
 
         if filter_dto.prompt is None or filter_dto.prompt == '':
             return []
 
-        ids = search_by_text(filter_dto.prompt, filter_dto.limit)
-        images = session.query(ImageMetadata).filter(ImageMetadata.image_id.in_([pair[0] for pair in ids]))
-        ids_d = {i[0]: i[1] for i in ids}
+        c1 = None
+        c2 = None
+        if filter_dto.prompt_w is not None:
+            c = filter_dto.prompt_w.split(',')
+            c1 = float(c[0])
+            c2 = float(c[1])
 
-        images = sorted(images, key=lambda im: ids_d[im.image_id], reverse=True)
+        args = {
+            'prompt': filter_dto.prompt,
+            'image_id': filter_dto.prompt_id,
+            'limit': filter_dto.limit,
+            'c1': c1,
+            'c2': c2,
+        }
+        search = SearchByPrompt(**args)
 
-        return images
+        images = []
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
+        found_count = 0
+        while True:
+            ids_d = search.next_batch()
+            if len(ids_d) == 0:
+                return images
+
+            ids = list(ids_d.keys())
+
+            images_batch = q.filter(ImageMetadata.image_id.in_(ids)).all()
+            images_batch = sorted(images_batch, key=lambda im: ids_d[im.image_id], reverse=True)
+            if (found_count + len(images_batch)) >= filter_dto.offset:
+                start = max(filter_dto.offset - found_count, 0)
+                if start > 0:
+                    images.extend(images_batch[start:])
+                else:
+                    images.extend(images_batch)
+            if len(images) >= filter_dto.limit:
+                break
+
+            found_count += len(images_batch)
+
+        return images[:filter_dto.limit]
 
 
     @staticmethod
