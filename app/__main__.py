@@ -15,4 +15,4 @@ if Utils.is_debugging():
     app_quart = create_app()
     app_quart.run(host='0.0.0.0', port=int(Env.SERVER_PORT))
 else:
-    uvicorn.run('app.here_you_go_uvicorn:asgi_app', host='0.0.0.0', port=int(Env.SERVER_PORT), reload=False, lifespan="off")
+    uvicorn.run('app.here_you_go_uvicorn:asgi_app', host='0.0.0.0', port=int(Env.SERVER_PORT), reload=False, lifespan="off", use_colors=False)
