@@ -545,7 +545,11 @@ function insertMediaBg(container, data)
 
 function insertMediaContent(container, data)
 {
-    container.childNodes.forEach(el => el.remove())
+    const dontRemove = Array.from(['magnification', 'drawing'])
+    Array.from(container.children).forEach(el => {
+        if (dontRemove.includes(el.id)) return
+        el.remove()
+    })
 
     // image
     if (data.content_type === 1)
