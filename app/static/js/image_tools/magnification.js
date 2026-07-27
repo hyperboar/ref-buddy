@@ -18,7 +18,8 @@ class Magnification
     {
         this.sources = Array.from(selSourceImg)
         this.container = document.querySelector(selContainer)
-        this.modalImages = Array.from(selSourceImg).map(sel => document.querySelector(sel))
+        this.modalImagesSel = Array.from(selSourceImg)
+        // this.modalImages = Array.from(selSourceImg).map(sel => document.querySelector(sel))
         this.lastModalImage = null
         this.magnification = document.querySelector(selTargetImg)
         this.mhalf = {x:0, y:0}
@@ -34,11 +35,19 @@ class Magnification
 
         this.getterIsFlipped = getterIsFlipped
 
-        this.modalImages.forEach(mi=> mi.addEventListener('wheel', (evt) => this.onwheel(evt)))
+        // this.magnification.addEventListener('wheel', (evt) => this.onwheel(evt))
+        // this.magnification.addEventListener('mouseup', (evt) => this.onmouseup(evt))
+        // this.magnification.addEventListener('mousemove', (evt) => this.onmousemove(evt))
 
-        this.modalImages.forEach(mi => mi.addEventListener('mouseup', (evt) => this.onmouseup(evt)))
+        // this.magnification.addEventListener('wheel', this.onwheel)
+        // this.magnification.addEventListener('mouseup', this.onmouseup)
+        // this.magnification.addEventListener('mousemove', this.onmousemove)
 
-        this.modalImages.forEach(mi => mi.addEventListener('mousemove', (evt) => this.onmousemove(evt)))
+        // this.modalImages.forEach(mi=> mi.addEventListener('wheel', (evt) => this.onwheel(evt)))
+        //
+        // this.modalImages.forEach(mi => mi.addEventListener('mouseup', (evt) => this.onmouseup(evt)))
+        //
+        // this.modalImages.forEach(mi => mi.addEventListener('mousemove', (evt) => this.onmousemove(evt)))
 
         this.container.addEventListener('wheel', (evt) => this.onwheel(evt))
         this.container.addEventListener('mousedown', (evt) => this.onmousedown(evt))
@@ -56,6 +65,18 @@ class Magnification
 
     reset()
     {
+        this.mpos.x = 0
+        this.mpos.y = 0
+        this.scale = 1
+
+        this.modalImages = this.modalImagesSel.map(sel => document.querySelector(sel)).filter(mi => mi !== null)
+
+        this.modalImages.forEach(mi=> mi.addEventListener('wheel', (evt) => this.onwheel(evt)))
+        //
+        // this.modalImages.forEach(mi => mi.addEventListener('mouseup', (evt) => this.onmouseup(evt)))
+        //
+        // this.modalImages.forEach(mi => mi.addEventListener('mousemove', (evt) => this.onmousemove(evt)))
+
         this.onmouseup({})
     }
 
@@ -115,11 +136,7 @@ class Magnification
             this._lastPivotPos[0] *= scaleChange; this._lastPivotPos[1] *= scaleChange
         }
 
-
-        this.magnification.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1)}, 1)`
-        // this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale})`
-        // this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale})`
-        this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale})`
+        this.updatePosScale()
     }
 
     onmousedown(evt)
@@ -221,10 +238,17 @@ class Magnification
 
         // console.log([x,y])
 
+        this.mpos.x = x
+        this.mpos.y = y
 
-        this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale}) translate(${x}px, ${y}px)`
+        this.updatePosScale()
 
         // this._startPos[0] = cx; this._startPos[1] = cy;
+    }
+
+    updatePosScale() {
+        this.magnification.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1)}, 1)`
+        this._imgTarget.style.transform = `scale(${(this.getterIsFlipped() ? -1 : 1) * this.scale}, ${this.scale}) translate(${this.mpos.x}px, ${this.mpos.y}px)`
     }
 
     absToCenter(absX, absY)

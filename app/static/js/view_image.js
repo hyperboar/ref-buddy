@@ -122,9 +122,9 @@ function initializeComponents()
     // flip
     imageFlip = new ImageFlip(['.media', '.magnification'])
 
-    // // TODO distinguish between img, gif, video
-    // // magnification
-    // magnifier = new Magnification(['stub!', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
+    // magnification
+    // TODO distinguish between img, gif, video
+    magnifier = new Magnification(['.media-img', '.anim-container #animation'], '.magnification-container', '.magnification', () => imageFlip.isFlipped)
 
     // grayscale
     imageGrayScale = new ImageGrayscale(['.media',  '.media-bg', '.magnification'])
@@ -425,11 +425,11 @@ function injectImageData(data)
     insertMediaContent(media, data)
 
     // magnifier
-    // magnifier.reset()
+    magnifier.reset()
 
     if (data.content_type === 1)
     {
-        // magnifier.setImage(data.url_image)
+        magnifier.setImage(data.url_image)
         const mediaImg = document.querySelector('.media-img')
         Array.from([mediaBg, mediaImg]).forEach(im =>
         {
@@ -580,7 +580,7 @@ function insertMediaContent(container, data)
             const modalBg = document.querySelector('.media-bg img')
             modalBg.src = anim.currentFrameUrl
 
-            // magnifier.setImage(anim.currentFrameUrl)
+            magnifier.setImage(anim.currentFrameUrl)
         })
     }
     else if (data.content_type === 3)
