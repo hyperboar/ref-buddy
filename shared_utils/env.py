@@ -26,6 +26,7 @@ class Env:
     THUMB_MAX_SIZE:int
     IMPORT_FORMATS:[str]
 
+    SERVER_ADDRESS:str
     SERVER_PORT:str
     DEFAULT_FPS_SPLIT:int
     DEFAULT_PER_PAGE_LIMIT:int
@@ -71,6 +72,7 @@ class Env:
         cls.IMPORT_FORMATS = list(map(lambda f: '.' + f.strip(), os.getenv('IMPORT_FORMATS').split(',')))
 
         # other defaults
+        cls.SERVER_ADDRESS = os.getenv('SERVER_ADDRESS')
         cls.SERVER_PORT = os.getenv('SERVER_PORT')
         cls.DEFAULT_FPS_SPLIT = int(os.getenv('FPS_SPLIT'))
         cls.DEFAULT_PER_PAGE_LIMIT = int(os.getenv('PER_PAGE_LIMIT'))
