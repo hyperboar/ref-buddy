@@ -3,11 +3,17 @@ import shutil
 from datetime import datetime
 
 from shared_utils.env import Env, is_testing
+from shared_utils.runtime_cache import RuntimeCache
 
 
 def make_database_backup(marker:str='',force:bool=False):
-    if is_testing: return
 
+    if is_testing: return
+    #TODO
+    # cache = RuntimeCache.current_cache()
+    # print(cache.get_marker('the_change'))
+    #
+    # return
     if not os.path.exists(Env.DB_FILE):
         print(f'No existing database found to backup.')
         return

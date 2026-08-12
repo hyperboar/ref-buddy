@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from pydantic import BaseModel, Field, model_validator
@@ -10,12 +11,14 @@ class ImageInfoDto(AttrModel):
     path_id:int
     path:str = Field(alias='path_abs')
     content_type:int = Field(alias='source_type_id')
-    video:int = None
     fav:int
+    imported_at:datetime.datetime
+    video:int = None
     rating:int
     extra:dict = None
     thumb:str = None
     url_image:str = None
+    url_folder:str = None
 
     @model_validator(mode='before')
     @classmethod
@@ -24,6 +27,7 @@ class ImageInfoDto(AttrModel):
         im.video = 1 if im.source_type_id == 2 or im.source_type_id == 3 else 0
         im.thumb = f'/thumbs/{im.image_id}.jpg'
         im.url_image = (f'/video/' if im.video else f'/image/') + str(im.image_id)
+        im.url_folder = f'/folder/{im.path_id}'
         return im
 
 class ImageFavDto(AttrModel):

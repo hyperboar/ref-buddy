@@ -3,9 +3,9 @@ from typing import Annotated
 from pydantic import BaseModel, Field, model_validator, AfterValidator
 from typing_extensions import Self
 
+from shared_utils.env import Env
 from app.common.dto_basic import AttrModel
 from app.common.tag_dtos import TagsRequestDto
-from shared_utils.env import Env
 
 
 class FilterRequestDto(BaseModel):

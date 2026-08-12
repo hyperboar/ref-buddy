@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% include '../tpl_part_header.html' %}
+    {% include 'tpl_part_header.html' %}
     <link rel="stylesheet" href="/static/styles/crud.css">
     <title>Tags list</title>
 </head>
@@ -12,34 +12,53 @@
 </header>
 
 <main class="container container-flex">
-    <a href="/tags/add">+ Add Tag</a>
-    <table class="list">
+    <a id="add-tag-btn" href="#">+ Add Tag</a>
+    <div>
+        <form id="tag-form" class="hidden">
+            <label for="tag">Tag:</label>
+            <input type="hidden" id="id" name="id">
+            <input type="text" id="tag" name="name" required>
+            <label for="color">Color:</label>
+            <select name="color_id" id="color">
+                <option value="0">None</option>
+            </select>
+            <br>
+            <input type="submit" value="Send">
+            <button id="cancel">Cancel</button>
+        </form>
+    </div>
+    <table id="tags-list" class="list">
         <tr>
             <th>ID</th>
             <th>Tag</th>
             <th>Color</th>
             <th>Actions</th>
         </tr>
-        {% for tag in tags %}
-            <tr>
-                <td>{{ tag.id }}</td>
-                <td style="color: {{ tag.hex }}">{{ tag.tag }}</td>
-                <td style="color: {{ tag.hex }}">{{ tag.color_id }}</td>
-                <td>
-                    <a class="edit" href="/tags/edit/{{ tag.id }}">✎</a>
-                    <form method="POST" action="/tags/delete/{{ tag.id }}" style="display: inline;">
-                        <input class="del" type="submit" value="&cross;" onclick="return confirmDelete('{{ tag.tag }}');">
-                    </form>
-                </td>
-            </tr>
-        {% endfor %}
     </table>
 </main>
 
-<script>
-    function confirmDelete(tag) {
-        return confirm(`Delete tag '${tag}'?`);
+<template id="tpl-tag">
+    <tr id="tag-">
+        <td id="id">{# tag.id #}</td>
+        <td id="name">{# tag.tag #}</td>
+        <td id="color">{# tag.color_id #}</td>
+        <td>
+            <a id="update" class="edit" href="#">✎</a>
+            <button id="delete" class="del">&cross;</button>
+        </td>
+    </tr>
+</template>
+
+<script type="importmap">
+    {
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "vendors/": "/static/js/vendors/",
+            "api": "/static/js/api.js"
+        }
     }
 </script>
+<script type="module" src="/static/js/crud/tag.js"></script>
 </body>
 </html>

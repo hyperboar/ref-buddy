@@ -72,3 +72,7 @@ async def get_old_content(count:int, image_id):
         })
     session.close()
     return jsonify(response)
+
+@routes_discover.route('/roulette')
+async def roulette():
+    return await render_template('tpl_roulette.html')

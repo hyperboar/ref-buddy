@@ -29,6 +29,7 @@ async def send_html(image_id):
 async def image_info(image_id):
     with Session() as session:
         image = Ctrl.get_or_raise(session, image_id)
+        print(image.imported_at)
         return jsonify(ImageInfoDto.model_validate(image))
 
 @routes_image.route('/anim-info/<int:image_id>')
@@ -213,8 +214,6 @@ async def drawing_save():
 @routes_image.route('/next-image/<pattern>/<int:image_id>')
 async def next_image(pattern, image_id):
     with Session() as session:
-        Ctrl.get_or_raise(session, image_id)
-
         lookup = {}
         lookup['_'] = lambda im_id, s: next_miss(im_id)
         lookup['fwd_id']  = lambda im_id, s : next_seq_image_id(im_id, 1, s)

@@ -67,7 +67,8 @@
                 <label for="same-folder">Same folder:</label>
                 <input type="checkbox" id="same-folder" value="false">
                 <input type="hidden" id="min-rating" value="0">
-                <a id="img-folder-link" href="{# setup #}"><img class="dir-link" src="/static/images/link.png"></a>
+                <a id="img-folder-link" href="{# setup #}" target="_blank"><img class="dir-link" src="/static/images/link.png"></a>
+                <a id="img-ai-search-link" href="{# setup #}" target="_blank"><img class="dir-link" src="/static/images/link.png"></a>
             </div>
             <div class="row">
                 <button id="prev" class="btn-bg-blend">&lt;</button>
@@ -96,7 +97,7 @@
     <!-- info -->
     <div id="image-info-popup" class="popup hidden">
         <div class="popup-row">
-            <a href="" id="info-image-id"></a>
+            <a href="" id="info-image-id"></a>&nbsp;&nbsp;<span id="info-image-imported-at"></span>
         </div>
         <div class="popup-row">
             <span id="image-path">{# setup #}</span>&nbsp;

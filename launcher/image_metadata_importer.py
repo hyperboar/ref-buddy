@@ -9,7 +9,7 @@ from app.services.image_metadata_controller import ImageMetadataController as Ct
 from shared_utils.generators import assign_folder_tags, generate_thumbs, assign_animation_tags, \
     assign_video_extra_data, gif_split, assign_image_extra_data
 from app.models import Session
-from app.models.models_lump import Path, ImageMetadata
+from app.models.models_lump import Path, ImageMetadata, Setting
 from shared_utils.nice_print import NicePrinter
 
 
@@ -125,6 +125,10 @@ class ImageMetadataImporter:
                 self.np.step_down()
 
             self.np.header(f'Import completed in {int(time.time() - start_time)} seconds.')
+
+            setting = session.get(Setting, Setting.IMPORT_LAST_TIME)
+            setting.set_value(self.time_of_import)
+            session.commit()
 
     def _additional_processing(self, session):
         assign_folder_tags(start_at=self.update_time, session=session, printer=self.np)

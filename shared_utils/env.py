@@ -37,6 +37,9 @@ class Env:
     DB_CHANGES_TO_BACKUP:int
     IS_LOADED_ONCE:bool
 
+    AI_TAGGER_SERVICE_CMD:str
+
+
     @classmethod
     def apply_config(cls, config_path):
         if not os.path.exists(config_path):
@@ -78,6 +81,8 @@ class Env:
         cls.VIDEO_PLAYER_PATH = os.getenv('VIDEO_PLAYER_PATH')
 
         cls.DB_CHANGES_TO_BACKUP = int(os.getenv('DB_CHANGES_TO_BACKUP'))
+
+        cls.AI_TAGGER_SERVICE_CMD = os.getenv('AI_TAGGER_SERVICE_CMD')
 
         # some additional setup
         os.environ['SQLITE_TMPDIR'] = cls.TMP_PATH

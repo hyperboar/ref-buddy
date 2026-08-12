@@ -400,7 +400,7 @@ if __name__ == '__main__':
     # Env.apply_config(ENV_USER)
     # DatabaseEnvironment.update_db_connection()
     # with Session() as session:
-    #     start_time = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+    #     start_time = datetime.now(tz=timezone.utc) - timedelta(minutes=10)
     #     np = NicePrinter()
     #     assign_image_extra_data(start_at=int(start_time.timestamp()), session=session, printer=np)
     pass

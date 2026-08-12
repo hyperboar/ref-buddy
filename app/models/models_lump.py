@@ -33,6 +33,58 @@ class UnixTimestamp(TypeDecorator):
     def default() -> datetime:
         return datetime.fromtimestamp(0, tz=timezone.utc)
 
+
+class SettingBase(Base):
+    __tablename__ = 'settings'
+
+    key = Column(Text, nullable=False, primary_key=True)
+    _value = Column(Text, name='value', default='', nullable=False)
+    _type  = Column(Text, name='type', default='')
+
+    def set_value(self, value):
+        t = type(value).__name__
+
+        if t == 'datetime':
+            t = 'timestamp'
+            value = str(value.timestamp())
+        elif t == 'dict':
+            t = 'dict'
+            value = json.dumps(value)
+
+        self._type = t
+        self._value = str(value)
+
+    def get_value(self) -> str|int|bool|datetime|dict:
+        match self._type:
+            case 'int':  return int(self._value)
+            case 'bool': return bool(self._value)
+            case 'dict': return json.loads(self._value)
+            case 'timestamp': return datetime.fromtimestamp(int(self._value), tz=timezone.utc)
+            case _: return self._value
+
+    def as_string(self) -> str:
+        return str(self._value)
+
+    def as_int(self) -> int:
+        return int(self._value)
+
+    def as_bool(self) -> bool:
+        return bool(self._value)
+
+    def as_dict(self) -> dict:
+        return json.loads(self._value)
+
+class Setting(SettingBase):
+    BACKUP_LAST_MONTH_TIME = 'backup_last_month_time'
+    BACKUP_LAST_MONTH_NAME = 'backup_last_month_NAME'
+    BACKUP_LAST_TODAY_TIME = 'backup_last_today_time'
+    BACKUP_LAST_TODAY_NAME = 'backup_last_today_NAME'
+    BACKUP_LAST_TIME       = 'backup_last_time'
+
+    IMPORT_LAST_TIME = 'import_last_time'
+
+
+
 class Path(Base):
     """
     Paths are serialized with forward (/) slashes as separators.

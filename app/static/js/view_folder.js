@@ -153,7 +153,8 @@ document.addEventListener('keydown', (e) =>
     }
     else if (selection.selectionMode && e.code === 'KeyR' && !e.shiftKey)
     {
-        restoreImages()
+        const extra = getExtraValue()
+        if (extra === 'page-remove') restoreImages()
     }
     else if (selection.selectionMode && e.code === 'ArrowLeft' && e.shiftKey)
     {

@@ -67,16 +67,16 @@ async def remove_folder_tag():
 
 #region ---- JSON API ----
 
-@routes_tags.route('/tags/all')
-async def get_all_tags():
-    session = Session()
-    tags = session.query(Tag).all()
-    out = {'colors': {}, 'tags': []}
-    for tag in tags:
-        out['tags'].append({'id': tag.id, 'name': tag.tag, 'c': tag.color_id})
-        out['colors'][tag.color_id] = tag.color.hex
-    session.close()
-    return jsonify(out)
+# @routes_tags.route('/tags/all')
+# async def get_all_tags():
+#     session = Session()
+#     tags = session.query(Tag).all()
+#     out = {'colors': {}, 'tags': []}
+#     for tag in tags:
+#         out['tags'].append({'id': tag.id, 'name': tag.tag, 'c': tag.color_id})
+#         out['colors'][tag.color_id] = tag.color.hex
+#     session.close()
+#     return jsonify(out)
 
 @routes_tags.route('/tags/image/single/<int:image_id>')
 async def image_tags_single(image_id):
@@ -112,57 +112,6 @@ async def tag_set_list():
 #endregion ---- JSON API ----
 
 
-#region ---- CRUD TAG ----
-
-@routes_tags.route('/tags')
-async def show_tags():
-    session = Session()
-    tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
-    return await render_template('crud/tpl_tags_list.html', tags=tags)
-
-@routes_tags.route('/tags/add', methods=['GET', 'POST'])
-async def add_tag():
-    if request.method != 'POST':
-        session = Session()
-        colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
-        return await render_template('crud/tpl_tags_add.html', colors=colors)
-
-    session = Session()
-    tag = (await request.form)['tag'].strip()
-    color_id = int((await request.form)['color'].strip())
-    new_tag = Tag(tag=tag, color_id=color_id)
-    session.add(new_tag)
-    session.commit()
-    return redirect('/tags')
-
-
-@routes_tags.route('/tags/edit/<int:tag_id>', methods=['GET', 'POST'])
-async def edit_tag(tag_id):
-    session = Session()
-    tag = session.get(Tag, tag_id)
-
-    if request.method != 'POST':
-        session = Session()
-        tag = session.get(Tag, tag_id)
-        colors = session.query(Color).filter(Color.color_name.startswith('tag_')).order_by(Color.id).all()
-        return await render_template('crud/tpl_tags_edit.html', tag=tag, colors=colors)
-
-    tag.tag = (await request.form)['tag'].strip()
-    tag.color_id = int((await request.form)['color'].strip())
-    session.commit()
-    return redirect('/tags')
-
-
-@routes_tags.route('/tags/delete/<int:tag_id>', methods=['POST'])
-async def delete_tag(tag_id):
-    session = Session()
-    tag = session.get(Tag, tag_id)
-    session.delete(tag)
-    session.commit()
-    return redirect('/tags')
-
-#endregion ---- CRUD TAG ----
-
 #region ---- CRUD TAG SET ----
 
 @routes_tags.route('/tag-sets')
@@ -173,23 +122,25 @@ async def list_tag_sets():
 
 @routes_tags.route('/tag-sets/add', methods=['GET', 'POST'])
 async def tag_set_add():
-    session = Session()
+    with Session() as session:
 
-    if request.method == 'POST':
-        tag_set = TagSet()
-        tag_set.set_name  = request.form['set_name'].strip()
-        tag_set.set_alias = request.form['set_alias'].strip()
-        tag_list_pos  = [t.strip() for t in request.form['tag_list_pos'].split(',')]
-        tag_list_neg  = [t.strip() for t in request.form['tag_list_neg'].split(',')]
-        tag_set.tag_list = tag_set.names_to_tag_list(tag_list_pos, tag_list_neg)
-        session.add(tag_set)
-        session.commit()
-        return redirect(url_for('routes_tags.list_tag_sets'))
+        if request.method == 'POST':
+            form = await request.form
+            tag_set = TagSet()
+            session.add(tag_set)
+            # session.flush()
+            tag_set.set_name  = form['set_name'].strip()
+            tag_set.set_alias = form['set_alias'].strip()
+            tag_list_pos  = [t.strip() for t in form['tag_list_pos'].split(',')]
+            tag_list_neg  = [t.strip() for t in form['tag_list_neg'].split(',')]
+            tag_set.tag_list = tag_set.names_to_tag_list(tag_list_pos, tag_list_neg)
+            # session.add(tag_set)
+            session.commit()
+            return redirect(url_for('routes_tags.list_tag_sets'))
 
-    tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
+        tags = session.query(Tag).order_by(Tag.color_id, Tag.tag).all()
 
-    out = await render_template('crud/tpl_tagset_add.html', tags=tags)
-    return out
+        return await render_template('crud/tpl_tagset_add.html', tags=tags)
 
 @routes_tags.route('/tag-sets/<int:tag_set_id>/edit', methods=['GET', 'POST'])
 async def tag_set_edit(tag_set_id):

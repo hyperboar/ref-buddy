@@ -454,8 +454,10 @@ function injectImageData(data)
     rating.textContent = data.rating
 
     const folderLink = document.getElementById('img-folder-link')
-    folderLink.href = data.url_folder
+    folderLink.href = data.url_folder + '?limit=1000'
 
+    const aiSearchLink = document.getElementById('img-ai-search-link')
+    aiSearchLink.href = `/all-prompt?_prompt-id=_-${data.id}&prompt-w=0.1,0.9&_prompt=&page=1`
 
     // info
     const imgPath = document.querySelector('#image-path')
@@ -464,6 +466,14 @@ function injectImageData(data)
     const infoId = document.querySelector('#info-image-id')
     infoId.href = '/study-image/' + data.id
     infoId.textContent = data.id
+
+    const infoDate = document.querySelector('#info-image-imported-at')
+    let date = new Date(data.imported_at)
+    const pd = function (num) {return num.toString().padStart(2, '0')}
+    infoDate.textContent =
+        `${date.getUTCFullYear()}-` +
+        `${pd(date.getUTCMonth())}-${pd(date.getUTCDay())} ` +
+        `${pd(date.getUTCHours())}:${pd(date.getUTCMinutes())}`
 
     const infoComment = document.querySelector('#info-comment')
     if (data.extra && data.extra.comment !== undefined) {

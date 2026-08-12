@@ -2,7 +2,7 @@ import os
 
 from shared_utils.env import Env
 from app.models import Session
-from app.models.models_lump import Color, Tag, Category, TagSet, Base
+from app.models.models_lump import Color, Tag, Category, TagSet, Base, Setting
 
 
 class DatabaseUtil:
@@ -23,6 +23,17 @@ class DatabaseUtil:
     def add_predefined_data(session_maker):
 
         session = session_maker()
+
+        # SETTINGS
+        session.add(Setting(key=Setting.BACKUP_LAST_MONTH_TIME, value='0', type='timestamp'))
+        session.add(Setting(key=Setting.BACKUP_LAST_MONTH_NAME, value='', type='str'))
+        session.add(Setting(key=Setting.BACKUP_LAST_TODAY_TIME, value='0', type='timestamp'))
+        session.add(Setting(key=Setting.BACKUP_LAST_TODAY_NAME, value='', type='str'))
+        session.add(Setting(key=Setting.BACKUP_LAST_TIME, value='0', type='timestamp'))
+
+        session.add(Setting(key=Setting.IMPORT_LAST_TIME, value='0', type='timestamp'))
+
+        session.commit()
 
         # COLORS
         color = Color(color_name='default')
@@ -54,4 +65,5 @@ class DatabaseUtil:
         session.add(tag_set)
 
         session.commit()
+
         session.close()

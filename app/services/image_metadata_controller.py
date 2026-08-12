@@ -109,17 +109,20 @@ class ImageMetadataController:
             c1 = float(c[0])
             c2 = float(c[1])
 
+
+        images = []
+        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
+        total_possible_count = q.count()
+
         args = {
             'prompt': filter_dto.prompt,
             'image_id': filter_dto.prompt_id,
             'limit': filter_dto.limit,
             'c1': c1,
             'c2': c2,
+            'ids_in': [] if total_possible_count > 2000 else [im.image_id for im in q.all()]
         }
         search = SearchByPrompt(**args)
-
-        images = []
-        q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         found_count = 0
         while True:
             ids_d = search.next_batch()
@@ -235,7 +238,7 @@ class ImageMetadataController:
             q = q.filter(~ImageMetadata.tags.any(ImageTag.tag_id.in_(tags_neg_ids)))
 
         # when same_folder get path_id by image_id
-        if filter_dto.same_folder is not None and len(filter_dto.image_ids) > 0:
+        if filter_dto.same_folder is not None and filter_dto.same_folder != 0 and len(filter_dto.image_ids) > 0:
             im = session.get(ImageMetadata, filter_dto.image_ids[0])
             q = q.filter(ImageMetadata.path_id == im.path_id)
 

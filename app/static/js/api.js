@@ -7,21 +7,23 @@ class ApiImage
     {
         return ApiInternal.expandWithDefaults(
             {
-                'url_long': '/study-image/{image_id}?time-planned={time}&sf={sf}&tags={tags}&tag-set={tagset}',
+                'url_long': '/study-image/{image_id}?time-planned={time}&sf={sf}&tags={tags}&tag-set={tagset}&conts={conts}',
                 'url_short': '/study-image/{image_id}',
                 'keys': {
                     'image_id': '{image_id}',
                     'time': '{time}',
                     'sf': '{sf}',
                     'tags': '{tags}',
-                    'tagset': '{tagset}'
+                    'tagset': '{tagset}',
+                    'conts': '{conts}'
                 }
             },
             {
                 'time': '120',
-                'sf': '1',
+                'sf': '0',
                 'tags': '',
-                'tagset': 'all'
+                'tagset': 'all',
+                'conts': '1'
             })
     }
 
@@ -296,7 +298,7 @@ class ApiTags
      */
     static GetAllTags()
     {
-        return fetch('/tags/all')
+        return fetch('/tags/get/all')
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')
@@ -355,6 +357,39 @@ class ApiTags
     static RemoveTags(imageIds, tags)
     {
         return fetch('/remove-image-tags', ApiInternal.getPostRequest({'image_ids': imageIds, 'tags': tags}))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static CreateTag(data)
+    {
+        if ('id' in data) {
+            delete data['id']
+        }
+        return fetch('/tags/add', ApiInternal.getPostRequest(data))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static UpdateTag(data)
+    {
+        return fetch('/tags/update', ApiInternal.getPostRequest(data))
+            .then(r =>
+            {
+                if (!r.ok) throw new Error('Not ok')
+                return r.json()
+            })
+    }
+
+    static DeleteTag(id)
+    {
+        return fetch(`/tags/delete/${id}`)
             .then(r =>
             {
                 if (!r.ok) throw new Error('Not ok')

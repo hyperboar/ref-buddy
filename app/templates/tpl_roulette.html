@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'tpl_part_header.html' %}
+	<title>Roulette</title>
+    <style>
+        :root {
+            --max-width: 1600px;
+            --max-height: 900px;
+            --card-width: calc(1600px/3);
+
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: auto;
+        }
+        .deck {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .card {
+            max-width: var(--card-width);
+            max-height: var(--max-height);
+            width: var(--card-width);
+            padding: 0 5px;
+        }
+
+        .card img {
+            width: 100%;
+            height: auto;
+        }
+
+        .tags {
+            width: 100%;
+            height: 40px;
+        }
+
+        .card-controls {
+
+        }
+
+        .history {
+            .row {
+
+            }
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="deck">
+        <template hidden>
+            <div class="card" data-image-id="1">
+                <textarea name="" id="" cols="30" rows="10" class="tags">academic</textarea>
+                <div class="card-controls">
+                    <button class="ref-rand">rnd</button>
+                    <button class="ref-id">by id</button>
+                    <input type="number" class="image-id" value="42834">
+                </div>
+                <a href="" target="_blank"><img src="" alt=""></a>
+            </div>
+        </template>
+{#        <div class="card" data-image-id="1">#}
+{#            <textarea name="" id="" cols="30" rows="10" class="tags">academic</textarea>#}
+{#            <div class="card-controls">#}
+{#                <button class="ref-rand">rnd</button>#}
+{#                <button class="ref-id">by id</button>#}
+{#                <input type="number" class="image-id" value="42834">#}
+{#            </div>#}
+{#            <img src="" alt="">#}
+{#        </div>#}
+{#        <div class="card" data-image-id="1">#}
+{#            <textarea name="" id="" cols="30" rows="10" class="tags">stl_kakure</textarea>#}
+{#            <div class="card-controls">#}
+{#                <button class="ref-rand">rnd</button>#}
+{#                <button class="ref-id">by id</button>#}
+{#                <input type="number" class="image-id" value="316338">#}
+{#            </div>#}
+{#            <img src="" alt="">#}
+{#        </div>#}
+{#        <div class="card" data-image-id="1">#}
+{#            <textarea name="" id="" cols="30" rows="10" class="tags">ai,-ai_stylized</textarea>#}
+{#            <div class="card-controls">#}
+{#                <button class="ref-rand">rnd</button>#}
+{#                <button class="ref-id">by id</button>#}
+{#                <input type="number" class="image-id" value="197888">#}
+{#            </div>#}
+{#            <img src="" alt="">#}
+{#        </div>#}
+    </div>
+    <div id="controls">
+        <button id="save">Save</button>
+    </div>
+    <div class="history">
+        <template>
+        <div class="row">
+            <img src="" alt="">
+            <button>Set</button>
+            <img src="" alt="">
+            <button>Set</button>
+            <img src="" alt="">
+            <button>Set</button>
+            <button>Restore all</button>
+        </div>
+        </template>
+    </div>
+</div>
+</body>
+
+<script type="importmap">
+    {
+        "imports":
+        {
+            "image_tools/": "/static/js/image_tools/",
+            "vendors/": "/static/js/vendors/",
+            "api": "/static/js/api.js"
+        }
+    }
+</script>
+<script type="module" src="/static/js/view_roulette.js">
+</script>
+</html>

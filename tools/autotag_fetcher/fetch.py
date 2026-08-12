@@ -1,6 +1,8 @@
 import imghdr
 import os
+import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 
 import requests
@@ -69,24 +71,25 @@ def get_processed_ids(output_file):
 def show_usage():
     print("Usage: python tools/autotag_fetcher _path_to_env_config_file_")
 
-def fetch_tags():
+def startup() -> bool:
     if len(sys.argv) > 1:
         conf = sys.argv[1]
     else:
         show_usage()
-        return
+        return False
 
     conf = os.path.abspath(conf)
 
     if not os.path.exists(conf):
         show_usage()
         print(f'File at {conf} does not exist')
-        return
-
-
+        return False
 
     Env.apply_config(conf)
 
+    return True
+
+def fetch_tags():
     path = os.path.join(Env.TMP_PATH, FILENAME_EXPORT)
 
     with open(path, "r") as f:
@@ -138,4 +141,31 @@ def fetch_tags():
 
 # Example usage
 if __name__ == "__main__":
-    fetch_tags()
+    tagger_process = None
+    try:
+        if startup():
+            if len(Env.AI_TAGGER_SERVICE_CMD) > 0:
+                count = 0
+                bar = ['\\', '|', '/', '-']
+                msg = f'Trying to launch tagger service by executing "{Env.AI_TAGGER_SERVICE_CMD}"...'
+                print(msg, end='')
+                tagger_process = subprocess.Popen(
+                    f'cmd /k title "Tagging Service" & {Env.AI_TAGGER_SERVICE_CMD}',
+                    creationflags=subprocess.CREATE_NEW_CONSOLE)
+
+                while True:
+                    try:
+                        resp = requests.get("http://localhost:5000")
+                        if resp.status_code == 200:
+                            print('\r' + msg + ' Done')
+                            break
+                    except:
+                        count += 1
+                        print('\r' + msg + ' ' + bar[count % len(bar)], flush=True, end='')
+                        time.sleep(0.5)
+
+            fetch_tags()
+    finally:
+        if tagger_process is not None and tagger_process.poll() is None:
+            tagger_process.terminate()
+            tagger_process.wait()

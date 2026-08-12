@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os.path
 from datetime import datetime
@@ -5,7 +6,7 @@ from datetime import datetime
 import torch
 from PIL import Image
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct, CollectionStatus
+from qdrant_client.models import VectorParams, Distance, PointStruct, Filter, HasIdCondition, CollectionStatus
 from transformers import AutoProcessor, AutoModel
 
 
@@ -19,7 +20,7 @@ warnings.filterwarnings(
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
-EMPTY_EMBEDS_THRESHOLD = 10
+EMPTY_EMBEDS_THRESHOLD = 5
 
 COLLECTIONS = {
     'ai': {
@@ -44,8 +45,25 @@ COLLECTIONS = {
     }
 }
 
-
 printer = print
+
+class PromptCache:
+    def __init__(self):
+        self._cache = {}
+
+    def get(self, prompt, offset, limit):
+        if prompt not in self._cache: return {}
+        return {}
+        # return dict(itertools.islice(self._cache[prompt].items(), offset, offset + limit))
+
+    def add(self, prompt, objs):
+        if prompt not in self._cache:
+            self._cache[prompt] = {}
+        # self._cache[prompt].update(objs)
+        #
+        # self._cache[prompt] = dict(sorted(self._cache[prompt].items(), key=lambda item: item[1], reverse=True))
+
+
 
 class Loadout:
     MODEL_NAME = "./venv/models/siglip2-base-patch16-224"
@@ -54,6 +72,8 @@ class Loadout:
     MODEL = None
     DEVICE: str = ''
     QCLIENT: QdrantClient = None
+
+    CACHE:PromptCache = None
 
     @classmethod
     def load(cls):
@@ -75,6 +95,9 @@ class Loadout:
                 from shared_utils.env import ENV_USER
                 Env.apply_config(ENV_USER)
             cls.QCLIENT = QdrantClient(path=Env.DB_EMBED_FILE)
+
+        if cls.CACHE is None:
+            cls.CACHE = PromptCache()
 
         logger.info('Loadout... Done')
 
@@ -242,7 +265,18 @@ def encode_text(text: str) -> list[float]:
     return features[0].cpu().tolist()
 
 class SearchByPrompt:
-    def __init__(self, prompt:str, limit:int, image_id=None, c1:float=None, c2:float=None):
+    def __init__(self, prompt:str, limit:int, image_id=None, c1:float=None, c2:float=None, ids_in=None):
+
+        if ids_in is None or len(ids_in) == 0:
+            self.query_filters = None
+        else:
+            self.query_filters = Filter(
+                must=[
+                    HasIdCondition(
+                        has_id=ids_in
+                    )
+                ]
+            )
 
         logger.info('Search by prompt... init')
 
@@ -275,7 +309,12 @@ class SearchByPrompt:
 
         self.cname = COLLECTIONS[self.cname]['collection_name']
 
+        self.cached_prompt = self.prompt
+
         self.search_vector = self._evaluate_vector()
+
+        Loadout.CACHE.add(self.cached_prompt, {})
+
 
     def _evaluate_vector(self) -> [float]:
         logger.info('Searching by prompt... Encoding text ')
@@ -289,6 +328,8 @@ class SearchByPrompt:
             v1 = np.array(vector, dtype=np.float32)
             v2 = np.array(images_vector, dtype=np.float32)
             vector = (self.c1 * v1 + self.c2 * v2).tolist()
+            self.cached_prompt += ' %.2f:%.2f'.format(self.c1, self.c2)
+
             logger.info(f'Using image vector with text-{self.c1} image-{self.c2}) ')
 
         return vector
@@ -306,6 +347,8 @@ class SearchByPrompt:
             logger.error(f'Prompt id image not found for "{self.image_id}" ')
             return None
 
+        self.cached_prompt += ' %s'.format(self.image_id)
+
         return result[0].vector
 
     def _evaluate_text_to_image_prompt_weights(self):
@@ -322,16 +365,25 @@ class SearchByPrompt:
         if not self.is_ok:
             return {}
 
-        hits = self._client.query_points(
-            collection_name=self.cname,
-            query=self.search_vector,
-            limit=self.limit,
-            offset=self.offset
-        )
+        cached = Loadout.CACHE.get(self.cached_prompt, self.offset, self.limit)
 
-        self.offset += self.limit
+        if len(cached) == self.limit:
+            self.offset += self.limit
+            return cached
+        else:
+            hits = self._client.query_points(
+                collection_name=self.cname,
+                query=self.search_vector,
+                limit=self.limit,
+                offset=self.offset,
+                query_filter=self.query_filters,
+            )
 
-        return {s.id: s.score for s in hits.points}
+            self.offset += self.limit
+
+            result = {s.id: s.score for s in hits.points}
+            Loadout.CACHE.add(self.cached_prompt, result)
+            return result
 
 
 if __name__ == "__main__":

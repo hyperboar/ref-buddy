@@ -11,6 +11,10 @@ from app.services.server_widget_helpers import get_paging_widget
 from app.services.tags import get_tags_by_set, get_tag_names
 from app.utils.misc import json_for_folder_view
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 routes_folder = Blueprint('routes_folder', __name__)
 
 
@@ -37,8 +41,12 @@ async def view_tags():
 
 @routes_folder.route('/all-prompt')
 async def view_prompt():
+    logger.info('/all-prompt started')
+
     filter_dto = FilterRequestDto.model_validate(request.args.to_dict())
 
+    if filter_dto.prompt is None:
+        raise Exception('Prompt is none')
 
     with Session() as session:
         images = await asyncio.to_thread(

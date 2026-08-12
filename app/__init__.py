@@ -24,6 +24,7 @@ from app.routes.image_single import routes_image
 from app.routes.image_remove import routes_image_remove
 from app.routes.tags import routes_tags
 from app.routes.tags_ai import routes_tags_ai
+from app.routes.crud.tag import routes_crud_tag
 
 def create_app():
     config = {
@@ -55,6 +56,7 @@ def create_app():
     app_quart.register_blueprint(routes_board)
     app_quart.register_blueprint(routes_discover)
     app_quart.register_blueprint(routes_misc)
+    app_quart.register_blueprint(routes_crud_tag)
 
     return app_quart
 
