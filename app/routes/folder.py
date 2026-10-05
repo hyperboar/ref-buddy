@@ -39,6 +39,22 @@ async def view_tags():
         paging = await get_paging_widget(filter_dto.page)
         return await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images), overview=overview, paging=paging)
 
+@routes_folder.route('/all-paths')
+async def view_tags_paths():
+    filter_dto = FilterRequestDto.model_validate(request.args.to_dict())
+
+    with Session() as session:
+        images = Ctrl.get_all_by_tags_new4(filter_dto, session=session)
+
+        res = ''
+        for im in images:
+            p = im.path_abs
+            if p.endswith('mp4.gif'):
+                p = p[:-4]
+            res += p + '<br>'
+
+        return await render_template_string(res)
+
 @routes_folder.route('/all-prompt')
 async def view_prompt():
     logger.info('/all-prompt started')
