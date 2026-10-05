@@ -97,6 +97,7 @@ async def update_mapped_tags():
                     session
                         .query(ImageTagAi.image_id)
                         .filter(ImageTagAi.tag_id == m.ai_id)
+                        .filter(ImageTagAi.rating > 0.2)
                         .filter(ImageTagAi.imported_at > latest_import_at)
                      )
                 img_ids = [im[0] for im in q.all()]
