@@ -39,6 +39,31 @@ async def view_tags():
         paging = await get_paging_widget(filter_dto.page)
         return await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images), overview=overview, paging=paging)
 
+@routes_folder.route('/all-pivot')
+async def view_pivot():
+    filter_dto = FilterRequestDto.model_validate(request.args.to_dict())
+
+    if filter_dto.pivot is None:
+        print('No pivot!')
+        return await view_tags()
+
+    with Session() as session:
+        images = Ctrl.get_all_by_tags_new4(filter_dto, session=session)
+
+        tags_pos_ids, tags_neg_ids = get_tags_by_set(filter_dto.tag_set, session, filter_dto.tags.pos,
+                                                     filter_dto.tags.neg)
+        tags_pos_names = get_tag_names(tags_pos_ids, session)
+        tags_neg_names = get_tag_names(tags_neg_ids, session)
+
+        overview = {}
+        overview["category"] = ', '.join(tags_pos_names)
+        if len(tags_neg_names) > 0:
+            overview["category"] += ' exclude:' + ', '.join(tags_neg_names)
+        overview["path"] = ""
+
+        paging = await get_paging_widget(filter_dto.page)
+        return await render_template('tpl_view_folder.html', title='All', images=json_for_folder_view(images), overview=overview, paging=paging)
+
 @routes_folder.route('/all-paths')
 async def view_tags_paths():
     filter_dto = FilterRequestDto.model_validate(request.args.to_dict())

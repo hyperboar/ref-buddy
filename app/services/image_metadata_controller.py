@@ -93,7 +93,17 @@ class ImageMetadataController:
         q = ImageMetadataController.get_query_images_new4(filter_dto, session)
         q = q.order_by(ImageMetadata.imported_at.desc())
 
-        return q.offset(filter_dto.offset).limit(filter_dto.limit).all()
+        offset = filter_dto.offset
+        if filter_dto.pivot is not None:
+            rn = func.row_number().over(order_by=ImageMetadata.imported_at.desc()).label('row_number')
+            sub = q.add_column(rn).subquery()
+            im = session.query(sub.c).filter(sub.c.id == filter_dto.pivot).first()
+            if im is not None:
+                offset += int(im[-1]) - 1 - filter_dto.pivot_ahead * filter_dto.limit
+            else:
+                logger.error("Pivot image with id %d was initially excluded from search by some parameters! Try different tags.", filter_dto.pivot)
+
+        return q.offset(offset).limit(filter_dto.limit).all()
 
     @staticmethod
     def get_all_by_prompt(filter_dto:FilterRequestDto, session) -> [ImageMetadata]:

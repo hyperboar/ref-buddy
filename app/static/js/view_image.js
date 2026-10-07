@@ -456,6 +456,9 @@ function injectImageData(data)
     const folderLink = document.getElementById('img-folder-link')
     folderLink.href = data.url_folder + '?limit=1000'
 
+    const pivotLink = document.getElementById('img-pivot-link')
+    pivotLink.href = `/all-pivot?pivot=${data.id}&pivot_ahead=1&page=2`
+
     const aiSearchLink = document.getElementById('img-ai-search-link')
     aiSearchLink.href = `/all-prompt?_prompt-id=_-${data.id}&prompt-w=0.1,0.9&_prompt=&page=1`
 
