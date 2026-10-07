@@ -36,7 +36,6 @@ async def test_image_ok(client, route):
     '/next-image/_/999',
     '/next-image/fwd_id/999',
     '/next-image/bck_id/999',
-    '/next-image/fwd_rnd/999',
     '/next-image/fwd_name/999',
     '/next-image/bck_name/999'
 ])
@@ -61,6 +60,11 @@ async def test_image_get_next_image_data(client):
     assert resp.status_code == 200
     json = await resp.json
     assert json['id'] != 1, 'Random image should not repeat current image'
+
+    resp = await client.get('/next-image/fwd_rnd/999')
+    assert resp.status_code == 200
+    json = await resp.json
+    assert json['id'] != 999, 'Requesting random image using id that does not exist should still yield next image'
 
     resp = await client.get('/next-image/fwd_name/3')
     assert resp.status_code == 200
