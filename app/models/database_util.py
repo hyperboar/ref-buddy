@@ -25,13 +25,13 @@ class DatabaseUtil:
         session = session_maker()
 
         # SETTINGS
-        session.add(Setting(key=Setting.BACKUP_LAST_MONTH_TIME, value='0', type='timestamp'))
-        session.add(Setting(key=Setting.BACKUP_LAST_MONTH_NAME, value='', type='str'))
-        session.add(Setting(key=Setting.BACKUP_LAST_TODAY_TIME, value='0', type='timestamp'))
-        session.add(Setting(key=Setting.BACKUP_LAST_TODAY_NAME, value='', type='str'))
-        session.add(Setting(key=Setting.BACKUP_LAST_TIME, value='0', type='timestamp'))
+        session.add(Setting(key=Setting.BACKUP_LAST_MONTH_TIME, _value='0', _type='timestamp'))
+        session.add(Setting(key=Setting.BACKUP_LAST_MONTH_NAME, _value='', _type='str'))
+        session.add(Setting(key=Setting.BACKUP_LAST_TODAY_TIME, _value='0', _type='timestamp'))
+        session.add(Setting(key=Setting.BACKUP_LAST_TODAY_NAME, _value='', _type='str'))
+        session.add(Setting(key=Setting.BACKUP_LAST_TIME, _value='0', _type='timestamp'))
 
-        session.add(Setting(key=Setting.IMPORT_LAST_TIME, value='0', type='timestamp'))
+        session.add(Setting(key=Setting.IMPORT_LAST_TIME, _value='0', _type='timestamp'))
 
         session.commit()
 
