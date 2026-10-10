@@ -1,4 +1,4 @@
-import {ApiImage, ApiTags} from 'api'
+import {ApiImage, ApiTags, ApiMisc} from 'api'
 import {RateSingle, RateFolder} from 'image_tools/rating.js'
 import {Fav}            from 'image_tools/favorite.js'
 import {Magnification}  from 'image_tools/magnification.js'
@@ -27,6 +27,8 @@ let rateFolder = null
 let fav = null
 
 let timer = null
+let timerBeep = null
+let timerAutoContinue = null
 let magnifier = null
 let imageFlip = null
 let imageGrayScale = null
@@ -171,7 +173,11 @@ function initializeComponents()
     tagSets = new TagSetList('#tag-set')
 
     // timer
-    const timerTime = 120
+    timerBeep = new Audio(ApiMisc.urlForTimerBeep())
+    timerBeep.prepend('auto')
+
+    const timerTime = getTimerTime()
+
     timer = new StudyTimer(timerTime, '#time-current', '#time-planned', '#timer-start')
     document.addEventListener('timer_start', () =>
     {
@@ -180,6 +186,16 @@ function initializeComponents()
             {
                 console.log('Last Viewed time updated!')
             })
+    })
+    document.addEventListener('timer_done', (e) =>
+    {
+        if (!getTimerAutoContinue()) return
+        imageMove.clickNext(e)
+    })
+    document.addEventListener('timer_5sec_left', (e) =>
+    {
+        if (!getTimerAutoContinue()) return
+        timerBeep.play()
     })
 
     // board
@@ -394,6 +410,10 @@ function updateComponents(data)
     fav.update(data.fav === 1)
 
     timer.reset()
+    if (getTimerAutoContinue())
+    {
+        timer.start()
+    }
 
     if (data.content_type === 1)
         drawCanvas.updateCanvas('.media .media-img')
@@ -722,6 +742,18 @@ function getUrlFilterParameters()
     const url = new UrlWrapper(window.location.href)
 
     return url.getSearchStr()
+}
+
+function getTimerTime() {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('time-planned') || 120
+}
+
+function getTimerAutoContinue() {
+    if (timerAutoContinue === null)
+        timerAutoContinue = document.querySelector('#timer-auto-continue')
+
+    return timerAutoContinue.checked
 }
 
 /*

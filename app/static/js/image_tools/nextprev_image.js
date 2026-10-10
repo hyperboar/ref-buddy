@@ -116,6 +116,7 @@ class ImageNextPrev
 
     isJumpToTail(e)
     {
+        if (e === null || e === undefined) return false
         return e.ctrlKey
     }
 }

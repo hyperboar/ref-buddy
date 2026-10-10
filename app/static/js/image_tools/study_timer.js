@@ -2,6 +2,8 @@
 class StudyTimer
 {
     _evtTimerStart = 'timer_start'
+    _evtTimerDone = 'timer_done'
+    _evt5SecLeft = 'timer_5sec_left'
 
     _timerId = null
 
@@ -11,6 +13,7 @@ class StudyTimer
     _startBtn
 
     _isStarted
+    _isPaused
 
     constructor(maxTime, selTimeText, selMaxTimeText, selStartBtn)
     {
@@ -22,7 +25,21 @@ class StudyTimer
 
         this.reset()
 
-        this._startBtn.addEventListener('click', () => { this.start() })
+        this._startBtn.addEventListener('click', () => {
+            if (!this._isStarted) {
+                this.start()
+                document.dispatchEvent(new CustomEvent(this._evtTimerStart))
+
+                this._startBtn.textContent = 'Alga Only'
+            } else {
+                if (this._isPaused) {
+                    this._startBtn.textContent = 'Alga Only'
+                } else {
+                    this._startBtn.textContent = 'Paused'
+                }
+                this._isPaused = !this._isPaused
+            }
+        })
     }
 
     start()
@@ -33,14 +50,16 @@ class StudyTimer
         let elapsedTime = 0
         this._timerId = setInterval(() =>
         {
+            if (this._isPaused) return
+
             elapsedTime++
             this._curTimeText.textContent = this.format_time(elapsedTime)
+
+            if (elapsedTime == this._maxTime)
+                document.dispatchEvent(new CustomEvent(this._evtTimerDone))
+            else if (elapsedTime == this._maxTime - 5)
+                document.dispatchEvent(new CustomEvent(this._evt5SecLeft))
         }, 1000)
-
-        document.dispatchEvent(new CustomEvent(this._evtTimerStart))
-
-        this._startBtn.textContent = 'Alga Only'
-        this._startBtn.setAttribute('disabled', 'true')
     }
 
     format_time(seconds)
@@ -61,12 +80,12 @@ class StudyTimer
         }
 
         this._isStarted = false
+        this._isPaused = false
 
         this._curTimeText.textContent = this.format_time(0)
         this._maxTimeText.textContent  = this.format_time(this._maxTime)
 
         this._startBtn.textContent = 'Start'
-        this._startBtn.removeAttribute('disabled')
     }
 }
 

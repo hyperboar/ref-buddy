@@ -506,6 +506,10 @@ class ApiMisc
                 return r.text()
             })
     }
+
+    static urlForTimerBeep() {
+        return '/static/sounds/beep.ogg'
+    }
 }
 
 //#endregion Misc
