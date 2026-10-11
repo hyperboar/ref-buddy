@@ -1,4 +1,10 @@
 
+
+class TimerUpdateReason {
+    static Run = 1
+    static Tick = 2
+}
+
 class StudyTimer
 {
     _evtTimerStart = 'timer_start'
@@ -15,6 +21,8 @@ class StudyTimer
     _isStarted
     _isPaused
 
+    _elapsedTime
+
     constructor(maxTime, selTimeText, selMaxTimeText, selStartBtn)
     {
         this._maxTime = maxTime
@@ -25,44 +33,63 @@ class StudyTimer
 
         this.reset()
 
-        this._startBtn.addEventListener('click', () => {
-            if (!this._isStarted) {
-                this.start()
-                document.dispatchEvent(new CustomEvent(this._evtTimerStart))
-
-                this._startBtn.textContent = 'Alga Only'
-            } else {
-                if (this._isPaused) {
-                    this._startBtn.textContent = 'Alga Only'
-                } else {
-                    this._startBtn.textContent = 'Paused'
-                }
-                this._isPaused = !this._isPaused
-            }
-        })
+        this._startBtn.addEventListener('click', () => this.start())
     }
 
     start()
     {
-        if (this._isStarted) {return}
-        this._isStarted = true
+        if (!this._isStarted) {
+            this._actual_start()
+        } else {
+            this._isPaused = !this._isPaused
+        }
 
-        let elapsedTime = 0
+        this._updateUI(TimerUpdateReason.Run)
+    }
+
+    _actual_start() {
+        if (this._isStarted) return
+
+        this._isStarted = true
+        this._isPaused = false
+
+        this._elapsedTime = 0
         this._timerId = setInterval(() =>
         {
             if (this._isPaused) return
+            this._elapsedTime++
 
-            elapsedTime++
-            this._curTimeText.textContent = this.format_time(elapsedTime)
+            this._updateUI(TimerUpdateReason.Tick)
 
-            if (elapsedTime == this._maxTime)
+            if (this._elapsedTime === this._maxTime)
                 document.dispatchEvent(new CustomEvent(this._evtTimerDone))
-            else if (elapsedTime == this._maxTime - 5)
+            else if (this._elapsedTime === this._maxTime - 5)
                 document.dispatchEvent(new CustomEvent(this._evt5SecLeft))
         }, 1000)
+
+        document.dispatchEvent(new CustomEvent(this._evtTimerStart))
     }
 
-    format_time(seconds)
+    _updateUI(reason) {
+        switch (reason) {
+            case TimerUpdateReason.Tick:
+                this._curTimeText.textContent = this._format_time(this._elapsedTime)
+                break
+            case TimerUpdateReason.Run:
+                if (!this._isStarted) {
+                    this._startBtn.textContent = 'Alga Only'
+                } else {
+                    if (this._isPaused) {
+                        this._startBtn.textContent = 'Paused'
+                    } else {
+                        this._startBtn.textContent = 'Alga Only'
+                    }
+                }
+                break
+        }
+    }
+
+    _format_time(seconds)
     {
       const minutes = Math.floor(seconds / 60)
       const remainingSeconds = seconds % 60
@@ -82,8 +109,8 @@ class StudyTimer
         this._isStarted = false
         this._isPaused = false
 
-        this._curTimeText.textContent = this.format_time(0)
-        this._maxTimeText.textContent  = this.format_time(this._maxTime)
+        this._curTimeText.textContent = this._format_time(0)
+        this._maxTimeText.textContent  = this._format_time(this._maxTime)
 
         this._startBtn.textContent = 'Start'
     }
