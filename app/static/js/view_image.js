@@ -13,12 +13,12 @@ import {ImageCursor}    from "image_tools/cursor.js"
 import {ColorPicker}    from "image_tools/color_picker.js"
 import {WidgetBoard}    from "image_tools/widget_board.js"
 import {DrawCanvas}    from "image_tools/draw_canvas.js"
-import {FracturedColors}    from "image_tools/fractured_colors.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import { AnimPlayer } from "/static/js/video/anim_player.js"
 import { VideoPlayer } from "/static/js/video/video_player.js"
+// import {FracturedColors}    from "image_tools/fractured_colors.js"
 
 //region vars
 
