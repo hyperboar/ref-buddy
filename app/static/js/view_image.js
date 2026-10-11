@@ -59,6 +59,16 @@ let videoPlayer = null
 
 // let fracColors = null
 
+const hotkeysMapping = {
+    'image:start_timer': 'Space',
+    'image:grayscale': 'KeyG',
+    'image:info': 'KeyI',
+    'image:flip': 'KeyF',
+    'image:anim:move_fwd': 'ArrowRight',
+    'image:anim:move_bck': 'ArrowLeft',
+    'image:anim:play_stop': 'ArrowUp',
+}
+
 //endregion vars
 
 
@@ -342,43 +352,43 @@ function initializeComponents()
 
         if (currentImageData.content_type === 2) //
         {
-            if (e.code === 'ArrowRight') { animPlayer.move(1); e.preventDefault(); } // ->
-            if (e.code === 'ArrowLeft')  { animPlayer.move(-1); e.preventDefault(); } // <-
-            if (e.shiftKey && e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
-            if (e.shiftKey && e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
+            if (e.code === hotkeysMapping['image:anim:move_fwd']) { animPlayer.move(1); e.preventDefault(); } // ->
+            if (e.code === hotkeysMapping['image:anim:move_bck'])  { animPlayer.move(-1); e.preventDefault(); } // <-
+            if (e.shiftKey && e.code === hotkeysMapping['image:anim:move_bck'])  { imageMove.clickPrev(e); e.preventDefault(); } // <-
+            if (e.shiftKey && e.code === hotkeysMapping['image:anim:move_fwd']) { imageMove.clickNext(e); e.preventDefault(); } // ->
         }
         else
         {
-            if (e.code === 'ArrowLeft')  { imageMove.clickPrev(e); e.preventDefault(); } // <-
-            if (e.code === 'ArrowRight') { imageMove.clickNext(e); e.preventDefault(); } // ->
+            if (e.code === hotkeysMapping['image:anim:move_bck'])  { imageMove.clickPrev(e); e.preventDefault(); } // <-
+            if (e.code === hotkeysMapping['image:anim:move_fwd']) { imageMove.clickNext(e); e.preventDefault(); } // ->
         }
 
-        if (e.code === 'KeyF' && e.shiftKey && e.ctrlKey) { togglePanelsOrder(); e.preventDefault(); }
+        if (e.code === hotkeysMapping['image:flip'] && e.shiftKey && e.ctrlKey) { togglePanelsOrder(); e.preventDefault(); }
         if (e.code === 'KeyZ' && e.ctrlKey && drawCanvas.isDrawingMode) { drawCanvas.undo(); e.preventDefault(); }
 
         if (e.altKey || e.ctrlKey || e.metaKey) { return }
         if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
         { cursor.toggle(e.code); e.preventDefault(); return } // cursors
-        if (e.code === 'KeyF' && e.shiftKey) { imageFlip.toggleFlip(); e.preventDefault(); } // g
+        if (e.code === hotkeysMapping['image:flip'] && e.shiftKey) { imageFlip.toggleFlip(); e.preventDefault(); } // g
 
 
 
         if (e.shiftKey) { return }
         if (e.code.includes('Numpad') || e.code.includes('Digit'))
         { imageGrayScale.toggleContrastKeycode(e.code); e.preventDefault(); } // g
-        if (e.code.includes('Enter')){ timer.start(); e.preventDefault(); } // enter
+        if (e.code.includes(hotkeysMapping['image:start_timer'])){ timer.start(); e.preventDefault(); } // enter
 
         if (currentImageData.content_type === 2) //
         {
-            if (e.code === 'Space')      { animPlayer.togglePlay(); e.preventDefault(); } // space
+            if (e.code === hotkeysMapping['image:anim:play_stop'])      { animPlayer.togglePlay(); e.preventDefault(); } // space
         }
         else
         {
-            if (e.code === 'Space')      { toggleSameFolder(e); e.preventDefault(); } // space
+            if (e.code === hotkeysMapping['image:anim:play_stop'])      { toggleSameFolder(e); e.preventDefault(); } // space
         }
 
-        if (e.code === 'KeyG')       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g
-        if (e.code === 'KeyI')       { toggleInfoPopup(); e.preventDefault(); } // g
+        if (e.code === hotkeysMapping['image:grayscale'])       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g
+        if (e.code === hotkeysMapping['image:info'])       { toggleInfoPopup(); e.preventDefault(); } // g
         // if (e.code === 'KeyV')       { fracColors.render('.modal-img'); e.preventDefault(); } // g
     })
 }
