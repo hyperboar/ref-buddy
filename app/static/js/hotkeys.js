@@ -4,6 +4,13 @@ class Hotkeys {
     static _mapping = null
     static _consumed = false
 
+    static _mods = {
+        'ctrl': function(e) { return e.ctrlKey },
+        'shift': function(e) { return e.shiftKey },
+        'alt': function(e) { return e.altKey },
+        'meta': function(e) { return e.metaKey }
+    }
+
     // ctrl, shift, alt, Key*, Arrow*, NumAny (Digit* | Numpad*)
     static isDown(key_alias, evt = null, mapping = null) {
 
@@ -30,28 +37,40 @@ class Hotkeys {
 
         // actual hotkey press check
         let keys = key.replace(' ', '').split('+')
-        const totalKeys = keys.length
 
         let conditions = []
-        if (keys.includes('ctrl') && evt.ctrlKey) { conditions.push(true); Hotkeys.excludeKey(keys, 'ctrl') }
-        if (keys.includes('shift') && evt.shiftKey) { conditions.push(true); Hotkeys.excludeKey(keys, 'shift') }
-        if (keys.includes('alt') && evt.altKey) { conditions.push(true); Hotkeys.excludeKey(keys, 'alt') }
-        if (keys.includes('Space') && evt.code === 'Space') { conditions.push(true); Hotkeys.excludeKey(keys, 'Space') }
 
-        if (keys.includes('NumAny') && (evt.code.includes('Numpad') || evt.code.includes('Digit'))) { conditions.push(true); Hotkeys.excludeKey(keys, 'NumAny') }
+        // special cases: mods and numbers
+        conditions.push(Hotkeys._checkModifyRequired(keys, 'ctrl', evt));  this._excludeKey(keys, 'ctrl')
+        conditions.push(Hotkeys._checkModifyRequired(keys, 'shift', evt)); this._excludeKey(keys, 'shift')
+        conditions.push(Hotkeys._checkModifyRequired(keys, 'alt', evt));   this._excludeKey(keys, 'alt')
+        conditions.push(Hotkeys._checkModifyRequired(keys, 'meta', evt));  this._excludeKey(keys, 'meta')
 
-        for (let k of keys) {
-            if (k.startsWith('Key') && evt.code === k) { conditions.push(true) }
-            if (k.startsWith('Arrow') && evt.code === k) { conditions.push(true) }
+        // fail early
+        if (!conditions.every(c => c === true)) return false
+
+        if (keys.includes('NumAny')) {
+            conditions.push(evt.code.includes('Numpad') || evt.code.includes('Digit'))
+            this._excludeKey(keys, 'NumAny')
         }
 
-        const isDown = conditions.length === totalKeys && conditions.every(c => c === true)
+        // the rest of the keys
+        for (let k of keys) {
+            if (keys.includes(k)) conditions.push(evt.code === k)
+        }
+
+        const isDown = conditions.every(c => c === true)
         if (isDown && Hotkeys._preventDefault) evt.preventDefault()
         if (isDown) Hotkeys._consumed = true
         return isDown
     }
 
-    static excludeKey(keys, key) {
+    static _checkModifyRequired(keys, key, evt) {
+        return (keys.includes(key) &&  Hotkeys._mods[key](evt)) ||
+              (!keys.includes(key) && !Hotkeys._mods[key](evt))
+    }
+
+    static _excludeKey(keys, key) {
         const idx = keys.indexOf(key)
         if (idx < 0) return
         keys.splice(idx, 1)
