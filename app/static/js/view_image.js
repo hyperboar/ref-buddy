@@ -20,6 +20,7 @@ import {isActiveTextInput, UrlWrapper} from '/static/js/main.js'
 import { AnimPlayer } from "/static/js/video/anim_player.js"
 import { VideoPlayer } from "/static/js/video/video_player.js"
 
+//region vars
 
 let selection = null
 let rateImage = null
@@ -57,6 +58,8 @@ let animPlayer = null
 let videoPlayer = null
 
 // let fracColors = null
+
+//endregion vars
 
 
 function initializeComponents()
