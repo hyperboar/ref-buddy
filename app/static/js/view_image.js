@@ -1,4 +1,5 @@
 import {ApiImage, ApiTags, ApiMisc} from 'api'
+import {Hotkeys as HK} from '/static/js/hotkeys.js'
 import {RateSingle, RateFolder} from 'image_tools/rating.js'
 import {Fav}            from 'image_tools/favorite.js'
 import {Magnification}  from 'image_tools/magnification.js'
@@ -62,11 +63,18 @@ let videoPlayer = null
 const hotkeysMapping = {
     'image:start_timer': 'Space',
     'image:grayscale': 'KeyG',
+    'image:grayscale_variants': 'NumAny',
+    'image:cursor_variants': 'shift+NumAny',
     'image:info': 'KeyI',
-    'image:flip': 'KeyF',
-    'image:anim:move_fwd': 'ArrowRight',
-    'image:anim:move_bck': 'ArrowLeft',
+    'image:flip': 'shift+KeyF',
+    'image:panels_flip': 'shift+ctrl+KeyF',
+    'image:next': 'ArrowRight',
+    'image:prev': 'ArrowLeft',
+    'image:fragment_colors': 'KeyV',
+    'image:anim:move_fwd': 'shift+ArrowRight',
+    'image:anim:move_bck': 'shift+ArrowLeft',
     'image:anim:play_stop': 'ArrowUp',
+    'image:draw:undo': 'ctrl+KeyZ',
 }
 
 //endregion vars
@@ -350,46 +358,39 @@ function initializeComponents()
     {
         if (isActiveTextInput()) return
 
+        HK.reset()
+        HK.bindEvent(e)
+        HK.bindMapping(hotkeysMapping)
+        HK.bindPreventDefaultOnDown(true)
+
         if (currentImageData.content_type === 2) //
         {
-            if (e.code === hotkeysMapping['image:anim:move_fwd']) { animPlayer.move(1); e.preventDefault(); } // ->
-            if (e.code === hotkeysMapping['image:anim:move_bck'])  { animPlayer.move(-1); e.preventDefault(); } // <-
-            if (e.shiftKey && e.code === hotkeysMapping['image:anim:move_bck'])  { imageMove.clickPrev(e); e.preventDefault(); } // <-
-            if (e.shiftKey && e.code === hotkeysMapping['image:anim:move_fwd']) { imageMove.clickNext(e); e.preventDefault(); } // ->
-        }
-        else
-        {
-            if (e.code === hotkeysMapping['image:anim:move_bck'])  { imageMove.clickPrev(e); e.preventDefault(); } // <-
-            if (e.code === hotkeysMapping['image:anim:move_fwd']) { imageMove.clickNext(e); e.preventDefault(); } // ->
+            if (HK.isDown('image:anim:move_fwd')) animPlayer.move(1)
+            if (HK.isDown('image:anim:move_bck')) animPlayer.move(-1)
         }
 
-        if (e.code === hotkeysMapping['image:flip'] && e.shiftKey && e.ctrlKey) { togglePanelsOrder(); e.preventDefault(); }
-        if (e.code === 'KeyZ' && e.ctrlKey && drawCanvas.isDrawingMode) { drawCanvas.undo(); e.preventDefault(); }
+        if (HK.isDown('image:prev')) imageMove.clickPrev(e)
+        if (HK.isDown('image:next')) imageMove.clickNext(e)
+
+        if (HK.isDown('image:panels_flip')) togglePanelsOrder()
+        if (HK.isDown('image:draw:undo') && drawCanvas.isDrawingMode) drawCanvas.undo()
 
         if (e.altKey || e.ctrlKey || e.metaKey) { return }
-        if ((e.code.includes('Numpad') || e.code.includes('Digit')) && e.shiftKey)
-        { cursor.toggle(e.code); e.preventDefault(); return } // cursors
-        if (e.code === hotkeysMapping['image:flip'] && e.shiftKey) { imageFlip.toggleFlip(); e.preventDefault(); } // g
-
-
+        if (HK.isDown('image:cursor_variants')) { cursor.toggle(e.code); return } // cursors
+        if (HK.isDown('image:flip')) imageFlip.toggleFlip()
 
         if (e.shiftKey) { return }
-        if (e.code.includes('Numpad') || e.code.includes('Digit'))
-        { imageGrayScale.toggleContrastKeycode(e.code); e.preventDefault(); } // g
-        if (e.code.includes(hotkeysMapping['image:start_timer'])){ timer.start(); e.preventDefault(); } // enter
+        if (HK.isDown('image:grayscale_variants')) imageGrayScale.toggleContrastKeycode(e.code)
+        if (HK.isDown('image:start_timer')) timer.start()
 
         if (currentImageData.content_type === 2) //
         {
-            if (e.code === hotkeysMapping['image:anim:play_stop'])      { animPlayer.togglePlay(); e.preventDefault(); } // space
-        }
-        else
-        {
-            if (e.code === hotkeysMapping['image:anim:play_stop'])      { toggleSameFolder(e); e.preventDefault(); } // space
+            if (HK.isDown('image:anim:play_stop')) animPlayer.togglePlay()
         }
 
-        if (e.code === hotkeysMapping['image:grayscale'])       { imageGrayScale.toggleGrayscale(); e.preventDefault(); } // g
-        if (e.code === hotkeysMapping['image:info'])       { toggleInfoPopup(); e.preventDefault(); } // g
-        // if (e.code === 'KeyV')       { fracColors.render('.modal-img'); e.preventDefault(); } // g
+        if (HK.isDown('image:grayscale')) imageGrayScale.toggleGrayscale()
+        if (HK.isDown('image:info'))      toggleInfoPopup()
+        // if (HK.isDown('image:fragment_colors'))       { fracColors.render('.modal-img') }
     })
 }
 
