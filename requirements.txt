@@ -1,6 +1,6 @@
 Quart==0.20.0
 Flask_Caching==2.1.0
-Jinja2==3.1.2
+Jinja2==3.1.6
 MarkupSafe==2.1.2
 Pillow==12.3.0
 python-dotenv==1.0.1
