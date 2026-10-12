@@ -1,7 +1,14 @@
 import {ApiTags} from 'api'
+import {Hotkeys as HK} from '/static/js/hotkeys.js'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from "/static/js/bg_overlay.js";
 import {isActiveTextInput, UrlWrapper, wrapButtonFeedbackPromise} from '/static/js/main.js'
+
+const hotkeysMapping = {
+    'tag_editor:show_toggle': 'KeyT',
+    'tag_editor:side_panel:show_toggle': 'KeyN',
+    'tag_editor:hide': 'Escape'
+}
 
 class TagItem
 {
@@ -180,7 +187,11 @@ class WidgetImageTagsEditor
         {
             if (isActiveTextInput()) return
 
-            if (e.code === 'KeyT' && !e.shiftKey)
+            HK.reset()
+            HK.bindEvent(e)
+            HK.bindMapping(hotkeysMapping)
+
+            if (HK.isDown('tag_editor:show_toggle'))
             {
                 this.toggleTagsPopupDisplay(e)
             }
@@ -280,11 +291,15 @@ class WidgetImageTagsEditor
         {
             if (isActiveTextInput()) return
 
-            if (e.code === 'KeyN' && !e.shiftKey)
+            HK.reset()
+            HK.bindEvent(e)
+            HK.bindMapping(hotkeysMapping)
+
+            if (HK.isDown('tag_editor:side_panel:show_toggle'))
             {
                 this.toggleTagsPinsDisplay(e)
             }
-            else if (e.code === 'Escape' && !e.shiftKey)
+            if (HK.isDown('tag_editor:hide'))
             {
                 this.hideWidget(e)
             }

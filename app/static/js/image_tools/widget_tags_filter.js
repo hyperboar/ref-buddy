@@ -1,7 +1,13 @@
 import {ApiTags} from 'api'
+import {Hotkeys as HK} from '/static/js/hotkeys.js'
 import {waitForCondition} from '/static/js/discover/utils.js'
 import {BgOverlay} from '/static/js/bg_overlay.js'
 import {UrlWrapper, isActiveTextInput} from '/static/js/main.js' // + Array.prototype.remove
+
+const hotkeysMapping = {
+    'tag_filter:show_toggle': 'KeyF',
+    'tag_filter:hide': 'Escape'
+}
 
 class WidgetImageTagsFilter
 {
@@ -45,7 +51,11 @@ class WidgetImageTagsFilter
         {
             if (isActiveTextInput()) return
 
-            if (e.code === 'KeyF' && !e.shiftKey)
+            HK.reset()
+            HK.bindEvent(e)
+            HK.bindMapping(hotkeysMapping)
+
+            if (HK.isDown('tag_filter:show_toggle'))
             {
                 this.toggleTagsFilterDisplay()
             }
@@ -152,7 +162,11 @@ class WidgetImageTagsFilter
 
         document.addEventListener('keydown', (e) =>
         {
-            if (e.code === 'Escape' && !e.shiftKey)
+            HK.reset()
+            HK.bindEvent(e)
+            HK.bindMapping(hotkeysMapping)
+
+            if (HK.isDown('tag_filter:hide'))
             {
                 this.hideWidget()
             }

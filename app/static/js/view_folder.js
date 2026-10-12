@@ -1,4 +1,5 @@
 import {ApiImage, ApiTags} from "api"
+import {Hotkeys as HK} from '/static/js/hotkeys.js'
 import {WidgetImageTagsFilter} from "image_tools/widget_tags_filter.js"
 import {WidgetImageTagsEditor} from "image_tools/widget_tags_editor.js"
 import {WidgetBoard}           from "image_tools/widget_board.js"
@@ -9,6 +10,15 @@ import {MutationAttributeObserver} from '/static/js/mut_attr_observer.js'
 import {ImageLazyLoad } from '/static/js/image_lazy_load.js'
 import {YesNoPopup} from 'image_tools/widget_popup_yesno.js'
 
+const hotkeysMapping = {
+    'folder:show_tags_toggle': 'KeyW',
+    'folder:select_mode_toggle': 'KeyS',
+    'folder:select:all': 'shift+KeyA',
+    'folder:select:highlight_prev': 'shift+ArrowLeft',
+    'folder:select:highlight_next': 'shift+ArrowRight',
+    'folder:select:remove_images': 'KeyD',
+    'folder:select:restore_images': 'KeyR',
+}
 
 let tagsFilter = new WidgetImageTagsFilter('', '#tags-filter-btn', true)
 let tagsEditor = new WidgetImageTagsEditor('', '#tags-editor-btn', () => selection)
@@ -132,35 +142,39 @@ document.addEventListener('keydown', (e) =>
 {
     if (isActiveTextInput()) return
 
+    HK.reset()
+    HK.bindEvent(e)
+    HK.bindMapping(hotkeysMapping)
+
     // select all
-    if (selection.selectionMode && e.code === 'KeyA' && e.shiftKey)
+    if (selection.selectionMode && HK.isDown('folder:select:all'))
     {
         selection.selectAll()
     }
     // show/hide tags
-    else if (e.code === 'KeyW')
+    else if (HK.isDown('folder:show_tags_toggle'))
     {
         fetchTags()
     }
     // toggle selection mode
-    else if (e.code === 'KeyS' && !e.shiftKey)
+    else if (HK.isDown('folder:select_mode_toggle'))
     {
         selection.toggleSelectionMode()
     }
-    else if (selection.selectionMode && e.code === 'KeyD' && !e.shiftKey)
+    else if (selection.selectionMode && HK.isDown('folder:select:remove_images'))
     {
         removeImages()
     }
-    else if (selection.selectionMode && e.code === 'KeyR' && !e.shiftKey)
+    else if (selection.selectionMode && HK.isDown('folder:select:restore_images'))
     {
         const extra = getExtraValue()
         if (extra === 'page-remove') restoreImages()
     }
-    else if (selection.selectionMode && e.code === 'ArrowLeft' && e.shiftKey)
+    else if (selection.selectionMode && HK.isDown('folder:select:highlight_prev'))
     {
         selection.highlightNextSelected(-1)
     }
-    else if (selection.selectionMode && e.code === 'ArrowRight' && e.shiftKey)
+    else if (selection.selectionMode && HK.isDown('folder:select:highlight_next'))
     {
         selection.highlightNextSelected(1)
     }
