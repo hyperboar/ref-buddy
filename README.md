@@ -1,4 +1,4 @@
-![Tests](https://github.com/hyperboar/ref-buddy/actions/workflows/tests.yml/badge.svg) ![Coverage](https://codecov.io/gh/hyperboar/ref-buddy/main/graph/badge.svg) ![License](https://img.shields.io/github/license/hyperboar/ref-buddy)
+![Tests](https://github.com/hyperboar/ref-buddy/actions/workflows/tests.yml/badge.svg) [![Coverage](https://codecov.io/gh/hyperboar/ref-buddy/graph/badge.svg?token=RYY6VIGS1Q)](https://codecov.io/gh/hyperboar/ref-buddy) ![License](https://img.shields.io/github/license/hyperboar/ref-buddy)
 
 # Ref Buddy
 An application that helps to organize, navigate and (human) <b>study</b> big collection of refence images.<br/>
