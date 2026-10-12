@@ -760,7 +760,7 @@ function getUrlFilterParameters()
 
 function getTimerTime() {
     const params = new URLSearchParams(window.location.search)
-    return params.get('time-planned') || 120
+    return parseInt(params.get('time-planned')) || 120
 }
 
 function getTimerAutoContinue() {
