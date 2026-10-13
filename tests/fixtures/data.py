@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from app.models import get_engine
 from app.models.database_util import DatabaseUtil
-from app.models.models_lump import Path, ImageMetadata, Tag, ImageTag, ImageTagAi, TagAi, Category
+from app.models.models_lump import Path, ImageMetadata, Tag, ImageTag, ImageTagAi, TagAi, Category, Board
 
 
 def clean_database():
@@ -58,4 +58,9 @@ def add_1_gif_1_path(session) -> None:
 
 def add_1_category(session):
     session.add(Category(id=2, category='other_cat'))
+    session.commit()
+
+def add_2_boards(session):
+    session.add(Board(id=1, title='Test Board 1'))
+    session.add(Board(id=2, title='Test Board 2'))
     session.commit()
