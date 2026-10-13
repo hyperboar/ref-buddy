@@ -9,54 +9,46 @@ routes_board = Blueprint('routes_board', __name__)
 
 @routes_board.route('/boards')
 async def view_board_all():
-    session = Session()
-
-    boards = session.query(Board).all()
-    out = await render_template('tpl_view_board_all.html', boards=boards)
-    session.close()
-    return out
+    with Session() as session:
+        boards = session.query(Board).all()
+        return await render_template('tpl_view_board_all.html', boards=boards)
 
 @routes_board.route('/board/<int:b_id>')
 async def view_board(b_id):
-    session = Session()
-
-    board = session.get(Board, b_id)
-    out = await render_template('tpl_view_board.html', board=board)
-    session.close()
-    return out
+    with Session() as session:
+        board = session.get(Board, b_id)
+        return await render_template('tpl_view_board.html', board=board)
 
 @routes_board.route('/board/add', methods=['POST'])
 async def board_add():
-    title = request.form.get('title')
+    data = await request.form
+    title = data['title']
 
-    session = Session()
-    board = Board(title=title)
-    session.add(board)
-    session.commit()
+    with Session() as session:
+        board = Board(title=title)
+        session.add(board)
+        session.commit()
 
-    b = {"id":board.id, "title":board.title, "url":url_for('routes_board.view_board', b_id=board.id)}
-    out = jsonify(b)
-    return out
+        b = {"id":board.id, "title":board.title, "url":url_for('.view_board', b_id=board.id)}
+        return jsonify(b)
 
 @routes_board.route('/board-images/<int:b_id>')
 async def get_board_images(b_id):
-    session = Session()
+    with Session() as session:
+        images = [(bim.image, bim.tr_json, bim.board_id) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
+        json_images = []
+        for im, tr, b_id in images:
+            item = {
+                "image_id":im.image_id,
+                "thumb_path":f"/thumb/{im.image_id}.jpg",
+                "full_path":f"/image/{im.image_id}",
+                "tr":json.loads(tr),
+                "study_url":url_for('routes_image.send_html', image_id=im.image_id) + "?same-folder=true&tags=&tag-set=",
+                "remove_url":  url_for('.remove_images_from_board') + f'?b-id={b_id}&image-id={im.image_id}'}
+            json_images.append(item)
 
-    images = [(bim.image, bim.tr_json, bim.board_id) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id)]
-    json_images = []
-    for im, tr, b_id in images:
-        item = {
-            "image_id":im.image_id,
-            "thumb_path":f"/thumb/{im.image_id}.jpg",
-            "full_path":f"/image/{im.image_id}",
-            "tr":json.loads(tr),
-            "study_url":url_for('routes_image.study_image', image_id=im.image_id) + "?same-folder=true&tags=&tag-set=",
-            "remove_url":  url_for('routes_board.remove_images_from_board') + f'?b-id={b_id}&image-id={im.image_id}'}
-        json_images.append(item)
-
-    out = jsonify({"images":json_images})
-    session.close()
-    return out
+        out = jsonify({"images":json_images})
+        return out
 
 @routes_board.route('/set-board-image-transform')
 async def set_board_image_transform():
@@ -68,15 +60,14 @@ async def set_board_image_transform():
     if transform == '' or b_id == -1 or image_id == -1:
         abort(404, 'No transform provided')
 
-    session = Session()
-    im = session.query(BoardImage).filter(BoardImage.image_id == image_id, BoardImage.board_id == b_id).first()
-    if im is None:
-        abort(404, f'Image "{image_id}" is not on board "{b_id}"')
+    with Session() as session:
+        im = session.query(BoardImage).filter(BoardImage.image_id == image_id, BoardImage.board_id == b_id).first()
+        if im is None:
+            abort(404, f'Image "{image_id}" is not on board "{b_id}"')
 
-    im.tr = transform.replace('"', '')
-    session.commit()
-    session.close()
-    return 'ok'
+        im.tr = transform.replace('"', '')
+        session.commit()
+        return 'ok'
 
 @routes_board.route('/board/add-images', methods=['POST'])
 async def add_images_to_board():
@@ -90,13 +81,12 @@ async def add_images_to_board():
     if len(image_ids) == 0 or b_id == -1:
         abort(404, "Something went wrong")
 
-    session = Session()
-    for im in image_ids:
-        session.merge(BoardImage(image_id=im, board_id=b_id))
+    with Session() as session:
+        for im in image_ids:
+            session.merge(BoardImage(image_id=im, board_id=b_id))
 
-    session.commit()
-    session.close()
-    return 'ok'
+        session.commit()
+        return 'ok'
 
 @routes_board.route('/board/del-images')
 async def remove_images_from_board():
@@ -106,16 +96,13 @@ async def remove_images_from_board():
     if len(image_ids) == 0 or b_id == -1:
         abort(404, "Something went wrong")
 
-    session = Session()
-    [session.delete(bim) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id, BoardImage.image_id.in_(image_ids))]
-    session.commit()
-    session.close()
+    with Session() as session:
+        [session.delete(bim) for bim in session.query(BoardImage).filter(BoardImage.board_id == b_id, BoardImage.image_id.in_(image_ids))]
+        session.commit()
 
-    return 'ok'
+        return 'ok'
 
 @routes_board.route('/widget/get-boards-all')
 async def widget_get_boards_all():
-    session = Session()
-    out = get_boards_all(session=session)
-    session.close()
-    return out
+    with Session() as session:
+        return await get_boards_all(session=session)
