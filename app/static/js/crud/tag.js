@@ -79,7 +79,7 @@ function setCreateTag(evt) {
 
     form.querySelector('#id').removeAttribute('value')
     form.querySelector('#tag').value = ''
-    form.querySelector('#color').value = 0
+    form.querySelector('#color').value = 1
 }
 
 function setUpdateTag(evt) {
